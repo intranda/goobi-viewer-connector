@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="ASCII"?>
+<web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+	<display-name>intranda OAI-PMH Interface</display-name>
+	<listener>
+		<listener-class>de.intranda.digiverso.m2m.ContextListener</listener-class>
+	</listener>
+
+    <servlet>
+        <description></description>
+        <display-name>OAIServlet</display-name>
+        <servlet-name>OAIServlet</servlet-name>
+        <servlet-class>de.intranda.digiverso.m2m.oai.servlets.OaiServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>OAIServlet</servlet-name>
+        <url-pattern>/oai</url-pattern>
+        <url-pattern>/oai/</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <description></description>
+        <display-name>SRUServlet</display-name>
+        <servlet-name>SRUServlet</servlet-name>
+        <servlet-class>de.intranda.digiverso.m2m.sru.SruServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SRUServlet</servlet-name>
+        <url-pattern>/sru</url-pattern>
+        <url-pattern>/sru/</url-pattern>
+    </servlet-mapping>
+
+	<mime-mapping>
+		<extension>htc</extension>
+		<mime-type>text/plain</mime-type>
+	</mime-mapping>
+
+	<session-config>
+		<tracking-mode>COOKIE</tracking-mode>
+<!-- 		<session-timeout>120</session-timeout> -->
+	</session-config>
+
+	<welcome-file-list>
+		<welcome-file>index.xhtml</welcome-file>
+	</welcome-file-list>
+</web-app>

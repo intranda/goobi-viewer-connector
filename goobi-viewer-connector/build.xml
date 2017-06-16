@@ -1,0 +1,199 @@
+<?xml version="1.0"?>
+<project name="Goobi M2M Interface Suite" default="war" xmlns:jacoco="antlib:org.jacoco.ant">
+
+	<!-- Distribution specific settings. -->
+	<property name="dist.name" value="M2M" />
+	<property name="dist.version" value="3.1" />
+	<property name="server.watermark" value="true" />
+
+
+	<!-- Directory settings -->
+	<property name="dir.build" location="./build" />
+	<property name="dir.lib" value="./WebContent/WEB-INF/lib" />
+	<property name="dir.config" location="./config" />
+	<property name="dir.src" location="./src" />
+	<property name="dir.build.classes" value="${dir.build}/WEB-INF/classes" />
+	<property name="dir.buildlib" value="./lib" />
+	<property name="dir.tests.src" value="./test" />
+	<property name="dir.tests.classes" value="${dir.build}/test-classes" />
+	<property name="dir.tests.report" value="test-reports" />
+	<property name="dir.javadoc" value="doc" />
+
+	<!-- Compiler options -->
+	<property name="javac.source" value="1.7" />
+	<property name="javac.target" value="1.7" />
+	<property name="javac.debug" value="true" />
+
+	<!-- Build classpath -->
+	<path id="classpath">
+		<fileset dir="${dir.lib}" />
+		<fileset dir="${dir.buildlib}" />
+	</path>
+
+	<!-- JUnit test classpath -->
+	<path id="test.classpath">
+		<path refid="classpath" />
+		<pathelement location="${dir.build.classes}" />
+		<pathelement location="${dir.tests.classes}" />
+	</path>
+
+	<target name="clean" description="Clean up generated and compiled files.">
+		<delete dir="${dir.build}" />
+	</target>
+
+	<!-- Create needed directories -->
+	<target name="createDirs" depends="clean" description="Create needed directories">
+		<mkdir dir="${dir.build}" />
+		<mkdir dir="${dir.build.classes}" />
+		<mkdir dir="${dir.tests.classes}" />
+		<mkdir dir="${dir.tests.classes}/META-INF" />
+	</target>
+
+	<!-- Copy any resource or configuration files. -->
+	<target name="resources" description="Copy any resource or configuration files.">
+		<copy todir="${dir.build.classes}" includeEmptyDirs="no">
+			<fileset dir="${dir.src}">
+				<patternset>
+					<include name="**/*.txt" />
+					<include name="**/*.conf" />
+					<include name="**/*.properties" />
+					<include name="**/*.xml" />
+					<exclude name="build.xml" />
+					<exclude name="rebel.xml" />
+					<exclude name="ruleset.xml" />
+				</patternset>
+			</fileset>
+		</copy>
+
+		<copy todir="${dir.build}">
+			<fileset dir="WebContent" includes="*.xhtml">
+				<patternset>
+					<include name="*.*" />
+					<include name="META-INF/*.*" />
+				</patternset>
+			</fileset>
+		</copy>
+
+	</target>
+
+	<!-- Normal build of application. <target name="compile" depends="writeVersion" 
+		description="Normal build of application."> -->
+	<target name="compile" depends="createDirs,writeVersion" description="Normal build of application.">
+		<javac srcdir="${dir.src}" destdir="${dir.build}/WEB-INF/classes" source="${javac.source}" target="${javac.target}" encoding="UTF8" debug="true">
+			<compilerarg value="-Xlint" />
+			<classpath refid="classpath" />
+		</javac>
+	</target>
+
+	<!-- Compile unit tests -->
+	<target name="compile-tests" depends="compile,resources">
+		<javac includeAntRuntime="false" srcdir="${dir.tests.src}" destdir="${dir.tests.classes}" source="${javac.source}" target="${javac.target}" encoding="UTF8" debug="${javac.debug}" classpathref="test.classpath">
+		</javac>
+	</target>
+
+	<!-- Run all tests -->
+	<target name="junit" depends="compile-tests" description="Run JUnit tests">
+		<echo>Running JUnit tests...</echo>
+		<mkdir dir="${dir.build}/${dir.tests.report}" />
+		<junit printsummary="on" haltonerror="true" haltonfailure="true">
+			<classpath refid="test.classpath" />
+			<formatter type="xml" usefile="true" />
+			<batchtest todir="${dir.build}/${dir.tests.report}">
+				<fileset dir="${dir.tests.classes}" includes="de/intranda/digiverso/m2m/**/*Test.class" excludes="de/intranda/digiverso/m2m/**/AbstractSolr*" />
+			</batchtest>
+		</junit>
+		<delete dir="${dir.tests.classes}" />
+	</target>
+
+	<target name="junit-withcoverage" depends="compile-tests" description="Run JUnit tests with jacoco test coverage analysis">
+		<echo>Running JUnit tests with jacoco test coverage analysis...</echo>
+		<mkdir dir="${dir.build}/${dir.tests.report}" />
+		<jacoco:coverage>
+			<junit printsummary="on" haltonerror="true" haltonfailure="true" logfailedtests="true" fork="true" forkmode="once">
+				<classpath refid="test.classpath" />
+				<formatter type="xml" usefile="true" />
+				<batchtest todir="${dir.build}/${dir.tests.report}">
+					<fileset dir="${dir.tests.classes}" includes="de/intranda/digiverso/m2m/**/*Test.class" excludes="de/intranda/digiverso/m2m/**/*Solr*" />
+				</batchtest>
+			</junit>
+		</jacoco:coverage>
+		<delete dir="${dir.tests.classes}" />
+	</target>
+
+
+
+	<!-- Javadocs -->
+	<target name="javadoc">
+		<echo>Generating javadoc...</echo>
+		<delete dir="${dir.javadoc}" />
+		<mkdir dir="${dir.javadoc}" />
+		<!-- create javadocs -->
+		<javadoc destdir="${dir.javadoc}" sourcepath="${dir.src}" Author="true" version="true" Use="true" noindex="true" Windowtitle="intranda OAI Harvester Javadoc References" Doctitle="intranda OAI Harvester Javacoc References" bottom="Copyright 2014, inranda GmbH" encoding="UTF8">
+			<classpath refid="classpath">
+			</classpath>
+			<tag name="should" description="Generate Test Cases plugin" enabled="false" />
+		</javadoc>
+	</target>
+
+	<target name="find_revision" description="Store Git revision in ${repository.version}">
+		<exec executable="git" outputproperty="git.revision" failifexecutionfails="false" errorproperty="">
+			<arg value="describe" />
+			<arg value="--tags" />
+			<arg value="--always" />
+			<arg value="HEAD" />
+		</exec>
+		<condition property="repository.version" value="${git.revision}" else="unknown">
+			<and>
+				<isset property="git.revision" />
+				<length string="${git.revision}" trim="yes" length="0" when="greater" />
+			</and>
+		</condition>
+	</target>
+
+	<!-- rewrite the Version file with informations from the build system, not 
+	        used yet -->
+	<target name="writeVersion" depends="find_revision" description="writes the build version">
+		<tstamp>
+			<format property="date" pattern="dd−MMMM−yyyy" locale="en" />
+			<format property="dateshort" pattern="yyyyMMdd" locale="en" />
+		</tstamp>
+		<echo file="${dir.src}/de/intranda/digiverso/m2m/Version.java">
+	            package de.intranda.digiverso.m2m;
+	            /*
+	            DO NOT
+	            CHANGE THIS FILE, IT'S GENERATED BY ANT!
+	            */
+	            public class Version {
+	            public final static String VERSION = "Goobi M2M Interface Suite v${dist.version}";
+	            public final static String BUILDVERSION = "${git.revision}";
+	            public final static String BUILDDATE = "${dateshort}";
+	            }
+	        </echo>
+	</target>
+
+	<!-- Replace Strings in configs for target server -->
+	<target name="prepareConfig">
+		<replace file="${dir.build.classes}/config_oai.xml" token="C:/digiverso" value="/opt/digiverso" />
+		<replace file="${dir.build.classes}/config_oai.xml" token="c:/digiverso" value="/opt/digiverso" />
+	</target>
+
+	<!-- Build of war file. -->
+	<target name="war" depends="compile,junit-withcoverage,javadoc,resources,prepareConfig" description="Build of war file.">
+		<war destfile="${dir.build}/${dist.name}.war" webxml="WebContent/WEB-INF/web.xml">
+			<classes dir="${dir.build.classes}" />
+			<lib dir="WebContent/WEB-INF/lib" />
+			<fileset dir="${dir.build}">
+				<patternset>
+					<include name="resources/**/*.*" />
+					<include name="*.xsl" />
+				</patternset>
+			</fileset>
+		</war>
+
+		<!-- // Build of war file. -->
+		<delete dir="${dir.build}/resources" />
+		<delete dir="${dir.build}/META-INF" />
+		<echo>Alles ist gut!</echo>
+	</target>
+
+</project>

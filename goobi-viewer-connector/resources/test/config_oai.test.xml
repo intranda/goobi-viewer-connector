@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <!-- viewerConfigFolder: contains local configuration files, i.e. this file with local modifications that override the global one -->
+    <viewerConfigFolder>resources/test/</viewerConfigFolder>
+    
+	<!-- Definiert einige statische Werte, die bei ?verb=Identify ausgegeben 
+		werden -->
+	<identifyTags>
+		<!-- Name des repositories -->
+		<repositoryName>OAI Frontend</repositoryName>
+		<!-- URL des repositories -->
+		<baseURL useInRequestElement="true">http://localhost:8080/viewer/oai</baseURL>
+		<!-- OAI Version -->
+		<protocolVersion> 2.0</protocolVersion>
+		<!-- E-Mail Adresse des Ansprechpartners -->
+		<adminEmail>support@intranda.com</adminEmail>
+		<!-- Angabe wie mit gelöschten Datensätzen umgegangen wird, erlaubt sind: 
+			no - the repository does not maintain information about deletions. A repository 
+			that indicates this level of support must not reveal a deleted status in 
+			any response. persistent - the repository maintains information about deletions 
+			with no time limit. A repository that indicates this level of support must 
+			persistently keep track of the full history of deletions and consistently 
+			reveal the status of a deleted record over time. transient - the repository 
+			does not guarantee that a list of deletions is maintained persistently or 
+			consistently. A repository that indicates this level of support may reveal 
+			a deleted status for records. -->
+		<deletedRecord>transient</deletedRecord>
+		<!-- Definiert, wie genau mit Zeiten umgegangen wird. Erlaubt sind Datestamps 
+			und UTCdatetime -->
+		<granularity>YYYY-MM-DDThh:mm:ssZ</granularity>
+	</identifyTags>
+
+	<!-- Definiert die Liste von XML Namespaces, die in der OAI Antwort verwendet 
+		werden -->
+	<oai-identifier>
+		<xmlns>http://www.openarchives.org/OAI/2.0/</xmlns>
+		<repositoryIdentifier></repositoryIdentifier>
+	</oai-identifier>
+
+	<solr>
+		<!-- Anzahl der Treffer pro Seite -->
+		<hitsPerToken>23</hitsPerToken>
+		<!-- URL zum Index -->
+		<solrUrl>http://localhost:8080/solr</solrUrl>
+		<restrictions>
+            <restriction field="MD_SOMEFIELD">restricted1</restriction>
+            <restriction field="ACCESSCONDITION" conditions="-MDNUM_PUBLICRELEASEYEAR:[* TO NOW/YEAR]">restricted2</restriction>
+        </restrictions>
+        <querySuffix>-PI:PPN123456789</querySuffix>
+	</solr>
+	<oaiFolder>resources/test/oai/</oaiFolder>
+	<!-- Verzeichnis in dem die resumtionToken gespeichert werden -->
+	<resumptionTokenFolder>resources/test/oai/token/</resumptionTokenFolder>
+	<!-- Pfad zum internen URN Resolver, falls URNs genutzt werden, wird an 
+		zwei Stellen genutzt -->
+	<urnResolverUrl>http://localhost/viewer/resolver?urn=</urnResolverUrl>
+	<piResolverUrl>http://localhost/viewer/piresolver?id=</piResolverUrl>
+	<!-- documentResolverUrl: URL to the METS/LIDO resolver -->
+	<documentResolverUrl>http://localhost/viewer/metsresolver?id=</documentResolverUrl>
+    
+    <oai_dc>
+        <enabled>true</enabled>
+        <hitsPerToken>11</hitsPerToken>
+        <fields>
+            <field name="title" valueSource="MD_TITLE" translate="true" multivalued="true" useTopstructValueIfNoneFound="true" defaultValue="" />
+            <field name="format" defaultValue="image/jpeg" prefix="pre_SPACE_" suffix="_SPACE_suf" />
+        </fields>
+        <setSpec>
+            <field>DC</field>
+            <field>DOCSTRCT</field>
+        </setSpec>
+    </oai_dc>
+
+	<!-- ese: Value configuration for mandatory ESE fields -->
+	<ese>
+        <enabled>true</enabled>
+        <hitsPerToken>12</hitsPerToken>
+		<!-- types: Mapping of docstruct types to pre-defined values for europeana:type 
+			(@name: dostruct type; @type: ESE type) -->
+		<types>
+			<docstruct name="video" type="VIDEO" />
+			<docstruct name="audio" type="SOUND" />
+			<docstruct name="image" type="IMAGE" />
+			<docstruct name="picture" type="IMAGE" />
+			<docstruct name="painting" type="IMAGE" />
+			<docstruct name="museum_object" type="3D" />
+		</types>
+		<!-- providerField: Solr field that contains the value for europeana:provider -->
+		<providerField>MD_ACCESSCONDITIONCOPYRIGHT</providerField>
+		<!-- dataProviderField: Solr field that contains the value for europeana:dataProvider -->
+		<dataProviderField>MD_DEFAULTPROVIDER</dataProviderField>
+		<!-- defaultProvider: static default value for europeana:provider and europeana:dataProvider, 
+			in case any of the configured Solr fields provide no value -->
+		<defaultProvider>Institution XYZ</defaultProvider>
+		<!-- rightsField: Solr field that contains the value for europeana:rights 
+			(value must be a URI) -->
+		<rightsField>TODO</rightsField>
+		<!-- defaultRightsUrl: static default value for europeana:rights, in case 
+			the configured Solr field provides no value -->
+		<defaultRightsUrl>http://www.example.com/rights</defaultRightsUrl>
+	</ese>
+	
+    <mets>
+        <enabled>true</enabled>
+        <hitsPerToken>13</hitsPerToken>
+        <!-- Verzeichnis in dem die mets Dateien liegen -->
+        <metsDirectory>/opt/digiverso/viewer/indexed_mets/</metsDirectory>
+    </mets>
+    
+    <lido>
+        <enabled>true</enabled>
+        <hitsPerToken>14</hitsPerToken>
+        <!-- Verzeichnis in dem die lido Dateien liegen -->
+        <lidoDirectory>/opt/digiverso/viewer/indexed_lido/</lidoDirectory>
+    </lido>
+	
+    <marcxml>
+        <enabled>true</enabled>
+        <hitsPerToken>15</hitsPerToken>
+        <!-- Pfad zum marc to mods xslt -->
+        <marcStylesheet>resources/test/MODS2MARC21slim.xsl</marcStylesheet>
+    </marcxml>
+	
+	<epicur>
+        <enabled>true</enabled>
+        <hitsPerToken>16</hitsPerToken>
+	    <!-- additionalDocstructs: Docstructs whose URNs shall also be returned via Xepicur in addition to topstructs -->
+	    <additionalDocstructTypes>
+	        <docstruct>Article</docstruct>
+            <docstruct>Photograph</docstruct>
+	    </additionalDocstructTypes>
+        <blacklist>
+            <urnPrefix>urn:nbn:de:test_</urnPrefix>
+            <urnPrefix>urn:nbn:de:hidden_</urnPrefix>
+        </blacklist>
+	</epicur>
+	
+    <iv_overviewpage>
+        <enabled>true</enabled>
+        <hitsPerToken>17</hitsPerToken>
+    </iv_overviewpage>
+    
+    <iv_crowdsourcing>
+        <enabled>true</enabled>
+        <hitsPerToken>18</hitsPerToken>
+    </iv_crowdsourcing>
+
+	<sets>
+	    <allValuesSet translate="true">DC</allValuesSet>
+	    <allValuesSet>MD_WISSENSGEBIET</allValuesSet>
+		<set setName="test" setSpec="testspec" setQuery="DC:a.b.c.d" />
+	</sets>
+
+	<!-- useCollectionBlacklist: If true, records from collections blacklisted 
+		in config_viewer.xml will be filtered out. Default is true. -->
+	<useCollectionBlacklist>false</useCollectionBlacklist>
+	
+	<!-- defaultLocale: Locale to be used for value translations. Default is 'en'. -->
+	<defaultLocale>de</defaultLocale>
+</config>
