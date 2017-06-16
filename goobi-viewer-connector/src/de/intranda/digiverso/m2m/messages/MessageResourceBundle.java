@@ -1,5 +1,5 @@
 /**
- * This file is part of the Goobi M2M interface suite - OAI-PMH and SRU interfaces for digital objects.
+ * This file is part of the Goobi Viewer Connector - OAI-PMH and SRU interfaces for digital objects.
  *
  * Visit these websites for more information.
  *          - http://www.intranda.com
