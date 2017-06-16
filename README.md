@@ -32,7 +32,7 @@ The Goobi viewer indexer is part of the Goobi viewer project which consisists of
 | ------ | ------ |
 | [Goobi viewer core](https://github.com/intranda/goobi-viewer-core) | Core functionality of the viewer application|
 | [Goobi viewer indexer](https://github.com/intranda/goobi-viewer-indexer) | Indexing application to fill the Solr search index with metadata information |
-| [Goobi viewer connector](https://github.com/intranda/goobi-viewer-connector) | Connectors for different use cases (incl. OAI-PMH, SRU, JSON API)|
+| [Goobi viewer connector](https://github.com/intranda/goobi-viewer-connector) | Connectors for different use cases (incl. OAI-PMH, SRU)|
 | [Goobi viewer Theme Reference](https://github.com/intranda/goobi-viewer-theme-reference) | Reference Theme for the styling of the web pages for the user interface |
 
 
