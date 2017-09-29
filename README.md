@@ -1,11 +1,11 @@
 # Goobi viewer - Connector
 > Connector application as part of the highly flexible digital library framework - made by the Goobi developer team
 
-## Connector for the digital library framwork
+## Connector for the digital library framework
 The Goobi viewer connector provides several connectivity methods to the indexed data content of the Goobi viewer. Currently the connector supports two ways to let other machines communicate with the Goobi viewer:
 
 ### OAI-PMH
-The embedded OAI-PMH connector provides a standard OAI interface for harvesters. Dependend of the configuration it offeres the following formats for receiving the content:
+The embedded OAI-PMH connector provides a standard OAI interface for harvesters. Dependent of the configuration it offers the following formats for receiving the content:
 
 - METS/MODS
 - Dublin Core
@@ -15,7 +15,7 @@ The embedded OAI-PMH connector provides a standard OAI interface for harvesters.
 - ESE
 
 ### SRU
-The SRU connector offers the possibility to request specific information from the data store of the Goobi viewer. This is used for example by the reference manager programm [Citavi](https://www.citavi.com/en/) and others to embed the Goobi viewer data store into the databases that these programms search through.
+The SRU connector offers the possibility to request specific information from the data store of the Goobi viewer. This is used for example by the reference manager program [Citavi](https://www.citavi.com/en/) and others to embed the Goobi viewer data store into the databases that these programs search through.
 
 
 ## Documentation
@@ -26,7 +26,7 @@ Please notice that the Goobi viewer was formerly known as proprietary software u
 
 ## Technical background
 
-The Goobi viewer indexer is part of the Goobi viewer project which consisists of multiple packages:
+The Goobi viewer indexer is part of the Goobi viewer project which consists of multiple packages:
 
 | Package | Function |
 | ------ | ------ |
@@ -37,7 +37,7 @@ The Goobi viewer indexer is part of the Goobi viewer project which consisists of
 
 
 ## Installation
-The installation can be done on any operating system as the software is based on Java. A detailed explaination how to install the viewer will follow later on. In the mean time please get in touch with us via <info@intranda.com>
+The installation can be done on any operating system as the software is based on Java. A detailed explanation how to install the viewer will follow later on. In the mean time please get in touch with us via <info@intranda.com>
 
 ## Release History
 Detailed release note descriptions can be found using this URL:  
