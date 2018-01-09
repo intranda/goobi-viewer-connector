@@ -15,9 +15,6 @@
  */
 package de.intranda.digiverso.m2m.sru;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -41,7 +38,6 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 import org.jdom2.ProcessingInstruction;
-import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import org.jdom2.transform.XSLTransformException;
@@ -50,8 +46,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.intranda.digiverso.m2m.DataManager;
-import de.intranda.digiverso.m2m.utils.SolrSearchIndex;
+import de.intranda.digiverso.m2m.oai.enums.Metadata;
 import de.intranda.digiverso.m2m.utils.SolrConstants;
+import de.intranda.digiverso.m2m.utils.SolrSearchIndex;
+import de.intranda.digiverso.m2m.utils.Utils;
 
 public class SruServlet extends HttpServlet {
 
@@ -471,29 +469,29 @@ public class SruServlet extends HttpServlet {
     }
 
     /**
-     * @param document
+     * @param doc
      * @param recordData
      */
     private static void generateLidoRecord(SolrDocument doc, Element recordData) {
-        String filename = (String) doc.getFieldValue(SolrConstants.PI) + ".xml";
-        File file = new File(DataManager.getInstance().getConfiguration().getLidoDirectory(), filename);
-        try (FileInputStream fis = new FileInputStream(file)) {
-            SAXBuilder parser = new SAXBuilder();
-            org.jdom2.Document lidoFile = parser.build(fis);
-            Element lidoRoot = lidoFile.getRootElement();
-
-            Element newLido = new Element("lido", LIDO_NAMESPACE);
+        String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl()).append(doc.getFieldValue(
+                SolrConstants.PI_TOPSTRUCT)).toString();
+        try {
+            String xml = Utils.getWebContent(url);
+            if (StringUtils.isEmpty(xml)) {
+                return;
+            }
+            org.jdom2.Document xmlDoc = Utils.getDocumentFromString(xml, null);
+            Element xmlRoot = xmlDoc.getRootElement();
+            Element newLido = new Element(Metadata.lido.getMetadataPrefix(), LIDO_NAMESPACE);
             newLido.addNamespaceDeclaration(XSI_NAMESPACE);
             newLido.setAttribute(new Attribute("schemaLocation", "http://www.lido-schema.org http://www.lido-schema.org/schema/v1.0/lido-v1.0.xsd",
                     XSI_NAMESPACE));
 
-            newLido.addContent(lidoRoot.cloneContent());
+            newLido.addContent(xmlRoot.cloneContent());
             recordData.addContent(newLido);
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             logger.error(e.getMessage(), e);
         } catch (JDOMException e) {
-            logger.error(e.getMessage(), e);
-        } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }
     }
@@ -650,21 +648,22 @@ public class SruServlet extends HttpServlet {
      * @param recordData
      */
     private static void generateMarcxmlRecord(SolrDocument document, Element recordData, HttpServletRequest request) {
-        String pi = (String) document.getFieldValue(SolrConstants.PI);
-        String filename = new StringBuilder(pi).append(".xml").toString();
-        SAXBuilder parser = new SAXBuilder();
-        File file = new File(DataManager.getInstance().getConfiguration().getMetsDirectory(), filename);
-        try (FileInputStream fis = new FileInputStream(file)) {
-            org.jdom2.Document metsFile = parser.build(fis);
-            Element mets_root = metsFile.getRootElement();
-
+        String pi = (String) document.getFieldValue(SolrConstants.PI_TOPSTRUCT);
+        String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl()).append(pi).toString();
+        try {
+            String xml = Utils.getWebContent(url);
+            if (StringUtils.isEmpty(xml)) {
+                return;
+            }
+            org.jdom2.Document xmlDoc = Utils.getDocumentFromString(xml, null);
+            Element xmlRoot = xmlDoc.getRootElement();
             Element newmods = new Element("mods", MODS_NAMESPACE);
             newmods.addNamespaceDeclaration(XSI_NAMESPACE);
             newmods.addNamespaceDeclaration(MODS_NAMESPACE);
             newmods.addNamespaceDeclaration(XLINK_NAMESPACE);
             newmods.setAttribute("schemaLocation", "http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-3.xsd", XSI_NAMESPACE);
 
-            List<Element> dmdList = mets_root.getChildren("dmdSec", METS_NAMESPACE);
+            List<Element> dmdList = xmlRoot.getChildren("dmdSec", METS_NAMESPACE);
             if (dmdList != null && !dmdList.isEmpty()) {
                 Element firstDmdSec = dmdList.get(0);
                 Element mdWrap = firstDmdSec.getChild("mdWrap", METS_NAMESPACE);
@@ -703,13 +702,10 @@ public class SruServlet extends HttpServlet {
                 eleUrlSubfield.setAttribute("code", "u");
                 eleUrlSubfield.setText(sbUrl.toString());
                 eleUrl.addContent(eleUrlSubfield);
-
             }
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             logger.error(e.getMessage(), e);
         } catch (JDOMException e) {
-            logger.error(e.getMessage(), e);
-        } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }
     }
@@ -718,68 +714,67 @@ public class SruServlet extends HttpServlet {
      * @param document
      * @param recordData
      */
-    private static void generateModsRecord(SolrDocument document, Element recordData) {
-        String filename = (String) document.getFieldValue(SolrConstants.PI) + ".xml";
-        SAXBuilder parser = new SAXBuilder();
-        File file = new File(DataManager.getInstance().getConfiguration().getMetsDirectory(), filename);
-        try (FileInputStream fis = new FileInputStream(file)) {
-            org.jdom2.Document metsFile = parser.build(fis);
-            Element mets_root = metsFile.getRootElement();
+    private static void generateModsRecord(SolrDocument doc, Element recordData) {
+        String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl()).append(doc.getFieldValue(
+                SolrConstants.PI_TOPSTRUCT)).toString();
+        try {
+            String xml = Utils.getWebContent(url);
+            if (StringUtils.isEmpty(xml)) {
+                return;
+            }
+            org.jdom2.Document xmlDoc = Utils.getDocumentFromString(xml, null);
+            Element xmlRoot = xmlDoc.getRootElement();
+            Element newMods = new Element("mods", MODS_NAMESPACE);
+            newMods.addNamespaceDeclaration(XSI_NAMESPACE);
+            newMods.addNamespaceDeclaration(MODS_NAMESPACE);
+            newMods.addNamespaceDeclaration(XLINK_NAMESPACE);
+            newMods.setAttribute("schemaLocation", "http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-3.xsd", XSI_NAMESPACE);
 
-            Element newmods = new Element("mods", MODS_NAMESPACE);
-            newmods.addNamespaceDeclaration(XSI_NAMESPACE);
-            newmods.addNamespaceDeclaration(MODS_NAMESPACE);
-            newmods.addNamespaceDeclaration(XLINK_NAMESPACE);
-            newmods.setAttribute("schemaLocation", "http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-3.xsd", XSI_NAMESPACE);
-
-            List<Element> dmdList = mets_root.getChildren("dmdSec", METS_NAMESPACE);
+            List<Element> dmdList = xmlRoot.getChildren("dmdSec", METS_NAMESPACE);
             if (dmdList != null && !dmdList.isEmpty()) {
                 Element firstDmdSec = dmdList.get(0);
                 Element mdWrap = firstDmdSec.getChild("mdWrap", METS_NAMESPACE);
                 Element xmlData = mdWrap.getChild("xmlData", METS_NAMESPACE);
                 Element modsElement = xmlData.getChild("mods", MODS_NAMESPACE);
-                newmods.addContent(modsElement.cloneContent());
-                recordData.addContent(newmods);
+                newMods.addContent(modsElement.cloneContent());
+                recordData.addContent(newMods);
             }
-
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             logger.error(e.getMessage(), e);
         } catch (JDOMException e) {
-            logger.error(e.getMessage(), e);
-        } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }
     }
 
     /**
-     * @param document
+     * @param doc
      * @param recordData
      */
-    private static void generateMetsRecord(SolrDocument document, Element recordData) {
-
-        String filename = (String) document.getFieldValue(SolrConstants.PI) + ".xml";
-        SAXBuilder parser = new SAXBuilder();
-        File file = new File(DataManager.getInstance().getConfiguration().getMetsDirectory(), filename);
-        try (FileInputStream fis = new FileInputStream(file)) {
-            org.jdom2.Document metsFile = parser.build(fis);
-            Element mets_root = metsFile.getRootElement();
-
-            Element newmets = new Element("mets", METS_NAMESPACE);
-            newmets.addNamespaceDeclaration(XSI_NAMESPACE);
-            newmets.addNamespaceDeclaration(MODS_NAMESPACE);
-            newmets.addNamespaceDeclaration(DV_NAMESPACE);
-            newmets.addNamespaceDeclaration(XLINK_NAMESPACE);
-            newmets.setAttribute("schemaLocation",
+    private static void generateMetsRecord(SolrDocument doc, Element recordData) {
+        String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl()).append(doc.getFieldValue(
+                SolrConstants.PI_TOPSTRUCT)).toString();
+        try {
+            String xml = Utils.getWebContent(url);
+            if (StringUtils.isEmpty(xml)) {
+                return;
+            }
+            org.jdom2.Document xmlDoc = Utils.getDocumentFromString(xml, null);
+            Element xmlRoot = xmlDoc.getRootElement();
+            Element newMets = new Element(Metadata.mets.getMetadataPrefix(), METS_NAMESPACE);
+            newMets.addNamespaceDeclaration(XSI_NAMESPACE);
+            newMets.addNamespaceDeclaration(XSI_NAMESPACE);
+            newMets.addNamespaceDeclaration(MODS_NAMESPACE);
+            newMets.addNamespaceDeclaration(DV_NAMESPACE);
+            newMets.addNamespaceDeclaration(XLINK_NAMESPACE);
+            newMets.setAttribute("schemaLocation",
                     "http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-3.xsd http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/version17/mets.v1-7.xsd",
                     XSI_NAMESPACE);
 
-            newmets.addContent(mets_root.cloneContent());
-            recordData.addContent(newmets);
-        } catch (FileNotFoundException e) {
+            newMets.addContent(xmlRoot.cloneContent());
+            recordData.addContent(newMets);
+        } catch (IOException e) {
             logger.error(e.getMessage(), e);
         } catch (JDOMException e) {
-            logger.error(e.getMessage(), e);
-        } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }
     }
