@@ -144,6 +144,16 @@
         <enabled>true</enabled>
         <hitsPerToken>18</hitsPerToken>
     </iv_crowdsourcing>
+    
+    <tei>
+        <enabled>true</enabled>
+        <hitsPerToken>10</hitsPerToken>
+    </tei>
+    
+    <cmdi>
+        <enabled>true</enabled>
+        <hitsPerToken>10</hitsPerToken>
+    </cmdi>
 
 	<sets>
 	    <allValuesSet translate="true">DC</allValuesSet>
