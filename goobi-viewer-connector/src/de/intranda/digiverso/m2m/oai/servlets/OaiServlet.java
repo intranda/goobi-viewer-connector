@@ -205,6 +205,12 @@ public class OaiServlet extends HttpServlet {
                                 root.addContent(xmlGeneration.createListRecordsIntrandaViewerUpdates(handler, 0, hitsPerToken, handler
                                         .getMetadataPrefix()));
                                 break;
+                            case tei:
+                                root.addContent(xmlGeneration.createListRecordsTei(handler, 0, hitsPerToken));
+                                break;
+                            case cmdi:
+                                root.addContent(xmlGeneration.createListRecordsCmdi(handler, 0, hitsPerToken));
+                                break;
                             default:
                                 root.addContent(new ErrorCode().getBadArgument());
                                 break;
@@ -246,6 +252,12 @@ public class OaiServlet extends HttpServlet {
                         case iv_overviewpage:
                         case iv_crowdsourcing:
                             root.addContent(xmlGeneration.createGetRecordIntrandaViewerUpdate(handler, handler.getMetadataPrefix()));
+                            break;
+                        case tei:
+                            root.addContent(xmlGeneration.createGetRecordTei(handler));
+                            break;
+                        case cmdi:
+                            root.addContent(xmlGeneration.createGetRecordCmdi(handler));
                             break;
                         default:
                             root.addContent(new ErrorCode().getCannotDisseminateFormat());

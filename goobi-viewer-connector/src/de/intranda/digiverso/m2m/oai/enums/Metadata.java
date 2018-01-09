@@ -29,7 +29,9 @@ public enum Metadata {
     iv_overviewpage("iv_overviewpage", "http://www.intranda.com/intrandaviewer_overviewpage.xsd",
             "http://www.intranda.com/digiverso/intrandaviewer/overviewpage", true, false),
     iv_crowdsourcing("iv_crowdsourcing", "http://www.intranda.com/intrandaviewer_overviewpage.xsd",
-            "http://www.intranda.com/digiverso/intrandaviewer/crowdsourcing", true, false);
+            "http://www.intranda.com/digiverso/intrandaviewer/crowdsourcing", true, false),
+    tei("tei", "https://www.tei-c.org/release/xml/tei/custom/schema/xsd/tei_all.xsd", "http://www.tei-c.org/ns/1.0", true, false),
+    cmdi("cmdi", "http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1271859438204/xsd", "http://www.clarin.eu/cmd/", true, false);
 
     private String metadataPrefix;
     private String schema;
@@ -37,6 +39,15 @@ public enum Metadata {
     private boolean oaiSet;
     private boolean sruSet;
 
+    /**
+     * Constructor.
+     * 
+     * @param metadataPrefix
+     * @param schema
+     * @param metadataNamespace
+     * @param oaiSet Use format for SRU
+     * @param sruSet Use format for OAI-PMH
+     */
     private Metadata(String metadataPrefix, String schema, String metadataNamespace, boolean oaiSet, boolean sruSet) {
         this.metadataPrefix = metadataPrefix;
         this.schema = schema;

@@ -1410,7 +1410,7 @@ public class XMLGeneration {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element xmlListRecords = new Element(recordType, xmlns);
 
-        Namespace mets = Namespace.getNamespace("mets", "http://www.loc.gov/METS/");
+        Namespace mets = Namespace.getNamespace(Metadata.mets.getMetadataPrefix(), Metadata.mets.getMetadataNamespace());
         Namespace xsi = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
         Namespace mods = Namespace.getNamespace("mods", "http://www.loc.gov/mods/v3");
         Namespace dv = Namespace.getNamespace("dv", "http://dfg-viewer.de/");
@@ -1430,7 +1430,7 @@ public class XMLGeneration {
 
             org.jdom2.Document metsFile = Utils.getDocumentFromString(xml, null);
             Element mets_root = metsFile.getRootElement();
-            Element newmets = new Element("mets", mets);
+            Element newmets = new Element(Metadata.mets.getMetadataPrefix(), mets);
             newmets.addNamespaceDeclaration(xsi);
             newmets.addNamespaceDeclaration(mods);
             newmets.addNamespaceDeclaration(dv);
@@ -2030,7 +2030,7 @@ public class XMLGeneration {
     }
 
     /**
-     * for the server request ?verb=GetRecord this method build the xml section if metadataPrefix is 'lido'
+     * For the server request ?verb=GetRecord this method build the XML section if metadataPrefix is 'lido'.
      * 
      * @param handler
      * @return
@@ -2040,7 +2040,7 @@ public class XMLGeneration {
             return new ErrorCode().getBadArgument();
         }
         try {
-            SolrDocument doc = solr.getListRecord(handler.getIdentifier(), "lido");
+            SolrDocument doc = solr.getListRecord(handler.getIdentifier(), Metadata.lido.getMetadataPrefix());
             if (doc == null) {
                 return new ErrorCode().getIdDoesNotExist();
             }
@@ -2056,10 +2056,11 @@ public class XMLGeneration {
     }
 
     /**
-     * for the server request ?verb=ListRecords this method build the xml section if metadataPrefix is mets
+     * For the server request ?verb=ListRecords this method build the xml section if metadataPrefix is 'lido'
      * 
      * @param handler
      * @param firstRow
+     * @param numRows
      * @return
      * @throws SolrServerException
      */
@@ -2098,7 +2099,7 @@ public class XMLGeneration {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element xmlListRecords = new Element(recordType, xmlns);
 
-        Namespace lido = Namespace.getNamespace("lido", "http://www.lido-schema.org");
+        Namespace lido = Namespace.getNamespace(Metadata.lido.getMetadataPrefix(), Metadata.lido.getMetadataNamespace());
         Namespace xsi = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
 
         if (records.size() < numRows) {
@@ -2113,19 +2114,241 @@ public class XMLGeneration {
                 continue;
             }
 
-            org.jdom2.Document lidoFile = Utils.getDocumentFromString(xml, null);
-            Element lidoRoot = lidoFile.getRootElement();
-            Element newLido = new Element("lido", lido);
+            org.jdom2.Document xmlDoc = Utils.getDocumentFromString(xml, null);
+            Element xmlRoot = xmlDoc.getRootElement();
+            Element newLido = new Element(Metadata.lido.getMetadataPrefix(), lido);
             newLido.addNamespaceDeclaration(xsi);
             newLido.setAttribute(new Attribute("schemaLocation", "http://www.lido-schema.org http://www.lido-schema.org/schema/v1.0/lido-v1.0.xsd",
                     xsi));
-            newLido.addContent(lidoRoot.cloneContent());
+            newLido.addContent(xmlRoot.cloneContent());
 
             Element record = new Element("record", xmlns);
             Element header = getHeader(doc, null, handler);
             record.addContent(header);
             Element metadata = new Element("metadata", xmlns);
             metadata.addContent(newLido);
+            // metadata.addContent(mets_root.cloneContent());
+            record.addContent(metadata);
+            xmlListRecords.addContent(record);
+        }
+
+        // Create resumption token
+        if (totalHits > firstRow + numRows) {
+            Element resumption = createResumptionTokenAndElement(totalHits, firstRow + numRows, xmlns, handler);
+            xmlListRecords.addContent(resumption);
+        }
+
+        return xmlListRecords;
+    }
+
+    /**
+     * For the server request ?verb=GetRecord this method build the XML section if metadataPrefix is 'tei'.
+     * 
+     * @param handler
+     * @return
+     */
+    public Element createGetRecordTei(RequestHandler handler) {
+        if (handler.getIdentifier() == null) {
+            return new ErrorCode().getBadArgument();
+        }
+        try {
+            SolrDocument doc = solr.getListRecord(handler.getIdentifier(), Metadata.tei.getMetadataPrefix());
+            if (doc == null) {
+                return new ErrorCode().getIdDoesNotExist();
+            }
+            Element record = generateTei(Collections.singletonList(doc), 1L, 0, 1, handler, "GetRecord");
+            return record;
+        } catch (IOException e) {
+            return new ErrorCode().getIdDoesNotExist();
+        } catch (JDOMException e) {
+            return new ErrorCode().getCannotDisseminateFormat();
+        } catch (SolrServerException e) {
+            return new ErrorCode().getIdDoesNotExist();
+        }
+    }
+
+    /**
+     * For the server request ?verb=ListRecords this method build the XML section if metadataPrefix is 'tei'.
+     * 
+     * @param handler
+     * @param firstRow
+     * @param numRows
+     * @return
+     * @throws SolrServerException
+     */
+    public Element createListRecordsTei(RequestHandler handler, int firstRow, int numRows) throws SolrServerException {
+        SolrDocumentList records = solr.getListRecords(filterDatestampFromRequest(handler), firstRow, numRows, false, null);
+        if (records.isEmpty()) {
+            return new ErrorCode().getNoRecordsMatch();
+        }
+        try {
+            Element xmlListRecords = generateTei(records, records.getNumFound(), firstRow, numRows, handler, "ListRecords");
+            return xmlListRecords;
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+            return new ErrorCode().getIdDoesNotExist();
+        } catch (JDOMException e) {
+            return new ErrorCode().getCannotDisseminateFormat();
+        }
+    }
+
+    /**
+     * Creates TEI records.
+     * 
+     * @param records
+     * @param totalHits
+     * @param firstRow
+     * @param numRows
+     * @param handler
+     * @param recordType "GetRecord" or "ListRecords"
+     * @return
+     * @throws IOException
+     * @throws JDOMException
+     * @throws SolrServerException
+     */
+    private Element generateTei(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler, String recordType)
+            throws JDOMException, IOException, SolrServerException {
+        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
+        Element xmlListRecords = new Element(recordType, xmlns);
+
+        Namespace tei = Namespace.getNamespace(Metadata.tei.getMetadataPrefix(), Metadata.tei.getMetadataNamespace());
+        Namespace xsi = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+
+        if (records.size() < numRows) {
+            numRows = records.size();
+        }
+        for (SolrDocument doc : records) {
+            String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl()).append(doc.getFieldValue(
+                    SolrConstants.PI_TOPSTRUCT)).toString();
+            String xml = Utils.getWebContent(url);
+            if (StringUtils.isEmpty(xml)) {
+                xmlListRecords.addContent(new ErrorCode().getCannotDisseminateFormat());
+                continue;
+            }
+
+            org.jdom2.Document teiFile = Utils.getDocumentFromString(xml, null);
+            Element teiRoot = teiFile.getRootElement();
+            Element newTei = new Element(Metadata.tei.getMetadataPrefix(), tei);
+            newTei.addNamespaceDeclaration(xsi);
+            newTei.setAttribute(new Attribute("schemaLocation", Metadata.tei.getSchema(), xsi));
+            newTei.addContent(teiRoot.cloneContent());
+
+            Element record = new Element("record", xmlns);
+            Element header = getHeader(doc, null, handler);
+            record.addContent(header);
+            Element metadata = new Element("metadata", xmlns);
+            metadata.addContent(newTei);
+            // metadata.addContent(mets_root.cloneContent());
+            record.addContent(metadata);
+            xmlListRecords.addContent(record);
+        }
+
+        // Create resumption token
+        if (totalHits > firstRow + numRows) {
+            Element resumption = createResumptionTokenAndElement(totalHits, firstRow + numRows, xmlns, handler);
+            xmlListRecords.addContent(resumption);
+        }
+
+        return xmlListRecords;
+    }
+    
+    /**
+     * For the server request ?verb=GetRecord this method build the XML section if metadataPrefix is 'cmdi'.
+     * 
+     * @param handler
+     * @return
+     */
+    public Element createGetRecordCmdi(RequestHandler handler) {
+        if (handler.getIdentifier() == null) {
+            return new ErrorCode().getBadArgument();
+        }
+        try {
+            SolrDocument doc = solr.getListRecord(handler.getIdentifier(), Metadata.cmdi.getMetadataPrefix());
+            if (doc == null) {
+                return new ErrorCode().getIdDoesNotExist();
+            }
+            Element record = generateTei(Collections.singletonList(doc), 1L, 0, 1, handler, "GetRecord");
+            return record;
+        } catch (IOException e) {
+            return new ErrorCode().getIdDoesNotExist();
+        } catch (JDOMException e) {
+            return new ErrorCode().getCannotDisseminateFormat();
+        } catch (SolrServerException e) {
+            return new ErrorCode().getIdDoesNotExist();
+        }
+    }
+
+    /**
+     * For the server request ?verb=ListRecords this method build the XML section if metadataPrefix is 'cmdi'.
+     * 
+     * @param handler
+     * @param firstRow
+     * @param numRows
+     * @return
+     * @throws SolrServerException
+     */
+    public Element createListRecordsCmdi(RequestHandler handler, int firstRow, int numRows) throws SolrServerException {
+        SolrDocumentList records = solr.getListRecords(filterDatestampFromRequest(handler), firstRow, numRows, false, null);
+        if (records.isEmpty()) {
+            return new ErrorCode().getNoRecordsMatch();
+        }
+        try {
+            Element xmlListRecords = generateCmdi(records, records.getNumFound(), firstRow, numRows, handler, "ListRecords");
+            return xmlListRecords;
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+            return new ErrorCode().getIdDoesNotExist();
+        } catch (JDOMException e) {
+            return new ErrorCode().getCannotDisseminateFormat();
+        }
+    }
+
+    /**
+     * Creates CMDI records.
+     * 
+     * @param records
+     * @param totalHits
+     * @param firstRow
+     * @param numRows
+     * @param handler
+     * @param recordType "GetRecord" or "ListRecords"
+     * @return
+     * @throws IOException
+     * @throws JDOMException
+     * @throws SolrServerException
+     */
+    private Element generateCmdi(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler, String recordType)
+            throws JDOMException, IOException, SolrServerException {
+        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
+        Element xmlListRecords = new Element(recordType, xmlns);
+
+        Namespace tei = Namespace.getNamespace(Metadata.cmdi.getMetadataPrefix(), Metadata.cmdi.getMetadataNamespace());
+        Namespace xsi = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+
+        if (records.size() < numRows) {
+            numRows = records.size();
+        }
+        for (SolrDocument doc : records) {
+            String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl()).append(doc.getFieldValue(
+                    SolrConstants.PI_TOPSTRUCT)).toString();
+            String xml = Utils.getWebContent(url);
+            if (StringUtils.isEmpty(xml)) {
+                xmlListRecords.addContent(new ErrorCode().getCannotDisseminateFormat());
+                continue;
+            }
+
+            org.jdom2.Document file = Utils.getDocumentFromString(xml, null);
+            Element teiRoot = file.getRootElement();
+            Element newTei = new Element(Metadata.cmdi.getMetadataPrefix(), tei);
+            newTei.addNamespaceDeclaration(xsi);
+            newTei.setAttribute(new Attribute("schemaLocation", Metadata.cmdi.getSchema(), xsi));
+            newTei.addContent(teiRoot.cloneContent());
+
+            Element record = new Element("record", xmlns);
+            Element header = getHeader(doc, null, handler);
+            record.addContent(header);
+            Element metadata = new Element("metadata", xmlns);
+            metadata.addContent(newTei);
             // metadata.addContent(mets_root.cloneContent());
             record.addContent(metadata);
             xmlListRecords.addContent(record);

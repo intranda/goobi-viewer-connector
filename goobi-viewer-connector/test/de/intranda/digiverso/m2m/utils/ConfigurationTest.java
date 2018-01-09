@@ -306,6 +306,8 @@ public class ConfigurationTest {
         Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.epicur.name()));
         Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.iv_overviewpage.name()));
         Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.iv_crowdsourcing.name()));
+        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.tei.name()));
+        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.cmdi.name()));
     }
 
     /**
