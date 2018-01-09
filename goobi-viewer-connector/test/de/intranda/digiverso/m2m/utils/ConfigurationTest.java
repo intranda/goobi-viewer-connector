@@ -166,24 +166,6 @@ public class ConfigurationTest {
     }
 
     /**
-     * @see Configuration#getLidoDirectory()
-     * @verifies return correct value
-     */
-    @Test
-    public void getLidoDirectory_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals("/opt/digiverso/viewer/indexed_lido/", DataManager.getInstance().getConfiguration().getLidoDirectory());
-    }
-
-    /**
-     * @see Configuration#getMetsDirectory()
-     * @verifies return correct value
-     */
-    @Test
-    public void getMetsDirectory_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals("/opt/digiverso/viewer/indexed_mets/", DataManager.getInstance().getConfiguration().getMetsDirectory());
-    }
-
-    /**
      * @see Configuration#getMods2MarcXsl()
      * @verifies return correct value
      */
