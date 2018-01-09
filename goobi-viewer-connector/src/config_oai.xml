@@ -132,8 +132,6 @@
 	<mets>
 	    <enabled>true</enabled>
         <hitsPerToken>10</hitsPerToken>
-        <!-- Verzeichnis in dem die mets Dateien liegen -->
-        <metsDirectory>C:/digiverso/viewer/indexed_mets/</metsDirectory>
         <setSpec>
             <field>DC</field>       
         </setSpec>
@@ -142,8 +140,6 @@
 	<lido>
         <enabled>true</enabled>
         <hitsPerToken>10</hitsPerToken>
-        <!-- Verzeichnis in dem die lido Dateien liegen -->
-        <lidoDirectory>C:/digiverso/viewer/indexed_lido/</lidoDirectory>
         <setSpec>
             <field>DC</field>       
         </setSpec>
