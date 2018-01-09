@@ -366,26 +366,6 @@ public final class Configuration {
     }
 
     /**
-     * TODO incompatible with repositories
-     * 
-     * @return directory for METS files
-     * @should return correct value
-     */
-    public String getMetsDirectory() {
-        return getLocalString("mets.metsDirectory", null);
-    }
-
-    /**
-     * TODO incompatible with repositories
-     * 
-     * @return directory for LIDO files
-     * @should return correct value
-     */
-    public String getLidoDirectory() {
-        return getLocalString("lido.lidoDirectory", null);
-    }
-
-    /**
      * @return Path to the MODS2MARC XSLT stylesheet.
      * @should return correct value
      */
