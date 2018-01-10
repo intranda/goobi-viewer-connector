@@ -2216,15 +2216,16 @@ public class XMLGeneration {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element xmlListRecords = new Element(recordType, xmlns);
 
-        Namespace tei = Namespace.getNamespace(Metadata.tei.getMetadataPrefix(), Metadata.tei.getMetadataNamespace());
+        Namespace tei = Namespace.getNamespace(handler.getMetadataPrefix().getMetadataPrefix(), handler.getMetadataPrefix().getMetadataNamespace());
         Namespace xsi = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
 
         if (records.size() < numRows) {
             numRows = records.size();
         }
         for (SolrDocument doc : records) {
-            String url = new StringBuilder(DataManager.getInstance().getConfiguration().getContentApiUrl()).append(handler.getMetadataPrefix())
-                    .append('/').append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT)).append('/').append(language).append('/').toString();
+            String url = new StringBuilder(DataManager.getInstance().getConfiguration().getContentApiUrl()).append(handler.getMetadataPrefix()
+                    .getMetadataPrefix()).append('/').append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT)).append('/').append(language).append('/')
+                    .toString();
             logger.trace(url);
             String xml = Utils.getWebContent(url);
             if (StringUtils.isEmpty(xml)) {
@@ -2232,18 +2233,18 @@ public class XMLGeneration {
                 continue;
             }
 
-            org.jdom2.Document teiFile = Utils.getDocumentFromString(xml, null);
-            Element teiRoot = teiFile.getRootElement();
-            Element newTei = new Element(Metadata.tei.getMetadataPrefix(), tei);
-            newTei.addNamespaceDeclaration(xsi);
-            newTei.setAttribute(new Attribute("schemaLocation", Metadata.tei.getSchema(), xsi));
-            newTei.addContent(teiRoot.cloneContent());
+            org.jdom2.Document xmlDoc = Utils.getDocumentFromString(xml, null);
+            Element teiRoot = xmlDoc.getRootElement();
+            Element newDoc = new Element(handler.getMetadataPrefix().getMetadataPrefix(), tei);
+            newDoc.addNamespaceDeclaration(xsi);
+            newDoc.setAttribute(new Attribute("schemaLocation", handler.getMetadataPrefix().getSchema(), xsi));
+            newDoc.addContent(teiRoot.cloneContent());
 
             Element record = new Element("record", xmlns);
             Element header = getHeader(doc, null, handler);
             record.addContent(header);
             Element metadata = new Element("metadata", xmlns);
-            metadata.addContent(newTei);
+            metadata.addContent(newDoc);
             // metadata.addContent(mets_root.cloneContent());
             record.addContent(metadata);
             xmlListRecords.addContent(record);
