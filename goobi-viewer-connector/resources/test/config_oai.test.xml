@@ -57,6 +57,12 @@
 	<piResolverUrl>http://localhost/viewer/piresolver?id=</piResolverUrl>
 	<!-- documentResolverUrl: URL to the METS/LIDO resolver -->
 	<documentResolverUrl>http://localhost/viewer/metsresolver?id=</documentResolverUrl>
+    <!-- harvestUrl: URL for havesting overview page and crowdsourcing updates -->
+    <harvestUrl>http://localhost/viewer/harvest
+    </harvestUrl>
+    <!-- contentApiUrl: Rest API for full-text/ALTO/TEI/CMDI retrieval -->
+    <contentApiUrl>http://localhost/viewer/rest/content/
+    </contentApiUrl>
     
     <oai_dc>
         <enabled>true</enabled>

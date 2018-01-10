@@ -206,10 +206,8 @@ public class OaiServlet extends HttpServlet {
                                         .getMetadataPrefix()));
                                 break;
                             case tei:
-                                root.addContent(xmlGeneration.createListRecordsTei(handler, 0, hitsPerToken));
-                                break;
                             case cmdi:
-                                root.addContent(xmlGeneration.createListRecordsCmdi(handler, 0, hitsPerToken));
+                                root.addContent(xmlGeneration.createListRecordsTeiCmdi(handler, 0, hitsPerToken));
                                 break;
                             default:
                                 root.addContent(new ErrorCode().getBadArgument());
@@ -254,10 +252,8 @@ public class OaiServlet extends HttpServlet {
                             root.addContent(xmlGeneration.createGetRecordIntrandaViewerUpdate(handler, handler.getMetadataPrefix()));
                             break;
                         case tei:
-                            root.addContent(xmlGeneration.createGetRecordTei(handler));
-                            break;
                         case cmdi:
-                            root.addContent(xmlGeneration.createGetRecordCmdi(handler));
+                            root.addContent(xmlGeneration.createGetRecordTeiCmdi(handler));
                             break;
                         default:
                             root.addContent(new ErrorCode().getCannotDisseminateFormat());

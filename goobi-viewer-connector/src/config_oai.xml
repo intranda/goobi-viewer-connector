@@ -71,8 +71,12 @@
 	   This URL is called locally and can be 'localhost' as long as the viewer is on the same machine -->
 	<documentResolverUrl>http://localhost:8080/viewer/metsresolver?id=
     </documentResolverUrl>
+    <!-- harvestUrl: URL for havesting overview page and crowdsourcing updates -->
     <harvestUrl>http://localhost:8080/viewer/harvest
     </harvestUrl>
+    <!-- contentApiUrl: Rest API for full-text/ALTO/TEI/CMDI retrieval -->
+    <contentApiUrl>http://localhost:8080/viewer/rest/content/
+    </contentApiUrl>
     
     
     <oai_dc>

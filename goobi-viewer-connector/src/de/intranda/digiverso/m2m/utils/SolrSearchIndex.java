@@ -263,13 +263,12 @@ public class SolrSearchIndex {
      * Searches for identifier and return {@link SolrDocument} identifier can be PPN or URN (doc or page)
      * 
      * @param identifier Identifier to search
-     * @param metadataPrefix
      * @return {@link SolrDocument}
      * @throws IOException
      * @throws SolrServerException
      */
-    public SolrDocument getListRecord(final String identifier, String metadataPrefix) throws IOException, SolrServerException {
-        SolrDocumentList ret = query(identifier, metadataPrefix, 1);
+    public SolrDocument getListRecord(final String identifier) throws IOException, SolrServerException {
+        SolrDocumentList ret = query(identifier, 1);
         if (!ret.isEmpty()) {
             return ret.get(0);
         }
@@ -280,23 +279,21 @@ public class SolrSearchIndex {
     /**
      * 
      * @param identifier
-     * @param metadataPrefix
      * @return
      * @throws SolrServerException
      */
-    public boolean isRecordExists(final String identifier, final String metadataPrefix) throws SolrServerException {
-        return !query(identifier, metadataPrefix, 0).isEmpty();
+    public boolean isRecordExists(final String identifier) throws SolrServerException {
+        return !query(identifier, 0).isEmpty();
     }
 
     /**
      * 
      * @param identifier
-     * @param metadataPrefix
      * @param rows
      * @return
      * @throws SolrServerException
      */
-    private SolrDocumentList query(final String identifier, String metadataPrefix, int rows) throws SolrServerException {
+    private SolrDocumentList query(final String identifier, int rows) throws SolrServerException {
         String useIdentifier = ClientUtils.escapeQueryChars(identifier);
 
         StringBuilder sb = new StringBuilder();
@@ -307,12 +304,6 @@ public class SolrSearchIndex {
         SolrQuery solrQuery = new SolrQuery(sb.toString());
         solrQuery.setRows(rows);
         QueryResponse resp = server.query(solrQuery);
-
-        //        if (resp.getResults().isEmpty() && Metadata.epicur.name().equals(metadataPrefix)) {
-        //            solrQuery = new SolrQuery(new StringBuilder(SolrConstants.IMAGEURN_OAI).append(":").append(identifier).toString());
-        //            solrQuery.setRows(rows);
-        //            resp = server.query(solrQuery);
-        //        }
 
         return resp.getResults();
     }
@@ -328,7 +319,6 @@ public class SolrSearchIndex {
      * @param querySuffix
      * @return
      */
-
     private static String buildQueryString(String from, String until, String set, String metadataPrefix, boolean excludeAnchor, String querySuffix) {
         StringBuilder query = new StringBuilder();
         query.append('(').append(SolrConstants.ISWORK).append(":true");

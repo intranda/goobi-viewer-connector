@@ -406,4 +406,22 @@ public class ConfigurationTest {
         Assert.assertEquals(SolrConstants.DC, values.get(0));
         Assert.assertEquals(SolrConstants.DOCSTRCT, values.get(1));
     }
+
+    /**
+     * @see Configuration#getContentApiUrl()
+     * @verifies return correct value
+     */
+    @Test
+    public void getContentApiUrl_shouldReturnCorrectValue() throws Exception {
+Assert.assertEquals("http://localhost/viewer/rest/content/", DataManager.getInstance().getConfiguration().getContentApiUrl());
+    }
+
+    /**
+     * @see Configuration#getHarvestUrl()
+     * @verifies return correct value
+     */
+    @Test
+    public void getHarvestUrl_shouldReturnCorrectValue() throws Exception {
+        Assert.assertEquals("http://localhost/viewer/harvest", DataManager.getInstance().getConfiguration().getHarvestUrl());
+    }
 }

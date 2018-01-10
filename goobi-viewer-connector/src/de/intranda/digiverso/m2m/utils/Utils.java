@@ -144,4 +144,32 @@ public class Utils {
         return Version.VERSION + "-" + Version.BUILDDATE + "-" + Version.BUILDVERSION;
     }
 
+    /**
+     * 
+     * @param identifier
+     * @param languageCodeLength
+     * @return
+     * @should split identifier correctly
+     */
+    public static String[] splitIdentifierAndLanguageCode(String identifier, int languageCodeLength) {
+        if (identifier == null) {
+            throw new IllegalArgumentException("identifer may not be null");
+        }
+        if (languageCodeLength < 1) {
+            throw new IllegalArgumentException("splitIndex must be 1 or larger");
+        }
+
+        String[] ret = new String[2];
+
+        if (identifier.contains("_")) {
+            int splitIndex = identifier.length() - languageCodeLength;
+            ret[0] = identifier.substring(0, splitIndex - 1);
+            ret[1] = identifier.substring(splitIndex);
+        } else {
+            ret[0] = identifier;
+        }
+
+        return ret;
+    }
+
 }

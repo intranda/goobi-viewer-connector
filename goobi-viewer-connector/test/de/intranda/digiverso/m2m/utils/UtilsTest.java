@@ -19,7 +19,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class UtilsTest {
-    
+
     /**
      * @see Utils#getDocumentFromString(String,String)
      * @verifies build document correctly
@@ -27,5 +27,26 @@ public class UtilsTest {
     @Test
     public void getDocumentFromString_shouldBuildDocumentCorrectly() throws Exception {
         Assert.assertEquals("2016-05-23T10:40:00Z", Utils.convertDate(1464000000000L));
+    }
+
+    /**
+     * @see Utils#splitIdentifierAndLanguageCode(String,int)
+     * @verifies split identifier correctly
+     */
+    @Test
+    public void splitIdentifierAndLanguageCode_shouldSplitIdentifierCorrectly() throws Exception {
+        {
+            String[] result = Utils.splitIdentifierAndLanguageCode("id_eng", 3);
+            Assert.assertEquals(2, result.length);
+            Assert.assertEquals("id", result[0]);
+            Assert.assertEquals("eng", result[1]);
+        }
+        {
+            String[] result = Utils.splitIdentifierAndLanguageCode("id", 3);
+            Assert.assertEquals(2, result.length);
+            Assert.assertEquals("id", result[0]);
+            Assert.assertNull(result[1]);
+        }
+
     }
 }
