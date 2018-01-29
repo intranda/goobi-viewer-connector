@@ -75,7 +75,8 @@ public class XMLGeneration {
     private long expiration = 259200000L; // 3 days
 
     public XMLGeneration() {
-        solr = DataManager.getInstance().getSearchIndex();
+        solr = DataManager.getInstance()
+                .getSearchIndex();
     }
 
     /**
@@ -103,8 +104,12 @@ public class XMLGeneration {
     public Element getIdentifyXML() throws SolrServerException {
         // TODO: optional parameter: compression is not implemented
         // TODO: optional parameter: description is not implemented
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
-        Map<String, String> identifyTags = DataManager.getInstance().getConfiguration().getIdentifyTags();
+        Namespace xmlns = DataManager.getInstance()
+                .getConfiguration()
+                .getStandardNameSpace();
+        Map<String, String> identifyTags = DataManager.getInstance()
+                .getConfiguration()
+                .getIdentifyTags();
         Element identify = new Element("Identify", xmlns);
 
         Element repositoryName = new Element("repositoryName", xmlns);
@@ -155,7 +160,9 @@ public class XMLGeneration {
             return new ErrorCode().getNoRecordsMatch();
         }
 
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
+        Namespace xmlns = DataManager.getInstance()
+                .getConfiguration()
+                .getStandardNameSpace();
         Element xmlListIdentifiers = new Element("ListIdentifiers", xmlns);
         long totalHits = listIdentifiers.getNumFound();
         for (int i = 0; i < listIdentifiers.size(); i++) {
@@ -184,7 +191,9 @@ public class XMLGeneration {
      */
     public Element createListRecordsDC(RequestHandler handler, int firstRow, int numRows) throws SolrServerException {
         SolrDocumentList records = solr.getListRecords(filterDatestampFromRequest(handler), firstRow, numRows, false,
-                getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes()));
+                getAdditionalDocstructsQuerySuffix(DataManager.getInstance()
+                        .getConfiguration()
+                        .getAdditionalDocstructTypes()));
         if (records.isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
@@ -202,7 +211,9 @@ public class XMLGeneration {
      */
     public Element createListRecordsESE(RequestHandler handler, int firstRow, int numRows) throws SolrServerException {
         SolrDocumentList records = solr.getListRecords(filterDatestampFromRequest(handler), firstRow, numRows, false,
-                getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes()));
+                getAdditionalDocstructsQuerySuffix(DataManager.getInstance()
+                        .getConfiguration()
+                        .getAdditionalDocstructTypes()));
         if (records.isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
@@ -218,18 +229,24 @@ public class XMLGeneration {
      */
     public Element createListSets(Locale locale) throws SolrServerException {
         // Add all values sets (a set for each existing field value)
-        List<Set> allValuesSetConfigurations = DataManager.getInstance().getConfiguration().getAllValuesSets();
+        List<Set> allValuesSetConfigurations = DataManager.getInstance()
+                .getConfiguration()
+                .getAllValuesSets();
         if (allValuesSetConfigurations != null && !allValuesSetConfigurations.isEmpty()) {
             for (Set set : allValuesSetConfigurations) {
-                set.getValues().addAll(solr.getSets(set.getSetName()));
+                set.getValues()
+                        .addAll(solr.getSets(set.getSetName()));
             }
         }
 
         boolean empty = true;
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
+        Namespace xmlns = DataManager.getInstance()
+                .getConfiguration()
+                .getStandardNameSpace();
         Element listSets = new Element("ListSets", xmlns);
         for (Set set : allValuesSetConfigurations) {
-            if (set.getValues().isEmpty()) {
+            if (set.getValues()
+                    .isEmpty()) {
                 continue;
             }
             for (String value : set.getValues()) {
@@ -250,7 +267,9 @@ public class XMLGeneration {
                 empty = false;
             }
         }
-        List<Set> additionalSets = DataManager.getInstance().getConfiguration().getAdditionalSets();
+        List<Set> additionalSets = DataManager.getInstance()
+                .getConfiguration()
+                .getAdditionalSets();
         if (additionalSets != null && !additionalSets.isEmpty()) {
             for (Set additionalSet : additionalSets) {
                 Element set = new Element("set", xmlns);
@@ -278,14 +297,18 @@ public class XMLGeneration {
      * @return
      */
     public Element createMetadataFormats() {
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
+        Namespace xmlns = DataManager.getInstance()
+                .getConfiguration()
+                .getStandardNameSpace();
         if (Metadata.values().length == 0) {
             return new ErrorCode().getNoMetadataFormats();
         }
         Element listMetadataFormats = new Element("ListMetadataFormats", xmlns);
         for (Metadata m : Metadata.values()) {
             // logger.trace("{}: {}", m.getMetadataPrefix(), DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(m.name()));
-            if (m.isOaiSet() && DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(m.name())) {
+            if (m.isOaiSet() && DataManager.getInstance()
+                    .getConfiguration()
+                    .isMetadataFormatEnabled(m.name())) {
                 Element metadataFormat = new Element("metadataFormat", xmlns);
                 Element metadataPrefix = new Element("metadataPrefix", xmlns);
                 metadataPrefix.setText(m.getMetadataPrefix());
@@ -322,18 +345,24 @@ public class XMLGeneration {
      * @throws SolrServerException
      */
     private Element getHeader(SolrDocument doc, SolrDocument topstructDoc, RequestHandler handler) throws SolrServerException {
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
+        Namespace xmlns = DataManager.getInstance()
+                .getConfiguration()
+                .getStandardNameSpace();
         Element header = new Element("header", xmlns);
         // identifier
         if (doc.getFieldValue(SolrConstants.URN) != null && ((String) doc.getFieldValue(SolrConstants.URN)).length() > 0) {
             Element urn_identifier = new Element("identifier", xmlns);
-            urn_identifier.setText(DataManager.getInstance().getConfiguration().getOaiIdentifier().get("repositoryIdentifier") + (String) doc
-                    .getFieldValue(SolrConstants.URN));
+            urn_identifier.setText(DataManager.getInstance()
+                    .getConfiguration()
+                    .getOaiIdentifier()
+                    .get("repositoryIdentifier") + (String) doc.getFieldValue(SolrConstants.URN));
             header.addContent(urn_identifier);
         } else {
             Element identifier = new Element("identifier", xmlns);
-            identifier.setText(DataManager.getInstance().getConfiguration().getOaiIdentifier().get("repositoryIdentifier") + (String) doc
-                    .getFieldValue(SolrConstants.PI));
+            identifier.setText(DataManager.getInstance()
+                    .getConfiguration()
+                    .getOaiIdentifier()
+                    .get("repositoryIdentifier") + (String) doc.getFieldValue(SolrConstants.PI));
             header.addContent(identifier);
         }
         // datestamp
@@ -346,8 +375,10 @@ public class XMLGeneration {
         }
         header.addContent(datestamp);
         // setSpec
-        List<String> setSpecFields = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix()
-                .name());
+        List<String> setSpecFields = DataManager.getInstance()
+                .getConfiguration()
+                .getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix()
+                        .name());
         if (!setSpecFields.isEmpty()) {
             for (String setSpecField : setSpecFields) {
                 if (doc.containsKey(setSpecField)) {
@@ -384,14 +415,16 @@ public class XMLGeneration {
      */
     public Element handleToken(String resumptionToken) {
         logger.debug("Loading resumption token {}", resumptionToken);
-        File f = new File(DataManager.getInstance().getConfiguration().getResumptionTokenFolder(), resumptionToken);
+        File f = new File(DataManager.getInstance()
+                .getConfiguration()
+                .getResumptionTokenFolder(), resumptionToken);
         if (!f.exists()) {
             logger.warn("Requested resumption token not found: {}", f.getName());
             return new ErrorCode().getBadResumptionToken();
         }
 
-        try (FileInputStream fis = new FileInputStream(f); InputStreamReader isr = new InputStreamReader(fis); BufferedReader infile =
-                new BufferedReader(isr);) {
+        try (FileInputStream fis = new FileInputStream(f); InputStreamReader isr = new InputStreamReader(fis);
+                BufferedReader infile = new BufferedReader(isr);) {
             XStream xStream = new XStream(new DomDriver());
             xStream.processAnnotations(ResumptionToken.class);
             ResumptionToken token = (ResumptionToken) xStream.fromXML(infile);
@@ -403,11 +436,15 @@ public class XMLGeneration {
             long totalHits = 0;
 
             switch (oldHandler.getMetadataPrefix()) {
-                // Query the intranda viewer for the total hits number
+                // Query the Goobi viewer for the total hits number
                 case iv_crowdsourcing:
                 case iv_overviewpage:
-                    String url = DataManager.getInstance().getConfiguration().getHarvestUrl() + "?action=getlist_" + oldHandler.getMetadataPrefix()
-                            .name().substring(3);
+                    String url = DataManager.getInstance()
+                            .getConfiguration()
+                            .getHarvestUrl() + "?action=getlist_"
+                            + oldHandler.getMetadataPrefix()
+                                    .name()
+                                    .substring(3);
                     String rawJSON = Utils.getWebContent(url);
                     if (StringUtils.isNotEmpty(rawJSON)) {
                         try {
@@ -422,12 +459,22 @@ public class XMLGeneration {
                 case epicur:
                     // Hit count may differ for epicur
                     urnOnly = true;
-                    querySuffix += getUrnPrefixBlacklistSuffix(DataManager.getInstance().getConfiguration().getUrnPrefixBlacklist());
+                    querySuffix += getUrnPrefixBlacklistSuffix(DataManager.getInstance()
+                            .getConfiguration()
+                            .getUrnPrefixBlacklist());
                 case oai_dc:
                 case ese:
-                    if (!Verb.ListIdentifiers.equals(token.getHandler().getVerb())) {
-                        querySuffix += getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes());
+                    if (!Verb.ListIdentifiers.equals(token.getHandler()
+                            .getVerb())) {
+                        querySuffix += getAdditionalDocstructsQuerySuffix(DataManager.getInstance()
+                                .getConfiguration()
+                                .getAdditionalDocstructTypes());
                     }
+                    // Query Solr index for the total hits number
+                    totalHits = solr.getTotalHitNumber(params, urnOnly, querySuffix);
+                    break;
+                case tei:
+                case cmdi:
                     // Query Solr index for the total hits number
                     totalHits = solr.getTotalHitNumber(params, urnOnly, querySuffix);
                     break;
@@ -440,11 +487,19 @@ public class XMLGeneration {
                 logger.warn("Hits size in the token ({}) does not equal the reported total hits number ({}).", token.getHits(), totalHits);
                 return new ErrorCode().getBadResumptionToken();
             }
-            int hitsPerToken = DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(oldHandler.getMetadataPrefix().name());
-            if (token.getHandler().getVerb().equals(Verb.ListIdentifiers)) {
+            int hitsPerToken = DataManager.getInstance()
+                    .getConfiguration()
+                    .getHitsPerTokenForMetadataFormat(oldHandler.getMetadataPrefix()
+                            .name());
+            if (token.getHandler()
+                    .getVerb()
+                    .equals(Verb.ListIdentifiers)) {
                 return createListIdentifiers(oldHandler, token.getCursor(), hitsPerToken);
-            } else if (token.getHandler().getVerb().equals(Verb.ListRecords)) {
-                Metadata md = token.getHandler().getMetadataPrefix();
+            } else if (token.getHandler()
+                    .getVerb()
+                    .equals(Verb.ListRecords)) {
+                Metadata md = token.getHandler()
+                        .getMetadataPrefix();
                 switch (md) {
                     case oai_dc:
                         return createListRecordsDC(token.getHandler(), token.getCursor(), hitsPerToken);
@@ -461,6 +516,9 @@ public class XMLGeneration {
                     case iv_overviewpage:
                     case iv_crowdsourcing:
                         return createListRecordsIntrandaViewerUpdates(token.getHandler(), token.getCursor(), hitsPerToken, md);
+                    case tei:
+                    case cmdi:
+                        return createListRecordsTeiCmdi(token.getHandler(), token.getCursor(), hitsPerToken);
                     default:
                         return new ErrorCode().getCannotDisseminateFormat();
                 }
@@ -473,7 +531,9 @@ public class XMLGeneration {
     }
 
     public void removeExpiredTokens() {
-        File tokenFolder = new File(DataManager.getInstance().getConfiguration().getResumptionTokenFolder());
+        File tokenFolder = new File(DataManager.getInstance()
+                .getConfiguration()
+                .getResumptionTokenFolder());
         if (tokenFolder.isDirectory()) {
             int count = 0;
             XStream xStream = new XStream(new DomDriver());
@@ -502,7 +562,9 @@ public class XMLGeneration {
 
     // save token in folder
     private static void saveToken(ResumptionToken token) throws IOException {
-        File f = new File(DataManager.getInstance().getConfiguration().getResumptionTokenFolder(), token.getTokenName());
+        File f = new File(DataManager.getInstance()
+                .getConfiguration()
+                .getResumptionTokenFolder(), token.getTokenName());
         XStream xStream = new XStream(new DomDriver());
         try (BufferedWriter outfile = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), "UTF8"))) {
             xStream.toXML(token, outfile);
@@ -522,13 +584,19 @@ public class XMLGeneration {
         String from = null;
         if (request.getFrom() != null) {
             from = request.getFrom();
-            from = from.replace("-", "").replace("T", "").replace(":", "").replace("Z", "");
+            from = from.replace("-", "")
+                    .replace("T", "")
+                    .replace(":", "")
+                    .replace("Z", "");
             datestamp.put("from", from);
         }
         String until = null;
         if (request.getUntil() != null) {
             until = request.getUntil();
-            until = until.replace("-", "").replace("T", "").replace(":", "").replace("Z", "");
+            until = until.replace("-", "")
+                    .replace("T", "")
+                    .replace(":", "")
+                    .replace("Z", "");
             datestamp.put("until", until);
         }
 
@@ -539,7 +607,8 @@ public class XMLGeneration {
         }
 
         if (request.getMetadataPrefix() != null) {
-            datestamp.put("metadataPrefix", request.getMetadataPrefix().getMetadataPrefix());
+            datestamp.put("metadataPrefix", request.getMetadataPrefix()
+                    .getMetadataPrefix());
         }
 
         return datestamp;
@@ -578,7 +647,8 @@ public class XMLGeneration {
         try {
             SolrDocumentList hits = solr.search(SolrConstants.IDDOC + ":" + iddocParent);
             if (hits != null && !hits.isEmpty()) {
-                return (String) hits.get(0).getFirstValue(SolrConstants.TITLE);
+                return (String) hits.get(0)
+                        .getFirstValue(SolrConstants.TITLE);
             }
         } catch (SolrServerException e) {
             logger.error(e.getMessage(), e);
@@ -596,7 +666,8 @@ public class XMLGeneration {
      */
     private static Element generateDcSource(SolrDocument doc, SolrDocument topstructDoc, SolrDocument anchorDoc, Namespace namespace) {
         if (topstructDoc == null) {
-            logger.debug(doc.getFieldValueMap().toString());
+            logger.debug(doc.getFieldValueMap()
+                    .toString());
             throw new IllegalArgumentException("topstructDoc may not be null");
         }
 
@@ -665,15 +736,25 @@ public class XMLGeneration {
         }
 
         StringBuilder sbSourceString = new StringBuilder();
-        sbSourceString.append(sbSourceCreators.toString()).append(": ").append(sbSourceTitle.toString());
+        sbSourceString.append(sbSourceCreators.toString())
+                .append(": ")
+                .append(sbSourceTitle.toString());
 
         if (doc == topstructDoc || doc == anchorDoc) {
             // Only top level docs should display publisher information
-            sbSourceString.append(", ").append(sourcePlacepublish).append(": ").append(sourcePublisher).append(' ').append(sourceYearpublish);
+            sbSourceString.append(", ")
+                    .append(sourcePlacepublish)
+                    .append(": ")
+                    .append(sourcePublisher)
+                    .append(' ')
+                    .append(sourceYearpublish);
             // sbSourceString.append('.');
         } else if (orderLabelFirst != null && orderLabelLast != null && !"-".equals(orderLabelFirst.trim()) && !"-".equals(orderLabelLast.trim())) {
             // Add page range for lower level docstructs, if available
-            sbSourceString.append(", P ").append(orderLabelFirst).append(" - ").append(orderLabelLast);
+            sbSourceString.append(", P ")
+                    .append(orderLabelFirst)
+                    .append(" - ")
+                    .append(orderLabelLast);
         }
 
         sbSourceString.append('.');
@@ -696,7 +777,9 @@ public class XMLGeneration {
      */
     private Element generateDC(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler, String recordType)
             throws SolrServerException {
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
+        Namespace xmlns = DataManager.getInstance()
+                .getConfiguration()
+                .getStandardNameSpace();
         Namespace nsOaiDoc = Namespace.getNamespace(Metadata.oai_dc.getMetadataPrefix(), Metadata.oai_dc.getMetadataNamespace());
         Element xmlListRecords = new Element(recordType, xmlns);
 
@@ -747,8 +830,9 @@ public class XMLGeneration {
             oai_dc.setAttribute("schemaLocation", "http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd", xsi);
 
             // Configured fields
-            List<FieldConfiguration> fieldConfigurations = DataManager.getInstance().getConfiguration().getFieldForMetadataFormat(Metadata.oai_dc
-                    .name());
+            List<FieldConfiguration> fieldConfigurations = DataManager.getInstance()
+                    .getConfiguration()
+                    .getFieldForMetadataFormat(Metadata.oai_dc.name());
             if (fieldConfigurations != null && !fieldConfigurations.isEmpty()) {
                 for (FieldConfiguration fieldConfiguration : fieldConfigurations) {
                     boolean added = false;
@@ -760,14 +844,17 @@ public class XMLGeneration {
                             switch (fieldConfiguration.getFieldName()) {
                                 case "identifier":
                                     if (StringUtils.isNotEmpty((String) doc.getFieldValue(SolrConstants.URN))) {
-                                        singleValue = DataManager.getInstance().getConfiguration().getUrnResolverUrl() + (String) doc.getFieldValue(
-                                                SolrConstants.URN);
+                                        singleValue = DataManager.getInstance()
+                                                .getConfiguration()
+                                                .getUrnResolverUrl() + (String) doc.getFieldValue(SolrConstants.URN);
                                     } else if (StringUtils.isNotEmpty((String) doc.getFieldValue(SolrConstants.PI))) {
-                                        singleValue = DataManager.getInstance().getConfiguration().getPiResolverUrl() + (String) doc.getFieldValue(
-                                                SolrConstants.PI);
+                                        singleValue = DataManager.getInstance()
+                                                .getConfiguration()
+                                                .getPiResolverUrl() + (String) doc.getFieldValue(SolrConstants.PI);
                                     } else if (StringUtils.isNotEmpty((String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))) {
-                                        singleValue = DataManager.getInstance().getConfiguration().getPiResolverUrl() + (String) doc.getFieldValue(
-                                                SolrConstants.PI_TOPSTRUCT);
+                                        singleValue = DataManager.getInstance()
+                                                .getConfiguration()
+                                                .getPiResolverUrl() + (String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT);
                                     }
                                     break;
                                 case "rights":
@@ -797,18 +884,23 @@ public class XMLGeneration {
                                     if (StringUtils.isNotEmpty(String.valueOf(fieldValue))) {
                                         StringBuilder sbValue = new StringBuilder();
                                         if (fieldConfiguration.getPrefix() != null) {
-                                            sbValue.append(MessageResourceBundle.getTranslation(fieldConfiguration.getPrefix(), DataManager
-                                                    .getInstance().getConfiguration().getDefaultLocale()));
+                                            sbValue.append(MessageResourceBundle.getTranslation(fieldConfiguration.getPrefix(),
+                                                    DataManager.getInstance()
+                                                            .getConfiguration()
+                                                            .getDefaultLocale()));
                                         }
                                         if (fieldConfiguration.isTranslate()) {
                                             sbValue.append(MessageResourceBundle.getTranslation(String.valueOf(fieldValue), DataManager.getInstance()
-                                                    .getConfiguration().getDefaultLocale()));
+                                                    .getConfiguration()
+                                                    .getDefaultLocale()));
                                         } else {
                                             sbValue.append(String.valueOf(fieldValue));
                                         }
                                         if (fieldConfiguration.getSuffix() != null) {
-                                            sbValue.append(MessageResourceBundle.getTranslation(fieldConfiguration.getSuffix(), DataManager
-                                                    .getInstance().getConfiguration().getDefaultLocale()));
+                                            sbValue.append(MessageResourceBundle.getTranslation(fieldConfiguration.getSuffix(),
+                                                    DataManager.getInstance()
+                                                            .getConfiguration()
+                                                            .getDefaultLocale()));
                                         }
                                         eleField.setText(sbValue.toString());
                                         oai_dc.addContent(eleField);
@@ -818,11 +910,15 @@ public class XMLGeneration {
 
                             } else {
                                 Element eleField = new Element(fieldConfiguration.getFieldName(), nsDc);
-                                singleValue = String.valueOf(doc.getFieldValues(fieldConfiguration.getValueSource()).iterator().next());
+                                singleValue = String.valueOf(doc.getFieldValues(fieldConfiguration.getValueSource())
+                                        .iterator()
+                                        .next());
                                 // If no value found use the topstruct's value (if so configured)
-                                if (fieldConfiguration.isUseTopstructValueIfNoneFound() && singleValue == null && topstructDoc != null && topstructDoc
-                                        .getFieldValues(fieldConfiguration.getFieldName()) != null) {
-                                    singleValue = String.valueOf(topstructDoc.getFieldValues(fieldConfiguration.getFieldName()).iterator().next());
+                                if (fieldConfiguration.isUseTopstructValueIfNoneFound() && singleValue == null && topstructDoc != null
+                                        && topstructDoc.getFieldValues(fieldConfiguration.getFieldName()) != null) {
+                                    singleValue = String.valueOf(topstructDoc.getFieldValues(fieldConfiguration.getFieldName())
+                                            .iterator()
+                                            .next());
                                 }
                             }
                         }
@@ -847,18 +943,21 @@ public class XMLGeneration {
                         if (singleValue != null) {
                             Element eleField = new Element(fieldConfiguration.getFieldName(), nsDc);
                             if (fieldConfiguration.isTranslate()) {
-                                eleField.setText(MessageResourceBundle.getTranslation(singleValue, DataManager.getInstance().getConfiguration()
+                                eleField.setText(MessageResourceBundle.getTranslation(singleValue, DataManager.getInstance()
+                                        .getConfiguration()
                                         .getDefaultLocale()));
                             } else {
                                 StringBuilder sbValue = new StringBuilder();
                                 if (fieldConfiguration.getPrefix() != null) {
                                     sbValue.append(MessageResourceBundle.getTranslation(fieldConfiguration.getPrefix(), DataManager.getInstance()
-                                            .getConfiguration().getDefaultLocale()));
+                                            .getConfiguration()
+                                            .getDefaultLocale()));
                                 }
                                 sbValue.append(singleValue);
                                 if (fieldConfiguration.getSuffix() != null) {
                                     sbValue.append(MessageResourceBundle.getTranslation(fieldConfiguration.getSuffix(), DataManager.getInstance()
-                                            .getConfiguration().getDefaultLocale()));
+                                            .getConfiguration()
+                                            .getDefaultLocale()));
                                 }
                                 eleField.setText(sbValue.toString());
                             }
@@ -919,7 +1018,9 @@ public class XMLGeneration {
      */
     private Element generateESE(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler, String recordType)
             throws SolrServerException {
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
+        Namespace xmlns = DataManager.getInstance()
+                .getConfiguration()
+                .getStandardNameSpace();
         // Namespace nsOaiDc = Namespace.getNamespace(Metadata.oai_dc.getMetadataPrefix(), Metadata.oai_dc.getMetadataNamespace());
         Namespace nsDc = Namespace.getNamespace(Metadata.dc.getMetadataPrefix(), Metadata.dc.getMetadataNamespace());
         Namespace nsDcTerms = Namespace.getNamespace("dcterms", "http://purl.org/dc/terms/");
@@ -983,17 +1084,23 @@ public class XMLGeneration {
             if (StringUtils.isNotEmpty((String) doc.getFieldValue(SolrConstants.URN))) {
                 Element eleDcIdentifier = new Element("identifier", nsDc);
                 urn = (String) doc.getFieldValue(SolrConstants.URN);
-                eleDcIdentifier.setText(DataManager.getInstance().getConfiguration().getUrnResolverUrl() + urn);
+                eleDcIdentifier.setText(DataManager.getInstance()
+                        .getConfiguration()
+                        .getUrnResolverUrl() + urn);
                 eleEuropeanaRecord.addContent(eleDcIdentifier);
             } else if (StringUtils.isNotEmpty((String) doc.getFieldValue(SolrConstants.PI))) {
                 Element eleDcIdentifier = new Element("identifier", nsDc);
                 identifier = (String) doc.getFieldValue(SolrConstants.PI);
-                eleDcIdentifier.setText(DataManager.getInstance().getConfiguration().getPiResolverUrl() + format(identifier));
+                eleDcIdentifier.setText(DataManager.getInstance()
+                        .getConfiguration()
+                        .getPiResolverUrl() + format(identifier));
                 eleEuropeanaRecord.addContent(eleDcIdentifier);
             } else if (StringUtils.isNotEmpty((String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))) {
                 Element eleDcIdentifier = new Element("identifier", nsDc);
                 identifier = (String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT);
-                eleDcIdentifier.setText(DataManager.getInstance().getConfiguration().getPiResolverUrl() + format(identifier));
+                eleDcIdentifier.setText(DataManager.getInstance()
+                        .getConfiguration()
+                        .getPiResolverUrl() + format(identifier));
                 eleEuropeanaRecord.addContent(eleDcIdentifier);
             }
             // <dc:language>
@@ -1001,7 +1108,9 @@ public class XMLGeneration {
                 Element eleDcLanguage = new Element("language", nsDc);
                 String language = "";
                 if (doc.getFieldValues("MD_LANGUAGE") != null) {
-                    language = (String) doc.getFieldValues("MD_LANGUAGE").iterator().next();
+                    language = (String) doc.getFieldValues("MD_LANGUAGE")
+                            .iterator()
+                            .next();
                     eleDcLanguage.setText(format(language));
                     eleEuropeanaRecord.addContent(eleDcLanguage);
                 }
@@ -1015,7 +1124,9 @@ public class XMLGeneration {
             {
                 Element dc_title = new Element("title", nsDc);
                 if (doc.getFieldValues(SolrConstants.TITLE) != null) {
-                    title = (String) doc.getFieldValues(SolrConstants.TITLE).iterator().next();
+                    title = (String) doc.getFieldValues(SolrConstants.TITLE)
+                            .iterator()
+                            .next();
                     // logger.debug("MD_TITLE : " + title);
                 }
                 if (isWork && doc.getFieldValue(SolrConstants.IDDOC_PARENT) != null) {
@@ -1032,10 +1143,14 @@ public class XMLGeneration {
             {
                 String value = null;
                 if (doc.getFieldValues("MD_INFORMATION") != null) {
-                    value = (String) doc.getFieldValues("MD_INFORMATION").iterator().next();
+                    value = (String) doc.getFieldValues("MD_INFORMATION")
+                            .iterator()
+                            .next();
 
                 } else if (doc.getFieldValues("MD_DATECREATED") != null) {
-                    value = (String) doc.getFieldValues("MD_DATECREATED").iterator().next();
+                    value = (String) doc.getFieldValues("MD_DATECREATED")
+                            .iterator()
+                            .next();
 
                 }
                 if (value != null) {
@@ -1047,13 +1162,21 @@ public class XMLGeneration {
             // <dc:date>
             {
                 if (doc.getFieldValues("MD_YEARPUBLISH") != null) {
-                    yearpublish = (String) doc.getFieldValues("MD_YEARPUBLISH").iterator().next();
+                    yearpublish = (String) doc.getFieldValues("MD_YEARPUBLISH")
+                            .iterator()
+                            .next();
                 } else if (doc.getFieldValues("MD_DATECREATED") != null) {
-                    yearpublish = (String) doc.getFieldValues("MD_DATECREATED").iterator().next();
+                    yearpublish = (String) doc.getFieldValues("MD_DATECREATED")
+                            .iterator()
+                            .next();
                 } else if (topstructDoc != null && topstructDoc.getFieldValues("MD_YEARPUBLISH") != null) {
-                    yearpublish = (String) topstructDoc.getFieldValues("MD_YEARPUBLISH").iterator().next();
+                    yearpublish = (String) topstructDoc.getFieldValues("MD_YEARPUBLISH")
+                            .iterator()
+                            .next();
                 } else if (topstructDoc != null && topstructDoc.getFieldValues("MD_DATECREATED") != null) {
-                    yearpublish = (String) topstructDoc.getFieldValues("MD_DATECREATED").iterator().next();
+                    yearpublish = (String) topstructDoc.getFieldValues("MD_DATECREATED")
+                            .iterator()
+                            .next();
                 }
 
                 if (yearpublish != null) {
@@ -1084,7 +1207,9 @@ public class XMLGeneration {
             // <dc:created>
             {
                 if (doc.getFieldValues("MD_DATECREATED") != null) {
-                    String created = (String) doc.getFieldValues("MD_DATECREATED").iterator().next();
+                    String created = (String) doc.getFieldValues("MD_DATECREATED")
+                            .iterator()
+                            .next();
                     Element eleDcCreated = new Element("created", nsDc);
                     eleDcCreated.setText(format(created));
                     eleEuropeanaRecord.addContent(eleDcCreated);
@@ -1093,7 +1218,9 @@ public class XMLGeneration {
             // <dc:issued>
             {
                 if (doc.getFieldValues("MD_DATEISSUED") != null) {
-                    String created = (String) doc.getFieldValues("MD_DATEISSUED").iterator().next();
+                    String created = (String) doc.getFieldValues("MD_DATEISSUED")
+                            .iterator()
+                            .next();
                     Element eleDcCreated = new Element("created", nsDc);
                     eleDcCreated.setText(format(created));
                     eleEuropeanaRecord.addContent(eleDcCreated);
@@ -1112,9 +1239,13 @@ public class XMLGeneration {
 
             // <dc:publisher>
             if (doc.getFieldValues("MD_PUBLISHER") != null) {
-                publisher = (String) doc.getFieldValues("MD_PUBLISHER").iterator().next();
+                publisher = (String) doc.getFieldValues("MD_PUBLISHER")
+                        .iterator()
+                        .next();
             } else if (topstructDoc != null && topstructDoc.getFieldValues("MD_PUBLISHER") != null) {
-                publisher = (String) topstructDoc.getFieldValues("MD_PUBLISHER").iterator().next();
+                publisher = (String) topstructDoc.getFieldValues("MD_PUBLISHER")
+                        .iterator()
+                        .next();
             }
             if (publisher != null) {
                 Element dc_publisher = new Element("publisher", nsDc);
@@ -1123,9 +1254,13 @@ public class XMLGeneration {
             }
 
             if (doc.getFieldValues("MD_PLACEPUBLISH") != null) {
-                placepublish = (String) doc.getFieldValues("MD_PLACEPUBLISH").iterator().next();
+                placepublish = (String) doc.getFieldValues("MD_PLACEPUBLISH")
+                        .iterator()
+                        .next();
             } else if (topstructDoc != null && topstructDoc.getFieldValues("MD_PLACEPUBLISH") != null) {
-                placepublish = (String) topstructDoc.getFieldValues("MD_PLACEPUBLISH").iterator().next();
+                placepublish = (String) topstructDoc.getFieldValues("MD_PLACEPUBLISH")
+                        .iterator()
+                        .next();
             }
 
             // <dc:type>
@@ -1160,10 +1295,16 @@ public class XMLGeneration {
             // MANDATORY: <europeana:provider>
             {
                 Element eleEuropeanaProvider = new Element("provider", nsEuropeana);
-                String value = DataManager.getInstance().getConfiguration().getEseDefaultProvider();
-                String field = DataManager.getInstance().getConfiguration().getEseProviderField();
+                String value = DataManager.getInstance()
+                        .getConfiguration()
+                        .getEseDefaultProvider();
+                String field = DataManager.getInstance()
+                        .getConfiguration()
+                        .getEseProviderField();
                 if (doc.getFieldValues(field) != null) {
-                    value = (String) doc.getFieldValues(field).iterator().next();
+                    value = (String) doc.getFieldValues(field)
+                            .iterator()
+                            .next();
                 }
                 eleEuropeanaProvider.setText(format(value));
                 eleEuropeanaRecord.addContent(eleEuropeanaProvider);
@@ -1174,7 +1315,9 @@ public class XMLGeneration {
                 String europeanaType = "TEXT";
                 if (type != null) {
                     // Retrieve coded ESE type, if available
-                    Map<String, String> eseTypes = DataManager.getInstance().getConfiguration().getEseTypes();
+                    Map<String, String> eseTypes = DataManager.getInstance()
+                            .getConfiguration()
+                            .getEseTypes();
                     if (eseTypes.get(type) != null) {
                         europeanaType = eseTypes.get(type);
                     }
@@ -1185,10 +1328,16 @@ public class XMLGeneration {
             // MANDATORY: <europeana:rights>
             {
                 Element eleEuropeanaRights = new Element("rights", nsEuropeana);
-                String value = DataManager.getInstance().getConfiguration().getEseDefaultRightsUrl();
-                String field = DataManager.getInstance().getConfiguration().getEseRightsField();
+                String value = DataManager.getInstance()
+                        .getConfiguration()
+                        .getEseDefaultRightsUrl();
+                String field = DataManager.getInstance()
+                        .getConfiguration()
+                        .getEseRightsField();
                 if (doc.getFieldValues(field) != null) {
-                    value = (String) doc.getFieldValues(field).iterator().next();
+                    value = (String) doc.getFieldValues(field)
+                            .iterator()
+                            .next();
                 }
                 eleEuropeanaRights.setText(value);
                 eleEuropeanaRecord.addContent(eleEuropeanaRights);
@@ -1196,10 +1345,16 @@ public class XMLGeneration {
             // MANDATORY: <europeana:dataProvider>
             {
                 Element eleEuropeanaDataProvider = new Element("dataProvider", nsEuropeana);
-                String value = DataManager.getInstance().getConfiguration().getEseDefaultProvider();
-                String field = DataManager.getInstance().getConfiguration().getEseDataProviderField();
+                String value = DataManager.getInstance()
+                        .getConfiguration()
+                        .getEseDefaultProvider();
+                String field = DataManager.getInstance()
+                        .getConfiguration()
+                        .getEseDataProviderField();
                 if (doc.getFieldValues(field) != null) {
-                    value = (String) doc.getFieldValues(field).iterator().next();
+                    value = (String) doc.getFieldValues(field)
+                            .iterator()
+                            .next();
                 }
                 eleEuropeanaDataProvider.setText(format(value));
                 eleEuropeanaRecord.addContent(eleEuropeanaDataProvider);
@@ -1209,9 +1364,13 @@ public class XMLGeneration {
                 Element eleEuropeanaIsShownAt = new Element("isShownAt", nsEuropeana);
                 String isShownAt = "";
                 if (urn != null) {
-                    isShownAt = DataManager.getInstance().getConfiguration().getUrnResolverUrl() + urn;
+                    isShownAt = DataManager.getInstance()
+                            .getConfiguration()
+                            .getUrnResolverUrl() + urn;
                 } else if (identifier != null) {
-                    isShownAt = DataManager.getInstance().getConfiguration().getPiResolverUrl() + identifier;
+                    isShownAt = DataManager.getInstance()
+                            .getConfiguration()
+                            .getPiResolverUrl() + identifier;
                 }
                 eleEuropeanaIsShownAt.setText(isShownAt);
                 eleEuropeanaRecord.addContent(eleEuropeanaIsShownAt);
@@ -1269,14 +1428,20 @@ public class XMLGeneration {
             return new ErrorCode().getBadArgument();
         }
         try {
-            StringBuilder sbUrlRoot = new StringBuilder(DataManager.getInstance().getConfiguration().getHarvestUrl()).append('?');
+            StringBuilder sbUrlRoot = new StringBuilder(DataManager.getInstance()
+                    .getConfiguration()
+                    .getHarvestUrl()).append('?');
             if (handler.getFrom() != null) {
-                sbUrlRoot.append("&from=").append(handler.getFrom());
+                sbUrlRoot.append("&from=")
+                        .append(handler.getFrom());
             }
             if (handler.getUntil() != null) {
-                sbUrlRoot.append("&until=").append(handler.getUntil());
+                sbUrlRoot.append("&until=")
+                        .append(handler.getUntil());
             }
-            sbUrlRoot.append("&identifier=").append(handler.getIdentifier()).append("&action=");
+            sbUrlRoot.append("&identifier=")
+                    .append(handler.getIdentifier())
+                    .append("&action=");
             String urlRoot = sbUrlRoot.toString();
             switch (metadataPrefix) {
                 case iv_overviewpage: {
@@ -1321,8 +1486,8 @@ public class XMLGeneration {
      * @throws SolrServerException
      */
     public Element createListRecordsMets(RequestHandler handler, int firstRow, int numRows) throws SolrServerException {
-        SolrDocumentList records = solr.getListRecords(filterDatestampFromRequest(handler), firstRow, numRows, false, SolrConstants.SOURCEDOCFORMAT
-                + ":METS");
+        SolrDocumentList records =
+                solr.getListRecords(filterDatestampFromRequest(handler), firstRow, numRows, false, SolrConstants.SOURCEDOCFORMAT + ":METS");
         if (records.isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
@@ -1350,7 +1515,10 @@ public class XMLGeneration {
     public Element createListRecordsIntrandaViewerUpdates(RequestHandler handler, int first, int pageSize, Metadata metadataPrefix)
             throws UnsupportedOperationException, IOException {
         StringBuilder sbUrl = new StringBuilder(100);
-        sbUrl.append(DataManager.getInstance().getConfiguration().getHarvestUrl()).append("?action=");
+        sbUrl.append(DataManager.getInstance()
+                .getConfiguration()
+                .getHarvestUrl())
+                .append("?action=");
         switch (metadataPrefix) {
             case iv_overviewpage:
                 sbUrl.append("getlist_overviewpage");
@@ -1362,12 +1530,17 @@ public class XMLGeneration {
                 return new ErrorCode().getBadArgument();
         }
         if (handler.getFrom() != null) {
-            sbUrl.append("&from=").append(handler.getFrom());
+            sbUrl.append("&from=")
+                    .append(handler.getFrom());
         }
         if (handler.getUntil() != null) {
-            sbUrl.append("&until=").append(handler.getUntil());
+            sbUrl.append("&until=")
+                    .append(handler.getUntil());
         }
-        sbUrl.append("&first=").append(first).append("&pageSize=").append(pageSize);
+        sbUrl.append("&first=")
+                .append(first)
+                .append("&pageSize=")
+                .append(pageSize);
 
         String rawJSON = Utils.getWebContent(sbUrl.toString());
         JSONArray jsonArray = null;
@@ -1408,7 +1581,9 @@ public class XMLGeneration {
      */
     private Element generateMets(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler, String recordType)
             throws JDOMException, IOException, SolrServerException {
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
+        Namespace xmlns = DataManager.getInstance()
+                .getConfiguration()
+                .getStandardNameSpace();
         Element xmlListRecords = new Element(recordType, xmlns);
 
         Namespace mets = Namespace.getNamespace(Metadata.mets.getMetadataPrefix(), Metadata.mets.getMetadataNamespace());
@@ -1421,8 +1596,10 @@ public class XMLGeneration {
             numRows = records.size();
         }
         for (SolrDocument doc : records) {
-            String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl()).append(doc.getFieldValue(
-                    SolrConstants.PI_TOPSTRUCT)).toString();
+            String url = new StringBuilder(DataManager.getInstance()
+                    .getConfiguration()
+                    .getDocumentResolverUrl()).append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))
+                            .toString();
             String xml = Utils.getWebContent(url);
             if (StringUtils.isEmpty(xml)) {
                 xmlListRecords.addContent(new ErrorCode().getCannotDisseminateFormat());
@@ -1483,23 +1660,29 @@ public class XMLGeneration {
         }
         logger.trace("generateIntrandaViewerUpdates: {}", metadataPrefix.getMetadataPrefix());
 
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
-        Namespace nsOverviewPage = Namespace.getNamespace(Metadata.iv_overviewpage.getMetadataPrefix(), Metadata.iv_overviewpage
-                .getMetadataNamespace());
-        Namespace nsCrowdsourcingUpdates = Namespace.getNamespace(Metadata.iv_crowdsourcing.getMetadataPrefix(), Metadata.iv_crowdsourcing
-                .getMetadataNamespace());
+        Namespace xmlns = DataManager.getInstance()
+                .getConfiguration()
+                .getStandardNameSpace();
+        Namespace nsOverviewPage =
+                Namespace.getNamespace(Metadata.iv_overviewpage.getMetadataPrefix(), Metadata.iv_overviewpage.getMetadataNamespace());
+        Namespace nsCrowdsourcingUpdates =
+                Namespace.getNamespace(Metadata.iv_crowdsourcing.getMetadataPrefix(), Metadata.iv_crowdsourcing.getMetadataNamespace());
         Element xmlListRecords = new Element(recordType, xmlns);
 
         int useNumRows = numRows;
         if (jsonArray.size() < useNumRows) {
             useNumRows = jsonArray.size();
         }
-        StringBuilder sbUrlRoot = new StringBuilder(DataManager.getInstance().getConfiguration().getHarvestUrl()).append('?');
+        StringBuilder sbUrlRoot = new StringBuilder(DataManager.getInstance()
+                .getConfiguration()
+                .getHarvestUrl()).append('?');
         if (handler.getFrom() != null) {
-            sbUrlRoot.append("&from=").append(handler.getFrom());
+            sbUrlRoot.append("&from=")
+                    .append(handler.getFrom());
         }
         if (handler.getUntil() != null) {
-            sbUrlRoot.append("&until=").append(handler.getUntil());
+            sbUrlRoot.append("&until=")
+                    .append(handler.getUntil());
         }
         sbUrlRoot.append("&identifier=");
         String urlRoot = sbUrlRoot.toString();
@@ -1540,7 +1723,9 @@ public class XMLGeneration {
                 // Add process ID, if available
                 String processId = null;
                 StringBuilder sb = new StringBuilder();
-                sb.append(SolrConstants.PI).append(':').append(identifier);
+                sb.append(SolrConstants.PI)
+                        .append(':')
+                        .append(identifier);
                 try {
                     SolrDocument doc = solr.getFirstDoc(sb.toString(), Collections.singletonList("MD_PROCESSID"));
                     if (doc != null) {
@@ -1598,18 +1783,24 @@ public class XMLGeneration {
      * @return
      */
     private static Element generateEpicurHeader(SolrDocument doc, long dateUpdated) {
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
+        Namespace xmlns = DataManager.getInstance()
+                .getConfiguration()
+                .getStandardNameSpace();
         Element header = new Element("header", xmlns);
         Element identifier = new Element("identifier", xmlns);
-        identifier.setText(DataManager.getInstance().getConfiguration().getOaiIdentifier().get("repositoryIdentifier") + (String) doc.getFieldValue(
-                "URN"));
+        identifier.setText(DataManager.getInstance()
+                .getConfiguration()
+                .getOaiIdentifier()
+                .get("repositoryIdentifier") + (String) doc.getFieldValue("URN"));
         header.addContent(identifier);
 
         Element datestamp = new Element("datestamp", xmlns);
         datestamp.setText(parseDate(dateUpdated));
         header.addContent(datestamp);
         // setSpec
-        List<String> setSpecFields = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.epicur.name());
+        List<String> setSpecFields = DataManager.getInstance()
+                .getConfiguration()
+                .getSetSpecFieldsForMetadataFormat(Metadata.epicur.name());
         if (!setSpecFields.isEmpty()) {
             for (String setSpecField : setSpecFields) {
                 if (doc.containsKey(setSpecField)) {
@@ -1638,18 +1829,25 @@ public class XMLGeneration {
      * @return
      */
     private static Element generateEpicurPageHeader(SolrDocument doc, String urn, long dateUpdated) {
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
+        Namespace xmlns = DataManager.getInstance()
+                .getConfiguration()
+                .getStandardNameSpace();
         Element header = new Element("header", xmlns);
 
         Element identifier = new Element("identifier", xmlns);
-        identifier.setText(DataManager.getInstance().getConfiguration().getOaiIdentifier().get("repositoryIdentifier") + urn);
+        identifier.setText(DataManager.getInstance()
+                .getConfiguration()
+                .getOaiIdentifier()
+                .get("repositoryIdentifier") + urn);
         header.addContent(identifier);
 
         Element datestamp = new Element("datestamp", xmlns);
         datestamp.setText(parseDate(dateUpdated));
         header.addContent(datestamp);
         // setSpec
-        List<String> setSpecFields = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.epicur.name());
+        List<String> setSpecFields = DataManager.getInstance()
+                .getConfiguration()
+                .getSetSpecFieldsForMetadataFormat(Metadata.epicur.name());
         if (!setSpecFields.isEmpty()) {
             for (String setSpecField : setSpecFields) {
                 if (doc.containsKey(setSpecField)) {
@@ -1681,10 +1879,15 @@ public class XMLGeneration {
      */
     public Element createListRecordsEpicur(RequestHandler handler, int firstRow, int numRows, String recordType) throws SolrServerException {
         logger.trace("createListRecordsEpicur");
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
+        Namespace xmlns = DataManager.getInstance()
+                .getConfiguration()
+                .getStandardNameSpace();
 
-        String urnPrefixBlacklistSuffix = getUrnPrefixBlacklistSuffix(DataManager.getInstance().getConfiguration().getUrnPrefixBlacklist());
-        String querySuffix = urnPrefixBlacklistSuffix + getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration()
+        String urnPrefixBlacklistSuffix = getUrnPrefixBlacklistSuffix(DataManager.getInstance()
+                .getConfiguration()
+                .getUrnPrefixBlacklist());
+        String querySuffix = urnPrefixBlacklistSuffix + getAdditionalDocstructsQuerySuffix(DataManager.getInstance()
+                .getConfiguration()
                 .getAdditionalDocstructTypes());
         SolrDocumentList records = solr.getListRecords(filterDatestampFromRequest(handler), firstRow, numRows, true, querySuffix);
         if (records.isEmpty()) {
@@ -1704,22 +1907,28 @@ public class XMLGeneration {
                 record.addContent(header);
                 Element metadata = new Element("metadata", xmlns);
                 record.addContent(metadata);
-                metadata.addContent(generateEpicurElement((String) doc.getFieldValue(SolrConstants.URN), (Long) doc.getFieldValue(
-                        SolrConstants.DATECREATED), dateUpdated, dateDeleted));
+                metadata.addContent(generateEpicurElement((String) doc.getFieldValue(SolrConstants.URN),
+                        (Long) doc.getFieldValue(SolrConstants.DATECREATED), dateUpdated, dateDeleted));
                 xmlListRecords.addContent(record);
                 // logger.debug("record: " + new XMLOutputter().outputString(record));
             }
 
             if (dateDeleted == null) {
                 // Page elements for existing record
-                StringBuilder sbPageQuery = new StringBuilder(SolrConstants.PI_TOPSTRUCT).append(':').append(doc.getFieldValue(
-                        SolrConstants.PI_TOPSTRUCT)).append(" AND ").append(SolrConstants.DOCTYPE).append(":PAGE").append(" AND ").append(
-                                SolrConstants.IMAGEURN).append(":*");
+                StringBuilder sbPageQuery = new StringBuilder(SolrConstants.PI_TOPSTRUCT).append(':')
+                        .append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))
+                        .append(" AND ")
+                        .append(SolrConstants.DOCTYPE)
+                        .append(":PAGE")
+                        .append(" AND ")
+                        .append(SolrConstants.IMAGEURN)
+                        .append(":*");
                 sbPageQuery.append(urnPrefixBlacklistSuffix);
                 // logger.trace("pageQuery: {}", sbPageQuery.toString());
                 QueryResponse qr = solr.search(sbPageQuery.toString(), 0, SolrSearchIndex.MAX_HITS, Collections.singletonList(SolrConstants.ORDER),
                         Collections.singletonList(SolrConstants.IMAGEURN), null);
-                if (qr != null && !qr.getResults().isEmpty()) {
+                if (qr != null && !qr.getResults()
+                        .isEmpty()) {
                     for (SolrDocument pageDoc : qr.getResults()) {
                         String imgUrn = (String) pageDoc.getFieldValue(SolrConstants.IMAGEURN);
                         Element pagerecord = new Element("record", xmlns);
@@ -1744,8 +1953,8 @@ public class XMLGeneration {
                         pagerecord.addContent(pageheader);
                         Element pagemetadata = new Element("metadata", xmlns);
                         pagerecord.addContent(pagemetadata);
-                        pagemetadata.addContent(generateEpicurPageElement(imgUrn, (Long) doc.getFieldValue(SolrConstants.DATECREATED), dateUpdated,
-                                dateDeleted));
+                        pagemetadata.addContent(
+                                generateEpicurPageElement(imgUrn, (Long) doc.getFieldValue(SolrConstants.DATECREATED), dateUpdated, dateDeleted));
                         xmlListRecords.addContent(pagerecord);
                         pagecount++;
                     }
@@ -1779,7 +1988,9 @@ public class XMLGeneration {
             if (doc == null) {
                 return new ErrorCode().getIdDoesNotExist();
             }
-            Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
+            Namespace xmlns = DataManager.getInstance()
+                    .getConfiguration()
+                    .getStandardNameSpace();
             Element getRecord = new Element("GetRecord", xmlns);
             Element record = new Element("record", xmlns);
             long dateupdated = SolrSearchIndex.getLatestValidDateUpdated(doc, RequestHandler.getUntilTimestamp(handler.getUntil()));
@@ -1848,7 +2059,9 @@ public class XMLGeneration {
         identifier.setAttribute("scheme", "url");
         identifier.setAttribute("type", "frontpage");
 
-        identifier.setText(DataManager.getInstance().getConfiguration().getUrnResolverUrl() + urn);
+        identifier.setText(DataManager.getInstance()
+                .getConfiguration()
+                .getUrnResolverUrl() + urn);
         resource.addContent(identifier);
         Element format = new Element("format", xmlns);
         format.setAttribute("scheme", "imt");
@@ -1915,7 +2128,9 @@ public class XMLGeneration {
         identifier.setAttribute("scheme", "url");
         identifier.setAttribute("type", "frontpage");
 
-        identifier.setText(DataManager.getInstance().getConfiguration().getUrnResolverUrl() + urn);
+        identifier.setText(DataManager.getInstance()
+                .getConfiguration()
+                .getUrnResolverUrl() + urn);
         resource.addContent(identifier);
         Element format = new Element("format", xmlns);
         format.setAttribute("scheme", "imt");
@@ -1956,7 +2171,8 @@ public class XMLGeneration {
      */
     public Element createListRecordsMarc(RequestHandler handler, int firstRow, int numRows) throws SolrServerException {
         Element mets = createListRecordsMets(handler, firstRow, numRows);
-        if (mets.getName().equals("error")) {
+        if (mets.getName()
+                .equals("error")) {
             return mets;
         }
         return generateMarc(mets, "ListRecords");
@@ -1974,8 +2190,12 @@ public class XMLGeneration {
 
         for (Element rec : records) {
             Element header = rec.getChild("header", xmlns);
-            Element modsOnly = rec.getChild("metadata", xmlns).getChild("mets", metsNamespace).getChild("dmdSec", metsNamespace).getChild("mdWrap",
-                    metsNamespace).getChild("xmlData", metsNamespace).getChild("mods", mods);
+            Element modsOnly = rec.getChild("metadata", xmlns)
+                    .getChild("mets", metsNamespace)
+                    .getChild("dmdSec", metsNamespace)
+                    .getChild("mdWrap", metsNamespace)
+                    .getChild("xmlData", metsNamespace)
+                    .getChild("mods", mods);
 
             Element newmods = new Element("mods", mods);
 
@@ -1986,7 +2206,9 @@ public class XMLGeneration {
 
             marcDoc.setRootElement(newmods);
 
-            String filename = DataManager.getInstance().getConfiguration().getMods2MarcXsl();
+            String filename = DataManager.getInstance()
+                    .getConfiguration()
+                    .getMods2MarcXsl();
 
             try (FileInputStream fis = new FileInputStream(filename)) {
                 XSLTransformer transformer = new XSLTransformer(fis);
@@ -2020,9 +2242,12 @@ public class XMLGeneration {
         }
         if (token != null) {
             Element resumption = new Element("resumptionToken", xmlns);
-            resumption.setAttribute("expirationDate", token.getAttribute("expirationDate").getValue());
-            resumption.setAttribute("completeListSize", token.getAttribute("completeListSize").getValue());
-            resumption.setAttribute("cursor", token.getAttribute("cursor").getValue());
+            resumption.setAttribute("expirationDate", token.getAttribute("expirationDate")
+                    .getValue());
+            resumption.setAttribute("completeListSize", token.getAttribute("completeListSize")
+                    .getValue());
+            resumption.setAttribute("cursor", token.getAttribute("cursor")
+                    .getValue());
             resumption.setText(token.getValue());
             xmlListRecords.addContent(resumption);
         }
@@ -2066,8 +2291,8 @@ public class XMLGeneration {
      * @throws SolrServerException
      */
     public Element createListRecordsLido(RequestHandler handler, int firstRow, int numRows) throws SolrServerException {
-        SolrDocumentList records = solr.getListRecords(filterDatestampFromRequest(handler), firstRow, numRows, false, SolrConstants.SOURCEDOCFORMAT
-                + ":LIDO");
+        SolrDocumentList records =
+                solr.getListRecords(filterDatestampFromRequest(handler), firstRow, numRows, false, SolrConstants.SOURCEDOCFORMAT + ":LIDO");
         if (records.isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
@@ -2098,7 +2323,9 @@ public class XMLGeneration {
      */
     private Element generateLido(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler, String recordType)
             throws JDOMException, IOException, SolrServerException {
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
+        Namespace xmlns = DataManager.getInstance()
+                .getConfiguration()
+                .getStandardNameSpace();
         Element xmlListRecords = new Element(recordType, xmlns);
 
         Namespace lido = Namespace.getNamespace(Metadata.lido.getMetadataPrefix(), Metadata.lido.getMetadataNamespace());
@@ -2108,8 +2335,10 @@ public class XMLGeneration {
             numRows = records.size();
         }
         for (SolrDocument doc : records) {
-            String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl()).append(doc.getFieldValue(
-                    SolrConstants.PI_TOPSTRUCT)).toString();
+            String url = new StringBuilder(DataManager.getInstance()
+                    .getConfiguration()
+                    .getDocumentResolverUrl()).append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))
+                            .toString();
             String xml = Utils.getWebContent(url);
             if (StringUtils.isEmpty(xml)) {
                 xmlListRecords.addContent(new ErrorCode().getCannotDisseminateFormat());
@@ -2120,8 +2349,8 @@ public class XMLGeneration {
             Element xmlRoot = xmlDoc.getRootElement();
             Element newLido = new Element(Metadata.lido.getMetadataPrefix(), lido);
             newLido.addNamespaceDeclaration(xsi);
-            newLido.setAttribute(new Attribute("schemaLocation", "http://www.lido-schema.org http://www.lido-schema.org/schema/v1.0/lido-v1.0.xsd",
-                    xsi));
+            newLido.setAttribute(
+                    new Attribute("schemaLocation", "http://www.lido-schema.org http://www.lido-schema.org/schema/v1.0/lido-v1.0.xsd", xsi));
             newLido.addContent(xmlRoot.cloneContent());
 
             Element record = new Element("record", xmlns);
@@ -2213,19 +2442,31 @@ public class XMLGeneration {
      */
     private Element generateTeiCmdi(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler, String recordType,
             String language) throws JDOMException, IOException, SolrServerException {
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
+        Namespace xmlns = DataManager.getInstance()
+                .getConfiguration()
+                .getStandardNameSpace();
         Element xmlListRecords = new Element(recordType, xmlns);
 
-        Namespace tei = Namespace.getNamespace(handler.getMetadataPrefix().getMetadataPrefix(), handler.getMetadataPrefix().getMetadataNamespace());
+        Namespace tei = Namespace.getNamespace(handler.getMetadataPrefix()
+                .getMetadataPrefix(),
+                handler.getMetadataPrefix()
+                        .getMetadataNamespace());
         Namespace xsi = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
 
         if (records.size() < numRows) {
             numRows = records.size();
         }
         for (SolrDocument doc : records) {
-            String url = new StringBuilder(DataManager.getInstance().getConfiguration().getContentApiUrl()).append(handler.getMetadataPrefix()
-                    .getMetadataPrefix()).append('/').append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT)).append('/').append(language).append('/')
-                    .toString();
+            String url = new StringBuilder(DataManager.getInstance()
+                    .getConfiguration()
+                    .getContentApiUrl()).append(handler.getMetadataPrefix()
+                            .getMetadataPrefix())
+                            .append('/')
+                            .append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))
+                            .append('/')
+                            .append(language)
+                            .append('/')
+                            .toString();
             logger.trace(url);
             String xml = Utils.getWebContent(url);
             if (StringUtils.isEmpty(xml)) {
@@ -2235,9 +2476,11 @@ public class XMLGeneration {
 
             org.jdom2.Document xmlDoc = Utils.getDocumentFromString(xml, null);
             Element teiRoot = xmlDoc.getRootElement();
-            Element newDoc = new Element(handler.getMetadataPrefix().getMetadataPrefix(), tei);
+            Element newDoc = new Element(handler.getMetadataPrefix()
+                    .getMetadataPrefix(), tei);
             newDoc.addNamespaceDeclaration(xsi);
-            newDoc.setAttribute(new Attribute("schemaLocation", handler.getMetadataPrefix().getSchema(), xsi));
+            newDoc.setAttribute(new Attribute("schemaLocation", handler.getMetadataPrefix()
+                    .getSchema(), xsi));
             newDoc.addContent(teiRoot.cloneContent());
 
             Element record = new Element("record", xmlns);
@@ -2293,14 +2536,18 @@ public class XMLGeneration {
     static String getAdditionalDocstructsQuerySuffix(List<String> additionalDocstructTypes) {
         StringBuilder sbQuerySuffix = new StringBuilder();
         if (additionalDocstructTypes != null && !additionalDocstructTypes.isEmpty()) {
-            sbQuerySuffix.append(" OR (").append(SolrConstants.DOCTYPE).append(":DOCSTRCT AND (");
+            sbQuerySuffix.append(" OR (")
+                    .append(SolrConstants.DOCTYPE)
+                    .append(":DOCSTRCT AND (");
             int count = 0;
             for (String docstructType : additionalDocstructTypes) {
                 if (StringUtils.isNotBlank(docstructType)) {
                     if (count > 0) {
                         sbQuerySuffix.append(" OR ");
                     }
-                    sbQuerySuffix.append(SolrConstants.DOCSTRCT).append(':').append(docstructType);
+                    sbQuerySuffix.append(SolrConstants.DOCSTRCT)
+                            .append(':')
+                            .append(docstructType);
                     count++;
                 } else {
                     logger.warn("Empty element found in <additionalDocstructTypes>.");
@@ -2329,8 +2576,15 @@ public class XMLGeneration {
                 if (StringUtils.isNotBlank(urnPrefix)) {
                     urnPrefix = ClientUtils.escapeQueryChars(urnPrefix);
                     urnPrefix += '*';
-                    sbQuerySuffix.append(" -").append("URN_UNTOKENIZED:").append(urnPrefix).append(" -").append("IMAGEURN_UNTOKENIZED:").append(
-                            urnPrefix).append(" -").append("IMAGEURN_OAI_UNTOKENIZED:").append(urnPrefix);
+                    sbQuerySuffix.append(" -")
+                            .append("URN_UNTOKENIZED:")
+                            .append(urnPrefix)
+                            .append(" -")
+                            .append("IMAGEURN_UNTOKENIZED:")
+                            .append(urnPrefix)
+                            .append(" -")
+                            .append("IMAGEURN_OAI_UNTOKENIZED:")
+                            .append(urnPrefix);
                     count++;
                 } else {
                     logger.warn("Empty element found in <additionalDocstructTypes>.");
