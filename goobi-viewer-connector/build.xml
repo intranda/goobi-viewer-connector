@@ -79,7 +79,7 @@
 	<!-- Normal build of application. <target name="compile" depends="writeVersion" 
 		description="Normal build of application."> -->
 	<target name="compile" depends="createDirs,writeVersion" description="Normal build of application.">
-		<javac srcdir="${dir.src}" destdir="${dir.build}/WEB-INF/classes" source="${javac.source}" target="${javac.target}" encoding="UTF8" debug="true">
+		<javac srcdir="${dir.src}" destdir="${dir.build}/WEB-INF/classes" source="${javac.source}" target="${javac.target}" encoding="UTF8" debug="${javac.debug}">
 			<compilerarg value="-Xlint" />
 			<classpath refid="classpath" />
 		</javac>
