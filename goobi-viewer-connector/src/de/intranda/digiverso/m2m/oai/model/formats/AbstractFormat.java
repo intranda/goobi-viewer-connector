@@ -438,6 +438,13 @@ public abstract class AbstractFormat {
             switch (token.getHandler()
                     .getMetadataPrefix()) {
                 // Query the Goobi viewer for the total hits number
+                case mets:
+                case marcxml:
+                    totalHits = new METSFormat().getTotalHits(params);
+                    break;
+                case lido:
+                    totalHits = new LIDOFormat().getTotalHits(params);
+                    break;
                 case iv_crowdsourcing:
                 case iv_overviewpage:
                     totalHits = new GoobiViewerUpdateFormat().getTotalHits(params);
