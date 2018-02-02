@@ -34,6 +34,7 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.response.FieldStatsInfo;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
@@ -190,14 +191,17 @@ public class XMLGeneration {
      * @throws SolrServerException
      */
     public Element createListRecordsDC(RequestHandler handler, int firstRow, int numRows) throws SolrServerException {
-        SolrDocumentList records = solr.getListRecords(filterDatestampFromRequest(handler), firstRow, numRows, false,
+        QueryResponse qr = solr.getListRecords(filterDatestampFromRequest(handler), firstRow, numRows, false,
                 getAdditionalDocstructsQuerySuffix(DataManager.getInstance()
                         .getConfiguration()
-                        .getAdditionalDocstructTypes()));
-        if (records.isEmpty()) {
+                        .getAdditionalDocstructTypes()),
+                null);
+        if (qr.getResults()
+                .isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
-        return generateDC(records, records.getNumFound(), firstRow, numRows, handler, "ListRecords");
+        return generateDC(qr.getResults(), qr.getResults()
+                .getNumFound(), firstRow, numRows, handler, "ListRecords");
     }
 
     /**
@@ -210,14 +214,17 @@ public class XMLGeneration {
      * @throws SolrServerException
      */
     public Element createListRecordsESE(RequestHandler handler, int firstRow, int numRows) throws SolrServerException {
-        SolrDocumentList records = solr.getListRecords(filterDatestampFromRequest(handler), firstRow, numRows, false,
+        QueryResponse qr = solr.getListRecords(filterDatestampFromRequest(handler), firstRow, numRows, false,
                 getAdditionalDocstructsQuerySuffix(DataManager.getInstance()
                         .getConfiguration()
-                        .getAdditionalDocstructTypes()));
-        if (records.isEmpty()) {
+                        .getAdditionalDocstructTypes()),
+                null);
+        if (qr.getResults()
+                .isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
-        return generateESE(records, records.getNumFound(), firstRow, numRows, handler, "ListRecords");
+        return generateESE(qr.getResults(), qr.getResults()
+                .getNumFound(), firstRow, numRows, handler, "ListRecords");
     }
 
     /**
@@ -252,7 +259,6 @@ public class XMLGeneration {
             for (String value : set.getValues()) {
 
                 Element eleSet = new Element("set", xmlns);
-                // TODO
                 Element eleSetSpec = new Element("setSpec", xmlns);
                 eleSetSpec.setText(value);
                 eleSet.addContent(eleSetSpec);
@@ -332,7 +338,6 @@ public class XMLGeneration {
      * @return
      */
     private static String format(String string) {
-
         return string;
     }
 
@@ -471,15 +476,18 @@ public class XMLGeneration {
                                 .getAdditionalDocstructTypes());
                     }
                     // Query Solr index for the total hits number
-                    totalHits = solr.getTotalHitNumber(params, urnOnly, querySuffix);
+                    totalHits = solr.getTotalHitNumber(params, urnOnly, querySuffix, null);
                     break;
                 case tei:
                 case cmdi:
-                    // Query Solr index for the total hits number
-                    totalHits = solr.getTotalHitNumber(params, urnOnly, querySuffix);
+                    // Query Solr index for the count of the LANGUAGE field
+                    //                    totalHits = solr.getTotalHitNumber(params, urnOnly, querySuffix, Collections.singletonList(SolrConstants.LANGUAGE));
+                    QueryResponse qr = solr.search(params.get("from"), params.get("until"), params.get("set"), params.get("metadataPrefix"), 0, 0,
+                            false, querySuffix, Collections.singletonList(SolrConstants.LANGUAGE));
+                    totalHits = getFieldCount(qr, SolrConstants.LANGUAGE);
                     break;
                 default:
-                    totalHits = solr.getTotalHitNumber(params, urnOnly, querySuffix);
+                    totalHits = solr.getTotalHitNumber(params, urnOnly, querySuffix, null);
                     break;
             }
 
@@ -1486,13 +1494,15 @@ public class XMLGeneration {
      * @throws SolrServerException
      */
     public Element createListRecordsMets(RequestHandler handler, int firstRow, int numRows) throws SolrServerException {
-        SolrDocumentList records =
-                solr.getListRecords(filterDatestampFromRequest(handler), firstRow, numRows, false, SolrConstants.SOURCEDOCFORMAT + ":METS");
-        if (records.isEmpty()) {
+        QueryResponse qr =
+                solr.getListRecords(filterDatestampFromRequest(handler), firstRow, numRows, false, SolrConstants.SOURCEDOCFORMAT + ":METS", null);
+        if (qr.getResults()
+                .isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
         try {
-            return generateMets(records, records.getNumFound(), firstRow, numRows, handler, "ListRecords");
+            return generateMets(qr.getResults(), qr.getResults()
+                    .getNumFound(), firstRow, numRows, handler, "ListRecords");
         } catch (IOException e) {
             logger.error(e.getMessage());
             return new ErrorCode().getIdDoesNotExist();
@@ -1889,7 +1899,8 @@ public class XMLGeneration {
         String querySuffix = urnPrefixBlacklistSuffix + getAdditionalDocstructsQuerySuffix(DataManager.getInstance()
                 .getConfiguration()
                 .getAdditionalDocstructTypes());
-        SolrDocumentList records = solr.getListRecords(filterDatestampFromRequest(handler), firstRow, numRows, true, querySuffix);
+        QueryResponse qr = solr.getListRecords(filterDatestampFromRequest(handler), firstRow, numRows, true, querySuffix, null);
+        SolrDocumentList records = qr.getResults();
         if (records.isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
@@ -1925,11 +1936,11 @@ public class XMLGeneration {
                         .append(":*");
                 sbPageQuery.append(urnPrefixBlacklistSuffix);
                 // logger.trace("pageQuery: {}", sbPageQuery.toString());
-                QueryResponse qr = solr.search(sbPageQuery.toString(), 0, SolrSearchIndex.MAX_HITS, Collections.singletonList(SolrConstants.ORDER),
-                        Collections.singletonList(SolrConstants.IMAGEURN), null);
-                if (qr != null && !qr.getResults()
+                QueryResponse qrInner = solr.search(sbPageQuery.toString(), 0, SolrSearchIndex.MAX_HITS,
+                        Collections.singletonList(SolrConstants.ORDER), Collections.singletonList(SolrConstants.IMAGEURN), null);
+                if (qrInner != null && !qrInner.getResults()
                         .isEmpty()) {
-                    for (SolrDocument pageDoc : qr.getResults()) {
+                    for (SolrDocument pageDoc : qrInner.getResults()) {
                         String imgUrn = (String) pageDoc.getFieldValue(SolrConstants.IMAGEURN);
                         Element pagerecord = new Element("record", xmlns);
                         Element pageheader = generateEpicurPageHeader(doc, imgUrn, dateUpdated);
@@ -2291,13 +2302,15 @@ public class XMLGeneration {
      * @throws SolrServerException
      */
     public Element createListRecordsLido(RequestHandler handler, int firstRow, int numRows) throws SolrServerException {
-        SolrDocumentList records =
-                solr.getListRecords(filterDatestampFromRequest(handler), firstRow, numRows, false, SolrConstants.SOURCEDOCFORMAT + ":LIDO");
-        if (records.isEmpty()) {
+        QueryResponse qr =
+                solr.getListRecords(filterDatestampFromRequest(handler), firstRow, numRows, false, SolrConstants.SOURCEDOCFORMAT + ":LIDO", null);
+        if (qr.getResults()
+                .isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
         try {
-            Element xmlListRecords = generateLido(records, records.getNumFound(), firstRow, numRows, handler, "ListRecords");
+            Element xmlListRecords = generateLido(qr.getResults(), qr.getResults()
+                    .getNumFound(), firstRow, numRows, handler, "ListRecords");
             return xmlListRecords;
         } catch (IOException e) {
             logger.error(e.getMessage());
@@ -2410,12 +2423,16 @@ public class XMLGeneration {
      * @throws SolrServerException
      */
     public Element createListRecordsTeiCmdi(RequestHandler handler, int firstRow, int numRows) throws SolrServerException {
-        SolrDocumentList records = solr.getListRecords(filterDatestampFromRequest(handler), firstRow, numRows, false, null);
-        if (records.isEmpty()) {
+        // &stats=true&stats.field=LANGUAGE
+        QueryResponse qr = solr.getListRecords(filterDatestampFromRequest(handler), firstRow, numRows, false, null,
+                Collections.singletonList(SolrConstants.LANGUAGE));
+        if (qr.getResults()
+                .isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
+        long numFound = getFieldCount(qr, SolrConstants.LANGUAGE);
         try {
-            Element xmlListRecords = generateTeiCmdi(records, records.getNumFound(), firstRow, numRows, handler, "ListRecords", "eng"); // TODO language?
+            Element xmlListRecords = generateTeiCmdi(qr.getResults(), numFound, firstRow, numRows, handler, "ListRecords", null);
             return xmlListRecords;
         } catch (IOException e) {
             logger.error(e.getMessage());
@@ -2434,14 +2451,14 @@ public class XMLGeneration {
      * @param numRows
      * @param handler
      * @param recordType "GetRecord" or "ListRecords"
-     * @param language
+     * @param requestedLanguage
      * @return
      * @throws IOException
      * @throws JDOMException
      * @throws SolrServerException
      */
     private Element generateTeiCmdi(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler, String recordType,
-            String language) throws JDOMException, IOException, SolrServerException {
+            String requestedLanguage) throws JDOMException, IOException, SolrServerException {
         Namespace xmlns = DataManager.getInstance()
                 .getConfiguration()
                 .getStandardNameSpace();
@@ -2456,41 +2473,47 @@ public class XMLGeneration {
         if (records.size() < numRows) {
             numRows = records.size();
         }
+        List<String> languages = Collections.singletonList(requestedLanguage);
         for (SolrDocument doc : records) {
-            String url = new StringBuilder(DataManager.getInstance()
-                    .getConfiguration()
-                    .getContentApiUrl()).append(handler.getMetadataPrefix()
-                            .getMetadataPrefix())
-                            .append('/')
-                            .append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))
-                            .append('/')
-                            .append(language)
-                            .append('/')
-                            .toString();
-            logger.trace(url);
-            String xml = Utils.getWebContent(url);
-            if (StringUtils.isEmpty(xml)) {
-                xmlListRecords.addContent(new ErrorCode().getCannotDisseminateFormat());
-                continue;
+            if (requestedLanguage == null) {
+                languages = SolrSearchIndex.getMetadataValues(doc, SolrConstants.LANGUAGE);
             }
+            for (String language : languages) {
+                String url = new StringBuilder(DataManager.getInstance()
+                        .getConfiguration()
+                        .getContentApiUrl()).append(handler.getMetadataPrefix()
+                                .getMetadataPrefix())
+                                .append('/')
+                                .append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))
+                                .append('/')
+                                .append(language)
+                                .append('/')
+                                .toString();
+                // logger.trace(url);
+                String xml = Utils.getWebContent(url);
+                if (StringUtils.isEmpty(xml)) {
+                    xmlListRecords.addContent(new ErrorCode().getCannotDisseminateFormat());
+                    continue;
+                }
 
-            org.jdom2.Document xmlDoc = Utils.getDocumentFromString(xml, null);
-            Element teiRoot = xmlDoc.getRootElement();
-            Element newDoc = new Element(handler.getMetadataPrefix()
-                    .getMetadataPrefix(), tei);
-            newDoc.addNamespaceDeclaration(xsi);
-            newDoc.setAttribute(new Attribute("schemaLocation", handler.getMetadataPrefix()
-                    .getSchema(), xsi));
-            newDoc.addContent(teiRoot.cloneContent());
+                org.jdom2.Document xmlDoc = Utils.getDocumentFromString(xml, null);
+                Element teiRoot = xmlDoc.getRootElement();
+                Element newDoc = new Element(handler.getMetadataPrefix()
+                        .getMetadataPrefix(), tei);
+                newDoc.addNamespaceDeclaration(xsi);
+                newDoc.setAttribute(new Attribute("schemaLocation", handler.getMetadataPrefix()
+                        .getSchema(), xsi));
+                newDoc.addContent(teiRoot.cloneContent());
 
-            Element record = new Element("record", xmlns);
-            Element header = getHeader(doc, null, handler);
-            record.addContent(header);
-            Element metadata = new Element("metadata", xmlns);
-            metadata.addContent(newDoc);
-            // metadata.addContent(mets_root.cloneContent());
-            record.addContent(metadata);
-            xmlListRecords.addContent(record);
+                Element record = new Element("record", xmlns);
+                Element header = getHeader(doc, null, handler);
+                record.addContent(header);
+                Element metadata = new Element("metadata", xmlns);
+                metadata.addContent(newDoc);
+                // metadata.addContent(mets_root.cloneContent());
+                record.addContent(metadata);
+                xmlListRecords.addContent(record);
+            }
         }
 
         // Create resumption token
@@ -2599,4 +2622,27 @@ public class XMLGeneration {
         return sbQuerySuffix.toString();
     }
 
+    private static long getFieldCount(QueryResponse queryResponse, String field) {
+        if (queryResponse == null) {
+            throw new IllegalArgumentException("queryResponse may not be null");
+        }
+        if (field == null) {
+            throw new IllegalArgumentException("field may not be null");
+        }
+
+        long ret = 0;
+        FieldStatsInfo info = queryResponse.getFieldStatsInfo()
+                .get(SolrConstants.LANGUAGE);
+        if (info != null) {
+            Object count = info.getCount();
+            if (count instanceof Long || count instanceof Integer) {
+                ret = (long) count;
+            } else if (count instanceof Double) {
+                ret = ((Double) count).longValue();
+            }
+            logger.trace("Total hits via {} value count: {}", field, ret);
+        }
+
+        return ret;
+    }
 }

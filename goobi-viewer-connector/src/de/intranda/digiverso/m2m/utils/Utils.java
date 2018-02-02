@@ -111,7 +111,7 @@ public class Utils {
             try (CloseableHttpResponse response = httpClient.execute(get); StringWriter writer = new StringWriter()) {
                 int code = response.getStatusLine().getStatusCode();
                 if (code == HttpStatus.SC_OK) {
-                    logger.trace("{}: {}", code, response.getStatusLine().getReasonPhrase());
+                    // logger.trace("{}: {}", code, response.getStatusLine().getReasonPhrase());
                     IOUtils.copy(response.getEntity().getContent(), writer);
                     return writer.toString();
                 }
