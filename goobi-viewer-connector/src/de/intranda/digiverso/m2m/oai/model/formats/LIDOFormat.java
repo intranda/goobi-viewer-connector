@@ -51,7 +51,7 @@ public class LIDOFormat extends AbstractFormat {
     @Override
     public Element createListRecords(RequestHandler handler, int firstRow, int numRows) throws IOException, SolrServerException {
         QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRow, numRows, false,
-                SolrConstants.SOURCEDOCFORMAT + ":LIDO", null);
+                " AND " + SolrConstants.SOURCEDOCFORMAT + ":LIDO", null);
         if (qr.getResults()
                 .isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
@@ -162,7 +162,7 @@ public class LIDOFormat extends AbstractFormat {
      */
     @Override
     public long getTotalHits(Map<String, String> params) throws IOException, SolrServerException {
-        return solr.getTotalHitNumber(params, false, SolrConstants.SOURCEDOCFORMAT + ":LIDO", null);
+        return solr.getTotalHitNumber(params, false, " AND " + SolrConstants.SOURCEDOCFORMAT + ":LIDO", null);
     }
 
 }

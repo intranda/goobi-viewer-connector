@@ -366,10 +366,10 @@ public class SolrSearchIndex {
                     .append(SolrConstants.ISANCHOR)
                     .append(":true");
         }
+        query.append(')');
         if (StringUtils.isNotEmpty(querySuffix)) {
             query.append(querySuffix);
         }
-        query.append(')');
         // Solr timestamp range is irrelevant for iv_* formats
         if (!Metadata.iv_overviewpage.name()
                 .equals(metadataPrefix)
@@ -422,23 +422,23 @@ public class SolrSearchIndex {
                 }
             }
         }
-        if (metadataPrefix != null) {
-            switch (metadataPrefix.toLowerCase()) {
-                case "mets":
-                case "marcxml":
-                    query.append(" AND ")
-                            .append(SolrConstants.SOURCEDOCFORMAT)
-                            .append(':')
-                            .append(SolrConstants._METS);
-                    break;
-                case "lido":
-                    query.append(" AND ")
-                            .append(SolrConstants.SOURCEDOCFORMAT)
-                            .append(':')
-                            .append(SolrConstants._LIDO);
-                    break;
-            }
-        }
+        //        if (metadataPrefix != null) {
+        //            switch (metadataPrefix.toLowerCase()) {
+        //                case "mets":
+        //                case "marcxml":
+        //                    query.append(" AND ")
+        //                            .append(SolrConstants.SOURCEDOCFORMAT)
+        //                            .append(':')
+        //                            .append(SolrConstants._METS);
+        //                    break;
+        //                case "lido":
+        //                    query.append(" AND ")
+        //                            .append(SolrConstants.SOURCEDOCFORMAT)
+        //                            .append(':')
+        //                            .append(SolrConstants._LIDO);
+        //                    break;
+        //            }
+        //        }
 
         return query.toString();
     }
@@ -776,7 +776,7 @@ public class SolrSearchIndex {
 
         return ret;
     }
-    
+
     /**
      * 
      * @return
@@ -811,7 +811,7 @@ public class SolrSearchIndex {
 
         return sbQuerySuffix.toString();
     }
-    
+
     /**
      * 
      * @return

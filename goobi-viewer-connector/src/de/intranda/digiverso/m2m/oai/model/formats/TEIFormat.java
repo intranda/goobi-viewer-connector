@@ -51,8 +51,8 @@ public class TEIFormat extends AbstractFormat {
     @Override
     public Element createListRecords(RequestHandler handler, int firstRow, int numRows) throws SolrServerException {
         // &stats=true&stats.field=LANGUAGE
-        QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRow, numRows, false, SolrConstants.LANGUAGE + ":*",
-                Collections.singletonList(SolrConstants.LANGUAGE));
+        QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRow, numRows, false,
+                " AND " + SolrConstants.LANGUAGE + ":*", Collections.singletonList(SolrConstants.LANGUAGE));
         if (qr.getResults()
                 .isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
@@ -185,7 +185,7 @@ public class TEIFormat extends AbstractFormat {
     public long getTotalHits(Map<String, String> params) throws IOException, SolrServerException {
         // Query Solr index for the count of the LANGUAGE field
         QueryResponse qr = solr.search(params.get("from"), params.get("until"), params.get("set"), params.get("metadataPrefix"), 0, 0, false,
-                SolrConstants.LANGUAGE + ":*", Collections.singletonList(SolrConstants.LANGUAGE));
+                " AND " + SolrConstants.LANGUAGE + ":*", Collections.singletonList(SolrConstants.LANGUAGE));
         return SolrSearchIndex.getFieldCount(qr, SolrConstants.LANGUAGE);
     }
 }

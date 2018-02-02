@@ -50,7 +50,7 @@ public class METSFormat extends AbstractFormat {
     @Override
     public Element createListRecords(RequestHandler handler, int firstRow, int numRows) throws IOException, SolrServerException {
         QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRow, numRows, false,
-                SolrConstants.SOURCEDOCFORMAT + ":METS", null);
+                " AND " + SolrConstants.SOURCEDOCFORMAT + ":METS", null);
         if (qr.getResults()
                 .isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
@@ -103,8 +103,8 @@ public class METSFormat extends AbstractFormat {
      * @throws JDOMException
      * @throws SolrServerException
      */
-    private Element generateMets(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler, String recordType)
-            throws JDOMException, IOException, SolrServerException {
+    private static Element generateMets(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler,
+            String recordType) throws JDOMException, IOException, SolrServerException {
         Namespace xmlns = DataManager.getInstance()
                 .getConfiguration()
                 .getStandardNameSpace();
@@ -165,7 +165,7 @@ public class METSFormat extends AbstractFormat {
      */
     @Override
     public long getTotalHits(Map<String, String> params) throws IOException, SolrServerException {
-        return solr.getTotalHitNumber(params, false, SolrConstants.SOURCEDOCFORMAT + ":METS", null);
+        return solr.getTotalHitNumber(params, false, " AND " + SolrConstants.SOURCEDOCFORMAT + ":METS", null);
     }
 
 }
