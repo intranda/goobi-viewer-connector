@@ -15,13 +15,13 @@
  */
 package de.intranda.digiverso.m2m.utils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -42,7 +42,7 @@ public class SolrSearchIndexTest extends AbstractSolrEnabledTest {
      */
     @Test
     public void getSets_shouldReturnAllValues() throws Exception {
-        Assert.assertEquals(23, DataManager.getInstance()
+        Assert.assertEquals(28, DataManager.getInstance()
                 .getSearchIndex()
                 .getSets(SolrConstants.DC)
                 .size());
@@ -116,5 +116,29 @@ public class SolrSearchIndexTest extends AbstractSolrEnabledTest {
             Assert.assertTrue(dateCreated > previous);
             previous = dateCreated;
         }
+    }
+
+    /**
+     * @see SolrSearchIndex#getAdditionalDocstructsQuerySuffix(List)
+     * @verifies build query suffix correctly
+     */
+    @Test
+    public void getAdditionalDocstructsQuerySuffix_shouldBuildQuerySuffixCorrectly() throws Exception {
+        Assert.assertEquals(" OR (" + SolrConstants.DOCTYPE + ":DOCSTRCT AND (" + SolrConstants.DOCSTRCT + ":Article))",
+                SolrSearchIndex.getAdditionalDocstructsQuerySuffix(Collections.singletonList("Article")));
+    }
+
+    /**
+     * @see SolrSearchIndex#getUrnPrefixBlacklistSuffix(List)
+     * @verifies build query suffix correctly
+     */
+    @Test
+    public void getUrnPrefixBlacklistSuffix_shouldBuildQuerySuffixCorrectly() throws Exception {
+        List<String> prefixes = new ArrayList<>();
+        prefixes.add("urn:nbn:de:test-1");
+        prefixes.add("urn:nbn:de:hidden-1");
+        Assert.assertEquals(
+                " -URN_UNTOKENIZED:urn\\:nbn\\:de\\:test\\-1* -IMAGEURN_UNTOKENIZED:urn\\:nbn\\:de\\:test\\-1* -IMAGEURN_OAI_UNTOKENIZED:urn\\:nbn\\:de\\:test\\-1* -URN_UNTOKENIZED:urn\\:nbn\\:de\\:hidden\\-1* -IMAGEURN_UNTOKENIZED:urn\\:nbn\\:de\\:hidden\\-1* -IMAGEURN_OAI_UNTOKENIZED:urn\\:nbn\\:de\\:hidden\\-1*",
+                SolrSearchIndex.getUrnPrefixBlacklistSuffix(prefixes));
     }
 }

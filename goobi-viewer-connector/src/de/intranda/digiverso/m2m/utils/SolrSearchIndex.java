@@ -33,6 +33,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.BinaryRequestWriter;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.response.FacetField;
+import org.apache.solr.client.solrj.response.FieldStatsInfo;
 import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
@@ -245,14 +246,13 @@ public class SolrSearchIndex {
      * @param params
      * @param firstRow
      * @param numRows
-     * @param urnOnly
      * @return
      * @throws SolrServerException
      */
-    public SolrDocumentList getListIdentifiers(Map<String, String> params, int firstRow, int numRows, boolean urnOnly) throws SolrServerException {
+    public SolrDocumentList getListIdentifiers(Map<String, String> params, int firstRow, int numRows) throws SolrServerException {
         try {
             QueryResponse qr = search(params.get("from"), params.get("until"), params.get("set"), params.get("metadataPrefix"), firstRow, numRows,
-                    urnOnly, null, null);
+                    false, null, null);
             return qr.getResults();
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
@@ -745,5 +745,106 @@ public class SolrSearchIndex {
         }
 
         return Collections.emptyList();
+    }
+
+    /**
+     * 
+     * @param queryResponse
+     * @param field
+     * @return
+     */
+    public static long getFieldCount(QueryResponse queryResponse, String field) {
+        if (queryResponse == null) {
+            throw new IllegalArgumentException("queryResponse may not be null");
+        }
+        if (field == null) {
+            throw new IllegalArgumentException("field may not be null");
+        }
+
+        long ret = 0;
+        FieldStatsInfo info = queryResponse.getFieldStatsInfo()
+                .get(SolrConstants.LANGUAGE);
+        if (info != null) {
+            Object count = info.getCount();
+            if (count instanceof Long || count instanceof Integer) {
+                ret = (long) count;
+            } else if (count instanceof Double) {
+                ret = ((Double) count).longValue();
+            }
+            logger.trace("Total hits via {} value count: {}", field, ret);
+        }
+
+        return ret;
+    }
+    
+    /**
+     * 
+     * @return
+     * @should build query suffix correctly
+     */
+    public static String getAdditionalDocstructsQuerySuffix(List<String> additionalDocstructTypes) {
+        StringBuilder sbQuerySuffix = new StringBuilder();
+        if (additionalDocstructTypes != null && !additionalDocstructTypes.isEmpty()) {
+            sbQuerySuffix.append(" OR (")
+                    .append(SolrConstants.DOCTYPE)
+                    .append(":DOCSTRCT AND (");
+            int count = 0;
+            for (String docstructType : additionalDocstructTypes) {
+                if (StringUtils.isNotBlank(docstructType)) {
+                    if (count > 0) {
+                        sbQuerySuffix.append(" OR ");
+                    }
+                    sbQuerySuffix.append(SolrConstants.DOCSTRCT)
+                            .append(':')
+                            .append(docstructType);
+                    count++;
+                } else {
+                    logger.warn("Empty element found in <additionalDocstructTypes>.");
+                }
+            }
+            sbQuerySuffix.append("))");
+            // Avoid returning an invalid subquery if all configured values are blank
+            if (count == 0) {
+                return "";
+            }
+        }
+
+        return sbQuerySuffix.toString();
+    }
+    
+    /**
+     * 
+     * @return
+     * @should build query suffix correctly
+     */
+    public static String getUrnPrefixBlacklistSuffix(List<String> urnPrefixBlacklist) {
+        StringBuilder sbQuerySuffix = new StringBuilder();
+        if (urnPrefixBlacklist != null && !urnPrefixBlacklist.isEmpty()) {
+            int count = 0;
+            for (String urnPrefix : urnPrefixBlacklist) {
+                if (StringUtils.isNotBlank(urnPrefix)) {
+                    urnPrefix = ClientUtils.escapeQueryChars(urnPrefix);
+                    urnPrefix += '*';
+                    sbQuerySuffix.append(" -")
+                            .append("URN_UNTOKENIZED:")
+                            .append(urnPrefix)
+                            .append(" -")
+                            .append("IMAGEURN_UNTOKENIZED:")
+                            .append(urnPrefix)
+                            .append(" -")
+                            .append("IMAGEURN_OAI_UNTOKENIZED:")
+                            .append(urnPrefix);
+                    count++;
+                } else {
+                    logger.warn("Empty element found in <additionalDocstructTypes>.");
+                }
+            }
+            // Avoid returning an invalid subquery if all configured values are blank
+            if (count == 0) {
+                return "";
+            }
+        }
+
+        return sbQuerySuffix.toString();
     }
 }
