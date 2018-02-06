@@ -18,6 +18,7 @@ package de.intranda.digiverso.m2m.oai.model.formats;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -110,8 +111,8 @@ public class TEIFormat extends AbstractFormat {
      * @throws JDOMException
      * @throws SolrServerException
      */
-    private Element generateTeiCmdi(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler, String recordType,
-            String requestedLanguage) throws JDOMException, IOException, SolrServerException {
+    private static Element generateTeiCmdi(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler,
+            String recordType, String requestedLanguage) throws JDOMException, IOException, SolrServerException {
         Namespace xmlns = DataManager.getInstance()
                 .getConfiguration()
                 .getStandardNameSpace();
@@ -159,7 +160,7 @@ public class TEIFormat extends AbstractFormat {
                 newDoc.addContent(teiRoot.cloneContent());
 
                 Element record = new Element("record", xmlns);
-                Element header = getHeader(doc, null, handler);
+                Element header = getHeader(doc, null, handler, language);
                 record.addContent(header);
                 Element metadata = new Element("metadata", xmlns);
                 metadata.addContent(newDoc);
@@ -176,6 +177,66 @@ public class TEIFormat extends AbstractFormat {
         }
 
         return xmlListRecords;
+    }
+
+    /**
+     * Modified header generation where identifers also contain the language code.
+     * 
+     * @param doc Document from which to extract values.
+     * @param topstructDoc If not null, the datestamp value will be determined from this instead.
+     * @param handler
+     * @param language
+     * @return
+     * @throws SolrServerException
+     */
+    protected static Element getHeader(SolrDocument doc, SolrDocument topstructDoc, RequestHandler handler, String language)
+            throws SolrServerException {
+        Namespace xmlns = DataManager.getInstance()
+                .getConfiguration()
+                .getStandardNameSpace();
+        Element header = new Element("header", xmlns);
+        // identifier
+        Element identifier = new Element("identifier", xmlns);
+        identifier.setText(DataManager.getInstance()
+                .getConfiguration()
+                .getOaiIdentifier()
+                .get("repositoryIdentifier") + (String) doc.getFieldValue(SolrConstants.PI) + '_' + language);
+        header.addContent(identifier);
+        // datestamp
+        Element datestamp = new Element("datestamp", xmlns);
+        long untilTimestamp = RequestHandler.getUntilTimestamp(handler.getUntil());
+        long timestampModified = SolrSearchIndex.getLatestValidDateUpdated(topstructDoc != null ? topstructDoc : doc, untilTimestamp);
+        datestamp.setText(Utils.parseDate(timestampModified));
+        if (StringUtils.isEmpty(datestamp.getText()) && doc.getFieldValue(SolrConstants.ISANCHOR) != null) {
+            datestamp.setText(Utils.parseDate(DataManager.getInstance()
+                    .getSearchIndex()
+                    .getLatestVolumeTimestamp(doc, untilTimestamp)));
+        }
+        header.addContent(datestamp);
+        // setSpec
+        List<String> setSpecFields = DataManager.getInstance()
+                .getConfiguration()
+                .getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix()
+                        .name());
+        if (!setSpecFields.isEmpty()) {
+            for (String setSpecField : setSpecFields) {
+                if (doc.containsKey(setSpecField)) {
+                    for (Object fieldValue : doc.getFieldValues(setSpecField)) {
+                        // TODO translation
+                        Element setSpec = new Element("setSpec", xmlns);
+                        setSpec.setText((String) fieldValue);
+                        header.addContent(setSpec);
+                    }
+                }
+            }
+        }
+
+        // status="deleted"
+        if (doc.getFieldValues(SolrConstants.DATEDELETED) != null) {
+            header.setAttribute("status", "deleted");
+        }
+
+        return header;
     }
 
     /* (non-Javadoc)
