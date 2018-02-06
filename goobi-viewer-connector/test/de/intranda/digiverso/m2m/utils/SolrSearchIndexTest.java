@@ -15,12 +15,13 @@
  */
 package de.intranda.digiverso.m2m.utils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -41,9 +42,11 @@ public class SolrSearchIndexTest extends AbstractSolrEnabledTest {
      */
     @Test
     public void getSets_shouldReturnAllValues() throws Exception {
-        Assert.assertEquals(23, DataManager.getInstance().getSearchIndex().getSets(SolrConstants.DC).size());
+        Assert.assertEquals(28, DataManager.getInstance()
+                .getSearchIndex()
+                .getSets(SolrConstants.DC)
+                .size());
     }
-    
 
     /**
      * @see SolrSearchIndex#getLatestValidDateUpdated(SolrDocument,long)
@@ -75,8 +78,9 @@ public class SolrSearchIndexTest extends AbstractSolrEnabledTest {
      */
     @Test
     public void getFirstDoc_shouldReturnCorrectDoc() throws Exception {
-        SolrDocument doc = DataManager.getInstance().getSearchIndex().getFirstDoc(SolrConstants.PI + ":PPN517154005", Collections.singletonList(
-                SolrConstants.PI));
+        SolrDocument doc = DataManager.getInstance()
+                .getSearchIndex()
+                .getFirstDoc(SolrConstants.PI + ":PPN517154005", Collections.singletonList(SolrConstants.PI));
         Assert.assertNotNull(doc);
         Assert.assertEquals("PPN517154005", doc.getFieldValue(SolrConstants.PI));
     }
@@ -87,8 +91,11 @@ public class SolrSearchIndexTest extends AbstractSolrEnabledTest {
      */
     @Test
     public void search_shouldReturnCorrectNumberOfRows() throws Exception {
-        SolrDocumentList result = DataManager.getInstance().getSearchIndex().search(null, null, null, Metadata.oai_dc.name(), 0, 55, false, null);
-        Assert.assertEquals(55, result.size());
+        QueryResponse qr = DataManager.getInstance()
+                .getSearchIndex()
+                .search(null, null, null, Metadata.oai_dc.name(), 0, 55, false, null, null);
+        Assert.assertEquals(55, qr.getResults()
+                .size());
     }
 
     /**
@@ -97,14 +104,41 @@ public class SolrSearchIndexTest extends AbstractSolrEnabledTest {
      */
     @Test
     public void search_shouldSortResultsCorrectly() throws Exception {
-        SolrDocumentList result = DataManager.getInstance().getSearchIndex().search(null, null, null, Metadata.oai_dc.name(), 0, 10, false, null);
-        Assert.assertFalse(result.isEmpty());
+        QueryResponse qr = DataManager.getInstance()
+                .getSearchIndex()
+                .search(null, null, null, Metadata.oai_dc.name(), 0, 10, false, null, null);
+        Assert.assertFalse(qr.getResults()
+                .isEmpty());
         long previous = 0;
-        for (SolrDocument doc : result) {
+        for (SolrDocument doc : qr.getResults()) {
             Long dateCreated = (long) doc.getFieldValue(SolrConstants.DATECREATED);
             Assert.assertNotNull(dateCreated);
             Assert.assertTrue(dateCreated > previous);
             previous = dateCreated;
         }
+    }
+
+    /**
+     * @see SolrSearchIndex#getAdditionalDocstructsQuerySuffix(List)
+     * @verifies build query suffix correctly
+     */
+    @Test
+    public void getAdditionalDocstructsQuerySuffix_shouldBuildQuerySuffixCorrectly() throws Exception {
+        Assert.assertEquals(" OR (" + SolrConstants.DOCTYPE + ":DOCSTRCT AND (" + SolrConstants.DOCSTRCT + ":Article))",
+                SolrSearchIndex.getAdditionalDocstructsQuerySuffix(Collections.singletonList("Article")));
+    }
+
+    /**
+     * @see SolrSearchIndex#getUrnPrefixBlacklistSuffix(List)
+     * @verifies build query suffix correctly
+     */
+    @Test
+    public void getUrnPrefixBlacklistSuffix_shouldBuildQuerySuffixCorrectly() throws Exception {
+        List<String> prefixes = new ArrayList<>();
+        prefixes.add("urn:nbn:de:test-1");
+        prefixes.add("urn:nbn:de:hidden-1");
+        Assert.assertEquals(
+                " -URN_UNTOKENIZED:urn\\:nbn\\:de\\:test\\-1* -IMAGEURN_UNTOKENIZED:urn\\:nbn\\:de\\:test\\-1* -IMAGEURN_OAI_UNTOKENIZED:urn\\:nbn\\:de\\:test\\-1* -URN_UNTOKENIZED:urn\\:nbn\\:de\\:hidden\\-1* -IMAGEURN_UNTOKENIZED:urn\\:nbn\\:de\\:hidden\\-1* -IMAGEURN_OAI_UNTOKENIZED:urn\\:nbn\\:de\\:hidden\\-1*",
+                SolrSearchIndex.getUrnPrefixBlacklistSuffix(prefixes));
     }
 }

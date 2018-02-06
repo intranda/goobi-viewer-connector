@@ -336,11 +336,20 @@ public final class Configuration {
     }
 
     /**
+     * @return Harvest servlet URL
+     * @should return correct value
      * 
-     * @return Harvest servlet URL.
      */
     public String getHarvestUrl() {
         return getLocalString("harvestUrl", "http://localhost:8080/viewer/harvest");
+    }
+
+    /**
+     * @return Content file REST API URL
+     * @should return correct value
+     */
+    public String getContentApiUrl() {
+        return getLocalString("contentApiUrl", "http://localhost:8080/viewer/rest/content/");
     }
 
     /**

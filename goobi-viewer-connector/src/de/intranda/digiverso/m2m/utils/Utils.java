@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
@@ -37,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.intranda.digiverso.m2m.Version;
+import de.intranda.digiverso.m2m.oai.RequestHandler;
 
 public class Utils {
 
@@ -54,7 +57,8 @@ public class Utils {
      * @return the time in the format YYYY-MM-DDThh:mm:ssZ
      */
     public static String getCurrentUTCTime(long milliSecondsAdd) {
-        return formatterISO8601DateTimeFullWithTimeZone.withZoneUTC().print(System.currentTimeMillis() + milliSecondsAdd);
+        return formatterISO8601DateTimeFullWithTimeZone.withZoneUTC()
+                .print(System.currentTimeMillis() + milliSecondsAdd);
     }
 
     /**
@@ -64,7 +68,8 @@ public class Utils {
      * @should convert time correctly
      */
     public static String convertDate(long milliSeconds) {
-        return formatterISO8601DateTimeFullWithTimeZone.withZoneUTC().print(milliSeconds);
+        return formatterISO8601DateTimeFullWithTimeZone.withZoneUTC()
+                .print(milliSeconds);
     }
 
     /**
@@ -103,19 +108,27 @@ public class Utils {
      */
     public static String getWebContent(String url) throws UnsupportedOperationException, IOException {
         logger.trace("getWebContent: {}", url);
-        RequestConfig defaultRequestConfig = RequestConfig.custom().setSocketTimeout(HTTP_TIMEOUT).setConnectTimeout(HTTP_TIMEOUT)
-                .setConnectionRequestTimeout(HTTP_TIMEOUT).build();
-        try (CloseableHttpClient httpClient = HttpClients.custom().setDefaultRequestConfig(defaultRequestConfig).build()) {
+        RequestConfig defaultRequestConfig = RequestConfig.custom()
+                .setSocketTimeout(HTTP_TIMEOUT)
+                .setConnectTimeout(HTTP_TIMEOUT)
+                .setConnectionRequestTimeout(HTTP_TIMEOUT)
+                .build();
+        try (CloseableHttpClient httpClient = HttpClients.custom()
+                .setDefaultRequestConfig(defaultRequestConfig)
+                .build()) {
             HttpGet get = new HttpGet(url);
             Charset chars = Charset.forName(DEFAULT_ENCODING);
             try (CloseableHttpResponse response = httpClient.execute(get); StringWriter writer = new StringWriter()) {
-                int code = response.getStatusLine().getStatusCode();
+                int code = response.getStatusLine()
+                        .getStatusCode();
                 if (code == HttpStatus.SC_OK) {
-                    logger.trace("{}: {}", code, response.getStatusLine().getReasonPhrase());
-                    IOUtils.copy(response.getEntity().getContent(), writer);
+                    // logger.trace("{}: {}", code, response.getStatusLine().getReasonPhrase());
+                    IOUtils.copy(response.getEntity()
+                            .getContent(), writer);
                     return writer.toString();
                 }
-                logger.trace("{}: {}", code, response.getStatusLine().getReasonPhrase());
+                logger.trace("{}: {}", code, response.getStatusLine()
+                        .getReasonPhrase());
             }
         }
 
@@ -124,13 +137,19 @@ public class Utils {
 
     public static int getHttpResponseStatus(String url) throws UnsupportedOperationException, IOException {
         //                logger.trace("getHttpReponseStatus: {}", url);
-        RequestConfig defaultRequestConfig = RequestConfig.custom().setSocketTimeout(HTTP_TIMEOUT).setConnectTimeout(HTTP_TIMEOUT)
-                .setConnectionRequestTimeout(HTTP_TIMEOUT).build();
-        try (CloseableHttpClient httpClient = HttpClients.custom().setDefaultRequestConfig(defaultRequestConfig).build()) {
+        RequestConfig defaultRequestConfig = RequestConfig.custom()
+                .setSocketTimeout(HTTP_TIMEOUT)
+                .setConnectTimeout(HTTP_TIMEOUT)
+                .setConnectionRequestTimeout(HTTP_TIMEOUT)
+                .build();
+        try (CloseableHttpClient httpClient = HttpClients.custom()
+                .setDefaultRequestConfig(defaultRequestConfig)
+                .build()) {
             HttpGet get = new HttpGet(url);
             Charset chars = Charset.forName(DEFAULT_ENCODING);
             try (CloseableHttpResponse response = httpClient.execute(get); StringWriter writer = new StringWriter()) {
-                return response.getStatusLine().getStatusCode();
+                return response.getStatusLine()
+                        .getStatusCode();
             }
         }
     }
@@ -144,4 +163,95 @@ public class Utils {
         return Version.VERSION + "-" + Version.BUILDDATE + "-" + Version.BUILDVERSION;
     }
 
+    /**
+     * 
+     * @param identifier
+     * @param languageCodeLength
+     * @return
+     * @should split identifier correctly
+     */
+    public static String[] splitIdentifierAndLanguageCode(String identifier, int languageCodeLength) {
+        if (identifier == null) {
+            throw new IllegalArgumentException("identifer may not be null");
+        }
+        if (languageCodeLength < 1) {
+            throw new IllegalArgumentException("splitIndex must be 1 or larger");
+        }
+
+        String[] ret = new String[2];
+
+        if (identifier.contains("_")) {
+            int splitIndex = identifier.length() - languageCodeLength;
+            ret[0] = identifier.substring(0, splitIndex - 1);
+            ret[1] = identifier.substring(splitIndex);
+        } else {
+            ret[0] = identifier;
+        }
+
+        return ret;
+    }
+
+    /**
+     * 
+     * @param datestring
+     * @return
+     */
+    public static String parseDate(Object datestring) {
+        if (datestring instanceof Long) {
+            return Utils.convertDate((Long) datestring);
+        }
+        return "";
+    }
+
+    /**
+     * generates timestamp object from request
+     * 
+     * @param the request that was send to the server(servlet)
+     * @return a HashMap with the values from, until and set as string
+     * @should contain from timestamp
+     * @should contain until timestamp
+     * @should contain set
+     * @should contain metadataPrefix
+     * @should contain verb
+     */
+    public static Map<String, String> filterDatestampFromRequest(RequestHandler request) {
+        Map<String, String> datestamp = new HashMap<>();
+
+        String from = null;
+        if (request.getFrom() != null) {
+            from = request.getFrom();
+            from = from.replace("-", "")
+                    .replace("T", "")
+                    .replace(":", "")
+                    .replace("Z", "");
+            datestamp.put("from", from);
+        }
+        String until = null;
+        if (request.getUntil() != null) {
+            until = request.getUntil();
+            until = until.replace("-", "")
+                    .replace("T", "")
+                    .replace(":", "")
+                    .replace("Z", "");
+            datestamp.put("until", until);
+        }
+
+        String set = null;
+        if (request.getSet() != null) {
+            set = request.getSet();
+            datestamp.put("set", set);
+        }
+
+        if (request.getMetadataPrefix() != null) {
+            datestamp.put("metadataPrefix", request.getMetadataPrefix()
+                    .getMetadataPrefix());
+        }
+
+        if (request.getVerb() != null) {
+            datestamp.put("verb", request.getVerb()
+                    .getTitle());
+        }
+
+        return datestamp;
+    }
 }

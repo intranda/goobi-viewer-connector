@@ -306,6 +306,8 @@ public class ConfigurationTest {
         Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.epicur.name()));
         Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.iv_overviewpage.name()));
         Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.iv_crowdsourcing.name()));
+        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.tei.name()));
+        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.cmdi.name()));
     }
 
     /**
@@ -403,5 +405,23 @@ public class ConfigurationTest {
         Assert.assertEquals(2, values.size());
         Assert.assertEquals(SolrConstants.DC, values.get(0));
         Assert.assertEquals(SolrConstants.DOCSTRCT, values.get(1));
+    }
+
+    /**
+     * @see Configuration#getContentApiUrl()
+     * @verifies return correct value
+     */
+    @Test
+    public void getContentApiUrl_shouldReturnCorrectValue() throws Exception {
+Assert.assertEquals("http://localhost/viewer/rest/content/", DataManager.getInstance().getConfiguration().getContentApiUrl());
+    }
+
+    /**
+     * @see Configuration#getHarvestUrl()
+     * @verifies return correct value
+     */
+    @Test
+    public void getHarvestUrl_shouldReturnCorrectValue() throws Exception {
+        Assert.assertEquals("http://localhost/viewer/harvest", DataManager.getInstance().getConfiguration().getHarvestUrl());
     }
 }
