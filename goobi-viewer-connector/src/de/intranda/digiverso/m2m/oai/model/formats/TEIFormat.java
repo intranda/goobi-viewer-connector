@@ -18,7 +18,6 @@ package de.intranda.digiverso.m2m.oai.model.formats;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -35,12 +34,13 @@ import org.slf4j.LoggerFactory;
 import de.intranda.digiverso.m2m.DataManager;
 import de.intranda.digiverso.m2m.oai.RequestHandler;
 import de.intranda.digiverso.m2m.oai.model.ErrorCode;
+import de.intranda.digiverso.m2m.oai.model.language.Language;
 import de.intranda.digiverso.m2m.utils.SolrConstants;
 import de.intranda.digiverso.m2m.utils.SolrSearchIndex;
 import de.intranda.digiverso.m2m.utils.Utils;
 
 /**
- * Format for TEI records.
+ * Format for TEI and CMDI records.
  */
 public class TEIFormat extends AbstractFormat {
 
@@ -159,8 +159,18 @@ public class TEIFormat extends AbstractFormat {
                         .getSchema(), xsi));
                 newDoc.addContent(teiRoot.cloneContent());
 
+                String iso3code = language;
+                // Make sure to add the ISO-3 language code
+                if (iso3code.length() == 2) {
+                    Language lang = DataManager.getInstance()
+                            .getLanguageHelper()
+                            .getLanguage(language);
+                    if (lang != null) {
+                        iso3code = lang.getIsoCode();
+                    }
+                }
                 Element record = new Element("record", xmlns);
-                Element header = getHeader(doc, null, handler, language);
+                Element header = getHeader(doc, null, handler, iso3code);
                 record.addContent(header);
                 Element metadata = new Element("metadata", xmlns);
                 metadata.addContent(newDoc);

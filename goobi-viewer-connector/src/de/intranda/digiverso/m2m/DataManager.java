@@ -18,6 +18,7 @@ package de.intranda.digiverso.m2m;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.intranda.digiverso.m2m.oai.model.language.LanguageHelper;
 import de.intranda.digiverso.m2m.utils.Configuration;
 import de.intranda.digiverso.m2m.utils.SolrSearchIndex;
 
@@ -32,6 +33,8 @@ public final class DataManager {
     private Configuration configuration;
 
     private SolrSearchIndex searchIndex;
+
+    private LanguageHelper languageHelper;
 
     public static DataManager getInstance() {
         DataManager dm = instance;
@@ -77,6 +80,23 @@ public final class DataManager {
         searchIndex.checkReloadNeeded();
 
         return searchIndex;
+    }
+
+    /**
+     * @return the languageHelper
+     */
+    public LanguageHelper getLanguageHelper() {
+        if (languageHelper == null) {
+            synchronized (lock) {
+                String configFolder = getConfiguration().getViewerConfigFolder();
+                if (!configFolder.endsWith("/")) {
+                    configFolder += '/';
+                }
+                languageHelper = new LanguageHelper(configFolder + "languages.xml");
+            }
+        }
+
+        return languageHelper;
     }
 
     /**
