@@ -147,7 +147,7 @@ public class Utils {
                 .build()) {
             HttpGet get = new HttpGet(url);
             Charset chars = Charset.forName(DEFAULT_ENCODING);
-            try (CloseableHttpResponse response = httpClient.execute(get); StringWriter writer = new StringWriter()) {
+            try (CloseableHttpResponse response = httpClient.execute(get)) {
                 return response.getStatusLine()
                         .getStatusCode();
             }
