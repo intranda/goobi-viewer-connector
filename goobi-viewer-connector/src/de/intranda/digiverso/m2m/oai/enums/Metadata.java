@@ -31,7 +31,9 @@ public enum Metadata {
     iv_crowdsourcing("iv_crowdsourcing", "http://www.intranda.com/intrandaviewer_overviewpage.xsd",
             "http://www.intranda.com/digiverso/intrandaviewer/crowdsourcing", true, false),
     tei("tei", "https://www.tei-c.org/release/xml/tei/custom/schema/xsd/tei_all.xsd", "http://www.tei-c.org/ns/1.0", true, false),
-    cmdi("cmd", "http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1271859438204/xsd", "http://www.clarin.eu/cmd/", true, false);
+    cmdi("cmd",
+            "http://www.clarin.eu/cmd/1 https://infra.clarin.eu/CMDI/1.x/xsd/cmd-envelop.xsd http://www.clarin.eu/cmd/1/profiles/clarin.eu:cr1:p_1380106710826 https://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/1.x/profiles/clarin.eu:cr1:p_1380106710826/xsd",
+            "http://www.clarin.eu/cmd/1", true, false);
 
     private String metadataPrefix;
     private String schema;
@@ -84,7 +86,8 @@ public enum Metadata {
 
     public static Metadata getByMetadataPrefix(String metadataPrefix) {
         for (Metadata m : Metadata.values()) {
-            if (m.getMetadataPrefix().equals(metadataPrefix)) {
+            if (m.getMetadataPrefix()
+                    .equals(metadataPrefix)) {
                 return m;
             }
         }
