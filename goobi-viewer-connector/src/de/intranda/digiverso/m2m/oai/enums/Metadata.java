@@ -31,7 +31,7 @@ public enum Metadata {
     iv_crowdsourcing("iv_crowdsourcing", "http://www.intranda.com/intrandaviewer_overviewpage.xsd",
             "http://www.intranda.com/digiverso/intrandaviewer/crowdsourcing", true, false),
     tei("tei", "https://www.tei-c.org/release/xml/tei/custom/schema/xsd/tei_all.xsd", "http://www.tei-c.org/ns/1.0", true, false),
-    cmdi("cmdi", "http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1271859438204/xsd", "http://www.clarin.eu/cmd/", true, false);
+    cmdi("cmd", "http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1271859438204/xsd", "http://www.clarin.eu/cmd/", true, false);
 
     private String metadataPrefix;
     private String schema;

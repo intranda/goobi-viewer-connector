@@ -246,13 +246,16 @@ public class SolrSearchIndex {
      * @param params
      * @param firstRow
      * @param numRows
+     * @param querySuffix
+     * @param
      * @return
      * @throws SolrServerException
      */
-    public SolrDocumentList getListIdentifiers(Map<String, String> params, int firstRow, int numRows) throws SolrServerException {
+    public SolrDocumentList getListIdentifiers(Map<String, String> params, int firstRow, int numRows, String querySuffix,
+            List<String> fieldStatistics) throws SolrServerException {
         try {
             QueryResponse qr = search(params.get("from"), params.get("until"), params.get("set"), params.get("metadataPrefix"), firstRow, numRows,
-                    false, null, null);
+                    false, querySuffix, fieldStatistics);
             return qr.getResults();
         } catch (IOException e) {
             logger.error(e.getMessage(), e);

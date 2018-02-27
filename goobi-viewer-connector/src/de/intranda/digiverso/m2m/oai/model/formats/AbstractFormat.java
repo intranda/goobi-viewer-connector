@@ -253,6 +253,7 @@ public abstract class AbstractFormat {
      * @param handler
      * @param firstRow
      * @param numRows
+     * @param fieldStatistics
      * @return
      * @throws SolrServerException
      */
@@ -260,7 +261,7 @@ public abstract class AbstractFormat {
         Map<String, String> datestamp = Utils.filterDatestampFromRequest(handler);
         SolrDocumentList listIdentifiers = DataManager.getInstance()
                 .getSearchIndex()
-                .getListIdentifiers(datestamp, firstRow, numRows);
+                .getListIdentifiers(datestamp, firstRow, numRows, null, null); // TODO
         if (listIdentifiers == null || listIdentifiers.isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
@@ -342,18 +343,20 @@ public abstract class AbstractFormat {
         }
         header.addContent(datestamp);
         // setSpec
-        List<String> setSpecFields = DataManager.getInstance()
-                .getConfiguration()
-                .getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix()
-                        .name());
-        if (!setSpecFields.isEmpty()) {
-            for (String setSpecField : setSpecFields) {
-                if (doc.containsKey(setSpecField)) {
-                    for (Object fieldValue : doc.getFieldValues(setSpecField)) {
-                        // TODO translation
-                        Element setSpec = new Element("setSpec", xmlns);
-                        setSpec.setText((String) fieldValue);
-                        header.addContent(setSpec);
+        if (handler.getMetadataPrefix() != null) {
+            List<String> setSpecFields = DataManager.getInstance()
+                    .getConfiguration()
+                    .getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix()
+                            .name());
+            if (!setSpecFields.isEmpty()) {
+                for (String setSpecField : setSpecFields) {
+                    if (doc.containsKey(setSpecField)) {
+                        for (Object fieldValue : doc.getFieldValues(setSpecField)) {
+                            // TODO translation
+                            Element setSpec = new Element("setSpec", xmlns);
+                            setSpec.setText((String) fieldValue);
+                            header.addContent(setSpec);
+                        }
                     }
                 }
             }

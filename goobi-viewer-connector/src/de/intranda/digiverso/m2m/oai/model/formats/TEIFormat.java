@@ -118,7 +118,7 @@ public class TEIFormat extends AbstractFormat {
                 .getStandardNameSpace();
         Element xmlListRecords = new Element(recordType, xmlns);
 
-        Namespace tei = Namespace.getNamespace(handler.getMetadataPrefix()
+        Namespace namespace = Namespace.getNamespace(handler.getMetadataPrefix()
                 .getMetadataPrefix(),
                 handler.getMetadataPrefix()
                         .getMetadataNamespace());
@@ -152,8 +152,18 @@ public class TEIFormat extends AbstractFormat {
 
                 org.jdom2.Document xmlDoc = Utils.getDocumentFromString(xml, null);
                 Element teiRoot = xmlDoc.getRootElement();
-                Element newDoc = new Element(handler.getMetadataPrefix()
-                        .getMetadataPrefix(), tei);
+                String elementName = null;
+                switch (handler.getMetadataPrefix()) {
+                    case tei:
+                        elementName = "tei";
+                        break;
+                    case cmdi:
+                        elementName = "CMD";
+                        break;
+                    default:
+                        break;
+                }
+                Element newDoc = new Element(elementName, namespace);
                 newDoc.addNamespaceDeclaration(xsi);
                 newDoc.setAttribute(new Attribute("schemaLocation", handler.getMetadataPrefix()
                         .getSchema(), xsi));
