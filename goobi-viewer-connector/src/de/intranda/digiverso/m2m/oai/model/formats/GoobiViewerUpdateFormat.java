@@ -191,9 +191,9 @@ public class GoobiViewerUpdateFormat extends AbstractFormat {
                 .getConfiguration()
                 .getStandardNameSpace();
         Namespace nsOverviewPage =
-                Namespace.getNamespace(Metadata.iv_overviewpage.getMetadataPrefix(), Metadata.iv_overviewpage.getMetadataNamespace());
+                Namespace.getNamespace(Metadata.iv_overviewpage.getMetadataNamespacePrefix(), Metadata.iv_overviewpage.getMetadataNamespaceUri());
         Namespace nsCrowdsourcingUpdates =
-                Namespace.getNamespace(Metadata.iv_crowdsourcing.getMetadataPrefix(), Metadata.iv_crowdsourcing.getMetadataNamespace());
+                Namespace.getNamespace(Metadata.iv_crowdsourcing.getMetadataNamespacePrefix(), Metadata.iv_crowdsourcing.getMetadataNamespaceUri());
         Element xmlListRecords = new Element(recordType, xmlns);
 
         int useNumRows = numRows;

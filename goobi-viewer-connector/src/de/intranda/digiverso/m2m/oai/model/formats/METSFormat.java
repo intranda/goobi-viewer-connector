@@ -110,7 +110,7 @@ public class METSFormat extends AbstractFormat {
                 .getStandardNameSpace();
         Element xmlListRecords = new Element(recordType, xmlns);
 
-        Namespace mets = Namespace.getNamespace(Metadata.mets.getMetadataPrefix(), Metadata.mets.getMetadataNamespace());
+        Namespace mets = Namespace.getNamespace(Metadata.mets.getMetadataNamespacePrefix(), Metadata.mets.getMetadataNamespaceUri());
         Namespace xsi = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
         Namespace mods = Namespace.getNamespace("mods", "http://www.loc.gov/mods/v3");
         Namespace dv = Namespace.getNamespace("dv", "http://dfg-viewer.de/");

@@ -119,9 +119,9 @@ public class TEIFormat extends AbstractFormat {
         Element xmlListRecords = new Element(recordType, xmlns);
 
         Namespace namespace = Namespace.getNamespace(handler.getMetadataPrefix()
-                .getMetadataPrefix(),
+                .getMetadataNamespacePrefix(),
                 handler.getMetadataPrefix()
-                        .getMetadataNamespace());
+                        .getMetadataNamespaceUri());
         Namespace xsi = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
 
         if (records.size() < numRows) {

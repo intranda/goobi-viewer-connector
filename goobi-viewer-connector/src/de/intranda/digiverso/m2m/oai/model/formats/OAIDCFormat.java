@@ -104,7 +104,7 @@ public class OAIDCFormat extends AbstractFormat {
         Namespace xmlns = DataManager.getInstance()
                 .getConfiguration()
                 .getStandardNameSpace();
-        Namespace nsOaiDoc = Namespace.getNamespace(Metadata.oai_dc.getMetadataPrefix(), Metadata.oai_dc.getMetadataNamespace());
+        Namespace nsOaiDoc = Namespace.getNamespace(Metadata.oai_dc.getMetadataNamespacePrefix(), Metadata.oai_dc.getMetadataNamespaceUri());
         Element xmlListRecords = new Element(recordType, xmlns);
 
         if (records.size() < numRows) {
@@ -147,7 +147,7 @@ public class OAIDCFormat extends AbstractFormat {
 
             // creating Element <oai_dc:dc ....> </oai_dc:dc>
             Element oai_dc = new Element("dc", nsOaiDoc);
-            Namespace nsDc = Namespace.getNamespace(Metadata.dc.getMetadataPrefix(), Metadata.dc.getMetadataNamespace());
+            Namespace nsDc = Namespace.getNamespace(Metadata.dc.getMetadataNamespacePrefix(), Metadata.dc.getMetadataNamespaceUri());
             oai_dc.addNamespaceDeclaration(nsDc);
             Namespace xsi = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
             oai_dc.addNamespaceDeclaration(xsi);

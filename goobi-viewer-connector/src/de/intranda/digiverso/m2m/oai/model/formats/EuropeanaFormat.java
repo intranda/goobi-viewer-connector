@@ -40,7 +40,7 @@ import de.intranda.digiverso.m2m.utils.Utils;
  * ESE
  */
 public class EuropeanaFormat extends OAIDCFormat {
-    
+
     /* (non-Javadoc)
      * @see de.intranda.digiverso.m2m.oai.model.formats.AbstractFormat#createListRecords(de.intranda.digiverso.m2m.oai.RequestHandler, int, int)
      */
@@ -58,7 +58,7 @@ public class EuropeanaFormat extends OAIDCFormat {
         return generateESE(qr.getResults(), qr.getResults()
                 .getNumFound(), firstRow, numRows, handler, "ListRecords");
     }
-    
+
     /* (non-Javadoc)
      * @see de.intranda.digiverso.m2m.oai.model.formats.AbstractFormat#createGetRecord(de.intranda.digiverso.m2m.oai.RequestHandler)
      */
@@ -98,9 +98,9 @@ public class EuropeanaFormat extends OAIDCFormat {
                 .getConfiguration()
                 .getStandardNameSpace();
         // Namespace nsOaiDc = Namespace.getNamespace(Metadata.oai_dc.getMetadataPrefix(), Metadata.oai_dc.getMetadataNamespace());
-        Namespace nsDc = Namespace.getNamespace(Metadata.dc.getMetadataPrefix(), Metadata.dc.getMetadataNamespace());
+        Namespace nsDc = Namespace.getNamespace(Metadata.dc.getMetadataNamespacePrefix(), Metadata.dc.getMetadataNamespaceUri());
         Namespace nsDcTerms = Namespace.getNamespace("dcterms", "http://purl.org/dc/terms/");
-        Namespace nsEuropeana = Namespace.getNamespace(Metadata.ese.getMetadataPrefix(), Metadata.ese.getMetadataNamespace());
+        Namespace nsEuropeana = Namespace.getNamespace(Metadata.ese.getMetadataNamespacePrefix(), Metadata.ese.getMetadataNamespaceUri());
 
         Element xmlListRecords = new Element(recordType, xmlns);
 

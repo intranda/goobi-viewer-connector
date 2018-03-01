@@ -106,14 +106,14 @@ public class LIDOFormat extends AbstractFormat {
      * @throws JDOMException
      * @throws SolrServerException
      */
-    private Element generateLido(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler, String recordType)
-            throws JDOMException, IOException, SolrServerException {
+    private static Element generateLido(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler,
+            String recordType) throws JDOMException, IOException, SolrServerException {
         Namespace xmlns = DataManager.getInstance()
                 .getConfiguration()
                 .getStandardNameSpace();
         Element xmlListRecords = new Element(recordType, xmlns);
 
-        Namespace lido = Namespace.getNamespace(Metadata.lido.getMetadataPrefix(), Metadata.lido.getMetadataNamespace());
+        Namespace lido = Namespace.getNamespace(Metadata.lido.getMetadataNamespacePrefix(), Metadata.lido.getMetadataNamespaceUri());
         Namespace xsi = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
 
         if (records.size() < numRows) {

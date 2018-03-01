@@ -214,6 +214,7 @@ public class OaiServlet extends HttpServlet {
                                 .getConfiguration()
                                 .getHitsPerTokenForMetadataFormat(handler.getMetadataPrefix()
                                         .name());
+                        logger.trace(handler.getMetadataPrefix().getMetadataPrefix());
                         switch (handler.getMetadataPrefix()) {
                             case oai_dc:
                                 root.addContent(new OAIDCFormat().createListRecords(handler, 0, hitsPerToken));

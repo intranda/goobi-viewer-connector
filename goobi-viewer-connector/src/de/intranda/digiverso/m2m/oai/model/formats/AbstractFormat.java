@@ -165,7 +165,7 @@ public abstract class AbstractFormat {
                 Element schema = new Element("schema", xmlns);
                 schema.setText(m.getSchema());
                 Element metadataNamespace = new Element("metadataNamespace", xmlns);
-                metadataNamespace.setText(m.getMetadataNamespace());
+                metadataNamespace.setText(m.getMetadataNamespaceUri());
                 metadataFormat.addContent(metadataPrefix);
                 metadataFormat.addContent(schema);
                 metadataFormat.addContent(metadataNamespace);
