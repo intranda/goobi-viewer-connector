@@ -58,6 +58,9 @@ import de.intranda.digiverso.m2m.utils.Utils;
 public abstract class AbstractFormat {
 
     private final static Logger logger = LoggerFactory.getLogger(AbstractFormat.class);
+    
+    protected static final Namespace XML = Namespace.getNamespace("xml", "http://www.w3.org/XML/1998/namespace");
+    protected static final Namespace XSI = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
 
     protected static long expiration = 259200000L; // 3 days
 

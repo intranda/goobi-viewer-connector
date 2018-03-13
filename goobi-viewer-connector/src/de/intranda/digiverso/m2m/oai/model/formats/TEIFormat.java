@@ -46,6 +46,9 @@ public class TEIFormat extends AbstractFormat {
 
     private static final Logger logger = LoggerFactory.getLogger(TEIFormat.class);
 
+    static final Namespace CMDI = Namespace.getNamespace("cmd", "http://www.clarin.eu/cmd/1");
+    static final Namespace COMPONENTS = Namespace.getNamespace("cmdp", "http://www.clarin.eu/cmd/1/profiles/clarin.eu:cr1:p_1380106710826");
+
     /* (non-Javadoc)
      * @see de.intranda.digiverso.m2m.oai.model.formats.AbstractFormat#createListRecords(de.intranda.digiverso.m2m.oai.RequestHandler, int, int)
      */
@@ -54,8 +57,7 @@ public class TEIFormat extends AbstractFormat {
         // &stats=true&stats.field=LANGUAGE
         QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRow, numRows, false,
                 " AND " + SolrConstants.LANGUAGE + ":*", Collections.singletonList(SolrConstants.LANGUAGE));
-        if (qr.getResults()
-                .isEmpty()) {
+        if (qr.getResults().isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
         long numFound = SolrSearchIndex.getFieldCount(qr, SolrConstants.LANGUAGE);
@@ -113,16 +115,11 @@ public class TEIFormat extends AbstractFormat {
      */
     private static Element generateTeiCmdi(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler,
             String recordType, String requestedLanguage) throws JDOMException, IOException, SolrServerException {
-        Namespace xmlns = DataManager.getInstance()
-                .getConfiguration()
-                .getStandardNameSpace();
+        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element xmlListRecords = new Element(recordType, xmlns);
 
-        Namespace namespace = Namespace.getNamespace(handler.getMetadataPrefix()
-                .getMetadataNamespacePrefix(),
-                handler.getMetadataPrefix()
-                        .getMetadataNamespaceUri());
-        Namespace xsi = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+        Namespace namespace = Namespace.getNamespace(handler.getMetadataPrefix().getMetadataNamespacePrefix(),
+                handler.getMetadataPrefix().getMetadataNamespaceUri());
 
         if (records.size() < numRows) {
             numRows = records.size();
@@ -133,16 +130,14 @@ public class TEIFormat extends AbstractFormat {
                 languages = SolrSearchIndex.getMetadataValues(doc, SolrConstants.LANGUAGE);
             }
             for (String language : languages) {
-                String url = new StringBuilder(DataManager.getInstance()
-                        .getConfiguration()
-                        .getContentApiUrl()).append(handler.getMetadataPrefix()
-                                .getMetadataPrefix())
-                                .append('/')
-                                .append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))
-                                .append('/')
-                                .append(language)
-                                .append('/')
-                                .toString();
+                String url = new StringBuilder(DataManager.getInstance().getConfiguration().getContentApiUrl())
+                        .append(handler.getMetadataPrefix().getMetadataPrefix())
+                        .append('/')
+                        .append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))
+                        .append('/')
+                        .append(language)
+                        .append('/')
+                        .toString();
                 // logger.trace(url);
                 String xml = Utils.getWebContent(url);
                 if (StringUtils.isEmpty(xml)) {
@@ -152,29 +147,33 @@ public class TEIFormat extends AbstractFormat {
 
                 org.jdom2.Document xmlDoc = Utils.getDocumentFromString(xml, null);
                 Element teiRoot = xmlDoc.getRootElement();
-                String elementName = null;
+                Element newDoc;
                 switch (handler.getMetadataPrefix()) {
                     case tei:
-                        elementName = "tei";
+                        newDoc = new Element("tei", namespace);
+                        newDoc.addNamespaceDeclaration(XSI);
+                        newDoc.setAttribute(new Attribute("schemaLocation", handler.getMetadataPrefix().getSchema(), XSI));
                         break;
                     case cmdi:
-                        elementName = "CMD";
+                        newDoc = new Element("CMD", CMDI);
+                        newDoc.addNamespaceDeclaration(XSI);
+                        newDoc.addNamespaceDeclaration(COMPONENTS);
+                        newDoc.setAttribute("CMDVersion", "1.2");
+                        newDoc.setAttribute(new Attribute("schemaLocation",
+                                "http://www.clarin.eu/cmd/1 https://infra.clarin.eu/CMDI/1.x/xsd/cmd-envelop.xsd http://www.clarin.eu/cmd/1/profiles/clarin.eu:cr1:p_1380106710826 https://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/1.x/profiles/clarin.eu:cr1:p_1380106710826/xsd",
+                                XSI));
                         break;
                     default:
-                        break;
+                        xmlListRecords.addContent(new ErrorCode().getCannotDisseminateFormat());
+                        continue;
                 }
-                Element newDoc = new Element(elementName, namespace);
-                newDoc.addNamespaceDeclaration(xsi);
-                newDoc.setAttribute(new Attribute("schemaLocation", handler.getMetadataPrefix()
-                        .getSchema(), xsi));
+
                 newDoc.addContent(teiRoot.cloneContent());
 
                 String iso3code = language;
                 // Make sure to add the ISO-3 language code
                 if (iso3code.length() == 2) {
-                    Language lang = DataManager.getInstance()
-                            .getLanguageHelper()
-                            .getLanguage(language);
+                    Language lang = DataManager.getInstance().getLanguageHelper().getLanguage(language);
                     if (lang != null) {
                         iso3code = lang.getIsoCode();
                     }
@@ -211,16 +210,12 @@ public class TEIFormat extends AbstractFormat {
      */
     protected static Element getHeader(SolrDocument doc, SolrDocument topstructDoc, RequestHandler handler, String language)
             throws SolrServerException {
-        Namespace xmlns = DataManager.getInstance()
-                .getConfiguration()
-                .getStandardNameSpace();
+        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element header = new Element("header", xmlns);
         // identifier
         Element identifier = new Element("identifier", xmlns);
-        identifier.setText(DataManager.getInstance()
-                .getConfiguration()
-                .getOaiIdentifier()
-                .get("repositoryIdentifier") + (String) doc.getFieldValue(SolrConstants.PI) + '_' + language);
+        identifier.setText(DataManager.getInstance().getConfiguration().getOaiIdentifier().get("repositoryIdentifier")
+                + (String) doc.getFieldValue(SolrConstants.PI) + '_' + language);
         header.addContent(identifier);
         // datestamp
         Element datestamp = new Element("datestamp", xmlns);
@@ -228,16 +223,12 @@ public class TEIFormat extends AbstractFormat {
         long timestampModified = SolrSearchIndex.getLatestValidDateUpdated(topstructDoc != null ? topstructDoc : doc, untilTimestamp);
         datestamp.setText(Utils.parseDate(timestampModified));
         if (StringUtils.isEmpty(datestamp.getText()) && doc.getFieldValue(SolrConstants.ISANCHOR) != null) {
-            datestamp.setText(Utils.parseDate(DataManager.getInstance()
-                    .getSearchIndex()
-                    .getLatestVolumeTimestamp(doc, untilTimestamp)));
+            datestamp.setText(Utils.parseDate(DataManager.getInstance().getSearchIndex().getLatestVolumeTimestamp(doc, untilTimestamp)));
         }
         header.addContent(datestamp);
         // setSpec
-        List<String> setSpecFields = DataManager.getInstance()
-                .getConfiguration()
-                .getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix()
-                        .name());
+        List<String> setSpecFields =
+                DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix().name());
         if (!setSpecFields.isEmpty()) {
             for (String setSpecField : setSpecFields) {
                 if (doc.containsKey(setSpecField)) {
