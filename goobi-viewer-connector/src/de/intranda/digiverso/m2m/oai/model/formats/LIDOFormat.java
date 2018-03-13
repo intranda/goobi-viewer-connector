@@ -52,13 +52,11 @@ public class LIDOFormat extends AbstractFormat {
     public Element createListRecords(RequestHandler handler, int firstRow, int numRows) throws IOException, SolrServerException {
         QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRow, numRows, false,
                 " AND " + SolrConstants.SOURCEDOCFORMAT + ":LIDO", null);
-        if (qr.getResults()
-                .isEmpty()) {
+        if (qr.getResults().isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
         try {
-            Element xmlListRecords = generateLido(qr.getResults(), qr.getResults()
-                    .getNumFound(), firstRow, numRows, handler, "ListRecords");
+            Element xmlListRecords = generateLido(qr.getResults(), qr.getResults().getNumFound(), firstRow, numRows, handler, "ListRecords");
             return xmlListRecords;
         } catch (IOException e) {
             logger.error(e.getMessage());
@@ -108,22 +106,18 @@ public class LIDOFormat extends AbstractFormat {
      */
     private static Element generateLido(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler,
             String recordType) throws JDOMException, IOException, SolrServerException {
-        Namespace xmlns = DataManager.getInstance()
-                .getConfiguration()
-                .getStandardNameSpace();
+        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element xmlListRecords = new Element(recordType, xmlns);
 
         Namespace lido = Namespace.getNamespace(Metadata.lido.getMetadataNamespacePrefix(), Metadata.lido.getMetadataNamespaceUri());
-        Namespace xsi = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
 
         if (records.size() < numRows) {
             numRows = records.size();
         }
         for (SolrDocument doc : records) {
-            String url = new StringBuilder(DataManager.getInstance()
-                    .getConfiguration()
-                    .getDocumentResolverUrl()).append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))
-                            .toString();
+            String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl())
+                    .append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))
+                    .toString();
             String xml = Utils.getWebContent(url);
             if (StringUtils.isEmpty(xml)) {
                 xmlListRecords.addContent(new ErrorCode().getCannotDisseminateFormat());
@@ -133,9 +127,9 @@ public class LIDOFormat extends AbstractFormat {
             org.jdom2.Document xmlDoc = Utils.getDocumentFromString(xml, null);
             Element xmlRoot = xmlDoc.getRootElement();
             Element newLido = new Element(Metadata.lido.getMetadataPrefix(), lido);
-            newLido.addNamespaceDeclaration(xsi);
+            newLido.addNamespaceDeclaration(XSI);
             newLido.setAttribute(
-                    new Attribute("schemaLocation", "http://www.lido-schema.org http://www.lido-schema.org/schema/v1.0/lido-v1.0.xsd", xsi));
+                    new Attribute("schemaLocation", "http://www.lido-schema.org http://www.lido-schema.org/schema/v1.0/lido-v1.0.xsd", XSI));
             newLido.addContent(xmlRoot.cloneContent());
 
             Element record = new Element("record", xmlns);

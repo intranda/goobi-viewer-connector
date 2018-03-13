@@ -51,13 +51,11 @@ public class METSFormat extends AbstractFormat {
     public Element createListRecords(RequestHandler handler, int firstRow, int numRows) throws IOException, SolrServerException {
         QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRow, numRows, false,
                 " AND " + SolrConstants.SOURCEDOCFORMAT + ":METS", null);
-        if (qr.getResults()
-                .isEmpty()) {
+        if (qr.getResults().isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
         try {
-            return generateMets(qr.getResults(), qr.getResults()
-                    .getNumFound(), firstRow, numRows, handler, "ListRecords");
+            return generateMets(qr.getResults(), qr.getResults().getNumFound(), firstRow, numRows, handler, "ListRecords");
         } catch (IOException e) {
             logger.error(e.getMessage());
             return new ErrorCode().getIdDoesNotExist();
@@ -105,13 +103,10 @@ public class METSFormat extends AbstractFormat {
      */
     private static Element generateMets(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler,
             String recordType) throws JDOMException, IOException, SolrServerException {
-        Namespace xmlns = DataManager.getInstance()
-                .getConfiguration()
-                .getStandardNameSpace();
+        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element xmlListRecords = new Element(recordType, xmlns);
 
         Namespace mets = Namespace.getNamespace(Metadata.mets.getMetadataNamespacePrefix(), Metadata.mets.getMetadataNamespaceUri());
-        Namespace xsi = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
         Namespace mods = Namespace.getNamespace("mods", "http://www.loc.gov/mods/v3");
         Namespace dv = Namespace.getNamespace("dv", "http://dfg-viewer.de/");
         Namespace xlink = Namespace.getNamespace("xlink", "http://www.w3.org/1999/xlink");
@@ -120,10 +115,9 @@ public class METSFormat extends AbstractFormat {
             numRows = records.size();
         }
         for (SolrDocument doc : records) {
-            String url = new StringBuilder(DataManager.getInstance()
-                    .getConfiguration()
-                    .getDocumentResolverUrl()).append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))
-                            .toString();
+            String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl())
+                    .append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))
+                    .toString();
             String xml = Utils.getWebContent(url);
             if (StringUtils.isEmpty(xml)) {
                 xmlListRecords.addContent(new ErrorCode().getCannotDisseminateFormat());
@@ -133,13 +127,13 @@ public class METSFormat extends AbstractFormat {
             org.jdom2.Document metsFile = Utils.getDocumentFromString(xml, null);
             Element mets_root = metsFile.getRootElement();
             Element newmets = new Element(Metadata.mets.getMetadataPrefix(), mets);
-            newmets.addNamespaceDeclaration(xsi);
+            newmets.addNamespaceDeclaration(XSI);
             newmets.addNamespaceDeclaration(mods);
             newmets.addNamespaceDeclaration(dv);
             newmets.addNamespaceDeclaration(xlink);
             newmets.setAttribute("schemaLocation",
                     "http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-3.xsd http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/version17/mets.v1-7.xsd",
-                    xsi);
+                    XSI);
             newmets.addContent(mets_root.cloneContent());
 
             Element record = new Element("record", xmlns);

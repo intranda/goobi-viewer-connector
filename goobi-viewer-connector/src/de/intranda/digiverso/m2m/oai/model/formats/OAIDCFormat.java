@@ -54,16 +54,11 @@ public class OAIDCFormat extends AbstractFormat {
     @Override
     public Element createListRecords(RequestHandler handler, int firstRow, int numRows) throws SolrServerException {
         QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRow, numRows, false,
-                SolrSearchIndex.getAdditionalDocstructsQuerySuffix(DataManager.getInstance()
-                        .getConfiguration()
-                        .getAdditionalDocstructTypes()),
-                null);
-        if (qr.getResults()
-                .isEmpty()) {
+                SolrSearchIndex.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes()), null);
+        if (qr.getResults().isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
-        return generateDC(qr.getResults(), qr.getResults()
-                .getNumFound(), firstRow, numRows, handler, "ListRecords");
+        return generateDC(qr.getResults(), qr.getResults().getNumFound(), firstRow, numRows, handler, "ListRecords");
     }
 
     /* (non-Javadoc)
@@ -101,9 +96,7 @@ public class OAIDCFormat extends AbstractFormat {
      */
     private Element generateDC(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler, String recordType)
             throws SolrServerException {
-        Namespace xmlns = DataManager.getInstance()
-                .getConfiguration()
-                .getStandardNameSpace();
+        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Namespace nsOaiDoc = Namespace.getNamespace(Metadata.oai_dc.getMetadataNamespacePrefix(), Metadata.oai_dc.getMetadataNamespaceUri());
         Element xmlListRecords = new Element(recordType, xmlns);
 
@@ -149,14 +142,12 @@ public class OAIDCFormat extends AbstractFormat {
             Element oai_dc = new Element("dc", nsOaiDoc);
             Namespace nsDc = Namespace.getNamespace(Metadata.dc.getMetadataNamespacePrefix(), Metadata.dc.getMetadataNamespaceUri());
             oai_dc.addNamespaceDeclaration(nsDc);
-            Namespace xsi = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
-            oai_dc.addNamespaceDeclaration(xsi);
-            oai_dc.setAttribute("schemaLocation", "http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd", xsi);
+            oai_dc.addNamespaceDeclaration(XSI);
+            oai_dc.setAttribute("schemaLocation", "http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd", XSI);
 
             // Configured fields
-            List<FieldConfiguration> fieldConfigurations = DataManager.getInstance()
-                    .getConfiguration()
-                    .getFieldForMetadataFormat(Metadata.oai_dc.name());
+            List<FieldConfiguration> fieldConfigurations =
+                    DataManager.getInstance().getConfiguration().getFieldForMetadataFormat(Metadata.oai_dc.name());
             if (fieldConfigurations != null && !fieldConfigurations.isEmpty()) {
                 for (FieldConfiguration fieldConfiguration : fieldConfigurations) {
                     boolean added = false;
@@ -168,17 +159,14 @@ public class OAIDCFormat extends AbstractFormat {
                             switch (fieldConfiguration.getFieldName()) {
                                 case "identifier":
                                     if (StringUtils.isNotEmpty((String) doc.getFieldValue(SolrConstants.URN))) {
-                                        singleValue = DataManager.getInstance()
-                                                .getConfiguration()
-                                                .getUrnResolverUrl() + (String) doc.getFieldValue(SolrConstants.URN);
+                                        singleValue = DataManager.getInstance().getConfiguration().getUrnResolverUrl()
+                                                + (String) doc.getFieldValue(SolrConstants.URN);
                                     } else if (StringUtils.isNotEmpty((String) doc.getFieldValue(SolrConstants.PI))) {
-                                        singleValue = DataManager.getInstance()
-                                                .getConfiguration()
-                                                .getPiResolverUrl() + (String) doc.getFieldValue(SolrConstants.PI);
+                                        singleValue = DataManager.getInstance().getConfiguration().getPiResolverUrl()
+                                                + (String) doc.getFieldValue(SolrConstants.PI);
                                     } else if (StringUtils.isNotEmpty((String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))) {
-                                        singleValue = DataManager.getInstance()
-                                                .getConfiguration()
-                                                .getPiResolverUrl() + (String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT);
+                                        singleValue = DataManager.getInstance().getConfiguration().getPiResolverUrl()
+                                                + (String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT);
                                     }
                                     break;
                                 case "rights":
@@ -209,22 +197,17 @@ public class OAIDCFormat extends AbstractFormat {
                                         StringBuilder sbValue = new StringBuilder();
                                         if (fieldConfiguration.getPrefix() != null) {
                                             sbValue.append(MessageResourceBundle.getTranslation(fieldConfiguration.getPrefix(),
-                                                    DataManager.getInstance()
-                                                            .getConfiguration()
-                                                            .getDefaultLocale()));
+                                                    DataManager.getInstance().getConfiguration().getDefaultLocale()));
                                         }
                                         if (fieldConfiguration.isTranslate()) {
-                                            sbValue.append(MessageResourceBundle.getTranslation(String.valueOf(fieldValue), DataManager.getInstance()
-                                                    .getConfiguration()
-                                                    .getDefaultLocale()));
+                                            sbValue.append(MessageResourceBundle.getTranslation(String.valueOf(fieldValue),
+                                                    DataManager.getInstance().getConfiguration().getDefaultLocale()));
                                         } else {
                                             sbValue.append(String.valueOf(fieldValue));
                                         }
                                         if (fieldConfiguration.getSuffix() != null) {
                                             sbValue.append(MessageResourceBundle.getTranslation(fieldConfiguration.getSuffix(),
-                                                    DataManager.getInstance()
-                                                            .getConfiguration()
-                                                            .getDefaultLocale()));
+                                                    DataManager.getInstance().getConfiguration().getDefaultLocale()));
                                         }
                                         eleField.setText(sbValue.toString());
                                         oai_dc.addContent(eleField);
@@ -234,15 +217,11 @@ public class OAIDCFormat extends AbstractFormat {
 
                             } else {
                                 Element eleField = new Element(fieldConfiguration.getFieldName(), nsDc);
-                                singleValue = String.valueOf(doc.getFieldValues(fieldConfiguration.getValueSource())
-                                        .iterator()
-                                        .next());
+                                singleValue = String.valueOf(doc.getFieldValues(fieldConfiguration.getValueSource()).iterator().next());
                                 // If no value found use the topstruct's value (if so configured)
                                 if (fieldConfiguration.isUseTopstructValueIfNoneFound() && singleValue == null && topstructDoc != null
                                         && topstructDoc.getFieldValues(fieldConfiguration.getFieldName()) != null) {
-                                    singleValue = String.valueOf(topstructDoc.getFieldValues(fieldConfiguration.getFieldName())
-                                            .iterator()
-                                            .next());
+                                    singleValue = String.valueOf(topstructDoc.getFieldValues(fieldConfiguration.getFieldName()).iterator().next());
                                 }
                             }
                         }
@@ -267,21 +246,18 @@ public class OAIDCFormat extends AbstractFormat {
                         if (singleValue != null) {
                             Element eleField = new Element(fieldConfiguration.getFieldName(), nsDc);
                             if (fieldConfiguration.isTranslate()) {
-                                eleField.setText(MessageResourceBundle.getTranslation(singleValue, DataManager.getInstance()
-                                        .getConfiguration()
-                                        .getDefaultLocale()));
+                                eleField.setText(MessageResourceBundle.getTranslation(singleValue,
+                                        DataManager.getInstance().getConfiguration().getDefaultLocale()));
                             } else {
                                 StringBuilder sbValue = new StringBuilder();
                                 if (fieldConfiguration.getPrefix() != null) {
-                                    sbValue.append(MessageResourceBundle.getTranslation(fieldConfiguration.getPrefix(), DataManager.getInstance()
-                                            .getConfiguration()
-                                            .getDefaultLocale()));
+                                    sbValue.append(MessageResourceBundle.getTranslation(fieldConfiguration.getPrefix(),
+                                            DataManager.getInstance().getConfiguration().getDefaultLocale()));
                                 }
                                 sbValue.append(singleValue);
                                 if (fieldConfiguration.getSuffix() != null) {
-                                    sbValue.append(MessageResourceBundle.getTranslation(fieldConfiguration.getSuffix(), DataManager.getInstance()
-                                            .getConfiguration()
-                                            .getDefaultLocale()));
+                                    sbValue.append(MessageResourceBundle.getTranslation(fieldConfiguration.getSuffix(),
+                                            DataManager.getInstance().getConfiguration().getDefaultLocale()));
                                 }
                                 eleField.setText(sbValue.toString());
                             }
@@ -315,8 +291,7 @@ public class OAIDCFormat extends AbstractFormat {
         try {
             SolrDocumentList hits = solr.search(SolrConstants.IDDOC + ":" + iddocParent);
             if (hits != null && !hits.isEmpty()) {
-                return (String) hits.get(0)
-                        .getFirstValue(SolrConstants.TITLE);
+                return (String) hits.get(0).getFirstValue(SolrConstants.TITLE);
             }
         } catch (SolrServerException e) {
             logger.error(e.getMessage(), e);
@@ -334,8 +309,7 @@ public class OAIDCFormat extends AbstractFormat {
      */
     protected static Element generateDcSource(SolrDocument doc, SolrDocument topstructDoc, SolrDocument anchorDoc, Namespace namespace) {
         if (topstructDoc == null) {
-            logger.debug(doc.getFieldValueMap()
-                    .toString());
+            logger.debug(doc.getFieldValueMap().toString());
             throw new IllegalArgumentException("topstructDoc may not be null");
         }
 
@@ -404,25 +378,15 @@ public class OAIDCFormat extends AbstractFormat {
         }
 
         StringBuilder sbSourceString = new StringBuilder();
-        sbSourceString.append(sbSourceCreators.toString())
-                .append(": ")
-                .append(sbSourceTitle.toString());
+        sbSourceString.append(sbSourceCreators.toString()).append(": ").append(sbSourceTitle.toString());
 
         if (doc == topstructDoc || doc == anchorDoc) {
             // Only top level docs should display publisher information
-            sbSourceString.append(", ")
-                    .append(sourcePlacepublish)
-                    .append(": ")
-                    .append(sourcePublisher)
-                    .append(' ')
-                    .append(sourceYearpublish);
+            sbSourceString.append(", ").append(sourcePlacepublish).append(": ").append(sourcePublisher).append(' ').append(sourceYearpublish);
             // sbSourceString.append('.');
         } else if (orderLabelFirst != null && orderLabelLast != null && !"-".equals(orderLabelFirst.trim()) && !"-".equals(orderLabelLast.trim())) {
             // Add page range for lower level docstructs, if available
-            sbSourceString.append(", P ")
-                    .append(orderLabelFirst)
-                    .append(" - ")
-                    .append(orderLabelLast);
+            sbSourceString.append(", P ").append(orderLabelFirst).append(" - ").append(orderLabelLast);
         }
 
         sbSourceString.append('.');
@@ -437,11 +401,9 @@ public class OAIDCFormat extends AbstractFormat {
     @Override
     public long getTotalHits(Map<String, String> params) throws IOException, SolrServerException {
         String querySuffix = "";
-        if (!Verb.ListIdentifiers.getTitle()
-                .equals(params.get("verb"))) {
-            querySuffix += SolrSearchIndex.getAdditionalDocstructsQuerySuffix(DataManager.getInstance()
-                    .getConfiguration()
-                    .getAdditionalDocstructTypes());
+        if (!Verb.ListIdentifiers.getTitle().equals(params.get("verb"))) {
+            querySuffix +=
+                    SolrSearchIndex.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes());
         }
         // Query Solr index for the total hits number
         return solr.getTotalHitNumber(params, false, querySuffix, null);

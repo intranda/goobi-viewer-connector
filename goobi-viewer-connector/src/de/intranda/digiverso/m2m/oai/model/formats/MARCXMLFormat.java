@@ -36,7 +36,7 @@ import de.intranda.digiverso.m2m.oai.model.ErrorCode;
  * MARCXML
  */
 public class MARCXMLFormat extends METSFormat {
-    
+
     private final static Logger logger = LoggerFactory.getLogger(MARCXMLFormat.class);
 
     /* (non-Javadoc)
@@ -45,8 +45,7 @@ public class MARCXMLFormat extends METSFormat {
     @Override
     public Element createListRecords(RequestHandler handler, int firstRow, int numRows) throws IOException, SolrServerException {
         Element mets = super.createListRecords(handler, firstRow, numRows);
-        if (mets.getName()
-                .equals("error")) {
+        if (mets.getName().equals("error")) {
             return mets;
         }
         return generateMarc(mets, "ListRecords");
@@ -68,7 +67,6 @@ public class MARCXMLFormat extends METSFormat {
      * @return
      */
     private static Element generateMarc(Element mets, String recordType) {
-        Namespace xsi = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
         Namespace xmlns = Namespace.getNamespace("http://www.openarchives.org/OAI/2.0/");
         Namespace metsNamespace = Namespace.getNamespace("mets", "http://www.loc.gov/METS/");
         Namespace marc = Namespace.getNamespace("marc", "http://www.loc.gov/MARC21/slim");
@@ -95,9 +93,7 @@ public class MARCXMLFormat extends METSFormat {
 
             marcDoc.setRootElement(newmods);
 
-            String filename = DataManager.getInstance()
-                    .getConfiguration()
-                    .getMods2MarcXsl();
+            String filename = DataManager.getInstance().getConfiguration().getMods2MarcXsl();
 
             try (FileInputStream fis = new FileInputStream(filename)) {
                 XSLTransformer transformer = new XSLTransformer(fis);
@@ -111,9 +107,9 @@ public class MARCXMLFormat extends METSFormat {
 
                 Element metadata = new Element("metadata", xmlns);
                 Element answer = new Element("record", marc);
-                answer.addNamespaceDeclaration(xsi);
+                answer.addNamespaceDeclaration(XSI);
                 answer.setAttribute("schemaLocation", "http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd",
-                        xsi);
+                        XSI);
                 answer.addContent(root.cloneContent());
                 metadata.addContent(answer);
                 record.addContent(metadata);
@@ -131,12 +127,9 @@ public class MARCXMLFormat extends METSFormat {
         }
         if (token != null) {
             Element resumption = new Element("resumptionToken", xmlns);
-            resumption.setAttribute("expirationDate", token.getAttribute("expirationDate")
-                    .getValue());
-            resumption.setAttribute("completeListSize", token.getAttribute("completeListSize")
-                    .getValue());
-            resumption.setAttribute("cursor", token.getAttribute("cursor")
-                    .getValue());
+            resumption.setAttribute("expirationDate", token.getAttribute("expirationDate").getValue());
+            resumption.setAttribute("completeListSize", token.getAttribute("completeListSize").getValue());
+            resumption.setAttribute("cursor", token.getAttribute("cursor").getValue());
             resumption.setText(token.getValue());
             xmlListRecords.addContent(resumption);
         }
