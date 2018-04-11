@@ -204,7 +204,7 @@ public class OaiServlet extends HttpServlet {
                                 root.addContent(new METSFormat().createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
                                 break;
                             case marcxml:
-                                root.addContent(new LIDOFormat().createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
+                                root.addContent(new MARCXMLFormat().createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
                                 break;
                             case epicur:
                                 root.addContent(new EpicurFormat().createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
