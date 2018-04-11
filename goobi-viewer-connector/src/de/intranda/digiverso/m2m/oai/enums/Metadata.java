@@ -26,10 +26,10 @@ public enum Metadata {
     lido("lido", "http://www.lido-schema.org/schema/v1.0/lido-v1.0.xsd", "lido", "http://www.lido-schema.org", true, true),
     ese("europeana", "http://www.europeana.eu/schemas/ese/ESE-V3.4.xsd", "europeana", "http://www.europeana.eu/schemas/ese/", true, false),
     // TODO final namespaces
-    iv_overviewpage("iv_overviewpage", "http://www.intranda.com/intrandaviewer_overviewpage.xsd",
-            "http://www.intranda.com/digiverso/intrandaviewer/overviewpage", "iv_overviewpage", true, false),
-    iv_crowdsourcing("iv_crowdsourcing", "http://www.intranda.com/intrandaviewer_overviewpage.xsd",
-            "http://www.intranda.com/digiverso/intrandaviewer/crowdsourcing", "iv_crowdsourcing", true, false),
+    iv_overviewpage("iv_overviewpage", "http://www.intranda.com/intrandaviewer_overviewpage.xsd", "iv_overviewpage",
+            "http://www.intranda.com/digiverso/intrandaviewer/overviewpage", true, false),
+    iv_crowdsourcing("iv_crowdsourcing", "http://www.intranda.com/intrandaviewer_overviewpage.xsd", "iv_crowdsourcing",
+            "http://www.intranda.com/digiverso/intrandaviewer/crowdsourcing", true, false),
     tei("tei", "https://www.tei-c.org/release/xml/tei/custom/schema/xsd/tei_all.xsd", "tei", "http://www.tei-c.org/ns/1.0", true, false),
     cmdi("cmdi",
             "http://www.clarin.eu/cmd/1 https://infra.clarin.eu/CMDI/1.x/xsd/cmd-envelop.xsd http://www.clarin.eu/cmd/1/profiles/clarin.eu:cr1:p_1380106710826 https://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/1.x/profiles/clarin.eu:cr1:p_1380106710826/xsd",
@@ -98,8 +98,7 @@ public enum Metadata {
 
     public static Metadata getByMetadataPrefix(String metadataPrefix) {
         for (Metadata m : Metadata.values()) {
-            if (m.getMetadataPrefix()
-                    .equals(metadataPrefix)) {
+            if (m.getMetadataPrefix().equals(metadataPrefix)) {
                 return m;
             }
         }
