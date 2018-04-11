@@ -48,7 +48,7 @@ public class MessageResourceBundle extends ResourceBundle {
             bundle = ResourceBundle.getBundle("de.intranda.digiverso.m2m.messages.messages", locale);
         }
         if (localBundle == null || !localBundle.getLocale().equals(locale)) {
-            logger.trace("Reloading local resource bundle for '{}'...", locale.getLanguage());
+            // logger.trace("Reloading local resource bundle for '{}'...", locale.getLanguage());
             localBundle = loadLocalResourceBundle(locale);
         }
     }

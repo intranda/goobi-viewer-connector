@@ -47,15 +47,13 @@ public class GoobiViewerUpdateFormat extends AbstractFormat {
     private static final Logger logger = LoggerFactory.getLogger(GoobiViewerUpdateFormat.class);
 
     /* (non-Javadoc)
-     * @see de.intranda.digiverso.m2m.oai.model.formats.AbstractFormat#createListRecords(de.intranda.digiverso.m2m.oai.RequestHandler, int, int)
+     * @see de.intranda.digiverso.m2m.oai.model.formats.AbstractFormat#createListRecords(de.intranda.digiverso.m2m.oai.RequestHandler, int, int, int, java.lang.String)
      */
     @Override
-    public Element createListRecords(RequestHandler handler, int firstRow, int numRows) throws IOException, SolrServerException {
+    public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
+            throws IOException, SolrServerException {
         StringBuilder sbUrl = new StringBuilder(100);
-        sbUrl.append(DataManager.getInstance()
-                .getConfiguration()
-                .getHarvestUrl())
-                .append("?action=");
+        sbUrl.append(DataManager.getInstance().getConfiguration().getHarvestUrl()).append("?action=");
         switch (handler.getMetadataPrefix()) {
             case iv_overviewpage:
                 sbUrl.append("getlist_overviewpage");
@@ -67,17 +65,12 @@ public class GoobiViewerUpdateFormat extends AbstractFormat {
                 return new ErrorCode().getBadArgument();
         }
         if (handler.getFrom() != null) {
-            sbUrl.append("&from=")
-                    .append(handler.getFrom());
+            sbUrl.append("&from=").append(handler.getFrom());
         }
         if (handler.getUntil() != null) {
-            sbUrl.append("&until=")
-                    .append(handler.getUntil());
+            sbUrl.append("&until=").append(handler.getUntil());
         }
-        sbUrl.append("&first=")
-                .append(firstRow)
-                .append("&pageSize=")
-                .append(numRows);
+        sbUrl.append("&first=").append(firstVirtualRow).append("&pageSize=").append(numRows);
 
         String rawJSON = Utils.getWebContent(sbUrl.toString());
         JSONArray jsonArray = null;
@@ -96,7 +89,7 @@ public class GoobiViewerUpdateFormat extends AbstractFormat {
             return new ErrorCode().getNoRecordsMatch();
         }
         try {
-            return generateGoobiViewerUpdates(jsonArray, totalHits, firstRow, numRows, handler, "ListRecords");
+            return generateGoobiViewerUpdates(jsonArray, totalHits, firstVirtualRow, numRows, handler, "ListRecords");
         } catch (JDOMException e) {
             throw new IOException(e.getMessage());
         }
@@ -113,20 +106,14 @@ public class GoobiViewerUpdateFormat extends AbstractFormat {
             return new ErrorCode().getBadArgument();
         }
         try {
-            StringBuilder sbUrlRoot = new StringBuilder(DataManager.getInstance()
-                    .getConfiguration()
-                    .getHarvestUrl()).append('?');
+            StringBuilder sbUrlRoot = new StringBuilder(DataManager.getInstance().getConfiguration().getHarvestUrl()).append('?');
             if (handler.getFrom() != null) {
-                sbUrlRoot.append("&from=")
-                        .append(handler.getFrom());
+                sbUrlRoot.append("&from=").append(handler.getFrom());
             }
             if (handler.getUntil() != null) {
-                sbUrlRoot.append("&until=")
-                        .append(handler.getUntil());
+                sbUrlRoot.append("&until=").append(handler.getUntil());
             }
-            sbUrlRoot.append("&identifier=")
-                    .append(handler.getIdentifier())
-                    .append("&action=");
+            sbUrlRoot.append("&identifier=").append(handler.getIdentifier()).append("&action=");
             String urlRoot = sbUrlRoot.toString();
             switch (handler.getMetadataPrefix()) {
                 case iv_overviewpage: {
@@ -146,8 +133,7 @@ public class GoobiViewerUpdateFormat extends AbstractFormat {
                 }
                     break;
                 default:
-                    logger.trace("Unknown metadata format: {}", handler.getMetadataPrefix()
-                            .getMetadataPrefix());
+                    logger.trace("Unknown metadata format: {}", handler.getMetadataPrefix().getMetadataPrefix());
                     return new ErrorCode().getCannotDisseminateFormat();
             }
             JSONArray jsonArray = new JSONArray();
@@ -184,12 +170,9 @@ public class GoobiViewerUpdateFormat extends AbstractFormat {
         if (handler.getMetadataPrefix() == null) {
             throw new IllegalArgumentException("metadataPrefix may not be null");
         }
-        logger.trace("generateIntrandaViewerUpdates: {}", handler.getMetadataPrefix()
-                .getMetadataPrefix());
+        logger.trace("generateIntrandaViewerUpdates: {}", handler.getMetadataPrefix().getMetadataPrefix());
 
-        Namespace xmlns = DataManager.getInstance()
-                .getConfiguration()
-                .getStandardNameSpace();
+        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Namespace nsOverviewPage =
                 Namespace.getNamespace(Metadata.iv_overviewpage.getMetadataNamespacePrefix(), Metadata.iv_overviewpage.getMetadataNamespaceUri());
         Namespace nsCrowdsourcingUpdates =
@@ -200,16 +183,12 @@ public class GoobiViewerUpdateFormat extends AbstractFormat {
         if (jsonArray.size() < useNumRows) {
             useNumRows = jsonArray.size();
         }
-        StringBuilder sbUrlRoot = new StringBuilder(DataManager.getInstance()
-                .getConfiguration()
-                .getHarvestUrl()).append('?');
+        StringBuilder sbUrlRoot = new StringBuilder(DataManager.getInstance().getConfiguration().getHarvestUrl()).append('?');
         if (handler.getFrom() != null) {
-            sbUrlRoot.append("&from=")
-                    .append(handler.getFrom());
+            sbUrlRoot.append("&from=").append(handler.getFrom());
         }
         if (handler.getUntil() != null) {
-            sbUrlRoot.append("&until=")
-                    .append(handler.getUntil());
+            sbUrlRoot.append("&until=").append(handler.getUntil());
         }
         sbUrlRoot.append("&identifier=");
         String urlRoot = sbUrlRoot.toString();
@@ -250,9 +229,7 @@ public class GoobiViewerUpdateFormat extends AbstractFormat {
                 // Add process ID, if available
                 String processId = null;
                 StringBuilder sb = new StringBuilder();
-                sb.append(SolrConstants.PI)
-                        .append(':')
-                        .append(identifier);
+                sb.append(SolrConstants.PI).append(':').append(identifier);
                 try {
                     SolrDocument doc = solr.getFirstDoc(sb.toString(), Collections.singletonList("MD_PROCESSID"));
                     if (doc != null) {
@@ -303,15 +280,11 @@ public class GoobiViewerUpdateFormat extends AbstractFormat {
     }
 
     /* (non-Javadoc)
-     * @see de.intranda.digiverso.m2m.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map)
+     * @see de.intranda.digiverso.m2m.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map, java.lang.String)
      */
     @Override
-    public long getTotalHits(Map<String, String> params) throws IOException, SolrServerException {
-        String url = DataManager.getInstance()
-                .getConfiguration()
-                .getHarvestUrl() + "?action=getlist_"
-                + params.get("metadataPrefix")
-                        .substring(3);
+    public long getTotalHits(Map<String, String> params, String versionDiscriminatorField) throws IOException, SolrServerException {
+        String url = DataManager.getInstance().getConfiguration().getHarvestUrl() + "?action=getlist_" + params.get("metadataPrefix").substring(3);
         String rawJSON = Utils.getWebContent(url);
         if (StringUtils.isNotEmpty(rawJSON)) {
             try {

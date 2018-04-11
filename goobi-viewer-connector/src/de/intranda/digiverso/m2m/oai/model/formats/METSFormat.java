@@ -45,17 +45,18 @@ public class METSFormat extends AbstractFormat {
     private final static Logger logger = LoggerFactory.getLogger(METSFormat.class);
 
     /* (non-Javadoc)
-     * @see de.intranda.digiverso.m2m.oai.model.formats.AbstractFormat#createListRecords(de.intranda.digiverso.m2m.oai.RequestHandler, int, int)
+     * @see de.intranda.digiverso.m2m.oai.model.formats.AbstractFormat#createListRecords(de.intranda.digiverso.m2m.oai.RequestHandler, int, int, int, java.lang.String)
      */
     @Override
-    public Element createListRecords(RequestHandler handler, int firstRow, int numRows) throws IOException, SolrServerException {
-        QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRow, numRows, false,
+    public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
+            throws IOException, SolrServerException {
+        QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false,
                 " AND " + SolrConstants.SOURCEDOCFORMAT + ":METS", null);
         if (qr.getResults().isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
         try {
-            return generateMets(qr.getResults(), qr.getResults().getNumFound(), firstRow, numRows, handler, "ListRecords");
+            return generateMets(qr.getResults(), qr.getResults().getNumFound(), firstRawRow, numRows, handler, "ListRecords");
         } catch (IOException e) {
             logger.error(e.getMessage());
             return new ErrorCode().getIdDoesNotExist();
@@ -137,7 +138,7 @@ public class METSFormat extends AbstractFormat {
             newmets.addContent(mets_root.cloneContent());
 
             Element record = new Element("record", xmlns);
-            Element header = getHeader(doc, null, handler);
+            Element header = getHeader(doc, null, handler, null);
             record.addContent(header);
             Element metadata = new Element("metadata", xmlns);
             metadata.addContent(newmets);
@@ -155,10 +156,10 @@ public class METSFormat extends AbstractFormat {
     }
 
     /* (non-Javadoc)
-     * @see de.intranda.digiverso.m2m.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map)
+     * @see de.intranda.digiverso.m2m.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map, java.lang.String)
      */
     @Override
-    public long getTotalHits(Map<String, String> params) throws IOException, SolrServerException {
+    public long getTotalHits(Map<String, String> params, String versionDiscriminatorField) throws IOException, SolrServerException {
         return solr.getTotalHitNumber(params, false, " AND " + SolrConstants.SOURCEDOCFORMAT + ":METS", null);
     }
 

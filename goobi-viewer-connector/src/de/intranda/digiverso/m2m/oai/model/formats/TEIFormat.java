@@ -50,19 +50,32 @@ public class TEIFormat extends AbstractFormat {
     static final Namespace COMPONENTS = Namespace.getNamespace("cmdp", "http://www.clarin.eu/cmd/1/profiles/clarin.eu:cr1:p_1380106710826");
 
     /* (non-Javadoc)
-     * @see de.intranda.digiverso.m2m.oai.model.formats.AbstractFormat#createListRecords(de.intranda.digiverso.m2m.oai.RequestHandler, int, int)
+     * @see de.intranda.digiverso.m2m.oai.model.formats.AbstractFormat#createListRecords(de.intranda.digiverso.m2m.oai.RequestHandler, int, int, int, java.lang.String)
      */
     @Override
-    public Element createListRecords(RequestHandler handler, int firstRow, int numRows) throws SolrServerException {
+    public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
+            throws SolrServerException {
         // &stats=true&stats.field=LANGUAGE
-        QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRow, numRows, false,
-                " AND " + SolrConstants.LANGUAGE + ":*", Collections.singletonList(SolrConstants.LANGUAGE));
+        QueryResponse qr;
+        long totalVirtualHits;
+        long totalRawHits;
+        if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
+            // One OAI record for each record version
+            qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false,
+                    " AND " + versionDiscriminatorField + ":*", Collections.singletonList(versionDiscriminatorField));
+            totalVirtualHits = SolrSearchIndex.getFieldCount(qr, versionDiscriminatorField);
+            totalRawHits = qr.getResults().getNumFound();
+        } else {
+            // One OAI record for each record proper
+            qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false, null, null);
+            totalVirtualHits = totalRawHits = qr.getResults().getNumFound();
+        }
         if (qr.getResults().isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
-        long numFound = SolrSearchIndex.getFieldCount(qr, SolrConstants.LANGUAGE);
         try {
-            Element xmlListRecords = generateTeiCmdi(qr.getResults(), numFound, firstRow, numRows, handler, "ListRecords", null);
+            Element xmlListRecords = generateTeiCmdi(qr.getResults(), totalVirtualHits, totalRawHits, firstVirtualRow, firstRawRow, numRows, handler,
+                    "ListRecords", versionDiscriminatorField, null);
             return xmlListRecords;
         } catch (IOException e) {
             logger.error(e.getMessage());
@@ -81,13 +94,35 @@ public class TEIFormat extends AbstractFormat {
             return new ErrorCode().getBadArgument();
         }
 
-        String[] identifierSplit = Utils.splitIdentifierAndLanguageCode(handler.getIdentifier(), 3);
+        String versionDiscriminatorField =
+                DataManager.getInstance().getConfiguration().getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().name());
+        if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
+            String[] identifierSplit = Utils.splitIdentifierAndLanguageCode(handler.getIdentifier(), 3);
+            try {
+                SolrDocument doc = solr.getListRecord(identifierSplit[0]);
+                if (doc == null) {
+                    return new ErrorCode().getIdDoesNotExist();
+                }
+                Element record = generateTeiCmdi(Collections.singletonList(doc), 1L, 1L, 0, 0, 1, handler, "GetRecord", versionDiscriminatorField,
+                        identifierSplit[1]);
+                return record;
+            } catch (IOException e) {
+                return new ErrorCode().getIdDoesNotExist();
+            } catch (JDOMException e) {
+                return new ErrorCode().getCannotDisseminateFormat();
+            } catch (SolrServerException e) {
+                return new ErrorCode().getIdDoesNotExist();
+            }
+        }
         try {
-            SolrDocument doc = solr.getListRecord(identifierSplit[0]);
+            SolrDocument doc = solr.getListRecord(handler.getIdentifier());
             if (doc == null) {
                 return new ErrorCode().getIdDoesNotExist();
             }
-            Element record = generateTeiCmdi(Collections.singletonList(doc), 1L, 0, 1, handler, "GetRecord", identifierSplit[1]);
+            Element record = generateTeiCmdi(Collections.singletonList(doc), 1L, 1L, 0, 0, 1, handler, "GetRecord",
+                    DataManager.getInstance().getConfiguration().getVersionDisriminatorFieldForMetadataFormat(
+                            handler.getMetadataPrefix().getMetadataPrefix()),
+                    null);
             return record;
         } catch (IOException e) {
             return new ErrorCode().getIdDoesNotExist();
@@ -102,19 +137,23 @@ public class TEIFormat extends AbstractFormat {
      * Creates TEI or CMDI records.
      * 
      * @param records
-     * @param totalHits
-     * @param firstRow
+     * @param totalVirtualHits
+     * @param totalRawHits
+     * @param firstVirtualRow
+     * @param firstRawRow
      * @param numRows
      * @param handler
      * @param recordType "GetRecord" or "ListRecords"
-     * @param requestedLanguage
+     * @param versionDiscriminatorField If not null, each value of this field will be created as an individual record
+     * @param requestedVersion If not null, only the record with the exact value will be added
      * @return
      * @throws IOException
      * @throws JDOMException
      * @throws SolrServerException
      */
-    private static Element generateTeiCmdi(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler,
-            String recordType, String requestedLanguage) throws JDOMException, IOException, SolrServerException {
+    private static Element generateTeiCmdi(List<SolrDocument> records, long totalVirtualHits, long totalRawHits, int firstVirtualRow, int firstRawRow,
+            int numRows, RequestHandler handler, String recordType, String versionDiscriminatorField, String requestedVersion)
+            throws JDOMException, IOException, SolrServerException {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element xmlListRecords = new Element(recordType, xmlns);
 
@@ -124,74 +163,82 @@ public class TEIFormat extends AbstractFormat {
         if (records.size() < numRows) {
             numRows = records.size();
         }
-        List<String> languages = Collections.singletonList(requestedLanguage);
-        for (SolrDocument doc : records) {
-            if (requestedLanguage == null) {
-                languages = SolrSearchIndex.getMetadataValues(doc, SolrConstants.LANGUAGE);
-            }
-            for (String language : languages) {
-                String url = new StringBuilder(DataManager.getInstance().getConfiguration().getContentApiUrl())
-                        .append(handler.getMetadataPrefix().getMetadataPrefix())
-                        .append('/')
-                        .append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))
-                        .append('/')
-                        .append(language)
-                        .append('/')
-                        .toString();
-                // logger.trace(url);
-                String xml = Utils.getWebContent(url);
-                if (StringUtils.isEmpty(xml)) {
-                    xmlListRecords.addContent(new ErrorCode().getCannotDisseminateFormat());
-                    continue;
+        int virtualHitCount = 0;
+        if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
+            List<String> versions = Collections.singletonList(requestedVersion);
+            for (SolrDocument doc : records) {
+                if (requestedVersion == null) {
+                    versions = SolrSearchIndex.getMetadataValues(doc, versionDiscriminatorField);
                 }
-
-                org.jdom2.Document xmlDoc = Utils.getDocumentFromString(xml, null);
-                Element teiRoot = xmlDoc.getRootElement();
-                Element newDoc;
-                switch (handler.getMetadataPrefix()) {
-                    case tei:
-                        newDoc = new Element("tei", namespace);
-                        newDoc.addNamespaceDeclaration(XSI);
-                        newDoc.setAttribute(new Attribute("schemaLocation", handler.getMetadataPrefix().getSchema(), XSI));
-                        break;
-                    case cmdi:
-                        newDoc = new Element("CMD", CMDI);
-                        newDoc.addNamespaceDeclaration(XSI);
-                        newDoc.addNamespaceDeclaration(COMPONENTS);
-                        newDoc.setAttribute("CMDVersion", "1.2");
-                        newDoc.setAttribute(new Attribute("schemaLocation",
-                                "http://www.clarin.eu/cmd/1 https://infra.clarin.eu/CMDI/1.x/xsd/cmd-envelop.xsd http://www.clarin.eu/cmd/1/profiles/clarin.eu:cr1:p_1380106710826 https://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/1.x/profiles/clarin.eu:cr1:p_1380106710826/xsd",
-                                XSI));
-                        break;
-                    default:
+                for (String version : versions) {
+                    virtualHitCount++; // Count hit even if the XML file is ultimately unavailable
+                    String url = new StringBuilder(DataManager.getInstance().getConfiguration().getContentApiUrl())
+                            .append(handler.getMetadataPrefix().getMetadataPrefix())
+                            .append('/')
+                            .append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))
+                            .append('/')
+                            .append(version)
+                            .append('/')
+                            .toString();
+                    // logger.trace(url);
+                    String xml = Utils.getWebContent(url);
+                    if (StringUtils.isEmpty(xml)) {
                         xmlListRecords.addContent(new ErrorCode().getCannotDisseminateFormat());
                         continue;
-                }
-
-                newDoc.addContent(teiRoot.cloneContent());
-
-                String iso3code = language;
-                // Make sure to add the ISO-3 language code
-                if (iso3code.length() == 2) {
-                    Language lang = DataManager.getInstance().getLanguageHelper().getLanguage(language);
-                    if (lang != null) {
-                        iso3code = lang.getIsoCode();
                     }
+
+                    org.jdom2.Document xmlDoc = Utils.getDocumentFromString(xml, null);
+                    Element teiRoot = xmlDoc.getRootElement();
+                    Element newDoc;
+                    switch (handler.getMetadataPrefix()) {
+                        case tei:
+                            newDoc = new Element("tei", namespace);
+                            newDoc.addNamespaceDeclaration(XSI);
+                            newDoc.setAttribute(new Attribute("schemaLocation", handler.getMetadataPrefix().getSchema(), XSI));
+                            break;
+                        case cmdi:
+                            newDoc = new Element("CMD", CMDI);
+                            newDoc.addNamespaceDeclaration(XSI);
+                            newDoc.addNamespaceDeclaration(COMPONENTS);
+                            newDoc.setAttribute("CMDVersion", "1.2");
+                            newDoc.setAttribute(new Attribute("schemaLocation",
+                                    "http://www.clarin.eu/cmd/1 https://infra.clarin.eu/CMDI/1.x/xsd/cmd-envelop.xsd http://www.clarin.eu/cmd/1/profiles/clarin.eu:cr1:p_1380106710826 https://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/1.x/profiles/clarin.eu:cr1:p_1380106710826/xsd",
+                                    XSI));
+                            break;
+                        default:
+                            xmlListRecords.addContent(new ErrorCode().getCannotDisseminateFormat());
+                            continue;
+                    }
+
+                    newDoc.addContent(teiRoot.cloneContent());
+
+                    String iso3code = version;
+                    // Make sure to add the ISO-3 language code
+                    if (iso3code.length() == 2) {
+                        Language lang = DataManager.getInstance().getLanguageHelper().getLanguage(version);
+                        if (lang != null) {
+                            iso3code = lang.getIsoCode();
+                        }
+                    }
+                    Element record = new Element("record", xmlns);
+                    Element header = getHeader(doc, null, handler, iso3code);
+                    record.addContent(header);
+                    Element metadata = new Element("metadata", xmlns);
+                    metadata.addContent(newDoc);
+                    // metadata.addContent(mets_root.cloneContent());
+                    record.addContent(metadata);
+                    xmlListRecords.addContent(record);
                 }
-                Element record = new Element("record", xmlns);
-                Element header = getHeader(doc, null, handler, iso3code);
-                record.addContent(header);
-                Element metadata = new Element("metadata", xmlns);
-                metadata.addContent(newDoc);
-                // metadata.addContent(mets_root.cloneContent());
-                record.addContent(metadata);
-                xmlListRecords.addContent(record);
             }
+        } else {
+            logger.error("TEI/CMDI record output without languages is currently not supported.");
+            return new ErrorCode().getCannotDisseminateFormat();
         }
 
         // Create resumption token
-        if (totalHits > firstRow + numRows) {
-            Element resumption = createResumptionTokenAndElement(totalHits, firstRow + numRows, xmlns, handler);
+        if (totalRawHits > firstRawRow + numRows) {
+            Element resumption =
+                    createResumptionTokenAndElement(totalVirtualHits, totalRawHits, firstVirtualRow + virtualHitCount, firstRawRow + numRows, xmlns, handler);
             xmlListRecords.addContent(resumption);
         }
 
@@ -204,18 +251,18 @@ public class TEIFormat extends AbstractFormat {
      * @param doc Document from which to extract values.
      * @param topstructDoc If not null, the datestamp value will be determined from this instead.
      * @param handler
-     * @param language
+     * @param requestedVersion
      * @return
      * @throws SolrServerException
      */
-    protected static Element getHeader(SolrDocument doc, SolrDocument topstructDoc, RequestHandler handler, String language)
+    protected static Element getHeader(SolrDocument doc, SolrDocument topstructDoc, RequestHandler handler, String requestedVersion)
             throws SolrServerException {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element header = new Element("header", xmlns);
         // identifier
         Element identifier = new Element("identifier", xmlns);
         identifier.setText(DataManager.getInstance().getConfiguration().getOaiIdentifier().get("repositoryIdentifier")
-                + (String) doc.getFieldValue(SolrConstants.PI) + '_' + language);
+                + (String) doc.getFieldValue(SolrConstants.PI) + '_' + requestedVersion);
         header.addContent(identifier);
         // datestamp
         Element datestamp = new Element("datestamp", xmlns);
@@ -251,13 +298,16 @@ public class TEIFormat extends AbstractFormat {
     }
 
     /* (non-Javadoc)
-     * @see de.intranda.digiverso.m2m.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map)
+     * @see de.intranda.digiverso.m2m.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map, java.lang.String)
      */
     @Override
-    public long getTotalHits(Map<String, String> params) throws IOException, SolrServerException {
-        // Query Solr index for the count of the LANGUAGE field
-        QueryResponse qr = solr.search(params.get("from"), params.get("until"), params.get("set"), params.get("metadataPrefix"), 0, 0, false,
-                " AND " + SolrConstants.LANGUAGE + ":*", Collections.singletonList(SolrConstants.LANGUAGE));
-        return SolrSearchIndex.getFieldCount(qr, SolrConstants.LANGUAGE);
+    public long getTotalHits(Map<String, String> params, String versionDiscriminatorField) throws IOException, SolrServerException {
+        if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
+            // Query Solr index for the count of the discriminator field
+            QueryResponse qr = solr.search(params.get("from"), params.get("until"), params.get("set"), params.get("metadataPrefix"), 0, 0, false,
+                    " AND " + versionDiscriminatorField + ":*", Collections.singletonList(versionDiscriminatorField));
+            return SolrSearchIndex.getFieldCount(qr, versionDiscriminatorField);
+        }
+        return solr.getTotalHitNumber(params, false, null, null);
     }
 }

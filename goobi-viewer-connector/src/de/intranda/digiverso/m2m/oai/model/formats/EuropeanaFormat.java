@@ -42,21 +42,17 @@ import de.intranda.digiverso.m2m.utils.Utils;
 public class EuropeanaFormat extends OAIDCFormat {
 
     /* (non-Javadoc)
-     * @see de.intranda.digiverso.m2m.oai.model.formats.AbstractFormat#createListRecords(de.intranda.digiverso.m2m.oai.RequestHandler, int, int)
+     * @see de.intranda.digiverso.m2m.oai.model.formats.AbstractFormat#createListRecords(de.intranda.digiverso.m2m.oai.RequestHandler, int, int, int, java.lang.String)
      */
     @Override
-    public Element createListRecords(RequestHandler handler, int firstRow, int numRows) throws SolrServerException {
-        QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRow, numRows, false,
-                SolrSearchIndex.getAdditionalDocstructsQuerySuffix(DataManager.getInstance()
-                        .getConfiguration()
-                        .getAdditionalDocstructTypes()),
-                null);
-        if (qr.getResults()
-                .isEmpty()) {
+    public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
+            throws SolrServerException {
+        QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false,
+                SolrSearchIndex.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes()), null);
+        if (qr.getResults().isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
-        return generateESE(qr.getResults(), qr.getResults()
-                .getNumFound(), firstRow, numRows, handler, "ListRecords");
+        return generateESE(qr.getResults(), qr.getResults().getNumFound(), firstRawRow, numRows, handler, "ListRecords");
     }
 
     /* (non-Javadoc)
@@ -94,9 +90,7 @@ public class EuropeanaFormat extends OAIDCFormat {
      */
     private Element generateESE(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler, String recordType)
             throws SolrServerException {
-        Namespace xmlns = DataManager.getInstance()
-                .getConfiguration()
-                .getStandardNameSpace();
+        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         // Namespace nsOaiDc = Namespace.getNamespace(Metadata.oai_dc.getMetadataPrefix(), Metadata.oai_dc.getMetadataNamespace());
         Namespace nsDc = Namespace.getNamespace(Metadata.dc.getMetadataNamespacePrefix(), Metadata.dc.getMetadataNamespaceUri());
         Namespace nsDcTerms = Namespace.getNamespace("dcterms", "http://purl.org/dc/terms/");
@@ -135,7 +129,7 @@ public class EuropeanaFormat extends OAIDCFormat {
                 }
             }
 
-            Element header = getHeader(doc, topstructDoc, handler);
+            Element header = getHeader(doc, topstructDoc, handler, null);
             record.addContent(header);
 
             String identifier = null;
@@ -160,23 +154,17 @@ public class EuropeanaFormat extends OAIDCFormat {
             if (StringUtils.isNotEmpty((String) doc.getFieldValue(SolrConstants.URN))) {
                 Element eleDcIdentifier = new Element("identifier", nsDc);
                 urn = (String) doc.getFieldValue(SolrConstants.URN);
-                eleDcIdentifier.setText(DataManager.getInstance()
-                        .getConfiguration()
-                        .getUrnResolverUrl() + urn);
+                eleDcIdentifier.setText(DataManager.getInstance().getConfiguration().getUrnResolverUrl() + urn);
                 eleEuropeanaRecord.addContent(eleDcIdentifier);
             } else if (StringUtils.isNotEmpty((String) doc.getFieldValue(SolrConstants.PI))) {
                 Element eleDcIdentifier = new Element("identifier", nsDc);
                 identifier = (String) doc.getFieldValue(SolrConstants.PI);
-                eleDcIdentifier.setText(DataManager.getInstance()
-                        .getConfiguration()
-                        .getPiResolverUrl() + identifier);
+                eleDcIdentifier.setText(DataManager.getInstance().getConfiguration().getPiResolverUrl() + identifier);
                 eleEuropeanaRecord.addContent(eleDcIdentifier);
             } else if (StringUtils.isNotEmpty((String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))) {
                 Element eleDcIdentifier = new Element("identifier", nsDc);
                 identifier = (String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT);
-                eleDcIdentifier.setText(DataManager.getInstance()
-                        .getConfiguration()
-                        .getPiResolverUrl() + identifier);
+                eleDcIdentifier.setText(DataManager.getInstance().getConfiguration().getPiResolverUrl() + identifier);
                 eleEuropeanaRecord.addContent(eleDcIdentifier);
             }
             // <dc:language>
@@ -184,9 +172,7 @@ public class EuropeanaFormat extends OAIDCFormat {
                 Element eleDcLanguage = new Element("language", nsDc);
                 String language = "";
                 if (doc.getFieldValues("MD_LANGUAGE") != null) {
-                    language = (String) doc.getFieldValues("MD_LANGUAGE")
-                            .iterator()
-                            .next();
+                    language = (String) doc.getFieldValues("MD_LANGUAGE").iterator().next();
                     eleDcLanguage.setText(language);
                     eleEuropeanaRecord.addContent(eleDcLanguage);
                 }
@@ -200,9 +186,7 @@ public class EuropeanaFormat extends OAIDCFormat {
             {
                 Element dc_title = new Element("title", nsDc);
                 if (doc.getFieldValues(SolrConstants.TITLE) != null) {
-                    title = (String) doc.getFieldValues(SolrConstants.TITLE)
-                            .iterator()
-                            .next();
+                    title = (String) doc.getFieldValues(SolrConstants.TITLE).iterator().next();
                     // logger.debug("MD_TITLE : " + title);
                 }
                 if (isWork && doc.getFieldValue(SolrConstants.IDDOC_PARENT) != null) {
@@ -219,14 +203,10 @@ public class EuropeanaFormat extends OAIDCFormat {
             {
                 String value = null;
                 if (doc.getFieldValues("MD_INFORMATION") != null) {
-                    value = (String) doc.getFieldValues("MD_INFORMATION")
-                            .iterator()
-                            .next();
+                    value = (String) doc.getFieldValues("MD_INFORMATION").iterator().next();
 
                 } else if (doc.getFieldValues("MD_DATECREATED") != null) {
-                    value = (String) doc.getFieldValues("MD_DATECREATED")
-                            .iterator()
-                            .next();
+                    value = (String) doc.getFieldValues("MD_DATECREATED").iterator().next();
 
                 }
                 if (value != null) {
@@ -238,21 +218,13 @@ public class EuropeanaFormat extends OAIDCFormat {
             // <dc:date>
             {
                 if (doc.getFieldValues("MD_YEARPUBLISH") != null) {
-                    yearpublish = (String) doc.getFieldValues("MD_YEARPUBLISH")
-                            .iterator()
-                            .next();
+                    yearpublish = (String) doc.getFieldValues("MD_YEARPUBLISH").iterator().next();
                 } else if (doc.getFieldValues("MD_DATECREATED") != null) {
-                    yearpublish = (String) doc.getFieldValues("MD_DATECREATED")
-                            .iterator()
-                            .next();
+                    yearpublish = (String) doc.getFieldValues("MD_DATECREATED").iterator().next();
                 } else if (topstructDoc != null && topstructDoc.getFieldValues("MD_YEARPUBLISH") != null) {
-                    yearpublish = (String) topstructDoc.getFieldValues("MD_YEARPUBLISH")
-                            .iterator()
-                            .next();
+                    yearpublish = (String) topstructDoc.getFieldValues("MD_YEARPUBLISH").iterator().next();
                 } else if (topstructDoc != null && topstructDoc.getFieldValues("MD_DATECREATED") != null) {
-                    yearpublish = (String) topstructDoc.getFieldValues("MD_DATECREATED")
-                            .iterator()
-                            .next();
+                    yearpublish = (String) topstructDoc.getFieldValues("MD_DATECREATED").iterator().next();
                 }
 
                 if (yearpublish != null) {
@@ -283,9 +255,7 @@ public class EuropeanaFormat extends OAIDCFormat {
             // <dc:created>
             {
                 if (doc.getFieldValues("MD_DATECREATED") != null) {
-                    String created = (String) doc.getFieldValues("MD_DATECREATED")
-                            .iterator()
-                            .next();
+                    String created = (String) doc.getFieldValues("MD_DATECREATED").iterator().next();
                     Element eleDcCreated = new Element("created", nsDc);
                     eleDcCreated.setText(created);
                     eleEuropeanaRecord.addContent(eleDcCreated);
@@ -294,9 +264,7 @@ public class EuropeanaFormat extends OAIDCFormat {
             // <dc:issued>
             {
                 if (doc.getFieldValues("MD_DATEISSUED") != null) {
-                    String created = (String) doc.getFieldValues("MD_DATEISSUED")
-                            .iterator()
-                            .next();
+                    String created = (String) doc.getFieldValues("MD_DATEISSUED").iterator().next();
                     Element eleDcCreated = new Element("created", nsDc);
                     eleDcCreated.setText(created);
                     eleEuropeanaRecord.addContent(eleDcCreated);
@@ -315,13 +283,9 @@ public class EuropeanaFormat extends OAIDCFormat {
 
             // <dc:publisher>
             if (doc.getFieldValues("MD_PUBLISHER") != null) {
-                publisher = (String) doc.getFieldValues("MD_PUBLISHER")
-                        .iterator()
-                        .next();
+                publisher = (String) doc.getFieldValues("MD_PUBLISHER").iterator().next();
             } else if (topstructDoc != null && topstructDoc.getFieldValues("MD_PUBLISHER") != null) {
-                publisher = (String) topstructDoc.getFieldValues("MD_PUBLISHER")
-                        .iterator()
-                        .next();
+                publisher = (String) topstructDoc.getFieldValues("MD_PUBLISHER").iterator().next();
             }
             if (publisher != null) {
                 Element dc_publisher = new Element("publisher", nsDc);
@@ -330,13 +294,9 @@ public class EuropeanaFormat extends OAIDCFormat {
             }
 
             if (doc.getFieldValues("MD_PLACEPUBLISH") != null) {
-                placepublish = (String) doc.getFieldValues("MD_PLACEPUBLISH")
-                        .iterator()
-                        .next();
+                placepublish = (String) doc.getFieldValues("MD_PLACEPUBLISH").iterator().next();
             } else if (topstructDoc != null && topstructDoc.getFieldValues("MD_PLACEPUBLISH") != null) {
-                placepublish = (String) topstructDoc.getFieldValues("MD_PLACEPUBLISH")
-                        .iterator()
-                        .next();
+                placepublish = (String) topstructDoc.getFieldValues("MD_PLACEPUBLISH").iterator().next();
             }
 
             // <dc:type>
@@ -371,16 +331,10 @@ public class EuropeanaFormat extends OAIDCFormat {
             // MANDATORY: <europeana:provider>
             {
                 Element eleEuropeanaProvider = new Element("provider", nsEuropeana);
-                String value = DataManager.getInstance()
-                        .getConfiguration()
-                        .getEseDefaultProvider();
-                String field = DataManager.getInstance()
-                        .getConfiguration()
-                        .getEseProviderField();
+                String value = DataManager.getInstance().getConfiguration().getEseDefaultProvider();
+                String field = DataManager.getInstance().getConfiguration().getEseProviderField();
                 if (doc.getFieldValues(field) != null) {
-                    value = (String) doc.getFieldValues(field)
-                            .iterator()
-                            .next();
+                    value = (String) doc.getFieldValues(field).iterator().next();
                 }
                 eleEuropeanaProvider.setText(value);
                 eleEuropeanaRecord.addContent(eleEuropeanaProvider);
@@ -391,9 +345,7 @@ public class EuropeanaFormat extends OAIDCFormat {
                 String europeanaType = "TEXT";
                 if (type != null) {
                     // Retrieve coded ESE type, if available
-                    Map<String, String> eseTypes = DataManager.getInstance()
-                            .getConfiguration()
-                            .getEseTypes();
+                    Map<String, String> eseTypes = DataManager.getInstance().getConfiguration().getEseTypes();
                     if (eseTypes.get(type) != null) {
                         europeanaType = eseTypes.get(type);
                     }
@@ -404,16 +356,10 @@ public class EuropeanaFormat extends OAIDCFormat {
             // MANDATORY: <europeana:rights>
             {
                 Element eleEuropeanaRights = new Element("rights", nsEuropeana);
-                String value = DataManager.getInstance()
-                        .getConfiguration()
-                        .getEseDefaultRightsUrl();
-                String field = DataManager.getInstance()
-                        .getConfiguration()
-                        .getEseRightsField();
+                String value = DataManager.getInstance().getConfiguration().getEseDefaultRightsUrl();
+                String field = DataManager.getInstance().getConfiguration().getEseRightsField();
                 if (doc.getFieldValues(field) != null) {
-                    value = (String) doc.getFieldValues(field)
-                            .iterator()
-                            .next();
+                    value = (String) doc.getFieldValues(field).iterator().next();
                 }
                 eleEuropeanaRights.setText(value);
                 eleEuropeanaRecord.addContent(eleEuropeanaRights);
@@ -421,16 +367,10 @@ public class EuropeanaFormat extends OAIDCFormat {
             // MANDATORY: <europeana:dataProvider>
             {
                 Element eleEuropeanaDataProvider = new Element("dataProvider", nsEuropeana);
-                String value = DataManager.getInstance()
-                        .getConfiguration()
-                        .getEseDefaultProvider();
-                String field = DataManager.getInstance()
-                        .getConfiguration()
-                        .getEseDataProviderField();
+                String value = DataManager.getInstance().getConfiguration().getEseDefaultProvider();
+                String field = DataManager.getInstance().getConfiguration().getEseDataProviderField();
                 if (doc.getFieldValues(field) != null) {
-                    value = (String) doc.getFieldValues(field)
-                            .iterator()
-                            .next();
+                    value = (String) doc.getFieldValues(field).iterator().next();
                 }
                 eleEuropeanaDataProvider.setText(value);
                 eleEuropeanaRecord.addContent(eleEuropeanaDataProvider);
@@ -440,13 +380,9 @@ public class EuropeanaFormat extends OAIDCFormat {
                 Element eleEuropeanaIsShownAt = new Element("isShownAt", nsEuropeana);
                 String isShownAt = "";
                 if (urn != null) {
-                    isShownAt = DataManager.getInstance()
-                            .getConfiguration()
-                            .getUrnResolverUrl() + urn;
+                    isShownAt = DataManager.getInstance().getConfiguration().getUrnResolverUrl() + urn;
                 } else if (identifier != null) {
-                    isShownAt = DataManager.getInstance()
-                            .getConfiguration()
-                            .getPiResolverUrl() + identifier;
+                    isShownAt = DataManager.getInstance().getConfiguration().getPiResolverUrl() + identifier;
                 }
                 eleEuropeanaIsShownAt.setText(isShownAt);
                 eleEuropeanaRecord.addContent(eleEuropeanaIsShownAt);

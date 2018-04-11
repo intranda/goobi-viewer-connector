@@ -65,8 +65,7 @@ public class OaiServlet extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse res) throws ServletException, IOException {
         String queryString = (request.getQueryString() != null ? "?" + request.getQueryString() : "");
-        logger.debug("REQUEST URL: {}{}", request.getRequestURL()
-                .toString(), queryString);
+        logger.debug("REQUEST URL: {}{}", request.getRequestURL().toString(), queryString);
 
         // HTTP request header dump
         //        Enumeration<String> headers = request.getHeaderNames();
@@ -84,9 +83,7 @@ public class OaiServlet extends HttpServlet {
         doc.addContent(pi);
         // generate root element
         Element root = AbstractFormat.getOaiPmhElement("OAI-PMH");
-        Namespace xmlns = DataManager.getInstance()
-                .getConfiguration()
-                .getStandardNameSpace();
+        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
 
         Element responseDate = new Element("responseDate", xmlns);
 
@@ -103,16 +100,10 @@ public class OaiServlet extends HttpServlet {
         if (handler.getVerb() == null) {
             Element requestType = new Element("request", xmlns);
             requestType.setAttribute("verb", "missing");
-            if (DataManager.getInstance()
-                    .getConfiguration()
-                    .isBaseUrlUseInRequestElement()) {
-                requestType.setText(DataManager.getInstance()
-                        .getConfiguration()
-                        .getBaseURL());
+            if (DataManager.getInstance().getConfiguration().isBaseUrlUseInRequestElement()) {
+                requestType.setText(DataManager.getInstance().getConfiguration().getBaseURL());
             } else {
-                requestType.setText(request.getRequestURL()
-                        .toString()
-                        .replace("/M2M/", "/viewer/"));
+                requestType.setText(request.getRequestURL().toString().replace("/M2M/", "/viewer/"));
             }
             root.addContent(requestType);
             root.addContent(new ErrorCode().getBadVerb());
@@ -124,11 +115,9 @@ public class OaiServlet extends HttpServlet {
             // handler.getMetadataPrefix());
 
             Element requestType = new Element("request", xmlns);
-            requestType.setAttribute("verb", handler.getVerb()
-                    .getTitle());
+            requestType.setAttribute("verb", handler.getVerb().getTitle());
             if (handler.getMetadataPrefix() != null) {
-                requestType.setAttribute("metadataPrefix", handler.getMetadataPrefix()
-                        .getMetadataPrefix());
+                requestType.setAttribute("metadataPrefix", handler.getMetadataPrefix().getMetadataPrefix());
             }
             if (StringUtils.isNotEmpty(handler.getIdentifier())) {
                 requestType.setAttribute("identifier", handler.getIdentifier());
@@ -142,16 +131,10 @@ public class OaiServlet extends HttpServlet {
             if (StringUtils.isNotEmpty(handler.getSet())) {
                 requestType.setAttribute("set", handler.getSet());
             }
-            if (DataManager.getInstance()
-                    .getConfiguration()
-                    .isBaseUrlUseInRequestElement()) {
-                requestType.setText(DataManager.getInstance()
-                        .getConfiguration()
-                        .getBaseURL());
+            if (DataManager.getInstance().getConfiguration().isBaseUrlUseInRequestElement()) {
+                requestType.setText(DataManager.getInstance().getConfiguration().getBaseURL());
             } else {
-                requestType.setText(request.getRequestURL()
-                        .toString()
-                        .replace("/M2M/", "/viewer/"));
+                requestType.setText(request.getRequestURL().toString().replace("/M2M/", "/viewer/"));
             }
             root.addContent(requestType);
             // handle resumptionToken
@@ -162,8 +145,7 @@ public class OaiServlet extends HttpServlet {
                 AbstractFormat.removeExpiredTokens();
             }
             // handle Identify verb
-            else if (handler.getVerb()
-                    .equals(Verb.Identify)) {
+            else if (handler.getVerb().equals(Verb.Identify)) {
                 try {
                     root.addContent(AbstractFormat.getIdentifyXML());
                 } catch (SolrServerException e) {
@@ -173,17 +155,17 @@ public class OaiServlet extends HttpServlet {
                 }
             }
             // handle ListIdentifiers verb
-            else if (handler.getVerb()
-                    .equals(Verb.ListIdentifiers)) {
+            else if (handler.getVerb().equals(Verb.ListIdentifiers)) {
                 /*
                  * output for all metadata types is the same
                  */
                 Element listIdentifiers;
                 try {
-                    int hitsPerToken = DataManager.getInstance()
-                            .getConfiguration()
-                            .getHitsPerToken();
-                    listIdentifiers = AbstractFormat.createListIdentifiers(handler, 0, hitsPerToken);
+                    int hitsPerToken =
+                            DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(handler.getMetadataPrefix().name());
+                    String versionDiscriminatorField = DataManager.getInstance().getConfiguration().getVersionDisriminatorFieldForMetadataFormat(
+                            handler.getMetadataPrefix().name());
+                    listIdentifiers = AbstractFormat.createListIdentifiers(handler, 0, 0, hitsPerToken, versionDiscriminatorField);
                     root.addContent(listIdentifiers);
                 } catch (SolrServerException e) {
                     logger.error(e.getMessage(), e);
@@ -193,14 +175,10 @@ public class OaiServlet extends HttpServlet {
 
             }
             // handle ListRecords verb
-            else if (handler.getVerb()
-                    .equals(Verb.ListRecords)) {
+            else if (handler.getVerb().equals(Verb.ListRecords)) {
                 if (handler.getMetadataPrefix() == null) {
                     root.addContent(new ErrorCode().getBadArgument());
-                } else if (!DataManager.getInstance()
-                        .getConfiguration()
-                        .isMetadataFormatEnabled(handler.getMetadataPrefix()
-                                .name())) {
+                } else if (!DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(handler.getMetadataPrefix().name())) {
                     // Deny access to disabled formats
                     root.addContent(new ErrorCode().getCannotDisseminateFormat());
                 } else {
@@ -210,37 +188,38 @@ public class OaiServlet extends HttpServlet {
                         logger.debug("No 'until' parameter, setting 'now' ({})", until);
                     }
                     try {
-                        int hitsPerToken = DataManager.getInstance()
-                                .getConfiguration()
-                                .getHitsPerTokenForMetadataFormat(handler.getMetadataPrefix()
-                                        .name());
+                        int hitsPerToken =
+                                DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(handler.getMetadataPrefix().name());
+                        String versionDiscriminatorField = DataManager.getInstance().getConfiguration().getVersionDisriminatorFieldForMetadataFormat(
+                                handler.getMetadataPrefix().name());
                         logger.trace(handler.getMetadataPrefix().getMetadataPrefix());
                         switch (handler.getMetadataPrefix()) {
                             case oai_dc:
-                                root.addContent(new OAIDCFormat().createListRecords(handler, 0, hitsPerToken));
+                                root.addContent(new OAIDCFormat().createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
                                 break;
                             case ese:
-                                root.addContent(new EpicurFormat().createListRecords(handler, 0, hitsPerToken));
+                                root.addContent(new EuropeanaFormat().createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
                                 break;
                             case mets:
-                                root.addContent(new METSFormat().createListRecords(handler, 0, hitsPerToken));
+                                root.addContent(new METSFormat().createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
                                 break;
                             case marcxml:
-                                root.addContent(new LIDOFormat().createListRecords(handler, 0, hitsPerToken));
+                                root.addContent(new LIDOFormat().createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
                                 break;
                             case epicur:
-                                root.addContent(new EpicurFormat().createListRecords(handler, 0, hitsPerToken));
+                                root.addContent(new EpicurFormat().createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
                                 break;
                             case lido:
-                                root.addContent(new LIDOFormat().createListRecords(handler, 0, hitsPerToken));
+                                root.addContent(new LIDOFormat().createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
                                 break;
                             case iv_overviewpage:
                             case iv_crowdsourcing:
-                                root.addContent(new GoobiViewerUpdateFormat().createListRecords(handler, 0, hitsPerToken));
+                                root.addContent(
+                                        new GoobiViewerUpdateFormat().createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
                                 break;
                             case tei:
                             case cmdi:
-                                root.addContent(new TEIFormat().createListRecords(handler, 0, hitsPerToken));
+                                root.addContent(new TEIFormat().createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
                                 break;
                             default:
                                 root.addContent(new ErrorCode().getBadArgument());
@@ -254,14 +233,10 @@ public class OaiServlet extends HttpServlet {
                 }
             }
             // handle GetRecord verb
-            else if (handler.getVerb()
-                    .equals(Verb.GetRecord)) {
+            else if (handler.getVerb().equals(Verb.GetRecord)) {
                 if (handler.getMetadataPrefix() == null) {
                     root.addContent(new ErrorCode().getBadArgument());
-                } else if (!DataManager.getInstance()
-                        .getConfiguration()
-                        .isMetadataFormatEnabled(handler.getMetadataPrefix()
-                                .name())) {
+                } else if (!DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(handler.getMetadataPrefix().name())) {
                     // Deny access to disabled formats
                     root.addContent(new ErrorCode().getCannotDisseminateFormat());
                 } else {
@@ -297,15 +272,11 @@ public class OaiServlet extends HttpServlet {
                             break;
                     }
                 }
-            } else if (handler.getVerb()
-                    .equals(Verb.ListMetadataFormats)) {
+            } else if (handler.getVerb().equals(Verb.ListMetadataFormats)) {
                 root.addContent(AbstractFormat.createMetadataFormats());
-            } else if (handler.getVerb()
-                    .equals(Verb.ListSets)) {
+            } else if (handler.getVerb().equals(Verb.ListSets)) {
                 try {
-                    root.addContent(AbstractFormat.createListSets(DataManager.getInstance()
-                            .getConfiguration()
-                            .getDefaultLocale())); // TODO
+                    root.addContent(AbstractFormat.createListSets(DataManager.getInstance().getConfiguration().getDefaultLocale())); // TODO
                 } catch (SolrServerException e) {
                     logger.error(e.getMessage(), e);
                     res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -319,8 +290,7 @@ public class OaiServlet extends HttpServlet {
         Format format = Format.getPrettyFormat();
         format.setEncoding("utf-8");
         XMLOutputter xmlOut = new XMLOutputter(format);
-        if (handler.getMetadataPrefix() != null && handler.getMetadataPrefix()
-                .equals(Metadata.epicur)) {
+        if (handler.getMetadataPrefix() != null && handler.getMetadataPrefix().equals(Metadata.epicur)) {
             String ueblerhack = xmlOut.outputString(doc);
             ueblerhack = ueblerhack.replace("<epicur", "<epicur xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
             res.setCharacterEncoding("utf-8");
@@ -389,8 +359,7 @@ public class OaiServlet extends HttpServlet {
                 // 'from' may not be later than 'until'
                 try {
                     if (formatterISO8601DateTimeFullWithTimeZone.parseDateTime(from)
-                            .getMillis() > formatterISO8601DateTimeFullWithTimeZone.parseDateTime(until)
-                                    .getMillis()) {
+                            .getMillis() > formatterISO8601DateTimeFullWithTimeZone.parseDateTime(until).getMillis()) {
                         return false;
                     }
                 } catch (IllegalArgumentException e) {
@@ -400,9 +369,7 @@ public class OaiServlet extends HttpServlet {
             } else {
                 // 'from' may not be later than 'until'
                 try {
-                    if (formatterISO8601Date.parseDateTime(from)
-                            .getMillis() > formatterISO8601Date.parseDateTime(until)
-                                    .getMillis()) {
+                    if (formatterISO8601Date.parseDateTime(from).getMillis() > formatterISO8601Date.parseDateTime(until).getMillis()) {
                         return false;
                     }
                 } catch (IllegalArgumentException e) {

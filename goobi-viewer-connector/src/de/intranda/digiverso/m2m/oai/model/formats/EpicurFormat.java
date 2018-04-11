@@ -49,10 +49,11 @@ public class EpicurFormat extends AbstractFormat {
     private static Namespace EPICUR = Namespace.getNamespace("epicur", "urn:nbn:de:1111-2004033116");
 
     /* (non-Javadoc)
-     * @see de.intranda.digiverso.m2m.oai.model.formats.AbstractFormat#createListRecords(de.intranda.digiverso.m2m.oai.RequestHandler, int, int)
+     * @see de.intranda.digiverso.m2m.oai.model.formats.AbstractFormat#createListRecords(de.intranda.digiverso.m2m.oai.RequestHandler, int, int, int, java.lang.String)
      */
     @Override
-    public Element createListRecords(RequestHandler handler, int firstRow, int numRows) throws SolrServerException {
+    public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
+            throws SolrServerException {
         logger.trace("createListRecords");
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
 
@@ -60,7 +61,7 @@ public class EpicurFormat extends AbstractFormat {
                 SolrSearchIndex.getUrnPrefixBlacklistSuffix(DataManager.getInstance().getConfiguration().getUrnPrefixBlacklist());
         String querySuffix = urnPrefixBlacklistSuffix
                 + SolrSearchIndex.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes());
-        QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRow, numRows, true, querySuffix, null);
+        QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, true, querySuffix, null);
         SolrDocumentList records = qr.getResults();
         if (records.isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
@@ -135,8 +136,8 @@ public class EpicurFormat extends AbstractFormat {
         logger.debug("Found {} page records", pagecount);
 
         // Create resumption token
-        if (records.getNumFound() > firstRow + numRows) {
-            Element resumption = createResumptionTokenAndElement(records.getNumFound(), firstRow + numRows, xmlns, handler);
+        if (records.getNumFound() > firstRawRow + numRows) {
+            Element resumption = createResumptionTokenAndElement(records.getNumFound(), firstRawRow + numRows, xmlns, handler);
             xmlListRecords.addContent(resumption);
         }
 
@@ -409,10 +410,10 @@ public class EpicurFormat extends AbstractFormat {
     }
 
     /* (non-Javadoc)
-     * @see de.intranda.digiverso.m2m.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map)
+     * @see de.intranda.digiverso.m2m.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map, java.lang.String)
      */
     @Override
-    public long getTotalHits(Map<String, String> params) throws IOException, SolrServerException {
+    public long getTotalHits(Map<String, String> params, String versionDiscriminatorField) throws IOException, SolrServerException {
         // Hit count may differ for epicur
         String querySuffix = SolrSearchIndex.getUrnPrefixBlacklistSuffix(DataManager.getInstance().getConfiguration().getUrnPrefixBlacklist());
         if (!Verb.ListIdentifiers.getTitle().equals(params.get("verb"))) {

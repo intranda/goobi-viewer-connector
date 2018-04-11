@@ -40,11 +40,12 @@ public class MARCXMLFormat extends METSFormat {
     private final static Logger logger = LoggerFactory.getLogger(MARCXMLFormat.class);
 
     /* (non-Javadoc)
-     * @see de.intranda.digiverso.m2m.oai.model.formats.AbstractFormat#createListRecords(de.intranda.digiverso.m2m.oai.RequestHandler, int, int)
+     * @see de.intranda.digiverso.m2m.oai.model.formats.AbstractFormat#createListRecords(de.intranda.digiverso.m2m.oai.RequestHandler, int, int, int, java.lang.String)
      */
     @Override
-    public Element createListRecords(RequestHandler handler, int firstRow, int numRows) throws IOException, SolrServerException {
-        Element mets = super.createListRecords(handler, firstRow, numRows);
+    public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
+            throws IOException, SolrServerException {
+        Element mets = super.createListRecords(handler, firstVirtualRow, firstRawRow, numRows, versionDiscriminatorField);
         if (mets.getName().equals("error")) {
             return mets;
         }

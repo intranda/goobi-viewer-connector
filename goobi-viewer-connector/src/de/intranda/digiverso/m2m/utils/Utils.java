@@ -206,7 +206,7 @@ public class Utils {
     /**
      * generates timestamp object from request
      * 
-     * @param the request that was send to the server(servlet)
+     * @param  requestHandler The request that was send to the server(servlet)
      * @return a HashMap with the values from, until and set as string
      * @should contain from timestamp
      * @should contain until timestamp
@@ -214,12 +214,12 @@ public class Utils {
      * @should contain metadataPrefix
      * @should contain verb
      */
-    public static Map<String, String> filterDatestampFromRequest(RequestHandler request) {
+    public static Map<String, String> filterDatestampFromRequest(RequestHandler requestHandler) {
         Map<String, String> datestamp = new HashMap<>();
 
         String from = null;
-        if (request.getFrom() != null) {
-            from = request.getFrom();
+        if (requestHandler.getFrom() != null) {
+            from = requestHandler.getFrom();
             from = from.replace("-", "")
                     .replace("T", "")
                     .replace(":", "")
@@ -227,8 +227,8 @@ public class Utils {
             datestamp.put("from", from);
         }
         String until = null;
-        if (request.getUntil() != null) {
-            until = request.getUntil();
+        if (requestHandler.getUntil() != null) {
+            until = requestHandler.getUntil();
             until = until.replace("-", "")
                     .replace("T", "")
                     .replace(":", "")
@@ -237,18 +237,18 @@ public class Utils {
         }
 
         String set = null;
-        if (request.getSet() != null) {
-            set = request.getSet();
+        if (requestHandler.getSet() != null) {
+            set = requestHandler.getSet();
             datestamp.put("set", set);
         }
 
-        if (request.getMetadataPrefix() != null) {
-            datestamp.put("metadataPrefix", request.getMetadataPrefix()
+        if (requestHandler.getMetadataPrefix() != null) {
+            datestamp.put("metadataPrefix", requestHandler.getMetadataPrefix()
                     .getMetadataPrefix());
         }
 
-        if (request.getVerb() != null) {
-            datestamp.put("verb", request.getVerb()
+        if (requestHandler.getVerb() != null) {
+            datestamp.put("verb", requestHandler.getVerb()
                     .getTitle());
         }
 

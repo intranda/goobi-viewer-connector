@@ -26,11 +26,16 @@ public class ResumptionToken {
     @XStreamAsAttribute
     @XStreamAlias("tokenName")
     private String tokenName;
-    /** Total hit number for the query. */
+    /** Total (virtual) hit number as communicated the client. */
     @XStreamAlias("hits")
     private long hits;
+    /** Total actual record number in the index. */
+    @XStreamAlias("rawHits")
+    private long rawHits;
     @XStreamAlias("cursor")
-    private int cursor;
+    private int virtualCursor;
+    @XStreamAlias("rawCursor")
+    private int rawCursor;
     @XStreamAlias("expirationDate")
     private long expirationDate;
     @XStreamAlias("handler")
@@ -41,14 +46,18 @@ public class ResumptionToken {
      * 
      * @param tokenName
      * @param hits
-     * @param cursor
+     * @param rawHits
+     * @param virtualCursor
+     * @param rawCursor
      * @param expirationDate
      * @param handler
      */
-    public ResumptionToken(String tokenName, long hits, int cursor, long expirationDate, RequestHandler handler) {
+    public ResumptionToken(String tokenName, long hits, long rawHits, int virtualCursor, int rawCursor, long expirationDate, RequestHandler handler) {
         this.tokenName = tokenName;
         this.hits = hits;
-        this.cursor = cursor;
+        this.rawHits = rawHits;
+        this.virtualCursor = virtualCursor;
+        this.rawCursor = rawCursor;
         this.expirationDate = expirationDate;
         this.handler = handler;
     }
@@ -72,17 +81,45 @@ public class ResumptionToken {
     }
 
     /**
-     * @param cursor the cursor to set
+     * @return the rawHits
      */
-    public void setCursor(int cursor) {
-        this.cursor = cursor;
+    public long getRawHits() {
+        return rawHits;
     }
 
     /**
-     * @return the currentHit
+     * @param rawHits the rawHits to set
      */
-    public int getCursor() {
-        return cursor;
+    public void setRawHits(long rawHits) {
+        this.rawHits = rawHits;
+    }
+
+    /**
+     * @return the virtualCursor
+     */
+    public int getVirtualCursor() {
+        return virtualCursor;
+    }
+
+    /**
+     * @param virtualCursor the virtualCursor to set
+     */
+    public void setVirtualCursor(int virtualCursor) {
+        this.virtualCursor = virtualCursor;
+    }
+
+    /**
+     * @return the rawCursor
+     */
+    public int getRawCursor() {
+        return rawCursor;
+    }
+
+    /**
+     * @param rawCursor the rawCursor to set
+     */
+    public void setRawCursor(int rawCursor) {
+        this.rawCursor = rawCursor;
     }
 
     /**

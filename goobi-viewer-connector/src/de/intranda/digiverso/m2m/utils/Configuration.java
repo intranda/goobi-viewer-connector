@@ -62,8 +62,8 @@ public final class Configuration {
             configLocal.setReloadingStrategy(new FileChangedReloadingStrategy());
             logger.info("Loaded local OAI-PMH configuration from '{}'.", configLocal.getFile().getAbsolutePath());
         } catch (ConfigurationException e) {
-            logger.warn("OAI configuration file '{}' could not be read ({}), using default configuration file.", getViewerConfigFolder(), e
-                    .getMessage());
+            logger.warn("OAI configuration file '{}' could not be read ({}), using default configuration file.", getViewerConfigFolder(),
+                    e.getMessage());
             configLocal = configDefault;
         }
         // Load viewer configuration
@@ -269,6 +269,15 @@ public final class Configuration {
      */
     public int getHitsPerTokenForMetadataFormat(String metadataFormat) {
         return getLocalInt(metadataFormat + ".hitsPerToken", getHitsPerToken());
+    }
+
+    /**
+     * 
+     * @return number of hits per page/token
+     * @should return correct value
+     */
+    public String getVersionDisriminatorFieldForMetadataFormat(String metadataFormat) {
+        return getLocalString(metadataFormat + ".versionDiscriminatorField", null);
     }
 
     /**

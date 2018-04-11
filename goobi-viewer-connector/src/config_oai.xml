@@ -187,11 +187,13 @@
     <tei>
         <enabled>true</enabled>
         <hitsPerToken>10</hitsPerToken>
+        <versionDiscriminatorField>LANGUAGE</versionDiscriminatorField>
     </tei>
     
     <cmdi>
         <enabled>true</enabled>
         <hitsPerToken>10</hitsPerToken>
+        <versionDiscriminatorField>LANGUAGE</versionDiscriminatorField>
     </cmdi>
 
 	<sets>

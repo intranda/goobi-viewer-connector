@@ -86,8 +86,8 @@ public class ConfigurationTest {
      */
     @Test
     public void getCollectionBlacklistFilterSuffix_shouldConstructSuffixCorrectly() throws Exception {
-        Assert.assertEquals(" -DC:collection1 -DC:collection2 -MD_OTHERCOLLECTION:collection3 -MD_OTHERCOLLECTION:collection4", DataManager
-                .getInstance().getConfiguration().getCollectionBlacklistFilterSuffix());
+        Assert.assertEquals(" -DC:collection1 -DC:collection2 -MD_OTHERCOLLECTION:collection3 -MD_OTHERCOLLECTION:collection4",
+                DataManager.getInstance().getConfiguration().getCollectionBlacklistFilterSuffix());
     }
 
     /**
@@ -293,6 +293,15 @@ public class ConfigurationTest {
     }
 
     /**
+     * @see Configuration#getVersionDisriminatorFieldForMetadataFormat(String)
+     * @verifies return correct value
+     */
+    @Test
+    public void getVersionDisriminatorFieldForMetadataFormat_shouldReturnCorrectValue() throws Exception {
+        Assert.assertEquals(SolrConstants.LANGUAGE, DataManager.getInstance().getConfiguration().getVersionDisriminatorFieldForMetadataFormat("tei"));
+    }
+
+    /**
      * @see Configuration#isMetadataFormatEnabled(String)
      * @verifies return correct value
      */
@@ -413,7 +422,7 @@ public class ConfigurationTest {
      */
     @Test
     public void getContentApiUrl_shouldReturnCorrectValue() throws Exception {
-Assert.assertEquals("http://localhost/viewer/rest/content/", DataManager.getInstance().getConfiguration().getContentApiUrl());
+        Assert.assertEquals("http://localhost/viewer/rest/content/", DataManager.getInstance().getConfiguration().getContentApiUrl());
     }
 
     /**
