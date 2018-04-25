@@ -156,23 +156,23 @@ public class OaiServlet extends HttpServlet {
             }
             // handle ListIdentifiers verb
             else if (handler.getVerb().equals(Verb.ListIdentifiers)) {
-                /*
-                 * output for all metadata types is the same
-                 */
-                Element listIdentifiers;
-                try {
-                    int hitsPerToken =
-                            DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(handler.getMetadataPrefix().name());
-                    String versionDiscriminatorField = DataManager.getInstance().getConfiguration().getVersionDisriminatorFieldForMetadataFormat(
-                            handler.getMetadataPrefix().name());
-                    listIdentifiers = AbstractFormat.createListIdentifiers(handler, 0, 0, hitsPerToken, versionDiscriminatorField);
-                    root.addContent(listIdentifiers);
-                } catch (SolrServerException e) {
-                    logger.error(e.getMessage(), e);
-                    res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-                    return;
+                if (handler.getMetadataPrefix() == null) {
+                    root.addContent(new ErrorCode().getBadArgument());
+                } else {
+                    Element listIdentifiers;
+                    try {
+                        int hitsPerToken =
+                                DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(handler.getMetadataPrefix().name());
+                        String versionDiscriminatorField = DataManager.getInstance().getConfiguration().getVersionDisriminatorFieldForMetadataFormat(
+                                handler.getMetadataPrefix().name());
+                        listIdentifiers = AbstractFormat.createListIdentifiers(handler, 0, 0, hitsPerToken, versionDiscriminatorField);
+                        root.addContent(listIdentifiers);
+                    } catch (SolrServerException e) {
+                        logger.error(e.getMessage(), e);
+                        res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                        return;
+                    }
                 }
-
             }
             // handle ListRecords verb
             else if (handler.getVerb().equals(Verb.ListRecords)) {
