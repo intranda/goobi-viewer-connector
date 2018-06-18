@@ -220,7 +220,8 @@ public class SolrSearchIndex {
             }
         }
         QueryResponse resp = server.query(solrQuery);
-        logger.debug("Total hits (Solr only): {}, fetched records {} - {}", resp.getResults().getNumFound(), firstRow, firstRow + resp.getResults().size() - 1);
+        logger.debug("Total hits (Solr only): {}, fetched records {} - {}", resp.getResults().getNumFound(), firstRow,
+                firstRow + resp.getResults().size() - 1);
 
         return resp;
     }
@@ -236,8 +237,8 @@ public class SolrSearchIndex {
      * @return
      * @throws SolrServerException
      */
-    public QueryResponse getListIdentifiers(Map<String, String> params, int firstRawRow, int numRows, String querySuffix, List<String> fieldStatistics)
-            throws SolrServerException {
+    public QueryResponse getListIdentifiers(Map<String, String> params, int firstRawRow, int numRows, String querySuffix,
+            List<String> fieldStatistics) throws SolrServerException {
         try {
             return search(params.get("from"), params.get("until"), params.get("set"), params.get("metadataPrefix"), firstRawRow, numRows, false,
                     querySuffix, fieldStatistics);
@@ -371,46 +372,42 @@ public class SolrSearchIndex {
 
         }
         if (set != null) {
-            // check if set is defined in configuration file
-            List<Set> additionalSetList = DataManager.getInstance().getConfiguration().getAdditionalSets();
             boolean defaultSet = true;
-            for (Set currentSet : additionalSetList) {
-                if (currentSet.getSetSpec().equals(set)) {
-                    defaultSet = false;
-                    set = currentSet.getSetQuery();
-                    break;
+            // Use DC as the set field by default 
+            String setQuery = SolrConstants.DC + ":" + set;
+            // Check whether this is an additional set and if so, use its custom query
+            {
+                List<Set> additionalSetList = DataManager.getInstance().getConfiguration().getAdditionalSets();
+                for (Set s : additionalSetList) {
+                    if (s.getSetSpec().equals(set)) {
+                        defaultSet = false;
+                        set = s.getSetQuery();
+                        break;
+                    }
                 }
             }
-            if (defaultSet) {
-                // if set is not defined, use DC query 
-                query.append(" AND ").append(SolrConstants.DC).append(':').append(set);
-            } else {
-                // if set is configured, use configured query
-                if (set.charAt(0) == '-' || set.startsWith("NOT(")) {
-                    // do not wrap the conditions in parentheses if it starts with a negation, otherwise it won't work
-                    query.append(" AND ").append(set);
-                } else {
-                    query.append(" AND ").append(set);
+            // Check whether this is an all-values set and if so, use its field
+            if (defaultSet && set.contains(":")) {
+                List<Set> allValuesSetList = DataManager.getInstance().getConfiguration().getAllValuesSets();
+                for (Set s : allValuesSetList) {
+                    if (s.getSetName().equals(set.substring(0, set.indexOf(":")))) {
+                        defaultSet = false;
+                        setQuery = set;
+                        break;
+                    }
                 }
             }
+            //            if (!defaultSet) {
+            //                // if set is configured, use configured query
+            //                if (set.charAt(0) == '-' || set.startsWith("NOT(")) {
+            //                    // do not wrap the conditions in parentheses if it starts with a negation, otherwise it won't work
+            //                    query.append(" AND ").append(set);
+            //                } else {
+            //                    query.append(" AND ").append(set);
+            //                }
+            //            }
+            query.append(" AND ").append(setQuery);
         }
-        //        if (metadataPrefix != null) {
-        //            switch (metadataPrefix.toLowerCase()) {
-        //                case "mets":
-        //                case "marcxml":
-        //                    query.append(" AND ")
-        //                            .append(SolrConstants.SOURCEDOCFORMAT)
-        //                            .append(':')
-        //                            .append(SolrConstants._METS);
-        //                    break;
-        //                case "lido":
-        //                    query.append(" AND ")
-        //                            .append(SolrConstants.SOURCEDOCFORMAT)
-        //                            .append(':')
-        //                            .append(SolrConstants._LIDO);
-        //                    break;
-        //            }
-        //        }
 
         return query.toString();
     }

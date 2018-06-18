@@ -197,14 +197,14 @@ public abstract class AbstractFormat {
                 continue;
             }
             for (String value : set.getValues()) {
-
                 Element eleSet = new Element("set", xmlns);
                 Element eleSetSpec = new Element("setSpec", xmlns);
-                eleSetSpec.setText(value);
+                eleSetSpec.setText(set.getSetName() + ":" + value);
                 eleSet.addContent(eleSetSpec);
                 Element name = new Element("setName", xmlns);
                 if (set.isTranslate()) {
                     name.setText(MessageResourceBundle.getTranslation(value, locale));
+                    logger.trace("translation for value: {}", name.getText());
                 } else {
                     name.setText(value);
                 }
