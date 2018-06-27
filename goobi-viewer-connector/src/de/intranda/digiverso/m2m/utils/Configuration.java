@@ -52,7 +52,7 @@ public final class Configuration {
         try {
             configDefault = new XMLConfiguration(configPath);
             configDefault.setReloadingStrategy(new FileChangedReloadingStrategy());
-            logger.info("Loaded default OAI-PMH configuration.");
+            logger.info("Loaded default Connector configuration.");
         } catch (ConfigurationException e) {
             logger.error(e.getMessage(), e);
         }
@@ -60,7 +60,7 @@ public final class Configuration {
         try {
             configLocal = new XMLConfiguration(getViewerConfigFolder() + DEFAULT_CONFIG_FILE);
             configLocal.setReloadingStrategy(new FileChangedReloadingStrategy());
-            logger.info("Loaded local OAI-PMH configuration from '{}'.", configLocal.getFile().getAbsolutePath());
+            logger.info("Loaded local Connector configuration from '{}'.", configLocal.getFile().getAbsolutePath());
         } catch (ConfigurationException e) {
             logger.warn("OAI configuration file '{}' could not be read ({}), using default configuration file.", getViewerConfigFolder(),
                     e.getMessage());
@@ -70,7 +70,7 @@ public final class Configuration {
         try {
             viewerConfig = new XMLConfiguration(getViewerConfigFolder() + DEFAULT_VIEWER_CONFIG_FILE);
             viewerConfig.setReloadingStrategy(new FileChangedReloadingStrategy());
-            logger.info("Loaded default intranda viewer configuration for OAI-PMH.");
+            logger.info("Loaded default Goobi viewer configuration for Connector.");
         } catch (ConfigurationException e) {
             logger.error(e.getMessage(), e);
         }

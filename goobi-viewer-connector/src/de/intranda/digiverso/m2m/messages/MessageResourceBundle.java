@@ -58,7 +58,7 @@ public class MessageResourceBundle extends ResourceBundle {
         if (file.exists()) {
             try {
                 URL resourceURL = file.getParentFile().toURI().toURL();
-                // logger.debug("URL: " + file.getParentFile().toURI().toURL());
+                logger.debug("Local resource bundle URL {}: ", file.getParentFile().toURI().toURL());
                 URLClassLoader urlLoader = new URLClassLoader(new URL[] { resourceURL });
                 return ResourceBundle.getBundle("messages", locale, urlLoader);
             } catch (Exception e) {
