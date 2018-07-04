@@ -258,8 +258,8 @@ public abstract class AbstractFormat {
         long totalRawHits;
         if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
             // One OAI record for each record version
-            qr = DataManager.getInstance().getSearchIndex().getListIdentifiers(datestamp, firstRawRow, numRows, versionDiscriminatorField,
-                    Collections.singletonList(versionDiscriminatorField));
+            qr = DataManager.getInstance().getSearchIndex().getListIdentifiers(datestamp, firstRawRow, numRows,
+                    " AND " + versionDiscriminatorField + ":*", Collections.singletonList(versionDiscriminatorField));
             if (qr.getResults().isEmpty()) {
                 return new ErrorCode().getNoRecordsMatch();
             }
