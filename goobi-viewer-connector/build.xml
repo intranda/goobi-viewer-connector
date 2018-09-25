@@ -196,4 +196,23 @@
 		<echo>Alles ist gut!</echo>
 	</target>
 
+
+	<!-- Build of war file without tests and doc. -->
+	<target name="war-simple" depends="compile,resources,prepareConfig" description="Build of war file without tests and doc.">
+		<war destfile="${dir.build}/${dist.name}.war" webxml="WebContent/WEB-INF/web.xml">
+			<classes dir="${dir.build.classes}" />
+			<lib dir="WebContent/WEB-INF/lib" />
+			<fileset dir="${dir.build}">
+				<patternset>
+					<include name="resources/**/*.*" />
+					<include name="*.xsl" />
+				</patternset>
+			</fileset>
+		</war>
+
+		<!-- // Build of war file. -->
+		<delete dir="${dir.build}/resources" />
+		<delete dir="${dir.build}/META-INF" />
+		<echo>Alles ist gut!</echo>
+	</target>
 </project>
