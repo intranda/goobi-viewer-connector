@@ -225,6 +225,10 @@ public class OAIDCFormat extends AbstractFormat {
         Element header = getHeader(doc, topstructDoc, handler, requestedVersion);
         record.addContent(header);
 
+        if ("deleted".equals(header.getAttributeValue("status"))) {
+            return record;
+        }
+
         //            Map<String, String> collectedValues = new HashMap<>();
 
         // create the metadata element, special for dc

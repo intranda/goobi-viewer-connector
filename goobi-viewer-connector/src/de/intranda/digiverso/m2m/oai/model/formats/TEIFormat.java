@@ -292,6 +292,7 @@ public class TEIFormat extends AbstractFormat {
         // status="deleted"
         if (doc.getFieldValues(SolrConstants.DATEDELETED) != null) {
             header.setAttribute("status", "deleted");
+            datestamp.setText(Utils.parseDate(doc.getFieldValue(SolrConstants.DATEDELETED)));
         }
 
         return header;
