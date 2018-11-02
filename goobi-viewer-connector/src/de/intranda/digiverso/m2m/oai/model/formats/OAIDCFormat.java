@@ -39,6 +39,7 @@ import de.intranda.digiverso.m2m.oai.enums.Verb;
 import de.intranda.digiverso.m2m.oai.model.ErrorCode;
 import de.intranda.digiverso.m2m.oai.model.language.Language;
 import de.intranda.digiverso.m2m.oai.model.metadata.MetadataParameter;
+import de.intranda.digiverso.m2m.oai.model.metadata.MetadataParameter.MetadataParameterType;
 import de.intranda.digiverso.m2m.utils.SolrConstants;
 import de.intranda.digiverso.m2m.utils.SolrSearchIndex;
 import de.intranda.digiverso.m2m.utils.Utils;
@@ -250,7 +251,7 @@ public class OAIDCFormat extends AbstractFormat {
 
             for (de.intranda.digiverso.m2m.oai.model.metadata.Metadata md : metadataList) {
                 List<String> finishedValues = new ArrayList<>();
-                
+
                 // Alternative 1: get value from source
                 if ("#AUTO#".equals(md.getMasterValue())) {
                     // #AUTO# means a hardcoded value is added
@@ -302,8 +303,11 @@ public class OAIDCFormat extends AbstractFormat {
                                 values = SolrSearchIndex.getMetadataValues(topstructDoc, param.getKey());
                             }
                             if (!values.isEmpty()) {
-                                paramVal = values.size() > i ? values.get(i) : values.get(values.size() - 1);
+                                paramVal = values.size() > i ? values.get(i) : "";
                                 if (StringUtils.isNotEmpty(paramVal)) {
+                                    if (MetadataParameterType.TRANSLATEDFIELD.equals(param.getType())) {
+                                        paramVal = MessageResourceBundle.getTranslation(paramVal, null);
+                                    }
                                     if (StringUtils.isNotEmpty(param.getPrefix())) {
                                         String prefix = MessageResourceBundle.getTranslation(param.getPrefix(), null);
                                         paramVal = prefix + paramVal;
