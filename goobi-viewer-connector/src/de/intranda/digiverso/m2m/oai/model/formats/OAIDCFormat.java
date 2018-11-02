@@ -16,6 +16,7 @@
 package de.intranda.digiverso.m2m.oai.model.formats;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -36,8 +37,8 @@ import de.intranda.digiverso.m2m.oai.RequestHandler;
 import de.intranda.digiverso.m2m.oai.enums.Metadata;
 import de.intranda.digiverso.m2m.oai.enums.Verb;
 import de.intranda.digiverso.m2m.oai.model.ErrorCode;
-import de.intranda.digiverso.m2m.oai.model.FieldConfiguration;
 import de.intranda.digiverso.m2m.oai.model.language.Language;
+import de.intranda.digiverso.m2m.oai.model.metadata.MetadataParameter;
 import de.intranda.digiverso.m2m.utils.SolrConstants;
 import de.intranda.digiverso.m2m.utils.SolrSearchIndex;
 import de.intranda.digiverso.m2m.utils.Utils;
@@ -221,6 +222,7 @@ public class OAIDCFormat extends AbstractFormat {
                 }
             }
         }
+        String docstruct = (String) doc.getFieldValue(SolrConstants.DOCSTRCT);
 
         Element header = getHeader(doc, topstructDoc, handler, requestedVersion);
         record.addContent(header);
@@ -242,122 +244,103 @@ public class OAIDCFormat extends AbstractFormat {
         oai_dc.setAttribute("schemaLocation", "http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd", XSI);
 
         // Configured fields
-        List<FieldConfiguration> fieldConfigurations = DataManager.getInstance().getConfiguration().getFieldForMetadataFormat(Metadata.oai_dc.name());
-        if (fieldConfigurations != null && !fieldConfigurations.isEmpty()) {
-            for (FieldConfiguration fieldConfiguration : fieldConfigurations) {
-                boolean added = false;
-                String singleValue = null;
-                // Alternative 1: get value from source
-                if (StringUtils.isNotEmpty(fieldConfiguration.getValueSource())) {
-                    if ("#AUTO#".equals(fieldConfiguration.getValueSource())) {
-                        // #AUTO# means a hardcoded value is added
-                        switch (fieldConfiguration.getFieldName()) {
-                            case "identifier":
-                                if (StringUtils.isNotEmpty((String) doc.getFieldValue(SolrConstants.URN))) {
-                                    singleValue = DataManager.getInstance().getConfiguration().getUrnResolverUrl()
-                                            + (String) doc.getFieldValue(SolrConstants.URN);
-                                } else if (StringUtils.isNotEmpty((String) doc.getFieldValue(SolrConstants.PI))) {
-                                    singleValue = DataManager.getInstance().getConfiguration().getPiResolverUrl()
-                                            + (String) doc.getFieldValue(SolrConstants.PI);
-                                } else if (StringUtils.isNotEmpty((String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))) {
-                                    singleValue = DataManager.getInstance().getConfiguration().getPiResolverUrl()
-                                            + (String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT);
-                                }
-                                break;
-                            case "rights":
-                                if (doc.getFieldValues(SolrConstants.ACCESSCONDITION) != null) {
-                                    for (Object o : doc.getFieldValues(SolrConstants.ACCESSCONDITION)) {
-                                        if (SolrConstants.OPEN_ACCESS_VALUE.equals(o)) {
-                                            singleValue = "info:eu-repo/semantics/openAccess";
-                                            break;
-                                        }
-                                        singleValue = "info:eu-repo/semantics/closedAccess";
-                                    }
-                                }
-                                break;
-                            case "source":
-                                oai_dc.addContent(generateDcSource(doc, topstructDoc, anchorDoc, nsDc));
-                                break;
-                            default:
-                                singleValue = "No automatic configuration possible for field: " + fieldConfiguration.getFieldName();
-                                break;
-                        }
-                    } else if (doc.getFieldValues(fieldConfiguration.getValueSource()) != null) {
-                        if (fieldConfiguration.isMultivalued()) {
-                            // Multivalued
-                            StringBuilder sbAggregatedValue = new StringBuilder();
-                            for (Object fieldValue : doc.getFieldValues(fieldConfiguration.getValueSource())) {
-                                Element eleField = new Element(fieldConfiguration.getFieldName(), nsDc);
-                                if (StringUtils.isNotEmpty(String.valueOf(fieldValue))) {
-                                    StringBuilder sbValue = new StringBuilder();
-                                    if (fieldConfiguration.getPrefix() != null) {
-                                        sbValue.append(MessageResourceBundle.getTranslation(fieldConfiguration.getPrefix(),
-                                                DataManager.getInstance().getConfiguration().getDefaultLocale()));
-                                    }
-                                    if (fieldConfiguration.isTranslate()) {
-                                        sbValue.append(MessageResourceBundle.getTranslation(String.valueOf(fieldValue),
-                                                DataManager.getInstance().getConfiguration().getDefaultLocale()));
-                                    } else {
-                                        sbValue.append(String.valueOf(fieldValue));
-                                    }
-                                    if (fieldConfiguration.getSuffix() != null) {
-                                        sbValue.append(MessageResourceBundle.getTranslation(fieldConfiguration.getSuffix(),
-                                                DataManager.getInstance().getConfiguration().getDefaultLocale()));
-                                    }
-                                    eleField.setText(sbValue.toString());
-                                    oai_dc.addContent(eleField);
-                                    added = true;
-                                }
-                            }
+        List<de.intranda.digiverso.m2m.oai.model.metadata.Metadata> metadataList =
+                DataManager.getInstance().getConfiguration().getMetadataConfiguration(Metadata.oai_dc.name(), docstruct);
+        if (metadataList != null && !metadataList.isEmpty()) {
 
-                        } else {
-                            Element eleField = new Element(fieldConfiguration.getFieldName(), nsDc);
-                            singleValue = String.valueOf(doc.getFieldValues(fieldConfiguration.getValueSource()).iterator().next());
-                            // If no value found use the topstruct's value (if so configured)
-                            if (fieldConfiguration.isUseTopstructValueIfNoneFound() && singleValue == null && topstructDoc != null
-                                    && topstructDoc.getFieldValues(fieldConfiguration.getFieldName()) != null) {
-                                singleValue = String.valueOf(topstructDoc.getFieldValues(fieldConfiguration.getFieldName()).iterator().next());
+            for (de.intranda.digiverso.m2m.oai.model.metadata.Metadata md : metadataList) {
+                List<String> finishedValues = new ArrayList<>();
+                
+                // Alternative 1: get value from source
+                if ("#AUTO#".equals(md.getMasterValue())) {
+                    // #AUTO# means a hardcoded value is added
+                    String val = "";
+                    switch (md.getLabel()) {
+                        case "identifier":
+                            if (StringUtils.isNotEmpty((String) doc.getFieldValue(SolrConstants.URN))) {
+                                val = DataManager.getInstance().getConfiguration().getUrnResolverUrl()
+                                        + (String) doc.getFieldValue(SolrConstants.URN);
+                            } else if (StringUtils.isNotEmpty((String) doc.getFieldValue(SolrConstants.PI))) {
+                                val = DataManager.getInstance().getConfiguration().getPiResolverUrl() + (String) doc.getFieldValue(SolrConstants.PI);
+                            } else if (StringUtils.isNotEmpty((String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))) {
+                                val = DataManager.getInstance().getConfiguration().getPiResolverUrl()
+                                        + (String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT);
                             }
-                        }
-                    }
-                }
-                if (!added) {
-                    // Alternative 2: get default value
-                    if (singleValue == null && fieldConfiguration.getDefaultValue() != null) {
-                        singleValue = fieldConfiguration.getDefaultValue();
-                    }
-                    switch (fieldConfiguration.getFieldName()) {
-                        case "title":
-                            if (isWork && doc.getFieldValue(SolrConstants.IDDOC_PARENT) != null) {
-                                // If this is a volume, add anchor title in front
-                                String anchorTitle = getAnchorTitle(doc);
-                                if (anchorTitle != null) {
-                                    singleValue = anchorTitle + "; " + singleValue;
+                            break;
+                        case "rights":
+                            if (doc.getFieldValues(SolrConstants.ACCESSCONDITION) != null) {
+                                for (Object o : doc.getFieldValues(SolrConstants.ACCESSCONDITION)) {
+                                    if (SolrConstants.OPEN_ACCESS_VALUE.equals(o)) {
+                                        val = "info:eu-repo/semantics/openAccess";
+                                        break;
+                                    }
+                                    val = "info:eu-repo/semantics/closedAccess";
                                 }
                             }
                             break;
+                        case "source":
+                            oai_dc.addContent(generateDcSource(doc, topstructDoc, anchorDoc, nsDc));
+                            break;
+                        default:
+                            val = "No automatic configuration possible for field: " + md.getLabel();
+                            break;
                     }
-
-                    if (singleValue != null) {
-                        Element eleField = new Element(fieldConfiguration.getFieldName(), nsDc);
-                        if (fieldConfiguration.isTranslate()) {
-                            eleField.setText(MessageResourceBundle.getTranslation(singleValue,
-                                    DataManager.getInstance().getConfiguration().getDefaultLocale()));
-                        } else {
-                            StringBuilder sbValue = new StringBuilder();
-                            if (fieldConfiguration.getPrefix() != null) {
-                                sbValue.append(MessageResourceBundle.getTranslation(fieldConfiguration.getPrefix(),
-                                        DataManager.getInstance().getConfiguration().getDefaultLocale()));
+                    finishedValues.add(val);
+                } else if (!md.getParams().isEmpty()) {
+                    // Parameter configuration
+                    String firstField = md.getParams().get(0).getKey();
+                    int numValues = SolrSearchIndex.getMetadataValues(doc, firstField).size();
+                    // for each instance of the first field value
+                    for (int i = 0; i < numValues; ++i) {
+                        String val = md.getMasterValue();
+                        int paramIndex = 0;
+                        // for each parameter
+                        for (MetadataParameter param : md.getParams()) {
+                            String paramVal = "";
+                            List<String> values = SolrSearchIndex.getMetadataValues(doc, param.getKey());
+                            if (values.isEmpty() && !param.isDontUseTopstructValue()) {
+                                values = SolrSearchIndex.getMetadataValues(topstructDoc, param.getKey());
                             }
-                            sbValue.append(singleValue);
-                            if (fieldConfiguration.getSuffix() != null) {
-                                sbValue.append(MessageResourceBundle.getTranslation(fieldConfiguration.getSuffix(),
-                                        DataManager.getInstance().getConfiguration().getDefaultLocale()));
+                            if (!values.isEmpty()) {
+                                paramVal = values.size() > i ? values.get(i) : values.get(values.size() - 1);
+                                if (StringUtils.isNotEmpty(paramVal)) {
+                                    if (StringUtils.isNotEmpty(param.getPrefix())) {
+                                        String prefix = MessageResourceBundle.getTranslation(param.getPrefix(), null);
+                                        paramVal = prefix + paramVal;
+                                    }
+                                    if (StringUtils.isNotEmpty(param.getSuffix())) {
+                                        String suffix = MessageResourceBundle.getTranslation(param.getSuffix(), null);
+                                        paramVal += suffix;
+                                    }
+                                }
                             }
-                            eleField.setText(sbValue.toString());
+                            val = val.replace("{" + paramIndex + '}', paramVal);
+                            paramIndex++;
                         }
-                        oai_dc.addContent(eleField);
+                        logger.trace("adding value: " + md.getLabel() + ":" + val);
+                        finishedValues.add(val);
+                        if (!md.isMultivalued()) {
+                            continue;
+                        }
                     }
+                } else if (StringUtils.isNotEmpty(md.getMasterValue())) {
+                    // Default value
+                    String val = md.getMasterValue();
+                    if ("title".equals(md.getLabel()) && isWork && doc.getFieldValue(SolrConstants.IDDOC_PARENT) != null) {
+                        // If this is a volume, add anchor title in front
+                        String anchorTitle = getAnchorTitle(doc);
+                        if (anchorTitle != null) {
+                            val = anchorTitle + "; " + val;
+                        }
+                    }
+                    finishedValues.add(val);
+                }
+
+                // Add all constructed values for the current field to XML
+                for (String val : finishedValues) {
+                    Element eleField = new Element(md.getLabel(), nsDc);
+                    eleField.setText(val);
+                    oai_dc.addContent(eleField);
                 }
             }
         }

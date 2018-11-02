@@ -57,8 +57,7 @@ public class Utils {
      * @return the time in the format YYYY-MM-DDThh:mm:ssZ
      */
     public static String getCurrentUTCTime(long milliSecondsAdd) {
-        return formatterISO8601DateTimeFullWithTimeZone.withZoneUTC()
-                .print(System.currentTimeMillis() + milliSecondsAdd);
+        return formatterISO8601DateTimeFullWithTimeZone.withZoneUTC().print(System.currentTimeMillis() + milliSecondsAdd);
     }
 
     /**
@@ -68,8 +67,7 @@ public class Utils {
      * @should convert time correctly
      */
     public static String convertDate(long milliSeconds) {
-        return formatterISO8601DateTimeFullWithTimeZone.withZoneUTC()
-                .print(milliSeconds);
+        return formatterISO8601DateTimeFullWithTimeZone.withZoneUTC().print(milliSeconds);
     }
 
     /**
@@ -113,22 +111,17 @@ public class Utils {
                 .setConnectTimeout(HTTP_TIMEOUT)
                 .setConnectionRequestTimeout(HTTP_TIMEOUT)
                 .build();
-        try (CloseableHttpClient httpClient = HttpClients.custom()
-                .setDefaultRequestConfig(defaultRequestConfig)
-                .build()) {
+        try (CloseableHttpClient httpClient = HttpClients.custom().setDefaultRequestConfig(defaultRequestConfig).build()) {
             HttpGet get = new HttpGet(url);
             Charset chars = Charset.forName(DEFAULT_ENCODING);
             try (CloseableHttpResponse response = httpClient.execute(get); StringWriter writer = new StringWriter()) {
-                int code = response.getStatusLine()
-                        .getStatusCode();
+                int code = response.getStatusLine().getStatusCode();
                 if (code == HttpStatus.SC_OK) {
                     // logger.trace("{}: {}", code, response.getStatusLine().getReasonPhrase());
-                    IOUtils.copy(response.getEntity()
-                            .getContent(), writer);
+                    IOUtils.copy(response.getEntity().getContent(), writer);
                     return writer.toString();
                 }
-                logger.trace("{}: {}", code, response.getStatusLine()
-                        .getReasonPhrase());
+                logger.trace("{}: {}", code, response.getStatusLine().getReasonPhrase());
             }
         }
 
@@ -142,14 +135,11 @@ public class Utils {
                 .setConnectTimeout(HTTP_TIMEOUT)
                 .setConnectionRequestTimeout(HTTP_TIMEOUT)
                 .build();
-        try (CloseableHttpClient httpClient = HttpClients.custom()
-                .setDefaultRequestConfig(defaultRequestConfig)
-                .build()) {
+        try (CloseableHttpClient httpClient = HttpClients.custom().setDefaultRequestConfig(defaultRequestConfig).build()) {
             HttpGet get = new HttpGet(url);
             Charset chars = Charset.forName(DEFAULT_ENCODING);
             try (CloseableHttpResponse response = httpClient.execute(get)) {
-                return response.getStatusLine()
-                        .getStatusCode();
+                return response.getStatusLine().getStatusCode();
             }
         }
     }
@@ -206,7 +196,7 @@ public class Utils {
     /**
      * generates timestamp object from request
      * 
-     * @param  requestHandler The request that was send to the server(servlet)
+     * @param requestHandler The request that was send to the server(servlet)
      * @return a HashMap with the values from, until and set as string
      * @should contain from timestamp
      * @should contain until timestamp
@@ -220,19 +210,13 @@ public class Utils {
         String from = null;
         if (requestHandler.getFrom() != null) {
             from = requestHandler.getFrom();
-            from = from.replace("-", "")
-                    .replace("T", "")
-                    .replace(":", "")
-                    .replace("Z", "");
+            from = from.replace("-", "").replace("T", "").replace(":", "").replace("Z", "");
             datestamp.put("from", from);
         }
         String until = null;
         if (requestHandler.getUntil() != null) {
             until = requestHandler.getUntil();
-            until = until.replace("-", "")
-                    .replace("T", "")
-                    .replace(":", "")
-                    .replace("Z", "");
+            until = until.replace("-", "").replace("T", "").replace(":", "").replace("Z", "");
             datestamp.put("until", until);
         }
 
@@ -243,13 +227,11 @@ public class Utils {
         }
 
         if (requestHandler.getMetadataPrefix() != null) {
-            datestamp.put("metadataPrefix", requestHandler.getMetadataPrefix()
-                    .getMetadataPrefix());
+            datestamp.put("metadataPrefix", requestHandler.getMetadataPrefix().getMetadataPrefix());
         }
 
         if (requestHandler.getVerb() != null) {
-            datestamp.put("verb", requestHandler.getVerb()
-                    .getTitle());
+            datestamp.put("verb", requestHandler.getVerb().getTitle());
         }
 
         return datestamp;

@@ -35,6 +35,9 @@ import org.slf4j.LoggerFactory;
 import de.intranda.digiverso.m2m.oai.model.FieldConfiguration;
 import de.intranda.digiverso.m2m.oai.model.LicenseType;
 import de.intranda.digiverso.m2m.oai.model.Set;
+import de.intranda.digiverso.m2m.oai.model.metadata.Metadata;
+import de.intranda.digiverso.m2m.oai.model.metadata.MetadataParameter;
+import de.intranda.digiverso.m2m.oai.model.metadata.MetadataParameter.MetadataParameterType;
 
 public final class Configuration {
 
@@ -657,5 +660,89 @@ public final class Configuration {
         }
 
         return locale;
+    }
+
+    /**
+     * @param metadataFormat
+     * @param template
+     * @return
+     * @should return correct template configuration
+     * @should return default template configuration if template not found
+     */
+    @SuppressWarnings({ "rawtypes" })
+    public List<Metadata> getMetadataConfiguration(String metadataFormat, String template) {
+        HierarchicalConfiguration usingTemplate = null;
+        List templateList = getLocalConfigurationsAt(metadataFormat + ".fields.template");
+        if (templateList != null) {
+            HierarchicalConfiguration defaultTemplate = null;
+
+            for (Iterator it = templateList.iterator(); it.hasNext();) {
+                HierarchicalConfiguration subElement = (HierarchicalConfiguration) it.next();
+                if (subElement.getString("[@name]").equals(template)) {
+                    usingTemplate = subElement;
+                    break;
+                } else if ("_DEFAULT".equals(subElement.getString("[@name]"))) {
+                    defaultTemplate = subElement;
+                }
+            }
+
+            // If the requested template does not exist in the config, use _DEFAULT
+            if (usingTemplate == null) {
+                usingTemplate = defaultTemplate;
+            }
+
+        }
+
+        return getMetadataForTemplate(usingTemplate);
+    }
+
+    /**
+     * Reads metadata configuration for the given template configuration item. Returns empty list if template is null.
+     * 
+     * @param templateList
+     * @param template
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    private static List<Metadata> getMetadataForTemplate(HierarchicalConfiguration usingTemplate) {
+        List<Metadata> ret = new ArrayList<>();
+
+        if (usingTemplate != null) {
+            //                logger.debug("template requested: " + template + ", using: " + usingTemplate.getString("[@name]"));
+            List elements = usingTemplate.configurationsAt("metadata");
+            if (elements != null) {
+                for (Iterator it2 = elements.iterator(); it2.hasNext();) {
+                    HierarchicalConfiguration sub = (HierarchicalConfiguration) it2.next();
+                    String label = sub.getString("[@label]");
+                    String masterValue = sub.getString("[@value]");
+                    boolean group = sub.getBoolean("[@group]", false);
+                    boolean multivalued = sub.getBoolean("[@multivalued]", false);
+                    int number = sub.getInt("[@number]", -1);
+                    int type = sub.getInt("[@type]", 0);
+                    List params = sub.configurationsAt("param");
+                    List<MetadataParameter> paramList = null;
+                    if (params != null) {
+                        paramList = new ArrayList<>(params.size());
+                        for (Iterator it3 = params.iterator(); it3.hasNext();) {
+                            HierarchicalConfiguration sub2 = (HierarchicalConfiguration) it3.next();
+                            String fieldType = sub2.getString("[@type]");
+                            String source = sub2.getString("[@source]", null);
+                            String key = sub2.getString("[@key]");
+                            String overrideMasterValue = sub2.getString("[@value]");
+                            String defaultValue = sub2.getString("[@defaultValue]");
+                            String prefix = sub2.getString("[@prefix]", "").replace("_SPACE_", " ");
+                            String suffix = sub2.getString("[@suffix]", "").replace("_SPACE_", " ");
+                            boolean addUrl = sub2.getBoolean("[@url]", false);
+                            boolean dontUseTopstructValue = sub2.getBoolean("[@dontUseTopstructValue]", false);
+                            paramList.add(new MetadataParameter(MetadataParameterType.getByString(fieldType), source, key, overrideMasterValue,
+                                    defaultValue, prefix, suffix, addUrl, dontUseTopstructValue));
+                        }
+                    }
+                    ret.add(new Metadata(label, masterValue, type, paramList, group, number, multivalued));
+                }
+            }
+        }
+
+        return ret;
     }
 }

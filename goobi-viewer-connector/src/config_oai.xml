@@ -56,7 +56,7 @@
         <querySuffix></querySuffix>
 	</solr>
     <!-- oaiFolder: Folder with messages.properties files, etc. -->
-    <oaiFolder>C:/digiverso/viewer/oai/</oaiFolder>
+    <oaiFolder>/opt/digiverso/viewer/oai/</oaiFolder>
 	<!-- Verzeichnis in dem die resumtionToken gespeichert werden -->
 	<resumptionTokenFolder>C:/digiverso/viewer/oai/token/
 	</resumptionTokenFolder>
@@ -83,18 +83,44 @@
         <enabled>true</enabled>
         <hitsPerToken>100</hitsPerToken>
         <fields>
-            <field name="title" valueSource="MD_TITLE" defaultValue="" />
-            <field name="creator" valueSource="MD_CREATOR" multivalued="true" />
-            <field name="subject" valueSource="DC" translate="true" multivalued="true" />
-            <field name="publisher" valueSource="MD_PUBLISHER" useTopstructValueIfNoneFound="true" />
-            <field name="date" valueSource="MD_YEARPUBLISH" useTopstructValueIfNoneFound="true" />
-            <field name="type" valueSource="DOCSTRCT" translate="true" />
-            <field name="type" defaultValue="Text" />
-            <field name="format" defaultValue="image/jpeg" />
-            <field name="format" defaultValue="application/pdf" />
-            <field name="identifier" valueSource="#AUTO#" />
-            <field name="source" valueSource="#AUTO#" />
-            <field name="rights" valueSource="#AUTO#"/>
+            <template name="_DEFAULT">
+                <metadata label="title" value="{0}">
+                    <param type="field" key="MD_TITLE" />
+                </metadata>
+                <metadata label="creator" value="{0}">
+                    <param type="field" key="MD_CREATOR" />
+                </metadata>
+                <metadata label="subject" value="{0}">
+                    <param type="translatedfield" key="DC" />
+                </metadata>
+                <metadata label="publisher" value="{0}" useTopstructValueIfNoneFound="true">
+                    <param type="field" key="MD_PUBLISHER" />
+                </metadata>
+                <metadata label="date" value="{0}" useTopstructValueIfNoneFound="true">
+                    <param type="field" key="MD_YEARPUBLISH" />
+                </metadata>
+                <metadata label="type" value="{0}">
+                    <param type="translatedfield" key="DOCSTRCT" />
+                </metadata>
+                <metadata label="type" value="text">
+                </metadata>
+                <metadata label="format" value="image/jpeg">
+                </metadata>
+                <metadata label="format" value="application/pdf">
+                </metadata>
+                <metadata label="identifier" value="#AUTO#">
+                </metadata>
+                <metadata label="source" value="#AUTO#">
+                </metadata>
+                <metadata label="rights" value="#AUTO#">
+                </metadata>
+            </template>
+            <template name="PeriodicalVolume">
+                <metadata label="title" value="{0}{1}">
+                    <param type="field" key="MD_TITLE" />
+                    <param type="field" key="CURRENTNO" prefix="_SPACE_(" suffix=")" />
+                </metadata>
+            </template>
         </fields>
         <setSpec>
             <field>DC</field>       
