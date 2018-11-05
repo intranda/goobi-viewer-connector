@@ -267,6 +267,7 @@ public class OAIDCFormat extends AbstractFormat {
                                 val = DataManager.getInstance().getConfiguration().getPiResolverUrl()
                                         + (String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT);
                             }
+                            finishedValues.add(val);
                             break;
                         case "rights":
                             if (doc.getFieldValues(SolrConstants.ACCESSCONDITION) != null) {
@@ -278,15 +279,22 @@ public class OAIDCFormat extends AbstractFormat {
                                     val = "info:eu-repo/semantics/closedAccess";
                                 }
                             }
+                            finishedValues.add(val);
                             break;
                         case "source":
                             oai_dc.addContent(generateDcSource(doc, topstructDoc, anchorDoc, nsDc));
                             break;
+                        case "fulltext":
+                            for (Element oai_fulltext : generateFulltextUrls((String) topstructDoc.getFieldValue(SolrConstants.PI_TOPSTRUCT),
+                                    (String) topstructDoc.getFieldValue(SolrConstants.DATAREPOSITORY), nsDc)) {
+                                oai_dc.addContent(oai_fulltext);
+                            }
+                            break;
                         default:
                             val = "No automatic configuration possible for field: " + md.getLabel();
+                            finishedValues.add(val);
                             break;
                     }
-                    finishedValues.add(val);
                 } else if (!md.getParams().isEmpty()) {
                     // Parameter configuration
                     String firstField = md.getParams().get(0).getKey();
@@ -321,7 +329,6 @@ public class OAIDCFormat extends AbstractFormat {
                             val = val.replace("{" + paramIndex + '}', paramVal);
                             paramIndex++;
                         }
-                        logger.trace("adding value: " + md.getLabel() + ":" + val);
                         finishedValues.add(val);
                         if (!md.isMultivalued()) {
                             continue;
@@ -467,6 +474,45 @@ public class OAIDCFormat extends AbstractFormat {
         dc_source.setText(sbSourceString.toString());
 
         return dc_source;
+    }
+
+    /**
+     * @param topstructDoc
+     * @param namespace
+     * @return
+     * @throws SolrServerException
+     */
+    protected static List<Element> generateFulltextUrls(String pi, String dataRepository, Namespace namespace) throws SolrServerException {
+        if (pi == null) {
+            throw new IllegalArgumentException("pi may not be null");
+        }
+
+        Map<Integer, String> fulltextFilePaths = DataManager.getInstance().getSearchIndex().getFulltextFileNames(pi);
+        if (fulltextFilePaths.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Integer> orderedPageList = new ArrayList<>(fulltextFilePaths.keySet());
+        Collections.sort(orderedPageList);
+
+        String urlTemplate = DataManager.getInstance().getConfiguration().getFulltextUrl().replace("{pi}", pi);
+        if (dataRepository != null) {
+            urlTemplate = urlTemplate.replace("{dataRepository}", dataRepository);
+        }
+        List<Element> ret = new ArrayList<>(orderedPageList.size());
+        for (int i : orderedPageList) {
+            String filePath = fulltextFilePaths.get(i); // file path relative to the data repository (Goobi viewer 3.2 and later)
+            if (filePath == null) {
+                continue;
+            }
+            String fileName = filePath.substring(filePath.lastIndexOf('/') + 1); // pure file name
+            String url = urlTemplate.replace("{page}", String.valueOf(i)).replace("{filePath}", filePath).replace("{fileName}", fileName);
+            Element dc_fulltext = new Element("source", namespace);
+            dc_fulltext.setText(url);
+            ret.add(dc_fulltext);
+        }
+
+        return ret;
     }
 
     /* (non-Javadoc)

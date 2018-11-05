@@ -77,7 +77,16 @@
     <!-- contentApiUrl: Rest API for full-text/ALTO/TEI/CMDI retrieval -->
     <contentApiUrl>http://localhost:8080/viewer/rest/content/
     </contentApiUrl>
-    
+	<!-- fulltextUrl: URL for a single plain full-text page; contains placeholders 
+		for PI and page number; can be used for REST or older ContentServlet URLs. 
+		Allowed placeholders:
+		  {dataRepository} (e.g. '1'),
+		  {pi} (e.g 'PPN123456789'),
+		  {fileName} (e.g. '00000001.txt'), 
+		  {filePath} (e.g 'fulltext_crowd/PPN123456789/00000001.txt'),
+		  {page} (e.g. '1') -->
+	<fulltextUrl>http://localhost:8080/viewer/rest/content/fulltext/{pi}/{fileName}/ 
+	</fulltextUrl>
     
     <oai_dc>
         <enabled>true</enabled>
@@ -118,6 +127,8 @@
                     <param type="field" key="PI_TOPSTRUCT" />
                     <param type="field" key="THUMBPAGENO" />
                 </metadata>
+                <metadata label="fulltext" value="#AUTO#">
+                </metadata>
             </template>
             <template name="PeriodicalVolume">
                 <metadata label="title" value="{0}{1}">
@@ -150,6 +161,8 @@
                 <metadata label="source" value="#AUTO#">
                 </metadata>
                 <metadata label="rights" value="#AUTO#">
+                </metadata>
+                <metadata label="fulltext" value="#AUTO#">
                 </metadata>
             </template>
         </fields>
