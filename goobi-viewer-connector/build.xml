@@ -79,7 +79,7 @@
 	<!-- Normal build of application. <target name="compile" depends="writeVersion" 
 		description="Normal build of application."> -->
 	<target name="compile" depends="createDirs,writeVersion" description="Normal build of application.">
-		<javac srcdir="${dir.src}" destdir="${dir.build}/WEB-INF/classes" source="${javac.source}" target="${javac.target}" encoding="UTF8" debug="${javac.debug}">
+		<javac includeantruntime="false" srcdir="${dir.src}" destdir="${dir.build}/WEB-INF/classes" source="${javac.source}" target="${javac.target}" encoding="UTF8" debug="${javac.debug}">
 			<compilerarg value="-Xlint" />
 			<classpath refid="classpath" />
 		</javac>
@@ -104,6 +104,20 @@
 		</junit>
 		<delete dir="${dir.tests.classes}" />
 	</target>
+
+	<target name="junit-simple" depends="compile-tests" description="Run JUnit tests">
+		<echo>Running simple JUnit tests without Solr...</echo>
+		<mkdir dir="${dir.build}/${dir.tests.report}" />
+		<junit printsummary="on" haltonerror="true" haltonfailure="true">
+			<classpath refid="test.classpath" />
+			<formatter type="xml" usefile="true" />
+			<batchtest todir="${dir.build}/${dir.tests.report}">
+				<fileset dir="${dir.tests.classes}" includes="de/intranda/digiverso/m2m/**/*Test.class" excludes="de/intranda/digiverso/m2m/**/AbstractSolr*, de/intranda/digiverso/m2m/**/SolrSearchIndex*" />
+			</batchtest>
+		</junit>
+		<delete dir="${dir.tests.classes}" />
+	</target>
+
 
 	<target name="junit-withcoverage" depends="compile-tests" description="Run JUnit tests with jacoco test coverage analysis">
 		<echo>Running JUnit tests with jacoco test coverage analysis...</echo>
