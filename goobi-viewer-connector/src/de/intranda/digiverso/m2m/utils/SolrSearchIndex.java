@@ -189,7 +189,7 @@ public class SolrSearchIndex {
      * 
      * @param from startdate
      * @param until enddate
-     * @param set which collection
+     * @param setSpec
      * @param metadataPrefix
      * @param firstRow
      * @param numRows
@@ -200,9 +200,9 @@ public class SolrSearchIndex {
      * @throws IOException
      * @throws SolrServerException
      */
-    public QueryResponse search(String from, String until, String set, String metadataPrefix, int firstRow, int numRows, boolean urnOnly,
+    public QueryResponse search(String from, String until, String setSpec, String metadataPrefix, int firstRow, int numRows, boolean urnOnly,
             String querySuffix, List<String> fieldStatistics) throws IOException, SolrServerException {
-        StringBuilder sbQuery = new StringBuilder(buildQueryString(from, until, set, metadataPrefix, urnOnly, querySuffix));
+        StringBuilder sbQuery = new StringBuilder(buildQueryString(from, until, setSpec, metadataPrefix, urnOnly, querySuffix));
         if (urnOnly) {
             sbQuery.append(" AND (").append(SolrConstants.URN).append(":* OR ").append(SolrConstants.IMAGEURN_OAI).append(":*)");
         }
@@ -337,21 +337,22 @@ public class SolrSearchIndex {
      * 
      * @param from
      * @param until
-     * @param set
+     * @param setSpec
      * @param metadataPrefix
      * @param excludeAnchor
      * @param querySuffix
      * @return
      */
-    private static String buildQueryString(String from, String until, String set, String metadataPrefix, boolean excludeAnchor, String querySuffix) {
-        StringBuilder query = new StringBuilder();
-        query.append('(').append(SolrConstants.ISWORK).append(":true");
+    private static String buildQueryString(String from, String until, String setSpec, String metadataPrefix, boolean excludeAnchor,
+            String querySuffix) {
+        StringBuilder sbQuery = new StringBuilder();
+        sbQuery.append('(').append(SolrConstants.ISWORK).append(":true");
         if (!excludeAnchor) {
-            query.append(" OR ").append(SolrConstants.ISANCHOR).append(":true");
+            sbQuery.append(" OR ").append(SolrConstants.ISANCHOR).append(":true");
         }
-        query.append(')');
+        sbQuery.append(')');
         if (StringUtils.isNotEmpty(querySuffix)) {
-            query.append(querySuffix);
+            sbQuery.append(querySuffix);
         }
         // Solr timestamp range is irrelevant for iv_* formats
         if (!Metadata.iv_overviewpage.name().equals(metadataPrefix) && !Metadata.iv_crowdsourcing.name().equals(metadataPrefix)
@@ -361,7 +362,7 @@ public class SolrSearchIndex {
             if (fromTimestamp == untilTimestamp) {
                 untilTimestamp += 999;
             }
-            query.append(" AND ")
+            sbQuery.append(" AND ")
                     .append(SolrConstants.DATEUPDATED)
                     .append(":[")
                     .append(normalizeDate(String.valueOf(fromTimestamp)))
@@ -370,45 +371,41 @@ public class SolrSearchIndex {
                     .append(']');
 
         }
-        if (set != null) {
+        if (setSpec != null) {
             boolean defaultSet = true;
             // Use DC as the set field by default 
-            String setQuery = SolrConstants.DC + ":" + set;
+            String setQuery = SolrConstants.DC + ":" + setSpec;
+
             // Check whether this is an additional set and if so, use its custom query
             {
                 List<Set> additionalSetList = DataManager.getInstance().getConfiguration().getAdditionalSets();
                 for (Set s : additionalSetList) {
-                    if (s.getSetSpec().equals(set)) {
+                    if (s.getSetSpec().equals(setSpec)) {
                         defaultSet = false;
-                        set = s.getSetQuery();
+                        sbQuery = new StringBuilder(); // Replace query
+                        setQuery = s.getSetQuery();
                         break;
                     }
                 }
             }
             // Check whether this is an all-values set and if so, use its field
-            if (defaultSet && set.contains(":")) {
+            if (defaultSet && setSpec.contains(":")) {
                 List<Set> allValuesSetList = DataManager.getInstance().getConfiguration().getAllValuesSets();
                 for (Set s : allValuesSetList) {
-                    if (s.getSetName().equals(set.substring(0, set.indexOf(":")))) {
+                    if (s.getSetName().equals(setSpec.substring(0, setSpec.indexOf(":")))) {
                         defaultSet = false;
-                        setQuery = set;
+                        setQuery = setSpec;
                         break;
                     }
                 }
             }
-            //            if (!defaultSet) {
-            //                // if set is configured, use configured query
-            //                if (set.charAt(0) == '-' || set.startsWith("NOT(")) {
-            //                    // do not wrap the conditions in parentheses if it starts with a negation, otherwise it won't work
-            //                    query.append(" AND ").append(set);
-            //                } else {
-            //                    query.append(" AND ").append(set);
-            //                }
-            //            }
-            query.append(" AND ").append(setQuery);
+            if (sbQuery.length() > 0) {
+                sbQuery.append(" AND ");
+            }
+            sbQuery.append(setQuery);
         }
 
-        return query.toString();
+        return sbQuery.toString();
     }
 
     /**
@@ -838,7 +835,7 @@ public class SolrSearchIndex {
                 .append(SolrConstants.FULLTEXTAVAILABLE)
                 .append(":true");
 
-        logger.trace(sbQuery.toString());
+        // logger.trace(sbQuery.toString());
         String[] fields = new String[] { SolrConstants.ORDER, SolrConstants.FILENAME_FULLTEXT };
         QueryResponse qr = search(sbQuery.toString(), 0, MAX_HITS, Collections.singletonList(SolrConstants.ORDER), Arrays.asList(fields), null);
         if (!qr.getResults().isEmpty()) {
