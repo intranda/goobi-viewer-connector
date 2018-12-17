@@ -433,4 +433,13 @@ public class ConfigurationTest {
     public void getHarvestUrl_shouldReturnCorrectValue() throws Exception {
         Assert.assertEquals("http://localhost/viewer/harvest", DataManager.getInstance().getConfiguration().getHarvestUrl());
     }
+
+    /**
+     * @see Configuration#getFulltextUrl()
+     * @verifies return correct value
+     */
+    @Test
+    public void getFulltextUrl_shouldReturnCorrectValue() throws Exception {
+        Assert.assertEquals("http://localhost/viewer/rest/content/fulltext/{pi}/{page}/", DataManager.getInstance().getConfiguration().getFulltextUrl());
+    }
 }

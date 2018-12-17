@@ -18,9 +18,11 @@ package de.intranda.digiverso.m2m.utils;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -809,5 +811,41 @@ public class SolrSearchIndex {
         }
 
         return sbQuerySuffix.toString();
+    }
+
+    /**
+     * 
+     * @param pi
+     * @return
+     * @throws SolrServerException
+     */
+    public Map<Integer, String> getFulltextFileNames(String pi) throws SolrServerException {
+        if (pi == null) {
+            throw new IllegalArgumentException("pi may not be null");
+        }
+
+        StringBuilder sbQuery = new StringBuilder();
+        sbQuery.append(SolrConstants.PI_TOPSTRUCT)
+                .append(':')
+                .append(pi)
+                .append(" AND ")
+                .append(SolrConstants.DOCTYPE)
+                .append(":PAGE")
+                .append(" AND ")
+                .append(SolrConstants.FULLTEXTAVAILABLE)
+                .append(":true");
+
+        // logger.trace(sbQuery.toString());
+        String[] fields = new String[] { SolrConstants.ORDER, SolrConstants.FILENAME_FULLTEXT };
+        QueryResponse qr = search(sbQuery.toString(), 0, MAX_HITS, Collections.singletonList(SolrConstants.ORDER), Arrays.asList(fields), null);
+        if (!qr.getResults().isEmpty()) {
+            Map<Integer, String> ret = new HashMap<>(qr.getResults().size());
+            for (SolrDocument doc : qr.getResults()) {
+                ret.put((int) doc.getFieldValue(SolrConstants.ORDER), (String) doc.getFieldValue(SolrConstants.FILENAME_FULLTEXT));
+            }
+            return ret;
+        }
+
+        return Collections.emptyMap();
     }
 }
