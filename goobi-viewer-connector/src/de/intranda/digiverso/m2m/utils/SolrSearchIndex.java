@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
@@ -836,12 +837,17 @@ public class SolrSearchIndex {
                 .append(":true");
 
         // logger.trace(sbQuery.toString());
-        String[] fields = new String[] { SolrConstants.ORDER, SolrConstants.FILENAME_FULLTEXT };
+        String[] fields = new String[] { SolrConstants.ORDER, SolrConstants.FILENAME_FULLTEXT, SolrConstants.FILENAME };
         QueryResponse qr = search(sbQuery.toString(), 0, MAX_HITS, Collections.singletonList(SolrConstants.ORDER), Arrays.asList(fields), null);
         if (!qr.getResults().isEmpty()) {
             Map<Integer, String> ret = new HashMap<>(qr.getResults().size());
             for (SolrDocument doc : qr.getResults()) {
-                ret.put((int) doc.getFieldValue(SolrConstants.ORDER), (String) doc.getFieldValue(SolrConstants.FILENAME_FULLTEXT));
+                if (doc.containsKey(SolrConstants.FILENAME_FULLTEXT)) {
+                    ret.put((int) doc.getFieldValue(SolrConstants.ORDER), (String) doc.getFieldValue(SolrConstants.FILENAME_FULLTEXT));
+                } else if (doc.containsKey(SolrConstants.FILENAME)) {
+                    String baseName = FilenameUtils.getBaseName((String) doc.getFieldValue(SolrConstants.FILENAME));
+                    ret.put((int) doc.getFieldValue(SolrConstants.ORDER), baseName + ".txt");
+                }
             }
             return ret;
         }
