@@ -834,7 +834,11 @@ public class SolrSearchIndex {
                 .append(":PAGE")
                 .append(" AND ")
                 .append(SolrConstants.FULLTEXTAVAILABLE)
-                .append(":true");
+                .append(":true")
+                .append(" AND ")
+                .append(SolrConstants.ACCESSCONDITION)
+                .append(':')
+                .append(SolrConstants.OPEN_ACCESS_VALUE);
 
         // logger.trace(sbQuery.toString());
         String[] fields = new String[] { SolrConstants.ORDER, SolrConstants.FILENAME_FULLTEXT, SolrConstants.FILENAME };
