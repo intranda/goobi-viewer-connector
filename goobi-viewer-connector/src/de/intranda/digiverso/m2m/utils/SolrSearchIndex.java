@@ -347,7 +347,7 @@ public class SolrSearchIndex {
     private static String buildQueryString(String from, String until, String setSpec, String metadataPrefix, boolean excludeAnchor,
             String querySuffix) {
         StringBuilder sbQuery = new StringBuilder();
-        sbQuery.append('(').append(SolrConstants.ISWORK).append(":true");
+        sbQuery.append("((").append(SolrConstants.ISWORK).append(":true");
         if (!excludeAnchor) {
             sbQuery.append(" OR ").append(SolrConstants.ISANCHOR).append(":true");
         }
@@ -355,6 +355,7 @@ public class SolrSearchIndex {
         if (StringUtils.isNotEmpty(querySuffix)) {
             sbQuery.append(querySuffix);
         }
+        sbQuery.append(')');
         // Solr timestamp range is irrelevant for iv_* formats
         if (!Metadata.iv_overviewpage.name().equals(metadataPrefix) && !Metadata.iv_crowdsourcing.name().equals(metadataPrefix)
                 && (from != null || until != null)) {
