@@ -349,9 +349,9 @@ public class SolrSearchIndex {
         StringBuilder sbQuery = new StringBuilder();
         sbQuery.append("((").append(SolrConstants.ISWORK).append(":true");
         if (!excludeAnchor) {
-            sbQuery.append(" OR ").append(SolrConstants.ISANCHOR).append(":true");
+            sbQuery.append(' ').append(SolrConstants.ISANCHOR).append(":true");
         }
-        sbQuery.append(')');
+        sbQuery.append(' ').append(SolrConstants.DATEDELETED).append(":*)");
         if (StringUtils.isNotEmpty(querySuffix)) {
             sbQuery.append(querySuffix);
         }
