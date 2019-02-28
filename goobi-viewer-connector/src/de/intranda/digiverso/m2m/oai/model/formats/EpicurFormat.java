@@ -80,8 +80,9 @@ public class EpicurFormat extends AbstractFormat {
                 record.addContent(header);
                 Element metadata = new Element("metadata", xmlns);
                 record.addContent(metadata);
+                boolean topstruct = doc.containsKey(SolrConstants.PI);
                 metadata.addContent(generateEpicurElement((String) doc.getFieldValue(SolrConstants.URN),
-                        (Long) doc.getFieldValue(SolrConstants.DATECREATED), dateUpdated, dateDeleted));
+                        (Long) doc.getFieldValue(SolrConstants.DATECREATED), dateUpdated, dateDeleted, topstruct));
                 xmlListRecords.addContent(record);
                 // logger.debug("record: " + new XMLOutputter().outputString(record));
             }
@@ -113,6 +114,7 @@ public class EpicurFormat extends AbstractFormat {
                         xmlListRecords.addContent(pagerecord);
                         pagecount++;
                     }
+                    logger.trace("Found {} page records for {}", qrInner.getResults().size(), doc.getFieldValue(SolrConstants.PI_TOPSTRUCT));
                 }
             } else {
                 // Page elements for deleted record (only deleted record docs will have IMAGEURN_OAI!)
@@ -133,7 +135,7 @@ public class EpicurFormat extends AbstractFormat {
                 }
             }
         }
-        logger.debug("Found {} page records", pagecount);
+        logger.debug("Found {} page records total", pagecount);
 
         // Create resumption token
         if (records.getNumFound() > firstRawRow + numRows) {
@@ -225,9 +227,10 @@ public class EpicurFormat extends AbstractFormat {
      * @param dateCreated
      * @param dateUpdated
      * @param dateDeleted
+     * @param topstruct
      * @return
      */
-    private static Element generateEpicurElement(String urn, Long dateCreated, Long dateUpdated, Long dateDeleted) {
+    private static Element generateEpicurElement(String urn, Long dateCreated, Long dateUpdated, Long dateDeleted, boolean topstruct) {
         Namespace xmlns = Namespace.getNamespace("urn:nbn:de:1111-2004033116");
 
         Element epicur = new Element("epicur", xmlns);
@@ -270,7 +273,9 @@ public class EpicurFormat extends AbstractFormat {
         identifier.setAttribute("origin", "original");
         identifier.setAttribute("role", "primary");
         identifier.setAttribute("scheme", "url");
-        identifier.setAttribute("type", "frontpage");
+        if (topstruct) {
+            identifier.setAttribute("type", "frontpage");
+        }
 
         identifier.setText(DataManager.getInstance().getConfiguration().getUrnResolverUrl() + urn);
         resource.addContent(identifier);
@@ -375,7 +380,7 @@ public class EpicurFormat extends AbstractFormat {
         identifier.setAttribute("origin", "original");
         identifier.setAttribute("role", "primary");
         identifier.setAttribute("scheme", "url");
-        identifier.setAttribute("type", "frontpage");
+        //        identifier.setAttribute("type", "frontpage");
 
         identifier.setText(DataManager.getInstance().getConfiguration().getUrnResolverUrl() + urn);
         resource.addContent(identifier);
