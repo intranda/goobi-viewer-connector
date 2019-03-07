@@ -347,7 +347,7 @@ public class SolrSearchIndex {
     private static String buildQueryString(String from, String until, String setSpec, String metadataPrefix, boolean excludeAnchor,
             String querySuffix) {
         StringBuilder sbQuery = new StringBuilder();
-        sbQuery.append("((").append(SolrConstants.ISWORK).append(":true");
+        sbQuery.append("(+(").append(SolrConstants.ISWORK).append(":true");
         if (!excludeAnchor) {
             sbQuery.append(' ').append(SolrConstants.ISANCHOR).append(":true");
         }

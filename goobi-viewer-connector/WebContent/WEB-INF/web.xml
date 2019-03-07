@@ -29,6 +29,17 @@
         <url-pattern>/sru</url-pattern>
         <url-pattern>/sru/</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <description></description>
+        <display-name>ToolServlet</display-name>
+        <servlet-name>ToolServlet</servlet-name>
+        <servlet-class>de.intranda.digiverso.m2m.ToolServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ToolServlet</servlet-name>
+        <url-pattern>/tools</url-pattern>
+        <url-pattern>/tools/</url-pattern>
+    </servlet-mapping>
 
 	<mime-mapping>
 		<extension>htc</extension>
