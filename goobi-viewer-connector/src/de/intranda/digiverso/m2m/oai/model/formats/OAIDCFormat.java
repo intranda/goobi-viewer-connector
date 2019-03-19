@@ -17,9 +17,12 @@ package de.intranda.digiverso.m2m.oai.model.formats;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -201,6 +204,15 @@ public class OAIDCFormat extends AbstractFormat {
         Element record = new Element("record", xmlns);
         boolean isWork = doc.getFieldValue(SolrConstants.ISWORK) != null && (boolean) doc.getFieldValue(SolrConstants.ISWORK);
         boolean isAnchor = doc.getFieldValue(SolrConstants.ISANCHOR) != null && (boolean) doc.getFieldValue(SolrConstants.ISANCHOR);
+        boolean openAccess = true;
+        if (doc.getFieldValues(SolrConstants.ACCESSCONDITION) != null) {
+            for (Object o : doc.getFieldValues(SolrConstants.ACCESSCONDITION)) {
+                if (!SolrConstants.OPEN_ACCESS_VALUE.equals(o)) {
+                    openAccess = false;
+                    break;
+                }
+            }
+        }
         SolrDocument topstructDoc = null;
         if (isWork || isAnchor) {
             topstructDoc = doc;
@@ -248,8 +260,8 @@ public class OAIDCFormat extends AbstractFormat {
         List<de.intranda.digiverso.m2m.oai.model.metadata.Metadata> metadataList =
                 DataManager.getInstance().getConfiguration().getMetadataConfiguration(Metadata.oai_dc.name(), docstruct);
         if (metadataList != null && !metadataList.isEmpty()) {
-
             for (de.intranda.digiverso.m2m.oai.model.metadata.Metadata md : metadataList) {
+                boolean restrictedContent = false;
                 List<String> finishedValues = new ArrayList<>();
 
                 // Alternative 1: get value from source
@@ -270,14 +282,10 @@ public class OAIDCFormat extends AbstractFormat {
                             finishedValues.add(val);
                             break;
                         case "rights":
-                            if (doc.getFieldValues(SolrConstants.ACCESSCONDITION) != null) {
-                                for (Object o : doc.getFieldValues(SolrConstants.ACCESSCONDITION)) {
-                                    if (SolrConstants.OPEN_ACCESS_VALUE.equals(o)) {
-                                        val = "info:eu-repo/semantics/openAccess";
-                                        break;
-                                    }
-                                    val = "info:eu-repo/semantics/closedAccess";
-                                }
+                            if (openAccess) {
+                                val = "info:eu-repo/semantics/openAccess";
+                            } else {
+                                val = "info:eu-repo/semantics/closedAccess";
                             }
                             finishedValues.add(val);
                             break;
@@ -305,6 +313,9 @@ public class OAIDCFormat extends AbstractFormat {
                         int paramIndex = 0;
                         // for each parameter
                         for (MetadataParameter param : md.getParams()) {
+                            if (SolrConstants.THUMBNAIL.equals(param.getKey())) {
+                                restrictedContent = true;
+                            }
                             String paramVal = "";
                             List<String> values = SolrSearchIndex.getMetadataValues(doc, param.getKey());
                             if (values.isEmpty() && !param.isDontUseTopstructValue()) {
@@ -329,7 +340,9 @@ public class OAIDCFormat extends AbstractFormat {
                             val = val.replace("{" + paramIndex + '}', paramVal);
                             paramIndex++;
                         }
-                        finishedValues.add(val);
+                        if (openAccess || !restrictedContent) {
+                            finishedValues.add(val);
+                        }
                         if (!md.isMultivalued()) {
                             continue;
                         }
@@ -360,6 +373,7 @@ public class OAIDCFormat extends AbstractFormat {
         record.addContent(metadata);
 
         return record;
+
     }
 
     /**
