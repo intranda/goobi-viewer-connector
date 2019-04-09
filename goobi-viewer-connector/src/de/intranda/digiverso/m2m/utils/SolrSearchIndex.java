@@ -205,7 +205,7 @@ public class SolrSearchIndex {
             String querySuffix, List<String> fieldStatistics) throws IOException, SolrServerException {
         StringBuilder sbQuery = new StringBuilder(buildQueryString(from, until, setSpec, metadataPrefix, urnOnly, querySuffix));
         if (urnOnly) {
-            sbQuery.append(" AND (").append(SolrConstants.URN).append(":* OR ").append(SolrConstants.IMAGEURN_OAI).append(":*)");
+            sbQuery.append(" +(").append(SolrConstants.URN).append(":* ").append(SolrConstants.IMAGEURN_OAI).append(":*)");
         }
         sbQuery.append(getAllSuffixes());
         logger.debug("OAI query: {}", sbQuery.toString());
@@ -347,7 +347,7 @@ public class SolrSearchIndex {
     private static String buildQueryString(String from, String until, String setSpec, String metadataPrefix, boolean excludeAnchor,
             String querySuffix) {
         StringBuilder sbQuery = new StringBuilder();
-        sbQuery.append("(+(").append(SolrConstants.ISWORK).append(":true");
+        sbQuery.append("+(+(").append(SolrConstants.ISWORK).append(":true");
         if (!excludeAnchor) {
             sbQuery.append(' ').append(SolrConstants.ISANCHOR).append(":true");
         }
@@ -364,7 +364,7 @@ public class SolrSearchIndex {
             if (fromTimestamp == untilTimestamp) {
                 untilTimestamp += 999;
             }
-            sbQuery.append(" AND ")
+            sbQuery.append(" +")
                     .append(SolrConstants.DATEUPDATED)
                     .append(":[")
                     .append(normalizeDate(String.valueOf(fromTimestamp)))
@@ -402,7 +402,7 @@ public class SolrSearchIndex {
                 }
             }
             if (sbQuery.length() > 0) {
-                sbQuery.append(" AND ");
+                sbQuery.append(" +");
             }
             sbQuery.append(setQuery);
         }

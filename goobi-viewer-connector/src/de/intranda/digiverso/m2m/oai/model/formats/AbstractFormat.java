@@ -343,7 +343,7 @@ public abstract class AbstractFormat {
         } else {
             Element identifier = new Element("identifier", xmlns);
             identifier.setText(DataManager.getInstance().getConfiguration().getOaiIdentifier().get("repositoryIdentifier")
-                    + (String) doc.getFieldValue(SolrConstants.PI) + (StringUtils.isNotEmpty(requestedVersion) ? '_' + requestedVersion : ""));
+                    + (String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT) + (StringUtils.isNotEmpty(requestedVersion) ? '_' + requestedVersion : ""));
             header.addContent(identifier);
         }
         // datestamp
@@ -361,8 +361,7 @@ public abstract class AbstractFormat {
             Element setSpec = new Element("setSpec", xmlns);
             setSpec.setText(handler.getSet());
             header.addContent(setSpec);
-        } else
-            if (handler.getMetadataPrefix() != null) {
+        } else if (handler.getMetadataPrefix() != null) {
             // setSpec from config
             List<String> setSpecFields =
                     DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix().name());

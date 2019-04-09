@@ -51,7 +51,7 @@ public class METSFormat extends AbstractFormat {
     public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
             throws IOException, SolrServerException {
         QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false,
-                " AND " + SolrConstants.SOURCEDOCFORMAT + ":METS", null);
+                " +" + SolrConstants.SOURCEDOCFORMAT + ":METS", null);
         if (qr.getResults().isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
