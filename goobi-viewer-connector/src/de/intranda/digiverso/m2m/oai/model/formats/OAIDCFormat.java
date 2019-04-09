@@ -17,12 +17,9 @@ package de.intranda.digiverso.m2m.oai.model.formats;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -223,6 +220,10 @@ public class OAIDCFormat extends AbstractFormat {
             if (docList != null && !docList.isEmpty()) {
                 topstructDoc = docList.get(0);
             }
+        }
+        if (topstructDoc == null) {
+            logger.warn("No topstruct found for IDDOC:{} - is this a page document? Please check the base query.",
+                    doc.getFieldValue(SolrConstants.IDDOC));
         }
         SolrDocument anchorDoc = null;
         if (!isAnchor) {

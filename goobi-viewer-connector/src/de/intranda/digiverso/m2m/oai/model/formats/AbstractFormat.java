@@ -258,8 +258,10 @@ public abstract class AbstractFormat {
         long totalRawHits;
         if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
             // One OAI record for each record version
-            qr = DataManager.getInstance().getSearchIndex().getListIdentifiers(datestamp, firstRawRow, numRows,
-                    " AND " + versionDiscriminatorField + ":*", Collections.singletonList(versionDiscriminatorField));
+            qr = DataManager.getInstance()
+                    .getSearchIndex()
+                    .getListIdentifiers(datestamp, firstRawRow, numRows, " AND " + versionDiscriminatorField + ":*",
+                            Collections.singletonList(versionDiscriminatorField));
             if (qr.getResults().isEmpty()) {
                 return new ErrorCode().getNoRecordsMatch();
             }
@@ -354,18 +356,26 @@ public abstract class AbstractFormat {
         }
         header.addContent(datestamp);
         // setSpec
-        if (handler.getMetadataPrefix() != null) {
+        if (StringUtils.isNotEmpty(handler.getSet())) {
+            // setSpec from handler
+            Element setSpec = new Element("setSpec", xmlns);
+            setSpec.setText(handler.getSet());
+            header.addContent(setSpec);
+        } else
+            if (handler.getMetadataPrefix() != null) {
+            // setSpec from config
             List<String> setSpecFields =
                     DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix().name());
             if (!setSpecFields.isEmpty()) {
                 for (String setSpecField : setSpecFields) {
-                    if (doc.containsKey(setSpecField)) {
-                        for (Object fieldValue : doc.getFieldValues(setSpecField)) {
-                            // TODO translation
-                            Element setSpec = new Element("setSpec", xmlns);
-                            setSpec.setText((String) fieldValue);
-                            header.addContent(setSpec);
-                        }
+                    if (!doc.containsKey(setSpecField)) {
+                        continue;
+                    }
+                    for (Object fieldValue : doc.getFieldValues(setSpecField)) {
+                        // TODO translation
+                        Element setSpec = new Element("setSpec", xmlns);
+                        setSpec.setText((String) fieldValue);
+                        header.addContent(setSpec);
                     }
                 }
             }
@@ -459,8 +469,9 @@ public abstract class AbstractFormat {
 
             boolean urnOnly = false;
             long totalHits = 0;
-            String versionDiscriminatorField = DataManager.getInstance().getConfiguration().getVersionDisriminatorFieldForMetadataFormat(
-                    token.getHandler().getMetadataPrefix().name());
+            String versionDiscriminatorField = DataManager.getInstance()
+                    .getConfiguration()
+                    .getVersionDisriminatorFieldForMetadataFormat(token.getHandler().getMetadataPrefix().name());
             switch (token.getHandler().getMetadataPrefix()) {
                 // Query the Goobi viewer for the total hits number
                 case mets:
