@@ -84,6 +84,8 @@ public class SolrSearchIndex {
             HttpSolrServer httpSolrServer = (HttpSolrServer) server;
             if (!DataManager.getInstance().getConfiguration().getIndexUrl().equals(httpSolrServer.getBaseURL())) {
                 logger.info("Solr URL has changed, re-initializing SolrHelper...");
+                logger.trace("OLD: {}", httpSolrServer.getBaseURL());
+                logger.trace("NEW: {}", DataManager.getInstance().getConfiguration().getIndexUrl());
                 httpSolrServer.shutdown();
                 server = getNewHttpSolrServer(DataManager.getInstance().getConfiguration().getIndexUrl());
             }

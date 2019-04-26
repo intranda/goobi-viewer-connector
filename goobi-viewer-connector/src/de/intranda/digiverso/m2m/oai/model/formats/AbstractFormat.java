@@ -342,8 +342,12 @@ public abstract class AbstractFormat {
             header.addContent(urn_identifier);
         } else {
             Element identifier = new Element("identifier", xmlns);
-            identifier.setText(DataManager.getInstance().getConfiguration().getOaiIdentifier().get("repositoryIdentifier")
-                    + (String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT) + (StringUtils.isNotEmpty(requestedVersion) ? '_' + requestedVersion : ""));
+            String pi = (String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT);
+            if (pi == null) {
+                pi = (String) doc.getFieldValue(SolrConstants.PI);
+            }
+            identifier.setText(DataManager.getInstance().getConfiguration().getOaiIdentifier().get("repositoryIdentifier") + pi
+                    + (StringUtils.isNotEmpty(requestedVersion) ? '_' + requestedVersion : ""));
             header.addContent(identifier);
         }
         // datestamp

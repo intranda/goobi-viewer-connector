@@ -221,7 +221,7 @@ public class OAIDCFormat extends AbstractFormat {
                 topstructDoc = docList.get(0);
             }
         }
-        if (topstructDoc == null) {
+        if (topstructDoc == null && !doc.containsKey(SolrConstants.DATEDELETED)) {
             logger.warn("No topstruct found for IDDOC:{} - is this a page document? Please check the base query.",
                     doc.getFieldValue(SolrConstants.IDDOC));
         }
