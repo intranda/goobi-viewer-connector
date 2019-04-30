@@ -3,7 +3,7 @@
 
 	<!-- Distribution specific settings. -->
 	<property name="dist.name" value="goobi-viewer-connector" />
-	<property name="dist.version" value="3.2" />
+	<property name="dist.version" value="3.4" />
 	<property name="server.watermark" value="true" />
 
 
