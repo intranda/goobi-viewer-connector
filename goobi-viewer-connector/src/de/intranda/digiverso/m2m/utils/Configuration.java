@@ -79,6 +79,7 @@ public final class Configuration {
         }
     }
 
+
     /**
      * ns is needed as parameter for every xml element, otherwise the standard-ns is printed out in every element the standard return String =
      * http://www.openarchives.org/OAI/2.0/
@@ -225,7 +226,16 @@ public final class Configuration {
      * @should return correct value
      */
     public String getViewerConfigFolder() {
-        return configDefault.getString("viewerConfigFolder", "/opt/digiverso/viewer/config/");
+        
+        String configLocalPath = configDefault.getString("viewerConfigFolder", "/opt/digiverso/viewer/config/");
+        if (!configLocalPath.endsWith("/")) {
+            configLocalPath += "/";
+        }
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.indexOf("win") >= 0 && configLocalPath.startsWith("/opt/")) {
+            configLocalPath = configLocalPath.replace("/opt", "C:");
+        }
+        return configLocalPath;        
     }
 
     /**
