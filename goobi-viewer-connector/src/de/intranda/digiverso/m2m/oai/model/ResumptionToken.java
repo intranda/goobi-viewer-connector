@@ -15,6 +15,8 @@
  */
 package de.intranda.digiverso.m2m.oai.model;
 
+import java.util.regex.Pattern;
+
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
@@ -22,6 +24,10 @@ import de.intranda.digiverso.m2m.oai.RequestHandler;
 
 @XStreamAlias("ResumptionToken")
 public class ResumptionToken {
+
+    public static final String TOKEN_NAME_PREFIX = "oai_";
+    
+    public static Pattern TOKEN_NAME_PATTERN = Pattern.compile(TOKEN_NAME_PREFIX + "[0-9]{13}");
 
     @XStreamAsAttribute
     @XStreamAlias("tokenName")

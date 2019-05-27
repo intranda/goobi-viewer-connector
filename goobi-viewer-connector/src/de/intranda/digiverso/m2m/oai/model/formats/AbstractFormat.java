@@ -28,6 +28,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -419,8 +421,8 @@ public abstract class AbstractFormat {
             RequestHandler handler) {
         long now = System.currentTimeMillis();
         long time = now + expiration;
-        ResumptionToken token =
-                new ResumptionToken("oai_" + System.currentTimeMillis(), virtualHits, rawHits, virtualCursor, rawCursor, time, handler);
+        ResumptionToken token = new ResumptionToken(ResumptionToken.TOKEN_NAME_PREFIX + System.currentTimeMillis(), virtualHits, rawHits,
+                virtualCursor, rawCursor, time, handler);
         try {
             saveToken(token);
         } catch (IOException e) {
@@ -454,9 +456,19 @@ public abstract class AbstractFormat {
      * 
      * @param resumptionToken
      * @return
+     * @should return error if resumption token name illegal
      */
     public static Element handleToken(String resumptionToken) {
+        if (resumptionToken == null) {
+            throw new IllegalArgumentException("resumptionToken may not be null");
+        }
+
         logger.debug("Loading resumption token {}", resumptionToken);
+        Matcher m = ResumptionToken.TOKEN_NAME_PATTERN.matcher(resumptionToken);
+        if (!m.find()) {
+            logger.warn("Illegal resumption token name: {}", resumptionToken);
+            return new ErrorCode().getBadResumptionToken();
+        }
         File f = new File(DataManager.getInstance().getConfiguration().getResumptionTokenFolder(), resumptionToken);
         if (!f.exists()) {
             logger.warn("Requested resumption token not found: {}", f.getName());
