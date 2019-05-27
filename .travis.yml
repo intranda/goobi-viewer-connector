@@ -1,0 +1,5 @@
+language: java
+jdk:
+- openjdk8
+install:
+- cd goobi-viewer-connector; mvn compile -B -V ; mvn test -B -V
