@@ -1,5 +1,13 @@
 language: java
+dist: trusty
 jdk:
 - openjdk8
 install:
 - cd goobi-viewer-connector; mvn install -B -V
+addons:
+  sonarcloud:
+    organization: "intranda"
+    token:
+      secure: $SONAR_TOKEN
+script:
+- mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar
