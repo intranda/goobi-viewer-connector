@@ -65,7 +65,7 @@ public final class Configuration {
             configLocal.setReloadingStrategy(new FileChangedReloadingStrategy());
             logger.info("Loaded local Connector configuration from '{}'.", configLocal.getFile().getAbsolutePath());
         } catch (ConfigurationException e) {
-            logger.warn("OAI configuration file '{}' could not be read ({}), using default configuration file.", getViewerConfigFolder(),
+            logger.warn("Local OAI configuration file '{}' could not be read ({}), using default configuration file.", getViewerConfigFolder(),
                     e.getMessage());
             configLocal = configDefault;
         }
