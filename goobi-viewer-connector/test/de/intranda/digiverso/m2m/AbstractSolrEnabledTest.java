@@ -27,7 +27,7 @@ import de.intranda.digiverso.m2m.utils.SolrSearchIndex;
 /**
  * JUnit test classes that extend this class can use the embedded Solr server setup with a fixed viewer index.
  */
-public abstract class AbstractSolrEnabledTest {
+public abstract class AbstractSolrEnabledTest extends AbstractTest {
 
     private static final String CORE_NAME = "test-viewer";
 
@@ -37,8 +37,7 @@ public abstract class AbstractSolrEnabledTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        // Initialize the instance with a custom config file
-        DataManager.getInstance().injectConfiguration(new Configuration("resources/test/config_oai.test.xml"));
+        AbstractTest.setUpClass();
 
         String os = System.getProperty("os.name").toLowerCase();
         if (os.indexOf("win") >= 0) {
@@ -69,6 +68,7 @@ public abstract class AbstractSolrEnabledTest {
 
     @AfterClass
     public static void tearDownClass() throws Exception {
+        AbstractTest.tearDownClass();
         //        if (coreContainer != null) {
         //            coreContainer.shutdown();
         //        }

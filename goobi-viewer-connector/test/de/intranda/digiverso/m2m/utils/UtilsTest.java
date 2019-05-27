@@ -18,7 +18,9 @@ package de.intranda.digiverso.m2m.utils;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class UtilsTest {
+import de.intranda.digiverso.m2m.AbstractTest;
+
+public class UtilsTest extends AbstractTest {
 
     /**
      * @see Utils#getDocumentFromString(String,String)

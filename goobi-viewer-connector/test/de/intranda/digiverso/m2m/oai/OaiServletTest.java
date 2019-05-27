@@ -18,9 +18,10 @@ package de.intranda.digiverso.m2m.oai;
 import org.junit.Assert;
 import org.junit.Test;
 
+import de.intranda.digiverso.m2m.AbstractTest;
 import de.intranda.digiverso.m2m.oai.servlets.OaiServlet;
 
-public class OaiServletTest {
+public class OaiServletTest extends AbstractTest {
     /**
      * @see OaiServlet#checkDatestamps(String,String)
      * @verifies return false if from is not well formed

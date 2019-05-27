@@ -13,25 +13,28 @@
  *
  * You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.intranda.digiverso.m2m.messages;
+package de.intranda.digiverso.m2m;
 
-import java.util.Locale;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 
-import org.junit.Assert;
-import org.junit.Test;
+import de.intranda.digiverso.m2m.utils.Configuration;
 
-import de.intranda.digiverso.m2m.AbstractTest;
+/**
+ * JUnit test classes that extend this class will have test-specific logging and config configurations.
+ */
+public abstract class AbstractTest {
 
-public class MessageResourceBundleTest extends AbstractTest {
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+        System.setProperty("log4j.configurationFile", "resources/test/log4j2.test.xml");
 
-    /**
-     * @see MessageResourceBundle#getTranslation(String,Locale)
-     * @verifies translate text correctly
-     */
-    @Test
-    public void getTranslation_shouldTranslateTextCorrectly() throws Exception {
-        Assert.assertEquals("Table", MessageResourceBundle.getTranslation("table", Locale.ENGLISH));
-        Assert.assertEquals("Tabelle", MessageResourceBundle.getTranslation("table", Locale.GERMAN));
-        Assert.assertEquals("Tabla", MessageResourceBundle.getTranslation("table", Locale.forLanguageTag("es")));
+        // Initialize the instance with a custom config file
+        DataManager.getInstance().injectConfiguration(new Configuration("resources/test/config_oai.test.xml"));
+    }
+
+    @AfterClass
+    public static void tearDownClass() throws Exception {
+
     }
 }

@@ -18,10 +18,11 @@ package de.intranda.digiverso.m2m.oai;
 import org.junit.Assert;
 import org.junit.Test;
 
+import de.intranda.digiverso.m2m.AbstractTest;
 import de.intranda.digiverso.m2m.oai.RequestHandler;
 
-public class RequestHandlerTest {
-    
+public class RequestHandlerTest extends AbstractTest {
+
     /**
      * @see RequestHandler#getFromTimestamp(String)
      * @verifies convert date to timestamp correctly

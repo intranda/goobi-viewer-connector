@@ -20,22 +20,16 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
+import de.intranda.digiverso.m2m.AbstractTest;
 import de.intranda.digiverso.m2m.DataManager;
 import de.intranda.digiverso.m2m.oai.enums.Metadata;
 import de.intranda.digiverso.m2m.oai.model.FieldConfiguration;
 import de.intranda.digiverso.m2m.oai.model.LicenseType;
 import de.intranda.digiverso.m2m.oai.model.Set;
 
-public class ConfigurationTest {
-
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-        // Initialize the instance with a custom config file
-        DataManager.getInstance().injectConfiguration(new Configuration("resources/test/config_oai.test.xml"));
-    }
+public class ConfigurationTest extends AbstractTest {
 
     /**
      * @see Configuration#getAdditionalDocstructTypes()
@@ -440,6 +434,7 @@ public class ConfigurationTest {
      */
     @Test
     public void getFulltextUrl_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals("http://localhost/viewer/rest/content/fulltext/{pi}/{page}/", DataManager.getInstance().getConfiguration().getFulltextUrl());
+        Assert.assertEquals("http://localhost/viewer/rest/content/fulltext/{pi}/{page}/",
+                DataManager.getInstance().getConfiguration().getFulltextUrl());
     }
 }
