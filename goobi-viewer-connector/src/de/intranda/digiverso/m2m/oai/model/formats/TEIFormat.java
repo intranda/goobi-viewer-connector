@@ -42,7 +42,7 @@ import de.intranda.digiverso.m2m.utils.Utils;
 /**
  * Format for TEI and CMDI records.
  */
-public class TEIFormat extends AbstractFormat {
+public class TEIFormat extends Format {
 
     private static final Logger logger = LoggerFactory.getLogger(TEIFormat.class);
 

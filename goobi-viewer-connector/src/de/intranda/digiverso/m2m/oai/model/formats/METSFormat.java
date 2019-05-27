@@ -40,7 +40,7 @@ import de.intranda.digiverso.m2m.utils.Utils;
 /**
  * METS
  */
-public class METSFormat extends AbstractFormat {
+public class METSFormat extends Format {
 
     private final static Logger logger = LoggerFactory.getLogger(METSFormat.class);
 

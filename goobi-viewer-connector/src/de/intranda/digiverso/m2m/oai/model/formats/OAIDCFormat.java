@@ -47,7 +47,7 @@ import de.intranda.digiverso.m2m.utils.Utils;
 /**
  * oai_dc
  */
-public class OAIDCFormat extends AbstractFormat {
+public class OAIDCFormat extends Format {
 
     private static final Logger logger = LoggerFactory.getLogger(OAIDCFormat.class);
 

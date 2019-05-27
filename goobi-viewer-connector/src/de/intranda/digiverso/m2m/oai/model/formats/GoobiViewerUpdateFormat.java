@@ -42,7 +42,7 @@ import de.intranda.digiverso.m2m.utils.Utils;
 /**
  * Crowdsourcing and overview page data.
  */
-public class GoobiViewerUpdateFormat extends AbstractFormat {
+public class GoobiViewerUpdateFormat extends Format {
 
     private static final Logger logger = LoggerFactory.getLogger(GoobiViewerUpdateFormat.class);
 

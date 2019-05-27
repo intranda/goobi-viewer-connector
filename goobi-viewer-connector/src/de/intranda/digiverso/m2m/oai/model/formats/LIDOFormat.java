@@ -41,7 +41,7 @@ import de.intranda.digiverso.m2m.utils.Utils;
 /**
  * LIDO
  */
-public class LIDOFormat extends AbstractFormat {
+public class LIDOFormat extends Format {
 
     private final static Logger logger = LoggerFactory.getLogger(LIDOFormat.class);
 

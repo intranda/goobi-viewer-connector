@@ -42,7 +42,7 @@ import de.intranda.digiverso.m2m.utils.Utils;
 /**
  * Xepicur
  */
-public class EpicurFormat extends AbstractFormat {
+public class EpicurFormat extends Format {
 
     private static final Logger logger = LoggerFactory.getLogger(EpicurFormat.class);
 

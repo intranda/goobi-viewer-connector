@@ -59,9 +59,9 @@ import de.intranda.digiverso.m2m.utils.SolrConstants;
 import de.intranda.digiverso.m2m.utils.SolrSearchIndex;
 import de.intranda.digiverso.m2m.utils.Utils;
 
-public abstract class AbstractFormat {
+public abstract class Format {
 
-    private final static Logger logger = LoggerFactory.getLogger(AbstractFormat.class);
+    private final static Logger logger = LoggerFactory.getLogger(Format.class);
 
     protected static final Namespace XML = Namespace.getNamespace("xml", "http://www.w3.org/XML/1998/namespace");
     protected static final Namespace XSI = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");

@@ -29,7 +29,6 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 import org.jdom2.ProcessingInstruction;
-import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -42,7 +41,7 @@ import de.intranda.digiverso.m2m.oai.RequestHandler;
 import de.intranda.digiverso.m2m.oai.enums.Metadata;
 import de.intranda.digiverso.m2m.oai.enums.Verb;
 import de.intranda.digiverso.m2m.oai.model.ErrorCode;
-import de.intranda.digiverso.m2m.oai.model.formats.AbstractFormat;
+import de.intranda.digiverso.m2m.oai.model.formats.Format;
 import de.intranda.digiverso.m2m.oai.model.formats.EpicurFormat;
 import de.intranda.digiverso.m2m.oai.model.formats.EuropeanaFormat;
 import de.intranda.digiverso.m2m.oai.model.formats.GoobiViewerUpdateFormat;
@@ -82,7 +81,7 @@ public class OaiServlet extends HttpServlet {
 
         doc.addContent(pi);
         // generate root element
-        Element root = AbstractFormat.getOaiPmhElement("OAI-PMH");
+        Element root = Format.getOaiPmhElement("OAI-PMH");
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
 
         Element responseDate = new Element("responseDate", xmlns);
@@ -141,13 +140,13 @@ public class OaiServlet extends HttpServlet {
             if (request.getParameter("resumptionToken") != null) {
                 String resumptionToken = request.getParameterValues("resumptionToken")[0];
                 requestType.setAttribute("resumptionToken", resumptionToken);
-                root.addContent(AbstractFormat.handleToken(resumptionToken));
-                AbstractFormat.removeExpiredTokens();
+                root.addContent(Format.handleToken(resumptionToken));
+                Format.removeExpiredTokens();
             }
             // handle Identify verb
             else if (handler.getVerb().equals(Verb.Identify)) {
                 try {
-                    root.addContent(AbstractFormat.getIdentifyXML());
+                    root.addContent(Format.getIdentifyXML());
                 } catch (SolrServerException e) {
                     logger.error(e.getMessage(), e);
                     res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -163,9 +162,10 @@ public class OaiServlet extends HttpServlet {
                     try {
                         int hitsPerToken =
                                 DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(handler.getMetadataPrefix().name());
-                        String versionDiscriminatorField = DataManager.getInstance().getConfiguration().getVersionDisriminatorFieldForMetadataFormat(
-                                handler.getMetadataPrefix().name());
-                        listIdentifiers = AbstractFormat.createListIdentifiers(handler, 0, 0, hitsPerToken, versionDiscriminatorField);
+                        String versionDiscriminatorField = DataManager.getInstance()
+                                .getConfiguration()
+                                .getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().name());
+                        listIdentifiers = Format.createListIdentifiers(handler, 0, 0, hitsPerToken, versionDiscriminatorField);
                         root.addContent(listIdentifiers);
                     } catch (SolrServerException e) {
                         logger.error(e.getMessage(), e);
@@ -190,8 +190,9 @@ public class OaiServlet extends HttpServlet {
                     try {
                         int hitsPerToken =
                                 DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(handler.getMetadataPrefix().name());
-                        String versionDiscriminatorField = DataManager.getInstance().getConfiguration().getVersionDisriminatorFieldForMetadataFormat(
-                                handler.getMetadataPrefix().name());
+                        String versionDiscriminatorField = DataManager.getInstance()
+                                .getConfiguration()
+                                .getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().name());
                         logger.trace(handler.getMetadataPrefix().getMetadataPrefix());
                         switch (handler.getMetadataPrefix()) {
                             case oai_dc:
@@ -273,10 +274,10 @@ public class OaiServlet extends HttpServlet {
                     }
                 }
             } else if (handler.getVerb().equals(Verb.ListMetadataFormats)) {
-                root.addContent(AbstractFormat.createMetadataFormats());
+                root.addContent(Format.createMetadataFormats());
             } else if (handler.getVerb().equals(Verb.ListSets)) {
                 try {
-                    root.addContent(AbstractFormat.createListSets(DataManager.getInstance().getConfiguration().getDefaultLocale())); // TODO
+                    root.addContent(Format.createListSets(DataManager.getInstance().getConfiguration().getDefaultLocale())); // TODO
                 } catch (SolrServerException e) {
                     logger.error(e.getMessage(), e);
                     res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -287,7 +288,7 @@ public class OaiServlet extends HttpServlet {
             }
         }
         doc.setRootElement(root);
-        Format format = Format.getPrettyFormat();
+        org.jdom2.output.Format format = org.jdom2.output.Format.getPrettyFormat();
         format.setEncoding("utf-8");
         XMLOutputter xmlOut = new XMLOutputter(format);
         if (handler.getMetadataPrefix() != null && handler.getMetadataPrefix().equals(Metadata.epicur)) {
