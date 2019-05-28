@@ -117,7 +117,6 @@ public class Utils {
             try (CloseableHttpResponse response = httpClient.execute(get); StringWriter writer = new StringWriter()) {
                 int code = response.getStatusLine().getStatusCode();
                 if (code == HttpStatus.SC_OK) {
-                    // logger.trace("{}: {}", code, response.getStatusLine().getReasonPhrase());
                     IOUtils.copy(response.getEntity().getContent(), writer);
                     return writer.toString();
                 }
@@ -129,7 +128,6 @@ public class Utils {
     }
 
     public static int getHttpResponseStatus(String url) throws UnsupportedOperationException, IOException {
-        //                logger.trace("getHttpReponseStatus: {}", url);
         RequestConfig defaultRequestConfig = RequestConfig.custom()
                 .setSocketTimeout(HTTP_TIMEOUT)
                 .setConnectTimeout(HTTP_TIMEOUT)

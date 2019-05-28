@@ -86,9 +86,7 @@ public class MetadataValue implements Serializable {
                 }
                 if (paramUrls.size() > index && StringUtils.isNotEmpty(paramUrls.get(index))) {
                     sb.append("<a href=\"").append(paramUrls.get(index)).append("\">").append(paramValue).append("</a>");
-                    //                logger.trace("URL: {}: {}", index,paramUrls.get(index));
                 } else {
-                    //                logger.trace("Non-URL: {}: {}", index, paramValues.get(index));
                     sb.append(paramValue);
                 }
                 if (paramSuffixes.size() > index && paramSuffixes.get(index) != null) {

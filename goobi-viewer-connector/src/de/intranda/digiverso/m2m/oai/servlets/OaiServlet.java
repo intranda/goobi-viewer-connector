@@ -66,17 +66,7 @@ public class OaiServlet extends HttpServlet {
         String queryString = (request.getQueryString() != null ? "?" + request.getQueryString() : "");
         logger.debug("REQUEST URL: {}{}", request.getRequestURL().toString(), queryString);
 
-        // HTTP request header dump
-        //        Enumeration<String> headers = request.getHeaderNames();
-        //        while (headers.hasMoreElements()) {
-        //            String paramName = headers.nextElement();
-        //            logger.debug("HTTP header: {} - {}", paramName, request.getHeader(paramName));
-        //        }
-
         Document doc = new Document();
-        //        ProcessingInstruction pi =
-        //                new ProcessingInstruction("xml-stylesheet", "type='text/xsl' href='"
-        //                        + request.getRequestURL().toString().replace(request.getServletPath(), "") + "/oai2.xsl'");
         ProcessingInstruction pi = new ProcessingInstruction("xml-stylesheet", "type='text/xsl' href='./oai2.xsl'");
 
         doc.addContent(pi);
@@ -90,10 +80,6 @@ public class OaiServlet extends HttpServlet {
         root.addContent(responseDate);
 
         RequestHandler handler = new RequestHandler(request);
-        // Element requestType = new Element("request", xmlns);
-        // requestType.setAttribute("verb", handler.getVerb().getTitle());
-        // requestType.setText(request.getRequestURL().toString());
-        // root.addContent(requestType);
 
         // handle request
         if (handler.getVerb() == null) {
@@ -110,9 +96,6 @@ public class OaiServlet extends HttpServlet {
             // Check for invalid from/until parameters
             root.addContent(new ErrorCode().getBadArgument());
         } else {
-            // logger.debug("OAI request from " + request.getRemoteAddr() + ": " + handler.getVerb().getTitle() + " - " +
-            // handler.getMetadataPrefix());
-
             Element requestType = new Element("request", xmlns);
             requestType.setAttribute("verb", handler.getVerb().getTitle());
             if (handler.getMetadataPrefix() != null) {

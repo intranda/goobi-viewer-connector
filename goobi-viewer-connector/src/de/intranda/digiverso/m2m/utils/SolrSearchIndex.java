@@ -155,12 +155,10 @@ public class SolrSearchIndex {
         if (sortFields != null && !sortFields.isEmpty()) {
             for (String sortField : sortFields) {
                 solrQuery.addSort(sortField, ORDER.asc);
-                // logger.trace("Added sorting field: {}", sortField);
             }
         }
         if (fieldList != null && !fieldList.isEmpty()) {
             for (String field : fieldList) {
-                // logger.trace("adding result field: " + field);
                 if (StringUtils.isNotEmpty(field)) {
                     solrQuery.addField(field);
                 }
@@ -171,17 +169,10 @@ public class SolrSearchIndex {
         {
             for (String key : params.keySet()) {
                 solrQuery.set(key, params.get(key));
-                // logger.trace("&{}={}", key, params.get(key));
             }
         }
 
-        // logger.trace("Solr query: {}", solrQuery.toString());
-        // logger.debug("range: {} - {}", first, rows);
-        // logger.debug("facetFields: " + facetFields);
-        // logger.debug("fieldList: " + fieldList);
         QueryResponse resp = server.query(solrQuery);
-        // logger.debug("found: " + resp.getResults().getNumFound());
-        // logger.debug("fetched: {}", resp.getResults().size());
 
         return resp;
 
@@ -843,7 +834,6 @@ public class SolrSearchIndex {
                 .append(':')
                 .append(SolrConstants.OPEN_ACCESS_VALUE);
 
-        // logger.trace(sbQuery.toString());
         String[] fields = new String[] { SolrConstants.ORDER, SolrConstants.FILENAME_FULLTEXT, SolrConstants.FILENAME };
         QueryResponse qr = search(sbQuery.toString(), 0, MAX_HITS, Collections.singletonList(SolrConstants.ORDER), Arrays.asList(fields), null);
         if (!qr.getResults().isEmpty()) {

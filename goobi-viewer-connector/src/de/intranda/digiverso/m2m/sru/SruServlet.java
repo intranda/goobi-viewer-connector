@@ -131,10 +131,6 @@ public class SruServlet extends HttpServlet {
                     logger.info("Cannot process request {}, parameter 'scanClause' is missing.", request.getQueryString());
                     return;
                 }
-                // http://www.loc.gov/standards/sru/specs/scan.html
-                //                Element scan = generateScan(parameter);
-                //                doc.setRootElement(scan);
-                //                break;
                 // http://aleph20.ub.hu-berlin.de:5661/hub01?version=1.1&operation=scan&scanClause=BV040552415&maximumRecords=1
                 // http://services.dnb.de/sru/authorities?operation=scan&version=1.1&scanClause=Maximilian
                 // http://s2w.visuallibrary.net/dps/sru/?operation=scan&version=1.1&scanClause=Augsburg
@@ -154,30 +150,6 @@ public class SruServlet extends HttpServlet {
         xmlOut.output(doc, response.getOutputStream());
 
     }
-
-    //    /**
-    //     * @param parameter
-    //     * @return
-    //     */
-    //    private Element generateScan(SruRequestParameter parameter) {
-    //        // http://www.loc.gov/standards/sru/specs/scan.html
-    //
-    //        Element scanResponse = new Element("scanResponse", SRU_NAMESPACE);
-    //        Element version = new Element("version", SRU_NAMESPACE);
-    //        version.setText(parameter.getVersion());
-    //        scanResponse.addContent(version);
-    //
-    //        Element terms = new Element("terms", SRU_NAMESPACE);
-    //        scanResponse.addContent(terms);
-    //        
-    //        String query = generateScanQuery(parameter);
-    //        
-    //        
-    //        
-    //        generateEchoedSearchRetrieveRequest(scanResponse, null, parameter);
-    //        
-    //        return scanResponse;
-    //    }
 
     /**
      * @param response
@@ -359,27 +331,6 @@ public class SruServlet extends HttpServlet {
         return sbValue.toString();
     }
 
-    //    /**
-    //     * @param query
-    //     * @return
-    //     */
-    //    private String generateScanQuery(SruRequestParameter parameter) {
-    //        // map dc queries to solr queries
-    //        String value = parameter.getScanClause();
-    //        for (Matcher m = Pattern.compile("dc.\\w+").matcher(value); m.find();) {
-    //            String searchParameter = m.toMatchResult().group();
-    //            SearchField sf = SearchField.getFieldByDcName(searchParameter);
-    //            if (sf != null) {
-    //                value = value.replaceAll(searchParameter + "\\s*=", sf.getSolrName() + ":");
-    //            }
-    //        }
-    //        // map cql field names to solr queries
-    //
-    //      
-    //        value = value + "* AND (" + SolrConstants.ISWORK + ":true OR " + SolrConstants.ISANCHOR + ":true)";
-    //        logger.debug(value);
-    //        return value;
-    //    }
 
     /**
      * @param root
@@ -514,7 +465,6 @@ public class SruServlet extends HttpServlet {
         Element dc_title = new Element("title", DC_NAMEPSACE);
         if (doc.getFieldValues("MD_TITLE") != null) {
             title = (String) doc.getFieldValues("MD_TITLE").iterator().next();
-            // logger.debug("MD_TITLE : " + title);
         } else {
             title = "";
         }

@@ -397,7 +397,6 @@ public final class Configuration {
             for (Iterator it = types.iterator(); it.hasNext();) {
                 HierarchicalConfiguration sub = (HierarchicalConfiguration) it.next();
                 ret.put(sub.getString("[@name]"), sub.getString("[@type]"));
-                // logger.debug("loaded type: " + sub.getString("[@name]") + ": " + sub.getString("[@type]"));
             }
         }
 
@@ -529,7 +528,6 @@ public final class Configuration {
                 Set set = new Set(sub.getString("."), null, null);
                 set.setTranslate(sub.getBoolean("[@translate]", false));
                 ret.add(set);
-                // logger.debug("loaded type: " + sub.getString("[@name]") + ": " + sub.getString("[@type]"));
             }
             return ret;
         }
@@ -549,7 +547,6 @@ public final class Configuration {
                 HierarchicalConfiguration sub = it.next();
                 Set set = new Set(sub.getString("[@setName]"), sub.getString("[@setSpec]"), sub.getString("[@setQuery]"));
                 ret.add(set);
-                // logger.debug("loaded type: " + sub.getString("[@name]") + ": " + sub.getString("[@type]"));
             }
             return ret;
         }
@@ -726,7 +723,6 @@ public final class Configuration {
         List<Metadata> ret = new ArrayList<>();
 
         if (usingTemplate != null) {
-            //                logger.debug("template requested: " + template + ", using: " + usingTemplate.getString("[@name]"));
             List elements = usingTemplate.configurationsAt("metadata");
             if (elements != null) {
                 for (Iterator it2 = elements.iterator(); it2.hasNext();) {

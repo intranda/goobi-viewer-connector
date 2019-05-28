@@ -180,7 +180,6 @@ public class TEIFormat extends Format {
                             .append(version)
                             .append('/')
                             .toString();
-                    // logger.trace(url);
                     String xml = Utils.getWebContent(url);
                     if (StringUtils.isEmpty(xml)) {
                         xmlListRecords.addContent(new ErrorCode().getCannotDisseminateFormat());
