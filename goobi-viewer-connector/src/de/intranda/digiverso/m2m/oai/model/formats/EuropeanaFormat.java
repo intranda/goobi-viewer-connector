@@ -91,7 +91,6 @@ public class EuropeanaFormat extends OAIDCFormat {
     private Element generateESE(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler, String recordType)
             throws SolrServerException {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
-        // Namespace nsOaiDc = Namespace.getNamespace(Metadata.oai_dc.getMetadataPrefix(), Metadata.oai_dc.getMetadataNamespace());
         Namespace nsDc = Namespace.getNamespace(Metadata.dc.getMetadataNamespacePrefix(), Metadata.dc.getMetadataNamespaceUri());
         Namespace nsDcTerms = Namespace.getNamespace("dcterms", "http://purl.org/dc/terms/");
         Namespace nsEuropeana = Namespace.getNamespace(Metadata.ese.getMetadataNamespacePrefix(), Metadata.ese.getMetadataNamespaceUri());
@@ -143,7 +142,6 @@ public class EuropeanaFormat extends OAIDCFormat {
 
             // create the metadata element, special for dc
             Element eleMetadata = new Element("metadata", xmlns);
-            // eleMetadata.setNamespace(Namespace.getNamespace(nsEuropeana.getURI()));
             eleMetadata.addNamespaceDeclaration(nsEuropeana);
             eleMetadata.addNamespaceDeclaration(nsDc);
             eleMetadata.addNamespaceDeclaration(nsDcTerms);
@@ -176,18 +174,12 @@ public class EuropeanaFormat extends OAIDCFormat {
                     eleDcLanguage.setText(language);
                     eleEuropeanaRecord.addContent(eleDcLanguage);
                 }
-                // if (language.length() == 2) {
-                // // Convert ISO 639-1 to ISO 639-2
-                // Locale locale = new Locale(language);
-                // language = locale.getISO3Language();
-                // }
             }
             // MANDATORY: <dc:title>
             {
                 Element dc_title = new Element("title", nsDc);
                 if (doc.getFieldValues(SolrConstants.TITLE) != null) {
                     title = (String) doc.getFieldValues(SolrConstants.TITLE).iterator().next();
-                    // logger.debug("MD_TITLE : " + title);
                 }
                 if (isWork && doc.getFieldValue(SolrConstants.IDDOC_PARENT) != null) {
                     // If this is a volume, add anchor title in front
@@ -307,10 +299,6 @@ public class EuropeanaFormat extends OAIDCFormat {
                     eleDcType.setText(type);
                     eleEuropeanaRecord.addContent(eleDcType);
                 }
-                // // always create a standard type with the default dc:type
-                // eleDcType = new Element("type", nsDc);
-                // eleDcType.setText("Text");
-                // oai_dc.addContent(eleDcType);
             }
 
             // <dc:format>

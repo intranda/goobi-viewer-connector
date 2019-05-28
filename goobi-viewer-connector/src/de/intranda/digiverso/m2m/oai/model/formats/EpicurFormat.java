@@ -84,7 +84,6 @@ public class EpicurFormat extends Format {
                 metadata.addContent(generateEpicurElement((String) doc.getFieldValue(SolrConstants.URN),
                         (Long) doc.getFieldValue(SolrConstants.DATECREATED), dateUpdated, dateDeleted, topstruct));
                 xmlListRecords.addContent(record);
-                // logger.debug("record: " + new XMLOutputter().outputString(record));
             }
 
             if (dateDeleted == null) {
@@ -98,7 +97,6 @@ public class EpicurFormat extends Format {
                         .append(SolrConstants.IMAGEURN)
                         .append(":*");
                 sbPageQuery.append(urnPrefixBlacklistSuffix);
-                // logger.trace("pageQuery: {}", sbPageQuery.toString());
                 QueryResponse qrInner = solr.search(sbPageQuery.toString(), 0, SolrSearchIndex.MAX_HITS,
                         Collections.singletonList(SolrConstants.ORDER), Collections.singletonList(SolrConstants.IMAGEURN), null);
                 if (qrInner != null && !qrInner.getResults().isEmpty()) {
