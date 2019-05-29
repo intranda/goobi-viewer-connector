@@ -1,13 +1,19 @@
+# Travis continuous integration
+
 language: java
+
 dist: trusty
+
 jdk:
-- openjdk8
-install:
-- cd goobi-viewer-connector; mvn install -B -V
+  - openjdk8
+
 addons:
   sonarcloud:
     organization: "intranda"
     token:
       secure: $SONAR_TOKEN
+
 script:
-- mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar
+  - cd goobi-viewer-connector
+  - mvn install -B -V
+  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar
