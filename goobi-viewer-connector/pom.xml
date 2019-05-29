@@ -1,15 +1,23 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8" ?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+		http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.goobi.viewer</groupId>
 	<artifactId>connector</artifactId>
 	<version>3.4</version>
 	<packaging>war</packaging>
+
+
 	<name>Goobi viewer - Connector</name>
+	<url>https://github.com/intranda/goobi-viewer-connector</url>
+
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+
 
 	<repositories>
 		<repository>
@@ -18,8 +26,8 @@
 		</repository>
 	</repositories>
 
-	<dependencies>
 
+	<dependencies>
 		<!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
 		<dependency>
 			<groupId>commons-cli</groupId>
@@ -190,7 +198,7 @@
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/xerces/xercesImpl -->
-		<!-- This needs to be added explicitly because otherwise Solr will use 
+		<!-- This needs to be added explicitly because otherwise Solr will use
 			an older version that's incompatible -->
 		<dependency>
 			<groupId>xerces</groupId>
@@ -206,6 +214,7 @@
 		</dependency>
 
 	</dependencies>
+
 
 	<build>
 		<finalName>M2M</finalName>
@@ -234,7 +243,6 @@
 				<configuration>
 					<warSourceDirectory>WebContent</warSourceDirectory>
 					<packagingExcludes>**/rebel.xml</packagingExcludes>
-					<!-- <packagingExcludes>WEB-INF/lib/commons-logging-*.jar</packagingExcludes> -->
 					<packagingExcludes>WEB-INF/lib/zookeeper-*.jar</packagingExcludes>
 				</configuration>
 			</plugin>
