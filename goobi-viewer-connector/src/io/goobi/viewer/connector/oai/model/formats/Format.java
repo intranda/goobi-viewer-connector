@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -247,8 +246,8 @@ public abstract class Format {
      * @return
      * @throws SolrServerException
      */
-    public static Element createListIdentifiers(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows,
-            String versionDiscriminatorField) throws SolrServerException {
+    public Element createListIdentifiers(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
+            throws SolrServerException {
         Map<String, String> datestamp = Utils.filterDatestampFromRequest(handler);
 
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
@@ -256,7 +255,7 @@ public abstract class Format {
 
         QueryResponse qr;
         long totalVirtualHits;
-        int fetchedVirtualHits = 0;
+        int virtualHitCount = 0;
         long totalRawHits;
         if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
             // One OAI record for each record version
@@ -282,7 +281,7 @@ public abstract class Format {
                     }
                     Element header = getHeader(doc, null, handler, iso3code);
                     xmlListIdentifiers.addContent(header);
-                    fetchedVirtualHits++;
+                    virtualHitCount++;
                 }
             }
         } else {
@@ -295,12 +294,13 @@ public abstract class Format {
             for (SolrDocument doc : qr.getResults()) {
                 Element header = getHeader(doc, null, handler, null);
                 xmlListIdentifiers.addContent(header);
+                virtualHitCount++;
             }
         }
 
         // Create resumption token
         if (totalRawHits > firstRawRow + numRows) {
-            Element resumption = createResumptionTokenAndElement(totalVirtualHits, totalRawHits, firstVirtualRow + fetchedVirtualHits,
+            Element resumption = createResumptionTokenAndElement(totalVirtualHits, totalRawHits, firstVirtualRow + virtualHitCount,
                     firstRawRow + numRows, xmlns, handler);
             xmlListIdentifiers.addContent(resumption);
         }
@@ -487,76 +487,27 @@ public abstract class Format {
             String versionDiscriminatorField = DataManager.getInstance()
                     .getConfiguration()
                     .getVersionDisriminatorFieldForMetadataFormat(token.getHandler().getMetadataPrefix().name());
-            switch (token.getHandler().getMetadataPrefix()) {
-                // Query the Goobi viewer for the total hits number
-                case mets:
-                case marcxml:
-                    totalHits = new METSFormat().getTotalHits(params, versionDiscriminatorField);
-                    break;
-                case lido:
-                    totalHits = new LIDOFormat().getTotalHits(params, versionDiscriminatorField);
-                    break;
-                case iv_crowdsourcing:
-                case iv_overviewpage:
-                    totalHits = new GoobiViewerUpdateFormat().getTotalHits(params, versionDiscriminatorField);
-                    break;
-                case epicur:
-                    totalHits = new EpicurFormat().getTotalHits(params, versionDiscriminatorField);
-                    break;
-                case oai_dc:
-                case ese:
-                    totalHits = new OAIDCFormat().getTotalHits(params, versionDiscriminatorField);
-                    break;
-                case tei:
-                case cmdi:
-                    totalHits = new TEIFormat().getTotalHits(params, versionDiscriminatorField);
-                    break;
-                default:
-                    totalHits = DataManager.getInstance().getSearchIndex().getTotalHitNumber(params, urnOnly, "", null);
-                    break;
-            }
 
+            Format format = Format.getFormatByMetadataPrefix(token.getHandler().getMetadataPrefix());
+            if (format == null) {
+                logger.error("Bad metadataPrefix: {}", token.getHandler().getMetadataPrefix());
+                return new ErrorCode().getCannotDisseminateFormat();
+            }
+            totalHits = format.getTotalHits(params, versionDiscriminatorField);
             if (token.getHits() != totalHits) {
                 logger.warn("Hits size in the token ({}) does not equal the reported total hits number ({}).", token.getHits(), totalHits);
                 return new ErrorCode().getBadResumptionToken();
             }
             int hitsPerToken =
                     DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(token.getHandler().getMetadataPrefix().name());
+
             if (token.getHandler().getVerb().equals(Verb.ListIdentifiers)) {
-                return createListIdentifiers(token.getHandler(), token.getVirtualCursor(), token.getRawCursor(), hitsPerToken,
+                return format.createListIdentifiers(token.getHandler(), token.getVirtualCursor(), token.getRawCursor(), hitsPerToken,
                         versionDiscriminatorField);
             } else if (token.getHandler().getVerb().equals(Verb.ListRecords)) {
                 Metadata md = token.getHandler().getMetadataPrefix();
-                switch (md) {
-                    case oai_dc:
-                        return new OAIDCFormat().createListRecords(token.getHandler(), token.getVirtualCursor(), token.getRawCursor(), hitsPerToken,
-                                versionDiscriminatorField);
-                    case ese:
-                        return new EuropeanaFormat().createListRecords(token.getHandler(), token.getVirtualCursor(), token.getRawCursor(),
-                                hitsPerToken, versionDiscriminatorField);
-                    case epicur:
-                        return new EpicurFormat().createListRecords(token.getHandler(), token.getVirtualCursor(), token.getRawCursor(), hitsPerToken,
-                                versionDiscriminatorField);
-                    case mets:
-                        return new METSFormat().createListRecords(token.getHandler(), token.getVirtualCursor(), token.getRawCursor(), hitsPerToken,
-                                versionDiscriminatorField);
-                    case marcxml:
-                        return new MARCXMLFormat().createListRecords(token.getHandler(), token.getVirtualCursor(), token.getRawCursor(), hitsPerToken,
-                                versionDiscriminatorField);
-                    case lido:
-                        return new LIDOFormat().createListRecords(token.getHandler(), token.getVirtualCursor(), token.getRawCursor(), hitsPerToken,
-                                versionDiscriminatorField);
-                    case iv_overviewpage:
-                    case iv_crowdsourcing:
-                        return new GoobiViewerUpdateFormat().createListRecords(token.getHandler(), token.getVirtualCursor(), token.getRawCursor(),
-                                hitsPerToken, versionDiscriminatorField);
-                    case tei:
-                    case cmdi:
-                        return new TEIFormat().createListRecords(token.getHandler(), token.getVirtualCursor(), token.getRawCursor(), hitsPerToken,
-                                versionDiscriminatorField);
-                    default:
-                        return new ErrorCode().getCannotDisseminateFormat();
-                }
+                return format.createListRecords(token.getHandler(), token.getVirtualCursor(), token.getRawCursor(), hitsPerToken,
+                        versionDiscriminatorField);
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -594,5 +545,41 @@ public abstract class Format {
                 logger.info("{} expired resumption token(s) removed.", count);
             }
         }
+    }
+
+    /**
+     * Returns an instance of a format matching the given metadata prefix.
+     * 
+     * @param metadataPrefix
+     * @return Format instance; null if prefix not recognized
+     */
+    public static Format getFormatByMetadataPrefix(Metadata metadataPrefix) {
+        if (metadataPrefix == null) {
+            return null;
+        }
+
+        switch (metadataPrefix) {
+            case oai_dc:
+                return new OAIDCFormat();
+            case ese:
+                return new EuropeanaFormat();
+            case mets:
+                return new METSFormat();
+            case marcxml:
+                return new MARCXMLFormat();
+            case epicur:
+                return new EpicurFormat();
+            case lido:
+                return new LIDOFormat();
+            case iv_overviewpage:
+            case iv_crowdsourcing:
+                return new GoobiViewerUpdateFormat();
+            case tei:
+            case cmdi:
+                return new TEIFormat();
+            default:
+                return null;
+        }
+
     }
 }

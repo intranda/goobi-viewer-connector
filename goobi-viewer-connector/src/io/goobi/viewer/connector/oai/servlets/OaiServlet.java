@@ -41,15 +41,7 @@ import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.enums.Verb;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
-import io.goobi.viewer.connector.oai.model.formats.EpicurFormat;
-import io.goobi.viewer.connector.oai.model.formats.EuropeanaFormat;
 import io.goobi.viewer.connector.oai.model.formats.Format;
-import io.goobi.viewer.connector.oai.model.formats.GoobiViewerUpdateFormat;
-import io.goobi.viewer.connector.oai.model.formats.LIDOFormat;
-import io.goobi.viewer.connector.oai.model.formats.MARCXMLFormat;
-import io.goobi.viewer.connector.oai.model.formats.METSFormat;
-import io.goobi.viewer.connector.oai.model.formats.OAIDCFormat;
-import io.goobi.viewer.connector.oai.model.formats.TEIFormat;
 import io.goobi.viewer.connector.utils.Utils;
 
 public class OaiServlet extends HttpServlet {
@@ -119,14 +111,14 @@ public class OaiServlet extends HttpServlet {
                 requestType.setText(request.getRequestURL().toString().replace("/M2M/", "/viewer/"));
             }
             root.addContent(requestType);
-            // handle resumptionToken
+            //  resumptionToken
             if (request.getParameter("resumptionToken") != null) {
                 String resumptionToken = request.getParameterValues("resumptionToken")[0];
                 requestType.setAttribute("resumptionToken", resumptionToken);
                 root.addContent(Format.handleToken(resumptionToken));
                 Format.removeExpiredTokens();
             }
-            // handle Identify verb
+            // Identify
             else if (handler.getVerb().equals(Verb.Identify)) {
                 try {
                     root.addContent(Format.getIdentifyXML());
@@ -136,20 +128,26 @@ public class OaiServlet extends HttpServlet {
                     return;
                 }
             }
-            // handle ListIdentifiers verb
+            // ListIdentifiers
             else if (handler.getVerb().equals(Verb.ListIdentifiers)) {
                 if (handler.getMetadataPrefix() == null) {
                     root.addContent(new ErrorCode().getBadArgument());
+                } else if (!DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(handler.getMetadataPrefix().name())) {
+                    // Deny access to disabled formats
+                    root.addContent(new ErrorCode().getCannotDisseminateFormat());
                 } else {
-                    Element listIdentifiers;
                     try {
                         int hitsPerToken =
                                 DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(handler.getMetadataPrefix().name());
                         String versionDiscriminatorField = DataManager.getInstance()
                                 .getConfiguration()
                                 .getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().name());
-                        listIdentifiers = Format.createListIdentifiers(handler, 0, 0, hitsPerToken, versionDiscriminatorField);
-                        root.addContent(listIdentifiers);
+                        Format format = Format.getFormatByMetadataPrefix(handler.getMetadataPrefix());
+                        if (format != null) {
+                            root.addContent(format.createListIdentifiers(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
+                        } else {
+                            root.addContent(new ErrorCode().getBadArgument());
+                        }
                     } catch (SolrServerException e) {
                         logger.error(e.getMessage(), e);
                         res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -157,7 +155,7 @@ public class OaiServlet extends HttpServlet {
                     }
                 }
             }
-            // handle ListRecords verb
+            // ListRecords
             else if (handler.getVerb().equals(Verb.ListRecords)) {
                 if (handler.getMetadataPrefix() == null) {
                     root.addContent(new ErrorCode().getBadArgument());
@@ -177,37 +175,11 @@ public class OaiServlet extends HttpServlet {
                                 .getConfiguration()
                                 .getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().name());
                         logger.trace(handler.getMetadataPrefix().getMetadataPrefix());
-                        switch (handler.getMetadataPrefix()) {
-                            case oai_dc:
-                                root.addContent(new OAIDCFormat().createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
-                                break;
-                            case ese:
-                                root.addContent(new EuropeanaFormat().createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
-                                break;
-                            case mets:
-                                root.addContent(new METSFormat().createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
-                                break;
-                            case marcxml:
-                                root.addContent(new MARCXMLFormat().createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
-                                break;
-                            case epicur:
-                                root.addContent(new EpicurFormat().createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
-                                break;
-                            case lido:
-                                root.addContent(new LIDOFormat().createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
-                                break;
-                            case iv_overviewpage:
-                            case iv_crowdsourcing:
-                                root.addContent(
-                                        new GoobiViewerUpdateFormat().createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
-                                break;
-                            case tei:
-                            case cmdi:
-                                root.addContent(new TEIFormat().createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
-                                break;
-                            default:
-                                root.addContent(new ErrorCode().getBadArgument());
-                                break;
+                        Format format = Format.getFormatByMetadataPrefix(handler.getMetadataPrefix());
+                        if (format != null) {
+                            root.addContent(format.createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
+                        } else {
+                            root.addContent(new ErrorCode().getBadArgument());
                         }
                     } catch (SolrServerException e) {
                         logger.error(e.getMessage(), e);
@@ -216,7 +188,7 @@ public class OaiServlet extends HttpServlet {
                     }
                 }
             }
-            // handle GetRecord verb
+            // GetRecord
             else if (handler.getVerb().equals(Verb.GetRecord)) {
                 if (handler.getMetadataPrefix() == null) {
                     root.addContent(new ErrorCode().getBadArgument());
@@ -224,36 +196,11 @@ public class OaiServlet extends HttpServlet {
                     // Deny access to disabled formats
                     root.addContent(new ErrorCode().getCannotDisseminateFormat());
                 } else {
-                    switch (handler.getMetadataPrefix()) {
-                        case mets:
-                            root.addContent(new METSFormat().createGetRecord(handler));
-                            break;
-                        case marcxml:
-                            root.addContent(new MARCXMLFormat().createGetRecord(handler));
-                            break;
-                        case oai_dc:
-                            root.addContent(new OAIDCFormat().createGetRecord(handler));
-                            break;
-                        case ese:
-                            root.addContent(new EuropeanaFormat().createGetRecord(handler));
-                            break;
-                        case epicur:
-                            root.addContent(new EpicurFormat().createGetRecord(handler));
-                            break;
-                        case lido:
-                            root.addContent(new LIDOFormat().createGetRecord(handler));
-                            break;
-                        case iv_overviewpage:
-                        case iv_crowdsourcing:
-                            root.addContent(new GoobiViewerUpdateFormat().createGetRecord(handler));
-                            break;
-                        case tei:
-                        case cmdi:
-                            root.addContent(new TEIFormat().createGetRecord(handler));
-                            break;
-                        default:
-                            root.addContent(new ErrorCode().getCannotDisseminateFormat());
-                            break;
+                    Format format = Format.getFormatByMetadataPrefix(handler.getMetadataPrefix());
+                    if (format != null) {
+                        root.addContent(format.createGetRecord(handler));
+                    } else {
+                        root.addContent(new ErrorCode().getBadArgument());
                     }
                 }
             } else if (handler.getVerb().equals(Verb.ListMetadataFormats)) {

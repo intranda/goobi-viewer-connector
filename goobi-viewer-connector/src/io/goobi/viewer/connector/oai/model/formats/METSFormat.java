@@ -44,14 +44,53 @@ public class METSFormat extends Format {
 
     private final static Logger logger = LoggerFactory.getLogger(METSFormat.class);
 
+    private final static String QUERY_SUFFIX = " +(" + SolrConstants.SOURCEDOCFORMAT + ":METS " + SolrConstants.DATEDELETED + ":*)";
+
+    /* (non-Javadoc)
+     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListIdentifiers(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String)
+     */
+    @Override
+    public Element createListIdentifiers(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
+            throws SolrServerException {
+        Map<String, String> datestamp = Utils.filterDatestampFromRequest(handler);
+
+        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
+        Element xmlListIdentifiers = new Element("ListIdentifiers", xmlns);
+
+        QueryResponse qr;
+        long totalVirtualHits;
+        int virtualHitCount = 0;
+        long totalRawHits;
+
+        // One OAI record for each record proper
+        qr = DataManager.getInstance().getSearchIndex().getListIdentifiers(datestamp, firstRawRow, numRows, QUERY_SUFFIX, null);
+        if (qr.getResults().isEmpty()) {
+            return new ErrorCode().getNoRecordsMatch();
+        }
+        totalVirtualHits = totalRawHits = qr.getResults().getNumFound();
+        for (SolrDocument doc : qr.getResults()) {
+            Element header = getHeader(doc, null, handler, null);
+            xmlListIdentifiers.addContent(header);
+            virtualHitCount++;
+        }
+
+        // Create resumption token
+        if (totalRawHits > firstRawRow + numRows) {
+            Element resumption = createResumptionTokenAndElement(totalVirtualHits, totalRawHits, firstVirtualRow + virtualHitCount,
+                    firstRawRow + numRows, xmlns, handler);
+            xmlListIdentifiers.addContent(resumption);
+        }
+
+        return xmlListIdentifiers;
+    }
+
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String)
      */
     @Override
     public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
             throws IOException, SolrServerException {
-        QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false,
-                " +" + SolrConstants.SOURCEDOCFORMAT + ":METS", null);
+        QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false, QUERY_SUFFIX, null);
         if (qr.getResults().isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
@@ -160,7 +199,7 @@ public class METSFormat extends Format {
      */
     @Override
     public long getTotalHits(Map<String, String> params, String versionDiscriminatorField) throws IOException, SolrServerException {
-        return solr.getTotalHitNumber(params, false, " AND " + SolrConstants.SOURCEDOCFORMAT + ":METS", null);
+        return solr.getTotalHitNumber(params, false, QUERY_SUFFIX, null);
     }
 
 }

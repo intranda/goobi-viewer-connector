@@ -45,14 +45,15 @@ public class LIDOFormat extends Format {
 
     private final static Logger logger = LoggerFactory.getLogger(LIDOFormat.class);
 
+    private final static String QUERY_SUFFIX = " +" + SolrConstants.SOURCEDOCFORMAT + ":LIDO";
+
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String)
      */
     @Override
     public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
             throws IOException, SolrServerException {
-        QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false,
-                " AND " + SolrConstants.SOURCEDOCFORMAT + ":LIDO", null);
+        QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false, QUERY_SUFFIX, null);
         if (qr.getResults().isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
@@ -157,7 +158,7 @@ public class LIDOFormat extends Format {
      */
     @Override
     public long getTotalHits(Map<String, String> params, String versionDiscriminatorField) throws IOException, SolrServerException {
-        return solr.getTotalHitNumber(params, false, " AND " + SolrConstants.SOURCEDOCFORMAT + ":LIDO", null);
+        return solr.getTotalHitNumber(params, false, QUERY_SUFFIX, null);
     }
 
 }
