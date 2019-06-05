@@ -426,7 +426,7 @@ public abstract class Format {
         try {
             saveToken(token);
         } catch (IOException e) {
-            // do nothing
+            logger.error(e.getMessage());
         }
         Element eleResumptionToken = new Element("resumptionToken", xmlns);
         eleResumptionToken.setAttribute("expirationDate", Utils.convertDate(time));
