@@ -14,14 +14,14 @@
 	</Appenders>
 
 	<Loggers>
-		<Logger name="de.intranda.digiverso.m2m" level="TRACE" additivity="true" />
+		<Logger name="io.goobi" level="TRACE" additivity="true" />
 		<Logger name="java.net.SocketOutputStream" level="ERROR" additivity="true" />
 		<Logger name="httpclient" level="ERROR" additivity="true" />
 		<Logger name="java.net.SocketOutputStream" level="ERROR"
 			additivity="true" />
 		<Logger name="org.apache" level="ERROR" additivity="true" />
 		<Logger name="ugh" level="ERROR" additivity="true" />
-		<Root level="info">
+		<Root level="INFO">
 			<AppenderRef ref="stdout" />
 			<AppenderRef ref="rolling" />
 		</Root>
