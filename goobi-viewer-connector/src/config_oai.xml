@@ -59,7 +59,7 @@
     <!-- oaiFolder: Folder with messages.properties files, etc. -->
     <oaiFolder>/opt/digiverso/viewer/oai/</oaiFolder>
 	<!-- Verzeichnis in dem die resumtionToken gespeichert werden -->
-	<resumptionTokenFolder>C:/digiverso/viewer/oai/token/
+	<resumptionTokenFolder>/opt/digiverso/viewer/oai/token/
 	</resumptionTokenFolder>
 	<!-- urnResolverUrl: URL to the viewer's URN resolver --> 
 	<!-- MAKE SURE THIS URL IS NOT 'localhost' WHEN IN PRODUCTION! -->

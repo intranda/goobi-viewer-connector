@@ -4,14 +4,14 @@
     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
 	<display-name>Goobi viewer Connector</display-name>
 	<listener>
-		<listener-class>de.intranda.digiverso.m2m.ContextListener</listener-class>
+		<listener-class>io.goobi.viewer.connector.ContextListener</listener-class>
 	</listener>
 
     <servlet>
         <description></description>
         <display-name>OAIServlet</display-name>
         <servlet-name>OAIServlet</servlet-name>
-        <servlet-class>de.intranda.digiverso.m2m.oai.servlets.OaiServlet</servlet-class>
+        <servlet-class>io.goobi.viewer.connector.oai.servlets.OaiServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>OAIServlet</servlet-name>
@@ -22,7 +22,7 @@
         <description></description>
         <display-name>SRUServlet</display-name>
         <servlet-name>SRUServlet</servlet-name>
-        <servlet-class>de.intranda.digiverso.m2m.sru.SruServlet</servlet-class>
+        <servlet-class>io.goobi.viewer.connector.sru.SruServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>SRUServlet</servlet-name>
@@ -33,7 +33,7 @@
         <description></description>
         <display-name>ToolServlet</display-name>
         <servlet-name>ToolServlet</servlet-name>
-        <servlet-class>de.intranda.digiverso.m2m.ToolServlet</servlet-class>
+        <servlet-class>io.goobi.viewer.connector.ToolServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>ToolServlet</servlet-name>
