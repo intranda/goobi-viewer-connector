@@ -167,7 +167,7 @@ public class ConfigurationTest extends AbstractTest {
      */
     @Test
     public void getMods2MarcXsl_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals("resources/test/MODS2MARC21slim.xsl", DataManager.getInstance().getConfiguration().getMods2MarcXsl());
+        Assert.assertEquals("src/test/resources/MODS2MARC21slim.xsl", DataManager.getInstance().getConfiguration().getMods2MarcXsl());
     }
 
     /**
@@ -202,7 +202,7 @@ public class ConfigurationTest extends AbstractTest {
      */
     @Test
     public void getOaiFolder_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals("resources/test/oai/", DataManager.getInstance().getConfiguration().getOaiFolder());
+        Assert.assertEquals("src/test/resources/oai/", DataManager.getInstance().getConfiguration().getOaiFolder());
     }
 
     /**
@@ -211,7 +211,7 @@ public class ConfigurationTest extends AbstractTest {
      */
     @Test
     public void getResumptionTokenFolder_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals("resources/test/oai/token/", DataManager.getInstance().getConfiguration().getResumptionTokenFolder());
+        Assert.assertEquals("src/test/resources/oai/token/", DataManager.getInstance().getConfiguration().getResumptionTokenFolder());
     }
 
     /**
@@ -229,7 +229,7 @@ public class ConfigurationTest extends AbstractTest {
      */
     @Test
     public void getViewerConfigFolder_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals("resources/test/", DataManager.getInstance().getConfiguration().getViewerConfigFolder());
+        Assert.assertEquals("src/test/resources/", DataManager.getInstance().getConfiguration().getViewerConfigFolder());
     }
 
     /**

@@ -28,10 +28,10 @@ public abstract class AbstractTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        System.setProperty("log4j.configurationFile", "resources/test/log4j2.test.xml");
+        System.setProperty("log4j.configurationFile", "src/test/resources/log4j2.test.xml");
 
         // Initialize the instance with a custom config file
-        DataManager.getInstance().injectConfiguration(new Configuration("resources/test/config_oai.test.xml"));
+        DataManager.getInstance().injectConfiguration(new Configuration("src/test/resources/config_oai.test.xml"));
     }
 
     @AfterClass
