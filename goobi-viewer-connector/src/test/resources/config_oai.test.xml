@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
     <!-- viewerConfigFolder: contains local configuration files, i.e. this file with local modifications that override the global one -->
-    <viewerConfigFolder>resources/test/</viewerConfigFolder>
+    <viewerConfigFolder>src/test/resources/</viewerConfigFolder>
     
 	<!-- Definiert einige statische Werte, die bei ?verb=Identify ausgegeben 
 		werden -->
@@ -48,9 +48,9 @@
         </restrictions>
         <querySuffix>-PI:PPN123456789</querySuffix>
 	</solr>
-	<oaiFolder>resources/test/oai/</oaiFolder>
+	<oaiFolder>src/test/resources/oai/</oaiFolder>
 	<!-- Verzeichnis in dem die resumtionToken gespeichert werden -->
-	<resumptionTokenFolder>resources/test/oai/token/</resumptionTokenFolder>
+	<resumptionTokenFolder>src/test/resources/oai/token/</resumptionTokenFolder>
 	<!-- Pfad zum internen URN Resolver, falls URNs genutzt werden, wird an 
 		zwei Stellen genutzt -->
 	<urnResolverUrl>http://localhost/viewer/resolver?urn=</urnResolverUrl>
@@ -134,7 +134,7 @@
         <enabled>true</enabled>
         <hitsPerToken>15</hitsPerToken>
         <!-- Pfad zum marc to mods xslt -->
-        <marcStylesheet>resources/test/MODS2MARC21slim.xsl</marcStylesheet>
+	<marcStylesheet>src/test/resources/MODS2MARC21slim.xsl</marcStylesheet>
     </marcxml>
 	
 	<epicur>
