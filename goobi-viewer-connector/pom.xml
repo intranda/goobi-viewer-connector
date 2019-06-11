@@ -203,7 +203,6 @@
 				<artifactId>maven-war-plugin</artifactId>
 				<version>3.0.0</version>
 				<configuration>
-					<warSourceDirectory>WebContent</warSourceDirectory>
 					<packagingExcludes>**/rebel.xml</packagingExcludes>
 					<packagingExcludes>WEB-INF/lib/zookeeper-*.jar</packagingExcludes>
 				</configuration>
