@@ -45,7 +45,7 @@ public class MessageResourceBundle extends ResourceBundle {
             locale = Locale.ENGLISH;
         }
         if (bundle == null || !bundle.getLocale().equals(locale)) {
-            bundle = ResourceBundle.getBundle("io.goobi.viewer.connector.messages.messages", locale);
+            bundle = ResourceBundle.getBundle("messages", locale);
         }
         if (localBundle == null || !localBundle.getLocale().equals(locale)) {
             localBundle = loadLocalResourceBundle(locale);
