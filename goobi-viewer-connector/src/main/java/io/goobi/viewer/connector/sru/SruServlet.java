@@ -703,6 +703,7 @@ public class SruServlet extends HttpServlet {
     private static void generateMetsRecord(SolrDocument doc, Element recordData) {
         String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl()).append(doc.getFieldValue(
                 SolrConstants.PI_TOPSTRUCT)).toString();
+        logger.trace("generateMetsRecord");
         try {
             String xml = Utils.getWebContent(url);
             if (StringUtils.isEmpty(xml)) {

@@ -143,6 +143,7 @@ public class METSFormat extends Format {
      */
     private static Element generateMets(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler,
             String recordType) throws JDOMException, IOException, SolrServerException {
+        logger.trace("generateMets");
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element xmlListRecords = new Element(recordType, xmlns);
 
@@ -155,12 +156,18 @@ public class METSFormat extends Format {
             numRows = records.size();
         }
         for (SolrDocument doc : records) {
-            String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl())
-                    .append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))
-                    .toString();
+            String pi = (String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT);
+            if (pi == null) {
+                pi = (String) doc.getFieldValue(SolrConstants.PI);
+            }
+            if (pi == null) {
+                xmlListRecords.addContent(new ErrorCode().getIdDoesNotExist());
+                continue;
+            }
+            String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl()).append(pi).toString();
             String xml = Utils.getWebContent(url);
             if (StringUtils.isEmpty(xml)) {
-                xmlListRecords.addContent(new ErrorCode().getCannotDisseminateFormat());
+                xmlListRecords.addContent(new ErrorCode().getIdDoesNotExist());
                 continue;
             }
 
