@@ -224,7 +224,7 @@
         <enabled>true</enabled>
         <hitsPerToken>10</hitsPerToken>
         <!-- Pfad zum marc to mods xslt -->
-        <marcStylesheet>C:/digiverso/viewer/oai/MODS2MARC21slim.xsl</marcStylesheet>
+        <marcStylesheet>/opt/digiverso/viewer/oai/MODS2MARC21slim.xsl</marcStylesheet>
         <setSpec>
             <field>DC</field>       
         </setSpec>
