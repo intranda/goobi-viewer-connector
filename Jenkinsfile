@@ -29,7 +29,7 @@ pipeline {
       junit "**/target/surefire-reports/*.xml"
     }
     success {
-      archiveArtifacts artifacts: '**/target/*.war', fingerprint: true
+      archiveArtifacts artifacts: '**/target/*.war, */src/main/webapp/oai2.xsl', fingerprint: true
     }
     changed {
       emailext(
