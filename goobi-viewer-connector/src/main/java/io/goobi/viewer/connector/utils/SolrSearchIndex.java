@@ -275,6 +275,7 @@ public class SolrSearchIndex {
      * @throws SolrServerException
      */
     public SolrDocument getListRecord(final String identifier) throws IOException, SolrServerException {
+        logger.trace("getListRecord");
         SolrDocumentList ret = query(identifier, 1);
         if (!ret.isEmpty()) {
             return ret.get(0);

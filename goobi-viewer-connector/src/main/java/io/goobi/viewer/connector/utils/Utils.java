@@ -15,10 +15,8 @@
  */
 package io.goobi.viewer.connector.utils;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,9 +28,6 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.jdom2.Document;
-import org.jdom2.JDOMException;
-import org.jdom2.input.SAXBuilder;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -68,33 +63,6 @@ public class Utils {
      */
     public static String convertDate(long milliSeconds) {
         return formatterISO8601DateTimeFullWithTimeZone.withZoneUTC().print(milliSeconds);
-    }
-
-    /**
-     * Create a JDOM document from an XML string.
-     * 
-     * @param string
-     * @param encoding
-     * @return
-     * @throws IOException
-     * @throws JDOMException
-     * @should build document correctly
-     */
-    public static Document getDocumentFromString(String string, String encoding) throws JDOMException, IOException {
-        if (encoding == null) {
-            encoding = DEFAULT_ENCODING;
-        }
-
-        byte[] byteArray = null;
-        try {
-            byteArray = string.getBytes(encoding);
-        } catch (UnsupportedEncodingException e) {
-        }
-        ByteArrayInputStream baos = new ByteArrayInputStream(byteArray);
-        SAXBuilder builder = new SAXBuilder();
-        Document document = builder.build(baos);
-
-        return document;
     }
 
     /**

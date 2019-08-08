@@ -50,6 +50,7 @@ import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.SolrSearchIndex;
 import io.goobi.viewer.connector.utils.Utils;
+import io.goobi.viewer.connector.utils.XmlTools;
 
 public class SruServlet extends HttpServlet {
 
@@ -201,8 +202,8 @@ public class SruServlet extends HttpServlet {
         root.addContent(version);
 
         String query = generateSearchQuery(parameter, request);
-        QueryResponse queryResponse = solr.search(query, parameter.getStartRecord() - 1, parameter.getStartRecord() - 1 + parameter
-                .getMaximumRecords(), null, null, null);
+        QueryResponse queryResponse =
+                solr.search(query, parameter.getStartRecord() - 1, parameter.getStartRecord() - 1 + parameter.getMaximumRecords(), null, null, null);
         SolrDocumentList solrDocuments = queryResponse.getResults();
         Element numberOfRecords = new Element("numberOfRecords", SRU_NAMESPACE);
         if (solrDocuments == null || solrDocuments.isEmpty()) {
@@ -331,7 +332,6 @@ public class SruServlet extends HttpServlet {
         return sbValue.toString();
     }
 
-
     /**
      * @param root
      * @param solrDocuments
@@ -424,14 +424,15 @@ public class SruServlet extends HttpServlet {
      * @param recordData
      */
     private static void generateLidoRecord(SolrDocument doc, Element recordData) {
-        String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl()).append(doc.getFieldValue(
-                SolrConstants.PI_TOPSTRUCT)).toString();
+        String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl())
+                .append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))
+                .toString();
         try {
             String xml = Utils.getWebContent(url);
             if (StringUtils.isEmpty(xml)) {
                 return;
             }
-            org.jdom2.Document xmlDoc = Utils.getDocumentFromString(xml, null);
+            org.jdom2.Document xmlDoc = XmlTools.getDocumentFromString(xml, null);
             Element xmlRoot = xmlDoc.getRootElement();
             Element newLido = new Element(Metadata.lido.getMetadataPrefix(), LIDO_NAMESPACE);
             newLido.addNamespaceDeclaration(XSI_NAMESPACE);
@@ -605,7 +606,7 @@ public class SruServlet extends HttpServlet {
             if (StringUtils.isEmpty(xml)) {
                 return;
             }
-            org.jdom2.Document xmlDoc = Utils.getDocumentFromString(xml, null);
+            org.jdom2.Document xmlDoc = XmlTools.getDocumentFromString(xml, null);
             Element xmlRoot = xmlDoc.getRootElement();
             Element newmods = new Element("mods", MODS_NAMESPACE);
             newmods.addNamespaceDeclaration(XSI_NAMESPACE);
@@ -665,14 +666,15 @@ public class SruServlet extends HttpServlet {
      * @param recordData
      */
     private static void generateModsRecord(SolrDocument doc, Element recordData) {
-        String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl()).append(doc.getFieldValue(
-                SolrConstants.PI_TOPSTRUCT)).toString();
+        String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl())
+                .append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))
+                .toString();
         try {
             String xml = Utils.getWebContent(url);
             if (StringUtils.isEmpty(xml)) {
                 return;
             }
-            org.jdom2.Document xmlDoc = Utils.getDocumentFromString(xml, null);
+            org.jdom2.Document xmlDoc = XmlTools.getDocumentFromString(xml, null);
             Element xmlRoot = xmlDoc.getRootElement();
             Element newMods = new Element("mods", MODS_NAMESPACE);
             newMods.addNamespaceDeclaration(XSI_NAMESPACE);
@@ -701,15 +703,16 @@ public class SruServlet extends HttpServlet {
      * @param recordData
      */
     private static void generateMetsRecord(SolrDocument doc, Element recordData) {
-        String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl()).append(doc.getFieldValue(
-                SolrConstants.PI_TOPSTRUCT)).toString();
+        String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl())
+                .append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))
+                .toString();
         logger.trace("generateMetsRecord");
         try {
             String xml = Utils.getWebContent(url);
             if (StringUtils.isEmpty(xml)) {
                 return;
             }
-            org.jdom2.Document xmlDoc = Utils.getDocumentFromString(xml, null);
+            org.jdom2.Document xmlDoc = XmlTools.getDocumentFromString(xml, null);
             Element xmlRoot = xmlDoc.getRootElement();
             Element newMets = new Element(Metadata.mets.getMetadataPrefix(), METS_NAMESPACE);
             newMets.addNamespaceDeclaration(XSI_NAMESPACE);

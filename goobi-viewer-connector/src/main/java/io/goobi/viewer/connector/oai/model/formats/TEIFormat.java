@@ -38,6 +38,7 @@ import io.goobi.viewer.connector.oai.model.language.Language;
 import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.SolrSearchIndex;
 import io.goobi.viewer.connector.utils.Utils;
+import io.goobi.viewer.connector.utils.XmlTools;
 
 /**
  * Format for TEI and CMDI records.
@@ -186,7 +187,7 @@ public class TEIFormat extends Format {
                         continue;
                     }
 
-                    org.jdom2.Document xmlDoc = Utils.getDocumentFromString(xml, null);
+                    org.jdom2.Document xmlDoc = XmlTools.getDocumentFromString(xml, null);
                     Element teiRoot = xmlDoc.getRootElement();
                     Element newDoc;
                     switch (handler.getMetadataPrefix()) {

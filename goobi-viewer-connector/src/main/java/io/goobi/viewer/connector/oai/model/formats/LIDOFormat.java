@@ -37,6 +37,7 @@ import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
 import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.Utils;
+import io.goobi.viewer.connector.utils.XmlTools;
 
 /**
  * LIDO
@@ -132,7 +133,7 @@ public class LIDOFormat extends Format {
                 continue;
             }
 
-            org.jdom2.Document xmlDoc = Utils.getDocumentFromString(xml, null);
+            org.jdom2.Document xmlDoc = XmlTools.getDocumentFromString(xml, null);
             Element xmlRoot = xmlDoc.getRootElement();
             Element newLido = new Element(Metadata.lido.getMetadataPrefix(), lido);
             newLido.addNamespaceDeclaration(XSI);

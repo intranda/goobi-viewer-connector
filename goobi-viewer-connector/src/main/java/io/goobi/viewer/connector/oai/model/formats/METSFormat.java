@@ -36,6 +36,7 @@ import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
 import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.Utils;
+import io.goobi.viewer.connector.utils.XmlTools;
 
 /**
  * METS
@@ -109,12 +110,14 @@ public class METSFormat extends Format {
      */
     @Override
     public Element createGetRecord(RequestHandler handler) {
+        logger.trace("createGetRecord");
         if (handler.getIdentifier() == null) {
             return new ErrorCode().getBadArgument();
         }
         try {
             SolrDocument doc = solr.getListRecord(handler.getIdentifier());
             if (doc == null) {
+                logger.debug("Record not found in index: {}", handler.getIdentifier());
                 return new ErrorCode().getCannotDisseminateFormat();
             }
             return generateMets(Collections.singletonList(doc), 1L, 0, 1, handler, "GetRecord");
@@ -171,7 +174,7 @@ public class METSFormat extends Format {
                 continue;
             }
 
-            org.jdom2.Document metsFile = Utils.getDocumentFromString(xml, null);
+            org.jdom2.Document metsFile = XmlTools.getDocumentFromString(xml, null);
             Element mets_root = metsFile.getRootElement();
             Element newmets = new Element(Metadata.mets.getMetadataPrefix(), mets);
             newmets.addNamespaceDeclaration(XSI);

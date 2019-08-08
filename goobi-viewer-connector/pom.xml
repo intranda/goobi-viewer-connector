@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 		http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.goobi.viewer</groupId>
@@ -27,6 +27,7 @@
 		<httpclient.version>4.5.1</httpclient.version>
 		<httpcore.version>4.4.3</httpcore.version>
 		<httpmime.version>4.5.1</httpmime.version>
+		<jaxen.version>1.2.0</jaxen.version>
 		<jdom2.version>2.0.6</jdom2.version>
 		<joda-time.version>2.10.1</joda-time.version>
 		<junit.version>4.12</junit.version>
@@ -35,7 +36,8 @@
 		<slf4j.version>1.7.26</slf4j.version>
 		<solr.version>4.10.4</solr.version>
 		<tomcat.version>8.5.40</tomcat.version>
-		<!-- This xerces version needs to be added explicitly because otherwise Solr will use an older one that's incompatible -->
+		<!-- This xerces version needs to be added explicitly because otherwise 
+			Solr will use an older one that's incompatible -->
 		<xerces.version>2.12.0</xerces.version>
 		<xstream.version>1.4.11.1</xstream.version>
 	</properties>
@@ -112,6 +114,11 @@
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpmime</artifactId>
 			<version>${httpmime.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>jaxen</groupId>
+			<artifactId>jaxen</artifactId>
+			<version>${jaxen.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jdom</groupId>
