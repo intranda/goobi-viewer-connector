@@ -269,12 +269,12 @@
 
 	<sets>
 	    <!-- <allValuesSet translate="true">DC</allValuesSet> -->
-		<set setName="Alle Sets" setSpec="all" setQuery="DC:*" />
+		<set setName="Alle Sets" setSpec="all" setQuery="+DC:* +DOCTYPE:DOCSTRCT" />
 		<set setName="test" setSpec="test" setQuery="DC:a.b.c.d" />
 		<set setName="ID-TEST" setSpec="ID-TEST" setQuery="PI:aa000274" />
-		<set setName="Alle Monographien" setSpec="monograph" setQuery="DOCSTRCT:monograph" />
+		<set setName="Alle Monographien" setSpec="monograph" setQuery="+DOCSTRCT:monograph +DOCTYPE:DOCSTRCT" />
 		<set setName="Mehrbändige Werke und Bände" setSpec="multivolume"
-			setQuery="DOCSTRCT:MultiVolumeWork OR DOCSTRCT:Volume" />
+			setQuery="+(DOCSTRCT:MultiVolumeWork DOCSTRCT:Volume)" />
 	</sets>
 
 	<!-- useCollectionBlacklist: If true, records from collections blacklisted 
