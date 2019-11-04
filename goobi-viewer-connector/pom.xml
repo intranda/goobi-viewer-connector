@@ -220,6 +220,15 @@
 				<configuration>
 					<packagingExcludes>**/rebel.xml</packagingExcludes>
 					<packagingExcludes>WEB-INF/lib/zookeeper-*.jar</packagingExcludes>
+                    <archive>
+                        <addMavenDescriptor>false</addMavenDescriptor>
+                        <manifestEntries>
+                            <ApplicationName>Goobi-viewer-connector</ApplicationName>
+                            <version>${project.version}</version>
+                            <Implementation-Version>${buildNumber}</Implementation-Version>
+                            <Implementation-Build-Date>${buildDate}</Implementation-Build-Date>
+                        </manifestEntries>
+                    </archive>
 				</configuration>
 			</plugin>
 			<plugin>
