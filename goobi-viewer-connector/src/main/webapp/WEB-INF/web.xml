@@ -37,8 +37,8 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>ToolServlet</servlet-name>
-        <url-pattern>/tools</url-pattern>
-        <url-pattern>/tools/</url-pattern>
+        <url-pattern>/oai/tools</url-pattern>
+        <url-pattern>/oai/tools/</url-pattern>
     </servlet-mapping>
 
 	<mime-mapping>
