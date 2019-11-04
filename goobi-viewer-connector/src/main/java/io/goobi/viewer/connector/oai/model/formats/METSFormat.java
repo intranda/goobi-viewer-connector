@@ -118,7 +118,7 @@ public class METSFormat extends Format {
             SolrDocument doc = solr.getListRecord(handler.getIdentifier());
             if (doc == null) {
                 logger.debug("Record not found in index: {}", handler.getIdentifier());
-                return new ErrorCode().getCannotDisseminateFormat();
+                return new ErrorCode().getIdDoesNotExist();
             }
             return generateMets(Collections.singletonList(doc), 1L, 0, 1, handler, "GetRecord");
         } catch (IOException e) {
