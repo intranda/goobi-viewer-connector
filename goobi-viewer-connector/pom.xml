@@ -15,7 +15,9 @@
 
 
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jdk.version>1.8</jdk.version>
+        <skipTests>true</skipTests>
 		
         <!-- Manifest information -->
         <maven.build.timestamp.format>yyyy-MM-dd_HH-mm</maven.build.timestamp.format>
@@ -205,6 +207,15 @@
 
 	<build>
 		<finalName>M2M</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/webapp/META-INF</directory>
+<!--                 <filtering>true</filtering> -->
+                <includes>
+                    <include>MANIFEST.MF</include>
+                </includes>
+            </resource>
+        </resources>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -216,8 +227,11 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.2.2</version>
 				<configuration>
+                    <warName>M2M</warName>
+                    <wtpversion>2.0</wtpversion>
+                    <wtpContextName>M2M</wtpContextName>
 					<packagingExcludes>**/rebel.xml</packagingExcludes>
 					<packagingExcludes>WEB-INF/lib/zookeeper-*.jar</packagingExcludes>
                     <archive>
@@ -231,17 +245,19 @@
                     </archive>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0-M1</version>
-				<configuration>
-					<excludes>
-						<exclude>**/Abstract*.java</exclude>
-						<exclude>**/SolrSearchIndexTest.java</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
+            <!-- Maven Surefire Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M3</version>
+                <configuration>
+                    <skipTests>${skipTests}</skipTests>
+                    <excludes>
+                        <exclude>**/Abstract*.java</exclude>
+                        <exclude>**/SolrSearchIndexTest.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
             <!-- get git version number -->
             <plugin>
                 <groupId>pl.project13.maven</groupId>
