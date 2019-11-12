@@ -17,7 +17,7 @@
 	<properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jdk.version>1.8</jdk.version>
-        <skipTests>true</skipTests>
+        <skipTests>false</skipTests>
 		
         <!-- Manifest information -->
         <maven.build.timestamp.format>yyyy-MM-dd_HH-mm</maven.build.timestamp.format>
@@ -207,15 +207,6 @@
 
 	<build>
 		<finalName>M2M</finalName>
-        <resources>
-            <resource>
-                <directory>src/main/webapp/META-INF</directory>
-<!--                 <filtering>true</filtering> -->
-                <includes>
-                    <include>MANIFEST.MF</include>
-                </includes>
-            </resource>
-        </resources>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
