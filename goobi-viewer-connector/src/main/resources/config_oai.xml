@@ -15,8 +15,6 @@
 		<!-- MAKE SURE THIS URL IS NOT 'localhost' WHEN IN PRODUCTION! -->
 		<baseURL useInRequestElement="true">http://localhost:8080/viewer/oai
 		</baseURL>
-		<!-- -->
-		<requestElementUseBaseURL></requestElementUseBaseURL>
 		<!-- OAI Version -->
 		<protocolVersion> 2.0</protocolVersion>
 		<!-- E-Mail Adresse des Ansprechpartners -->
@@ -35,7 +33,6 @@
 		<!-- Definiert, wie genau mit Zeiten umgegangen wird. Erlaubt sind Datestamps 
 			und UTCdatetime -->
 		<granularity>YYYY-MM-DDThh:mm:ssZ</granularity>
-		<description>fvk</description>
 	</identifyTags>
 
 	<!-- Definiert die Liste von XML Namespaces, die in der OAI Antwort verwendet 

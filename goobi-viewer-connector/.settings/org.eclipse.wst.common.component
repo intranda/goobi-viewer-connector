@@ -2,11 +2,12 @@
     <wb-module deploy-name="M2M">
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
         <wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/test/java"/>
+        <wb-resource deploy-path="/" source-path="/src/main/webapp"/>
+        <wb-resource deploy-path="/" source-path="/webapp"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
         <property name="java-output-path" value="/OAI/build/classes"/>
-        <property name="context-root" value="M2M"/>
         <property name="component.exclusion.patterns" value="WEB-INF/lib/zookeeper-*.jar"/>
+        <property name="context-root" value="M2M"/>
     </wb-module>
 </project-modules>
