@@ -1,180 +1,191 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
-    <!-- viewerConfigFolder: contains local configuration files, i.e. this file with local modifications that override the global one -->
-    <viewerConfigFolder>/opt/digiverso/viewer/config/</viewerConfigFolder>
-    
-	<!-- Definiert einige statische Werte, die bei ?verb=Identify ausgegeben 
-		werden -->
+	<!-- viewerConfigFolder: contains local configuration files, i.e. this file with local modifications that override the global one -->
+	<viewerConfigFolder>/opt/digiverso/viewer/config/</viewerConfigFolder>
+
+
+	<!-- identifyTags: Defines static values that are shown when calling ?verb=Identify -->
 	<identifyTags>
-		<!-- Name des repositories -->
+		<!-- Name of the repository -->
 		<repositoryName>OAI Frontend</repositoryName>
-		<!-- URL des repositories.
-		    useInRequestElement: Use value configured in 
-			baseURL for the <request> element in the OAI dataset. Otherwise the URL will 
+
+		<!-- URL of the repository.
+		     @useInRequestElement: Use value configured in
+			baseURL for the <request> element in the OAI dataset. Otherwise the URL will
 			be extracted from the servlet request. Default is false. -->
 		<!-- MAKE SURE THIS URL IS NOT 'localhost' WHEN IN PRODUCTION! -->
-		<baseURL useInRequestElement="true">http://localhost:8080/viewer/oai
-		</baseURL>
-		<!-- OAI Version -->
+		<baseURL useInRequestElement="true">http://localhost:8080/viewer/oai</baseURL>
+
+		<!-- OAI version -->
 		<protocolVersion> 2.0</protocolVersion>
-		<!-- E-Mail Adresse des Ansprechpartners -->
+
+		<!-- Email address of a contact resposible for the interface -->
 		<adminEmail>support@intranda.com</adminEmail>
-		<!-- Angabe wie mit gelöschten Datensätzen umgegangen wird, erlaubt sind: 
-			no - the repository does not maintain information about deletions. A repository 
-			that indicates this level of support must not reveal a deleted status in 
-			any response. persistent - the repository maintains information about deletions 
-			with no time limit. A repository that indicates this level of support must 
-			persistently keep track of the full history of deletions and consistently 
-			reveal the status of a deleted record over time. transient - the repository 
-			does not guarantee that a list of deletions is maintained persistently or 
-			consistently. A repository that indicates this level of support may reveal 
+
+		<!-- How the interface deals with deleted records. Allowed values are:
+			no: the repository does not maintain information about deletions. A repository
+			that indicates this level of support must not reveal a deleted status in
+			any response.
+			persistent: the repository maintains information about deletions
+			with no time limit. A repository that indicates this level of support must
+			persistently keep track of the full history of deletions and consistently
+			reveal the status of a deleted record over time.
+			transient: the repository does not guarantee that a list of deletions is maintained persistently or
+			consistently. A repository that indicates this level of support may reveal
 			a deleted status for records. -->
 		<deletedRecord>transient</deletedRecord>
-		<!-- Definiert, wie genau mit Zeiten umgegangen wird. Erlaubt sind Datestamps 
-			und UTCdatetime -->
+
+		<!-- Defines times. Valid are Datestamps and UTCdatetime -->
 		<granularity>YYYY-MM-DDThh:mm:ssZ</granularity>
 	</identifyTags>
 
-	<!-- Definiert die Liste von XML Namespaces, die in der OAI Antwort verwendet 
-		werden -->
+
+	<!-- List of XML namespaces that are used in the OAI answer -->
 	<oai-identifier>
 		<xmlns>http://www.openarchives.org/OAI/2.0/</xmlns>
 		<repositoryIdentifier></repositoryIdentifier>
 	</oai-identifier>
 
+
 	<solr>
-		<!-- Anzahl der Treffer pro Seite -->
+		<!-- Hits per page -->
 		<hitsPerToken>100</hitsPerToken>
-		<!-- URL zum Index -->
+
+		<!-- URL to Solr index -->
 		<solrUrl>http://localhost:8081/solr</solrUrl>
+
 		<restrictions>
-            <!-- <restriction field="ACCESSCONDITION">restricted1</restriction> -->
-            <!-- <restriction field="ACCESSCONDITION">conditions="-MDNUM_PUBLICRELEASEYEAR:[* TO NOW/YEAR]">restricted2</licenseType> -->
-        </restrictions>
-        <querySuffix></querySuffix>
+			<!-- <restriction field="ACCESSCONDITION">restricted1</restriction> -->
+			<!-- <restriction field="ACCESSCONDITION">conditions="-MDNUM_PUBLICRELEASEYEAR:[* TO NOW/YEAR]">restricted2</licenseType> -->
+		</restrictions>
+
+		<querySuffix></querySuffix>
 	</solr>
-    <!-- oaiFolder: Folder with messages.properties files, etc. -->
-    <oaiFolder>/opt/digiverso/viewer/oai/</oaiFolder>
-	<!-- Verzeichnis in dem die resumtionToken gespeichert werden -->
-	<resumptionTokenFolder>/opt/digiverso/viewer/oai/token/
-	</resumptionTokenFolder>
-	<!-- urnResolverUrl: URL to the viewer's URN resolver --> 
+
+
+	<!-- oaiFolder: Folder with messages.properties files, etc. -->
+	<oaiFolder>/opt/digiverso/viewer/oai/</oaiFolder>
+
+	<!-- Dir3ctory containing resumptionToken -->
+	<resumptionTokenFolder>/opt/digiverso/viewer/oai/token/</resumptionTokenFolder>
+
+	<!-- urnResolverUrl: URL to the viewer's URN resolver -->
 	<!-- MAKE SURE THIS URL IS NOT 'localhost' WHEN IN PRODUCTION! -->
-	<urnResolverUrl>http://localhost:8080/viewer/resolver?urn=
-	</urnResolverUrl>
+	<urnResolverUrl>http://localhost:8080/viewer/resolver?urn=</urnResolverUrl>
+
 	<!-- MAKE SURE THIS URL IS NOT 'localhost' WHEN IN PRODUCTION! -->
-	<piResolverUrl>http://localhost:8080/viewer/piresolver?id=
-	</piResolverUrl>
+	<piResolverUrl>http://localhost:8080/viewer/piresolver?id=</piResolverUrl>
+
 	<!-- documentResolverUrl: URL to the METS/LIDO resolver.
-	   This URL is called locally and can be 'localhost' as long as the viewer is on the same machine -->
-	<documentResolverUrl>http://localhost:8080/viewer/metsresolver?id=
-    </documentResolverUrl>
-    <!-- harvestUrl: URL for havesting overview page and crowdsourcing updates -->
-    <harvestUrl>http://localhost:8080/viewer/harvest
-    </harvestUrl>
-    <!-- contentApiUrl: Rest API for full-text/ALTO/TEI/CMDI retrieval -->
-    <contentApiUrl>http://localhost:8080/viewer/rest/content/
-    </contentApiUrl>
-	<!-- fulltextUrl: URL for a single plain full-text page; contains placeholders 
-		for PI and page number; can be used for REST or older ContentServlet URLs. 
+	     This URL is called locally and can be 'localhost' as long as the viewer is on the same machine -->
+	<documentResolverUrl>http://localhost:8080/viewer/metsresolver?id=</documentResolverUrl>
+
+	<!-- harvestUrl: URL for havesting overview page and crowdsourcing updates -->
+	<harvestUrl>http://localhost:8080/viewer/harvest</harvestUrl>
+
+	<!-- contentApiUrl: Rest API for full-text/ALTO/TEI/CMDI retrieval -->
+	<contentApiUrl>http://localhost:8080/viewer/rest/content/</contentApiUrl>
+
+	<!-- fulltextUrl: URL for a single plain full-text page; contains placeholders
+		for PI and page number; can be used for REST or older ContentServlet URLs.
 		Allowed placeholders:
 		  {dataRepository} (e.g. '1'),
 		  {pi} (e.g 'PPN123456789'),
-		  {fileName} (e.g. '00000001.txt'), 
+		  {fileName} (e.g. '00000001.txt'),
 		  {filePath} (e.g 'fulltext_crowd/PPN123456789/00000001.txt'),
 		  {page} (e.g. '1') -->
-	<fulltextUrl>http://localhost:8080/viewer/rest/content/fulltext/{pi}/{fileName}/ 
-	</fulltextUrl>
-    
-    <oai_dc>
-        <enabled>true</enabled>
-        <hitsPerToken>100</hitsPerToken>
-        <fields>
-            <template name="_DEFAULT">
-                <metadata label="title" value="{0}">
-                    <param type="field" key="MD_TITLE" />
-                </metadata>
-                <metadata label="creator" value="{0}">
-                    <param type="field" key="MD_CREATOR" />
-                </metadata>
-                <metadata label="subject" value="{0}">
-                    <param type="translatedfield" key="DC" />
-                </metadata>
-                <metadata label="publisher" value="{0}">
-                    <param type="field" key="MD_PUBLISHER" dontUseTopstructValue="false" />
-                </metadata>
-                <metadata label="date" value="{0}">
-                    <param type="field" key="MD_YEARPUBLISH" dontUseTopstructValue="false" />
-                </metadata>
-                <metadata label="type" value="{0}">
-                    <param type="translatedfield" key="DOCSTRCT" />
-                </metadata>
-                <metadata label="type" value="text">
-                </metadata>
-                <metadata label="format" value="image/jpeg">
-                </metadata>
-                <metadata label="format" value="application/pdf">
-                </metadata>
-                <metadata label="identifier" value="#AUTO#">
-                </metadata>
-                <metadata label="source" value="#AUTO#">
-                </metadata>
-                <metadata label="rights" value="#AUTO#">
-                </metadata>
-                <metadata label="url" value="http://localhost:8080/viewer/image/{0}/{1}/">
-                    <param type="field" key="PI_TOPSTRUCT" />
-                    <param type="field" key="THUMBPAGENO" />
-                </metadata>
-                <metadata label="fulltext" value="#AUTO#">
-                </metadata>
-            </template>
-            <template name="PeriodicalVolume">
-                <metadata label="title" value="{0}{1}">
-                    <param type="field" key="MD_TITLE" />
-                    <param type="field" key="CURRENTNO" prefix="_SPACE_(" suffix=")" />
-                </metadata>
-                <metadata label="creator" value="{0}">
-                    <param type="field" key="MD_CREATOR" />
-                </metadata>
-                <metadata label="subject" value="{0}">
-                    <param type="translatedfield" key="DC" />
-                </metadata>
-                <metadata label="publisher" value="{0}">
-                    <param type="field" key="MD_PUBLISHER" dontUseTopstructValue="false" />
-                </metadata>
-                <metadata label="date" value="{0}">
-                    <param type="field" key="MD_YEARPUBLISH" dontUseTopstructValue="false" />
-                </metadata>
-                <metadata label="type" value="{0}">
-                    <param type="translatedfield" key="DOCSTRCT" />
-                </metadata>
-                <metadata label="type" value="text">
-                </metadata>
-                <metadata label="format" value="image/jpeg">
-                </metadata>
-                <metadata label="format" value="application/pdf">
-                </metadata>
-                <metadata label="identifier" value="#AUTO#">
-                </metadata>
-                <metadata label="source" value="#AUTO#">
-                </metadata>
-                <metadata label="rights" value="#AUTO#">
-                </metadata>
-                <metadata label="fulltext" value="#AUTO#">
-                </metadata>
-            </template>
-        </fields>
-        <setSpec>
-            <field>DC</field>       
-        </setSpec>
-    </oai_dc>
+	<fulltextUrl>http://localhost:8080/viewer/rest/content/fulltext/{pi}/{fileName}/</fulltextUrl>
 
-	<!-- ese: Value configuration for mandatory ESE fields -->
+
+	<oai_dc>
+		<enabled>true</enabled>
+		<hitsPerToken>100</hitsPerToken>
+		<fields>
+			<template name="_DEFAULT">
+				<metadata label="title" value="{0}">
+					<param type="field" key="MD_TITLE" />
+				</metadata>
+				<metadata label="creator" value="{0}">
+					<param type="field" key="MD_CREATOR" />
+				</metadata>
+				<metadata label="subject" value="{0}">
+					<param type="translatedfield" key="DC" />
+				</metadata>
+				<metadata label="publisher" value="{0}">
+					<param type="field" key="MD_PUBLISHER" dontUseTopstructValue="false" />
+				</metadata>
+				<metadata label="date" value="{0}">
+					<param type="field" key="MD_YEARPUBLISH" dontUseTopstructValue="false" />
+				</metadata>
+				<metadata label="type" value="{0}">
+					<param type="translatedfield" key="DOCSTRCT" />
+				</metadata>
+				<metadata label="type" value="text">
+				</metadata>
+				<metadata label="format" value="image/jpeg">
+				</metadata>
+				<metadata label="format" value="application/pdf">
+				</metadata>
+				<metadata label="identifier" value="#AUTO#">
+				</metadata>
+				<metadata label="source" value="#AUTO#">
+				</metadata>
+				<metadata label="rights" value="#AUTO#">
+				</metadata>
+				<metadata label="url" value="http://localhost:8080/viewer/image/{0}/{1}/">
+					<param type="field" key="PI_TOPSTRUCT" />
+					<param type="field" key="THUMBPAGENO" />
+				</metadata>
+				<metadata label="fulltext" value="#AUTO#">
+				</metadata>
+			</template>
+			<template name="PeriodicalVolume">
+				<metadata label="title" value="{0}{1}">
+					<param type="field" key="MD_TITLE" />
+					<param type="field" key="CURRENTNO" prefix="_SPACE_(" suffix=")" />
+				</metadata>
+				<metadata label="creator" value="{0}">
+					<param type="field" key="MD_CREATOR" />
+				</metadata>
+				<metadata label="subject" value="{0}">
+					<param type="translatedfield" key="DC" />
+				</metadata>
+				<metadata label="publisher" value="{0}">
+					<param type="field" key="MD_PUBLISHER" dontUseTopstructValue="false" />
+				</metadata>
+				<metadata label="date" value="{0}">
+					<param type="field" key="MD_YEARPUBLISH" dontUseTopstructValue="false" />
+				</metadata>
+				<metadata label="type" value="{0}">
+					<param type="translatedfield" key="DOCSTRCT" />
+				</metadata>
+				<metadata label="type" value="text">
+				</metadata>
+				<metadata label="format" value="image/jpeg">
+				</metadata>
+				<metadata label="format" value="application/pdf">
+				</metadata>
+				<metadata label="identifier" value="#AUTO#">
+				</metadata>
+				<metadata label="source" value="#AUTO#">
+				</metadata>
+				<metadata label="rights" value="#AUTO#">
+				</metadata>
+				<metadata label="fulltext" value="#AUTO#">
+				</metadata>
+			</template>
+		</fields>
+		<setSpec>
+			<field>DC</field>
+		</setSpec>
+	</oai_dc>
+
+
 	<ese>
-	    <enabled>true</enabled>
-	    <hitsPerToken>100</hitsPerToken>
-		<!-- types: Mapping of docstruct types to pre-defined values for europeana:type 
-			(@name: dostruct type; @type: ESE type) -->
+		<enabled>true</enabled>
+		<hitsPerToken>100</hitsPerToken>
+
+		<!-- types: Mapping of docstruct types to pre-defined values for europeana:type  (@name: dostruct type; @type: ESE type) -->
 		<types>
 			<docstruct name="video" type="VIDEO" />
 			<docstruct name="audio" type="SOUND" />
@@ -183,86 +194,100 @@
 			<docstruct name="painting" type="IMAGE" />
 			<docstruct name="museum_object" type="3D" />
 		</types>
+
 		<!-- providerField: Solr field that contains the value for europeana:provider -->
 		<providerField>MD_ACCESSCONDITIONCOPYRIGHT</providerField>
+
 		<!-- dataProviderField: Solr field that contains the value for europeana:dataProvider -->
 		<dataProviderField>MD_ACCESSCONDITIONCOPYRIGHT</dataProviderField>
-		<!-- defaultProvider: static default value for europeana:provider and europeana:dataProvider, 
-			in case any of the configured Solr fields provide no value -->
+
+		<!-- defaultProvider: static default value for europeana:provider and europeana:dataProvider, in case any of the configured Solr fields provide no value -->
 		<defaultProvider>Institution XYZ</defaultProvider>
-		<!-- rightsField: Solr field that contains the value for europeana:rights 
-			(value must be a URI) -->
+
+		<!-- rightsField: Solr field that contains the value for europeana:rights (value must be a URI) -->
 		<rightsField>TODO</rightsField>
-		<!-- defaultRightsUrl: static default value for europeana:rights, in case 
-			the configured Solr field provides no value -->
+
+		<!-- defaultRightsUrl: static default value for europeana:rights, in case  the configured Solr field provides no value -->
 		<defaultRightsUrl>http://www.example.com/rights</defaultRightsUrl>
-        <setSpec>
-            <field>DC</field>       
-        </setSpec>
+
+		<setSpec>
+			<field>DC</field>
+		</setSpec>
 	</ese>
-	
+
 	<mets>
-	    <enabled>true</enabled>
-        <hitsPerToken>10</hitsPerToken>
-        <setSpec>
-            <field>DC</field>       
-        </setSpec>
+		<enabled>true</enabled>
+		<hitsPerToken>10</hitsPerToken>
+		<setSpec>
+			<field>DC</field>
+		</setSpec>
 	</mets>
-	
+
+
 	<lido>
-        <enabled>true</enabled>
-        <hitsPerToken>10</hitsPerToken>
-        <setSpec>
-            <field>DC</field>       
-        </setSpec>
+		<enabled>true</enabled>
+		<hitsPerToken>10</hitsPerToken>
+		<setSpec>
+			<field>DC</field>
+		</setSpec>
 	</lido>
-	
+
+
 	<marcxml>
-        <enabled>true</enabled>
-        <hitsPerToken>10</hitsPerToken>
-        <!-- Pfad zum marc to mods xslt -->
-        <marcStylesheet>/opt/digiverso/viewer/oai/MODS2MARC21slim.xsl</marcStylesheet>
-        <setSpec>
-            <field>DC</field>       
-        </setSpec>
+		<enabled>true</enabled>
+		<hitsPerToken>10</hitsPerToken>
+
+		<!-- Path to MARC to MODS XSLT -->
+		<marcStylesheet>/opt/digiverso/viewer/oai/MODS2MARC21slim.xsl</marcStylesheet>
+
+		<setSpec>
+			<field>DC</field>
+		</setSpec>
 	</marcxml>
-	
+
+
 	<epicur>
-        <enabled>true</enabled>
-        <hitsPerToken>100</hitsPerToken>
-	    <!-- additionalDocstructs: Docstructs whose URNs shall also be returned via Xepicur in addition to topstructs -->
-	    <additionalDocstructTypes>
-<!-- 	        <docstruct>Article</docstruct> -->
-	    </additionalDocstructTypes>
-	    <blacklist>
-	        <!-- <urnPrefix></urnPrefix> -->
-	    </blacklist>
-        <setSpec>
-            <field>DOCSTRCT</field>       
-        </setSpec>
+		<enabled>true</enabled>
+		<hitsPerToken>100</hitsPerToken>
+
+		<!-- additionalDocstructs: Docstructs whose URNs shall also be returned via Xepicur in addition to topstructs -->
+		<additionalDocstructTypes>
+			<!-- <docstruct>Article</docstruct> -->
+		</additionalDocstructTypes>
+		<blacklist>
+			<!-- <urnPrefix></urnPrefix> -->
+		</blacklist>
+		<setSpec>
+			<field>DOCSTRCT</field>
+		</setSpec>
 	</epicur>
-	
+
+
 	<iv_overviewpage>
-        <enabled>true</enabled>
-        <hitsPerToken>100</hitsPerToken>
+		<enabled>false</enabled>
+		<hitsPerToken>100</hitsPerToken>
 	</iv_overviewpage>
-	
+
+
 	<iv_crowdsourcing>
-        <enabled>true</enabled>
-        <hitsPerToken>100</hitsPerToken>
+		<enabled>false</enabled>
+		<hitsPerToken>100</hitsPerToken>
 	</iv_crowdsourcing>
 
-    <tei>
-        <enabled>true</enabled>
-        <hitsPerToken>10</hitsPerToken>
-        <versionDiscriminatorField>LANGUAGE</versionDiscriminatorField>
-    </tei>
-    
-    <cmdi>
-        <enabled>true</enabled>
-        <hitsPerToken>10</hitsPerToken>
-        <versionDiscriminatorField>LANGUAGE</versionDiscriminatorField>
-    </cmdi>
+
+	<tei>
+		<enabled>false</enabled>
+		<hitsPerToken>10</hitsPerToken>
+		<versionDiscriminatorField>LANGUAGE</versionDiscriminatorField>
+	</tei>
+
+
+	<cmdi>
+		<enabled>false</enabled>
+		<hitsPerToken>10</hitsPerToken>
+		<versionDiscriminatorField>LANGUAGE</versionDiscriminatorField>
+	</cmdi>
+
 
 	<sets>
 	    <!-- <allValuesSet translate="true">DC</allValuesSet> -->
@@ -270,14 +295,15 @@
 		<set setName="test" setSpec="test" setQuery="DC:a.b.c.d" />
 		<set setName="ID-TEST" setSpec="ID-TEST" setQuery="PI:aa000274" />
 		<set setName="Alle Monographien" setSpec="monograph" setQuery="+DOCSTRCT:monograph +DOCTYPE:DOCSTRCT" />
-		<set setName="Mehrbändige Werke und Bände" setSpec="multivolume"
-			setQuery="+(DOCSTRCT:MultiVolumeWork DOCSTRCT:Volume)" />
+		<set setName="Mehrbändige Werke und Bände" setSpec="multivolume" setQuery="+(DOCSTRCT:MultiVolumeWork DOCSTRCT:Volume)" />
 	</sets>
 
-	<!-- useCollectionBlacklist: If true, records from collections blacklisted 
+
+	<!-- useCollectionBlacklist: If true, records from collections blacklisted
 		in config_viewer.xml will be filtered out. Default is true. -->
 	<useCollectionBlacklist>true</useCollectionBlacklist>
-	
+
+
 	<!-- defaultLocale: Locale to be used for value translations. Default is 'en'. -->
-    <defaultLocale>en</defaultLocale>
+	<defaultLocale>en</defaultLocale>
 </config>
