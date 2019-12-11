@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.goobi.viewer</groupId>
 	<artifactId>connector</artifactId>
-	<version>3.4.4</version>
+	<version>3.4.5</version>
 	<packaging>war</packaging>
 
 
@@ -15,13 +15,13 @@
 
 
 	<properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jdk.version>1.8</jdk.version>
-        <skipTests>false</skipTests>
-		
-        <!-- Manifest information -->
-        <maven.build.timestamp.format>yyyy-MM-dd_HH-mm</maven.build.timestamp.format>
-        <buildDate>${maven.build.timestamp}</buildDate>
+	        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	        <jdk.version>1.8</jdk.version>
+	        <skipTests>false</skipTests>
+			
+	        <!-- Manifest information -->
+	        <maven.build.timestamp.format>yyyy-MM-dd_HH-mm</maven.build.timestamp.format>
+	        <buildDate>${maven.build.timestamp}</buildDate>
 
 		<commons-cli.version>1.4</commons-cli.version>
 		<commons-collections.version>3.2.2</commons-collections.version>
@@ -48,10 +48,10 @@
 		<xstream.version>1.4.11.1</xstream.version>
 	</properties>
 
-    <scm>
-        <url>scm:git:https://github.com/intranda/goobi-viewer-connector/</url>
-        <connection>scm:git:https://github.com/intranda/goobi-viewer-connector/</connection>
-    </scm>
+	<scm>
+		<url>scm:git:https://github.com/intranda/goobi-viewer-connector/</url>
+		<connection>scm:git:https://github.com/intranda/goobi-viewer-connector/</connection>
+	</scm>
 
 	<repositories>
 		<repository>
