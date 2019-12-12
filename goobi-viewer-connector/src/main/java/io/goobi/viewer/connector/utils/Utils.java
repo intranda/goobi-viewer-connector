@@ -88,7 +88,7 @@ public class Utils {
                     IOUtils.copy(response.getEntity().getContent(), writer);
                     return writer.toString();
                 }
-                logger.trace("{}: {}", code, response.getStatusLine().getReasonPhrase());
+                logger.trace("{}: {} - {}", code, response.getStatusLine().getReasonPhrase(), url);
             }
         }
 
