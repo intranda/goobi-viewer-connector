@@ -13,6 +13,19 @@
 	<name>Goobi viewer - Connector</name>
 	<url>https://github.com/intranda/goobi-viewer-connector</url>
 
+	<scm>
+		<url>scm:git:https://github.com/intranda/goobi-viewer-connector/</url>
+		<connection>scm:git:https://github.com/intranda/goobi-viewer-connector/</connection>
+	</scm>
+
+
+	<repositories>
+		<repository>
+			<id>intranda-public</id>
+			<url>https://nexus.intranda.com/repository/maven-public</url>
+		</repository>
+	</repositories>
+
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -48,17 +61,6 @@
 		<xstream.version>1.4.11.1</xstream.version>
 	</properties>
 
-	<scm>
-		<url>scm:git:https://github.com/intranda/goobi-viewer-connector/</url>
-		<connection>scm:git:https://github.com/intranda/goobi-viewer-connector/</connection>
-	</scm>
-
-	<repositories>
-		<repository>
-			<id>intranda-public</id>
-			<url>https://nexus.intranda.com/repository/maven-public</url>
-		</repository>
-	</repositories>
 
 
 	<dependencies>
