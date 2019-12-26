@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.goobi.viewer</groupId>
 	<artifactId>connector</artifactId>
-	<version>3.4.7</version>
+	<version>3.4.8</version>
 	<packaging>war</packaging>
 
 
@@ -15,13 +15,13 @@
 
 
 	<properties>
-	        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	        <jdk.version>1.8</jdk.version>
-	        <skipTests>false</skipTests>
-			
-	        <!-- Manifest information -->
-	        <maven.build.timestamp.format>yyyy-MM-dd_HH-mm</maven.build.timestamp.format>
-	        <buildDate>${maven.build.timestamp}</buildDate>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<jdk.version>1.8</jdk.version>
+		<skipTests>false</skipTests>
+
+		<!-- Manifest information -->
+		<maven.build.timestamp.format>yyyy-MM-dd_HH-mm</maven.build.timestamp.format>
+		<buildDate>${maven.build.timestamp}</buildDate>
 
 		<commons-cli.version>1.4</commons-cli.version>
 		<commons-collections.version>3.2.2</commons-collections.version>
@@ -42,7 +42,7 @@
 		<slf4j.version>1.7.26</slf4j.version>
 		<solr.version>4.10.4</solr.version>
 		<tomcat.version>8.5.40</tomcat.version>
-		<!-- This xerces version needs to be added explicitly because otherwise 
+		<!-- This xerces version needs to be added explicitly because otherwise
 			Solr will use an older one that's incompatible -->
 		<xerces.version>2.12.0</xerces.version>
 		<xstream.version>1.4.11.1</xstream.version>
@@ -220,71 +220,71 @@
 				<artifactId>maven-war-plugin</artifactId>
 				<version>3.2.2</version>
 				<configuration>
-                    <warName>M2M</warName>
-                    <wtpversion>2.0</wtpversion>
-                    <wtpContextName>M2M</wtpContextName>
+					<warName>M2M</warName>
+					<wtpversion>2.0</wtpversion>
+					<wtpContextName>M2M</wtpContextName>
 					<packagingExcludes>**/rebel.xml</packagingExcludes>
 					<packagingExcludes>WEB-INF/lib/zookeeper-*.jar</packagingExcludes>
-                    <archive>
-                        <addMavenDescriptor>false</addMavenDescriptor>
-                        <manifestEntries>
-                            <ApplicationName>Goobi-viewer-connector</ApplicationName>
-                            <version>${project.version}</version>
-                            <Implementation-Version>${buildNumber}</Implementation-Version>
-                            <Implementation-Build-Date>${buildDate}</Implementation-Build-Date>
-                        </manifestEntries>
-                    </archive>
+					<archive>
+						<addMavenDescriptor>false</addMavenDescriptor>
+						<manifestEntries>
+							<ApplicationName>Goobi-viewer-connector</ApplicationName>
+							<version>${project.version}</version>
+							<Implementation-Version>${buildNumber}</Implementation-Version>
+							<Implementation-Build-Date>${buildDate}</Implementation-Build-Date>
+						</manifestEntries>
+					</archive>
 				</configuration>
 			</plugin>
-            <!-- Maven Surefire Plugin -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M3</version>
-                <configuration>
-                    <skipTests>${skipTests}</skipTests>
-                    <excludes>
-                        <exclude>**/Abstract*.java</exclude>
-                        <exclude>**/SolrSearchIndexTest.java</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-            <!-- get git version number -->
-            <plugin>
-                <groupId>pl.project13.maven</groupId>
-                <artifactId>git-commit-id-plugin</artifactId>
-                <version>2.2.1</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>revision</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <commitIdGenerationMode>flat</commitIdGenerationMode>
-                    <gitDescribe>
-                        <skip>true</skip>
-                    </gitDescribe>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>buildnumber-maven-plugin</artifactId>
-                <version>1.4</version>
-                <executions>
-                    <execution>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>create</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <shortRevisionLength>7</shortRevisionLength>
-                    <doCheck>false</doCheck>
-                </configuration>
-            </plugin>
+			<!-- Maven Surefire Plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.0.0-M3</version>
+				<configuration>
+					<skipTests>${skipTests}</skipTests>
+					<excludes>
+						<exclude>**/Abstract*.java</exclude>
+						<exclude>**/SolrSearchIndexTest.java</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+			<!-- get git version number -->
+			<plugin>
+				<groupId>pl.project13.maven</groupId>
+				<artifactId>git-commit-id-plugin</artifactId>
+				<version>2.2.1</version>
+				<configuration>
+					<commitIdGenerationMode>flat</commitIdGenerationMode>
+					<gitDescribe>
+						<skip>true</skip>
+					</gitDescribe>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>revision</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>buildnumber-maven-plugin</artifactId>
+				<version>1.4</version>
+				<configuration>
+					<shortRevisionLength>7</shortRevisionLength>
+					<doCheck>false</doCheck>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 </project>
