@@ -52,6 +52,10 @@ import io.goobi.viewer.connector.utils.SolrSearchIndex;
 import io.goobi.viewer.connector.utils.Utils;
 import io.goobi.viewer.connector.utils.XmlTools;
 
+/**
+ * <p>SruServlet class.</p>
+ *
+ */
 public class SruServlet extends HttpServlet {
 
     private static final long serialVersionUID = -6396567784411891113L;
@@ -73,6 +77,7 @@ public class SruServlet extends HttpServlet {
     /* (non-Javadoc)
      * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
+    /** {@inheritDoc} */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         SruRequestParameter parameter = null;
@@ -1133,6 +1138,7 @@ public class SruServlet extends HttpServlet {
     /* (non-Javadoc)
      * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
+    /** {@inheritDoc} */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         doGet(req, resp);

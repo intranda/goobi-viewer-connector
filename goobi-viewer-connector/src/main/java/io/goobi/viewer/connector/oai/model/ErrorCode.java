@@ -26,14 +26,17 @@ import io.goobi.viewer.connector.DataManager;
 public class ErrorCode {
 	private Namespace xmlns = null;
 
+	/**
+	 * <p>Constructor for ErrorCode.</p>
+	 */
 	public ErrorCode() {
 		xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
 	}
 
 	/**
 	 * required argument is missing, argument has wrong syntax or argument has invalid value
-	 * 
-	 * @return
+	 *
+	 * @return a {@link org.jdom2.Element} object.
 	 */
 	public Element getBadArgument() {
 		Element error = new Element("error", xmlns);
@@ -44,8 +47,8 @@ public class ErrorCode {
 
 	/**
 	 * resumptionToken is expired, invalid, not found
-	 * 
-	 * @return
+	 *
+	 * @return a {@link org.jdom2.Element} object.
 	 */
 	public Element getBadResumptionToken() {
 		Element error = new Element("error", xmlns);
@@ -56,8 +59,8 @@ public class ErrorCode {
 
 	/**
 	 * the verb argument is missing or has invalid value
-	 * 
-	 * @return
+	 *
+	 * @return a {@link org.jdom2.Element} object.
 	 */
 	public Element getBadVerb() {
 		Element error = new Element("error", xmlns);
@@ -68,8 +71,8 @@ public class ErrorCode {
 
 	/**
 	 * The metadataPrefix argument has invalid value
-	 * 
-	 * @return
+	 *
+	 * @return a {@link org.jdom2.Element} object.
 	 */
 	public Element getCannotDisseminateFormat() {
 		Element error = new Element("error", xmlns);
@@ -80,8 +83,8 @@ public class ErrorCode {
 
 	/**
 	 * identifier does not exist
-	 * 
-	 * @return
+	 *
+	 * @return a {@link org.jdom2.Element} object.
 	 */
 	public Element getIdDoesNotExist() {
 		Element error = new Element("error", xmlns);
@@ -92,8 +95,8 @@ public class ErrorCode {
 
 	/**
 	 * query returns no hits
-	 * 
-	 * @return
+	 *
+	 * @return a {@link org.jdom2.Element} object.
 	 */
 	public Element getNoRecordsMatch() {
 		Element error = new Element("error", xmlns);
@@ -104,8 +107,8 @@ public class ErrorCode {
 
 	/**
 	 * for given identifier the metadata format used in metadataPrefix is not provided
-	 * 
-	 * @return
+	 *
+	 * @return a {@link org.jdom2.Element} object.
 	 */
 	public Element getNoMetadataFormats() {
 		Element error = new Element("error", xmlns);
@@ -116,8 +119,8 @@ public class ErrorCode {
 
 	/**
 	 * there are no sets in repository
-	 * 
-	 * @return
+	 *
+	 * @return a {@link org.jdom2.Element} object.
 	 */
 	public Element getNoSetHierarchy() {
 		Element error = new Element("error", xmlns);

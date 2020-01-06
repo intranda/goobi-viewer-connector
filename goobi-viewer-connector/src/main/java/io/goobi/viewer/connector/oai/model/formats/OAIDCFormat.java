@@ -54,6 +54,7 @@ public class OAIDCFormat extends Format {
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String)
      */
+    /** {@inheritDoc} */
     @Override
     public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
             throws SolrServerException {
@@ -88,6 +89,7 @@ public class OAIDCFormat extends Format {
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler)
      */
+    /** {@inheritDoc} */
     @Override
     public Element createGetRecord(RequestHandler handler) {
         if (handler.getIdentifier() == null) {
@@ -378,9 +380,10 @@ public class OAIDCFormat extends Format {
     }
 
     /**
-     * 
-     * @param doc
-     * @return
+     * <p>getAnchorTitle.</p>
+     *
+     * @param doc a {@link org.apache.solr.common.SolrDocument} object.
+     * @return a {@link java.lang.String} object.
      */
     protected String getAnchorTitle(SolrDocument doc) {
         String iddocParent = (String) doc.getFieldValue(SolrConstants.IDDOC_PARENT);
@@ -397,11 +400,13 @@ public class OAIDCFormat extends Format {
     }
 
     /**
-     * @param doc
-     * @param topstructDoc
-     * @param anchorDoc
-     * @param namespace
-     * @return
+     * <p>generateDcSource.</p>
+     *
+     * @param doc a {@link org.apache.solr.common.SolrDocument} object.
+     * @param topstructDoc a {@link org.apache.solr.common.SolrDocument} object.
+     * @param anchorDoc a {@link org.apache.solr.common.SolrDocument} object.
+     * @param namespace a {@link org.jdom2.Namespace} object.
+     * @return a {@link org.jdom2.Element} object.
      */
     protected static Element generateDcSource(SolrDocument doc, SolrDocument topstructDoc, SolrDocument anchorDoc, Namespace namespace) {
         if (topstructDoc == null) {
@@ -492,10 +497,13 @@ public class OAIDCFormat extends Format {
     }
 
     /**
-     * @param topstructDoc
-     * @param namespace
-     * @return
-     * @throws SolrServerException
+     * <p>generateFulltextUrls.</p>
+     *
+     * @param namespace a {@link org.jdom2.Namespace} object.
+     * @throws org.apache.solr.client.solrj.SolrServerException
+     * @param pi a {@link java.lang.String} object.
+     * @param dataRepository a {@link java.lang.String} object.
+     * @return a {@link java.util.List} object.
      */
     protected static List<Element> generateFulltextUrls(String pi, String dataRepository, Namespace namespace) throws SolrServerException {
         if (pi == null) {
@@ -533,6 +541,7 @@ public class OAIDCFormat extends Format {
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map, java.util.String)
      */
+    /** {@inheritDoc} */
     @Override
     public long getTotalHits(Map<String, String> params, String versionDiscriminatorField) throws IOException, SolrServerException {
         String querySuffix = "";

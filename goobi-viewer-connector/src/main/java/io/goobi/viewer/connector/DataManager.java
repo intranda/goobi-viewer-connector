@@ -22,6 +22,10 @@ import io.goobi.viewer.connector.oai.model.language.LanguageHelper;
 import io.goobi.viewer.connector.utils.Configuration;
 import io.goobi.viewer.connector.utils.SolrSearchIndex;
 
+/**
+ * <p>DataManager class.</p>
+ *
+ */
 public final class DataManager {
 
     private static final Logger logger = LoggerFactory.getLogger(DataManager.class);
@@ -36,6 +40,11 @@ public final class DataManager {
 
     private LanguageHelper languageHelper;
 
+    /**
+     * <p>Getter for the field <code>instance</code>.</p>
+     *
+     * @return a {@link io.goobi.viewer.connector.DataManager} object.
+     */
     public static DataManager getInstance() {
         DataManager dm = instance;
         if (dm == null) {
@@ -56,6 +65,8 @@ public final class DataManager {
     }
 
     /**
+     * <p>Getter for the field <code>configuration</code>.</p>
+     *
      * @return the configuration
      */
     public Configuration getConfiguration() {
@@ -69,6 +80,8 @@ public final class DataManager {
     }
 
     /**
+     * <p>Getter for the field <code>searchIndex</code>.</p>
+     *
      * @return the searchIndex
      */
     public SolrSearchIndex getSearchIndex() {
@@ -83,6 +96,8 @@ public final class DataManager {
     }
 
     /**
+     * <p>Getter for the field <code>languageHelper</code>.</p>
+     *
      * @return the languageHelper
      */
     public LanguageHelper getLanguageHelper() {
@@ -101,8 +116,8 @@ public final class DataManager {
 
     /**
      * Sets custom Configuration object (used for unit testing).
-     * 
-     * @param dao
+     *
+     * @param configuration a {@link io.goobi.viewer.connector.utils.Configuration} object.
      */
     public void injectConfiguration(Configuration configuration) {
         if (configuration != null) {
@@ -112,8 +127,8 @@ public final class DataManager {
 
     /**
      * Sets custom SolrSearchIndex object (used for unit testing).
-     * 
-     * @param dao
+     *
+     * @param searchIndex a {@link io.goobi.viewer.connector.utils.SolrSearchIndex} object.
      */
     public void injectSearchIndex(SolrSearchIndex searchIndex) {
         if (searchIndex != null) {

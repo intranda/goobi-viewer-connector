@@ -51,11 +51,16 @@ import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.model.LicenseType;
 import io.goobi.viewer.connector.oai.model.Set;
 
+/**
+ * <p>SolrSearchIndex class.</p>
+ *
+ */
 public class SolrSearchIndex {
 
     /** Logger for this class. */
     final static Logger logger = LoggerFactory.getLogger(SolrSearchIndex.class);
 
+    /** Constant <code>MAX_HITS=Integer.MAX_VALUE</code> */
     public static final int MAX_HITS = Integer.MAX_VALUE;
     private static final int TIMEOUT_SO = 10000;
     private static final int TIMEOUT_CONNECTION = 10000;
@@ -63,6 +68,12 @@ public class SolrSearchIndex {
     private SolrServer server;
     private final boolean testMode;
 
+    /**
+     * <p>Constructor for SolrSearchIndex.</p>
+     *
+     * @param server a {@link org.apache.solr.client.solrj.SolrServer} object.
+     * @param testMode a boolean.
+     */
     public SolrSearchIndex(SolrServer server, boolean testMode) {
         this.testMode = testMode;
         if (server == null) {
@@ -93,9 +104,10 @@ public class SolrSearchIndex {
     }
 
     /**
-     * 
-     * @param indexUrl
-     * @return
+     * <p>getNewHttpSolrServer.</p>
+     *
+     * @param indexUrl a {@link java.lang.String} object.
+     * @return a {@link org.apache.solr.client.solrj.impl.HttpSolrServer} object.
      */
     public static HttpSolrServer getNewHttpSolrServer(String indexUrl) {
         if (indexUrl == null) {
@@ -117,10 +129,11 @@ public class SolrSearchIndex {
     }
 
     /**
-     * 
-     * @param query
-     * @return
-     * @throws SolrServerException
+     * <p>search.</p>
+     *
+     * @param query a {@link java.lang.String} object.
+     * @throws org.apache.solr.client.solrj.SolrServerException
+     * @return a {@link org.apache.solr.common.SolrDocumentList} object.
      */
     public SolrDocumentList search(String query) throws SolrServerException {
         SolrQuery solrQuery = new SolrQuery(query + getAllSuffixes());
@@ -132,16 +145,15 @@ public class SolrSearchIndex {
 
     /**
      * Pure Solr search method.
-     * 
-     * @param query {@link String}
-     * @param first {@link Integer}
-     * @param rows {@link Integer}
-     * @param sortFields
+     *
+     * @param query {@link java.lang.String}
+     * @param first {@link java.lang.Integer}
+     * @param rows {@link java.lang.Integer}
+     * @param sortFields a {@link java.util.List} object.
      * @param fieldList If not null, only the fields in the list will be returned.
      * @param params Additional query parameters.
-     * @return {@link QueryResponse}
-     * @throws SolrServerException
-     * @throws PresentationException
+     * @return {@link org.apache.solr.client.solrj.response.QueryResponse}
+     * @throws org.apache.solr.client.solrj.SolrServerException
      * @should return correct results
      * @should return correct number of rows
      * @should sort results correctly
@@ -179,20 +191,20 @@ public class SolrSearchIndex {
     }
 
     /**
-     * searches and returns a list of {@link SolrDocument}
-     * 
+     * searches and returns a list of {@link org.apache.solr.common.SolrDocument}
+     *
      * @param from startdate
      * @param until enddate
-     * @param setSpec
-     * @param metadataPrefix
-     * @param firstRow
-     * @param numRows
-     * @param urnOnly
-     * @param querySuffix
-     * @param fieldStatistics
-     * @return list of hits as {@link SolrDocument}
-     * @throws IOException
-     * @throws SolrServerException
+     * @param setSpec a {@link java.lang.String} object.
+     * @param metadataPrefix a {@link java.lang.String} object.
+     * @param firstRow a int.
+     * @param numRows a int.
+     * @param urnOnly a boolean.
+     * @param querySuffix a {@link java.lang.String} object.
+     * @param fieldStatistics a {@link java.util.List} object.
+     * @return list of hits as {@link org.apache.solr.common.SolrDocument}
+     * @throws java.io.IOException
+     * @throws org.apache.solr.client.solrj.SolrServerException
      */
     public QueryResponse search(String from, String until, String setSpec, String metadataPrefix, int firstRow, int numRows, boolean urnOnly,
             String querySuffix, List<String> fieldStatistics) throws IOException, SolrServerException {
@@ -221,14 +233,14 @@ public class SolrSearchIndex {
 
     /**
      * there is no difference between oai_dc or mets
-     * 
-     * @param params
-     * @param firstRawRow
-     * @param numRows
-     * @param querySuffix
-     * @param
-     * @return
-     * @throws SolrServerException
+     *
+     * @param params a {@link java.util.Map} object.
+     * @param firstRawRow a int.
+     * @param numRows a int.
+     * @param querySuffix a {@link java.lang.String} object.
+     * @throws org.apache.solr.client.solrj.SolrServerException
+     * @param fieldStatistics a {@link java.util.List} object.
+     * @return a {@link org.apache.solr.client.solrj.response.QueryResponse} object.
      */
     public QueryResponse getListIdentifiers(Map<String, String> params, int firstRawRow, int numRows, String querySuffix,
             List<String> fieldStatistics) throws SolrServerException {
@@ -244,15 +256,15 @@ public class SolrSearchIndex {
 
     /**
      * listRecords display the whole meta-data of an element
-     * 
-     * @param params
-     * @param firstRow
-     * @param numRows
-     * @param urnOnly
-     * @param querySuffix
-     * @param fieldStatistics
-     * @return
-     * @throws SolrServerException
+     *
+     * @param params a {@link java.util.Map} object.
+     * @param firstRow a int.
+     * @param numRows a int.
+     * @param urnOnly a boolean.
+     * @param querySuffix a {@link java.lang.String} object.
+     * @param fieldStatistics a {@link java.util.List} object.
+     * @throws org.apache.solr.client.solrj.SolrServerException
+     * @return a {@link org.apache.solr.client.solrj.response.QueryResponse} object.
      */
     public QueryResponse getListRecords(Map<String, String> params, int firstRow, int numRows, boolean urnOnly, String querySuffix,
             List<String> fieldStatistics) throws SolrServerException {
@@ -267,12 +279,12 @@ public class SolrSearchIndex {
     }
 
     /**
-     * Searches for identifier and return {@link SolrDocument} identifier can be PPN or URN (doc or page)
-     * 
+     * Searches for identifier and return {@link org.apache.solr.common.SolrDocument} identifier can be PPN or URN (doc or page)
+     *
      * @param identifier Identifier to search
-     * @return {@link SolrDocument}
-     * @throws IOException
-     * @throws SolrServerException
+     * @return {@link org.apache.solr.common.SolrDocument}
+     * @throws java.io.IOException
+     * @throws org.apache.solr.client.solrj.SolrServerException
      */
     public SolrDocument getListRecord(final String identifier) throws IOException, SolrServerException {
         logger.trace("getListRecord");
@@ -285,10 +297,11 @@ public class SolrSearchIndex {
     }
 
     /**
-     * 
-     * @param identifier
-     * @return
-     * @throws SolrServerException
+     * <p>isRecordExists.</p>
+     *
+     * @param identifier a {@link java.lang.String} object.
+     * @throws org.apache.solr.client.solrj.SolrServerException
+     * @return a boolean.
      */
     public boolean isRecordExists(final String identifier) throws SolrServerException {
         return !query(identifier, 0).isEmpty();
@@ -406,10 +419,11 @@ public class SolrSearchIndex {
 
     /**
      * Creates a list with all available values for the given field (minus any blacklisted values).
-     * 
-     * @return
-     * @throws SolrServerException
+     *
+     * @throws org.apache.solr.client.solrj.SolrServerException
      * @should return all values
+     * @param field a {@link java.lang.String} object.
+     * @return a {@link java.util.List} object.
      */
     public List<String> getSets(String field) throws SolrServerException {
         List<String> ret = new ArrayList<>();
@@ -438,14 +452,15 @@ public class SolrSearchIndex {
     }
 
     /**
-     * 
-     * @param params
-     * @param urnOnly
-     * @param querySuffix
-     * @param fieldStatistics
+     * <p>getTotalHitNumber.</p>
+     *
+     * @param params a {@link java.util.Map} object.
+     * @param urnOnly a boolean.
+     * @param querySuffix a {@link java.lang.String} object.
+     * @param fieldStatistics a {@link java.util.List} object.
      * @return size of search
-     * @throws IOException
-     * @throws SolrServerException
+     * @throws java.io.IOException
+     * @throws org.apache.solr.client.solrj.SolrServerException
      */
     public long getTotalHitNumber(Map<String, String> params, boolean urnOnly, String querySuffix, List<String> fieldStatistics)
             throws IOException, SolrServerException {
@@ -472,6 +487,12 @@ public class SolrSearchIndex {
         return num;
     }
 
+    /**
+     * <p>getEarliestRecordDatestamp.</p>
+     *
+     * @return a {@link java.lang.String} object.
+     * @throws org.apache.solr.client.solrj.SolrServerException if any.
+     */
     public String getEarliestRecordDatestamp() throws SolrServerException {
         try {
             String searchStr = SolrConstants.ISWORK + ":true" + getAllSuffixes();
@@ -504,11 +525,11 @@ public class SolrSearchIndex {
 
     /**
      * If the given SolrDocument is an anchor, retrieve the latest DATEUPDATED timestamp value from its volumes.
-     * 
-     * @param anchorDoc
-     * @param untilTimestamp
-     * @return
-     * @throws SolrServerException
+     *
+     * @param anchorDoc a {@link org.apache.solr.common.SolrDocument} object.
+     * @param untilTimestamp a long.
+     * @throws org.apache.solr.client.solrj.SolrServerException
+     * @return a long.
      */
     public long getLatestVolumeTimestamp(SolrDocument anchorDoc, long untilTimestamp) throws SolrServerException {
         if (anchorDoc.getFieldValue(SolrConstants.ISANCHOR) != null && (Boolean) anchorDoc.getFieldValue(SolrConstants.ISANCHOR)) {
@@ -534,8 +555,8 @@ public class SolrSearchIndex {
 
     /**
      * Returns the blacklist filter suffix (if enabled), followed by the user-agnostic access condition suffix.
-     * 
-     * @return
+     *
+     * @return a {@link java.lang.String} object.
      */
     public static String getAllSuffixes() {
         StringBuilder sb = new StringBuilder();
@@ -618,9 +639,9 @@ public class SolrSearchIndex {
     /**
      * Returns the latest DATEUPDATED value on the given <code>SolrDocument</code> that is no larger than <code>untilTimestamp</code>. Returns 0 if no
      * such value is found.
-     * 
-     * @param doc
-     * @param untilTimestamp
+     *
+     * @param doc a {@link org.apache.solr.common.SolrDocument} object.
+     * @param untilTimestamp a long.
      * @return Latest DATEUPDATED value is less than or equals untilTimestamp on doc; 0 if none found.
      * @should return correct value
      * @should return 0 if no valid value is found
@@ -642,14 +663,13 @@ public class SolrSearchIndex {
     }
 
     /**
-     * 
-     * @param query
-     * @param fieldList
-     * @return
-     * @throws SolrServerException
-     * @throws PresentationException
-     * @throws IndexUnreachableException
+     * <p>getFirstDoc.</p>
+     *
+     * @param query a {@link java.lang.String} object.
+     * @param fieldList a {@link java.util.List} object.
+     * @throws org.apache.solr.client.solrj.SolrServerException
      * @should return correct doc
+     * @return a {@link org.apache.solr.common.SolrDocument} object.
      */
     public SolrDocument getFirstDoc(String query, List<String> fieldList) throws SolrServerException {
         logger.trace("getFirstDoc: {}", query);
@@ -662,10 +682,11 @@ public class SolrSearchIndex {
     }
 
     /**
+     * <p>getSingleFieldValue.</p>
      *
-     * @param doc
-     * @param field
-     * @return
+     * @param doc a {@link org.apache.solr.common.SolrDocument} object.
+     * @param field a {@link java.lang.String} object.
+     * @return a {@link java.lang.Object} object.
      */
     public static Object getSingleFieldValue(SolrDocument doc, String field) {
         Collection<Object> valueList = doc.getFieldValues(field);
@@ -677,10 +698,11 @@ public class SolrSearchIndex {
     }
 
     /**
+     * <p>getSingleFieldStringValue.</p>
      *
-     * @param doc
-     * @param field
-     * @return
+     * @param doc a {@link org.apache.solr.common.SolrDocument} object.
+     * @param field a {@link java.lang.String} object.
+     * @return a {@link java.lang.String} object.
      */
     public static String getSingleFieldStringValue(SolrDocument doc, String field) {
         return (String) getSingleFieldValue(doc, field);
@@ -689,10 +711,10 @@ public class SolrSearchIndex {
     /**
      * Returns a list with all (string) values for the given field name in the given SolrDocument.
      *
-     * @param doc
-     * @param fieldName
-     * @return
+     * @param doc a {@link org.apache.solr.common.SolrDocument} object.
+     * @param fieldName a {@link java.lang.String} object.
      * @should return all values for the given field
+     * @return a {@link java.util.List} object.
      */
     public static List<String> getMetadataValues(SolrDocument doc, String fieldName) {
         if (doc != null) {
@@ -714,10 +736,11 @@ public class SolrSearchIndex {
     }
 
     /**
-     * 
-     * @param queryResponse
-     * @param field
-     * @return
+     * <p>getFieldCount.</p>
+     *
+     * @param queryResponse a {@link org.apache.solr.client.solrj.response.QueryResponse} object.
+     * @param field a {@link java.lang.String} object.
+     * @return a long.
      */
     public static long getFieldCount(QueryResponse queryResponse, String field) {
         if (queryResponse == null) {
@@ -743,9 +766,11 @@ public class SolrSearchIndex {
     }
 
     /**
-     * 
-     * @return
+     * <p>getAdditionalDocstructsQuerySuffix.</p>
+     *
      * @should build query suffix correctly
+     * @param additionalDocstructTypes a {@link java.util.List} object.
+     * @return a {@link java.lang.String} object.
      */
     public static String getAdditionalDocstructsQuerySuffix(List<String> additionalDocstructTypes) {
         StringBuilder sbQuerySuffix = new StringBuilder();
@@ -774,9 +799,11 @@ public class SolrSearchIndex {
     }
 
     /**
-     * 
-     * @return
+     * <p>getUrnPrefixBlacklistSuffix.</p>
+     *
      * @should build query suffix correctly
+     * @param urnPrefixBlacklist a {@link java.util.List} object.
+     * @return a {@link java.lang.String} object.
      */
     public static String getUrnPrefixBlacklistSuffix(List<String> urnPrefixBlacklist) {
         StringBuilder sbQuerySuffix = new StringBuilder();
@@ -810,10 +837,11 @@ public class SolrSearchIndex {
     }
 
     /**
-     * 
-     * @param pi
-     * @return
-     * @throws SolrServerException
+     * <p>getFulltextFileNames.</p>
+     *
+     * @param pi a {@link java.lang.String} object.
+     * @throws org.apache.solr.client.solrj.SolrServerException
+     * @return a {@link java.util.Map} object.
      */
     public Map<Integer, String> getFulltextFileNames(String pi) throws SolrServerException {
         if (pi == null) {

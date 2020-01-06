@@ -27,10 +27,15 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.enums.Verb;
 
+/**
+ * <p>RequestHandler class.</p>
+ *
+ */
 public class RequestHandler {
 
     private final static Logger logger = LoggerFactory.getLogger(RequestHandler.class);
 
+    /** Constant <code>formatter</code> */
     public static DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss").withZoneUTC();
 
     @XStreamAlias("verb")
@@ -48,8 +53,8 @@ public class RequestHandler {
 
     /**
      * handles the request in servlet
-     * 
-     * @param request
+     *
+     * @param request a {@link javax.servlet.http.HttpServletRequest} object.
      */
     public RequestHandler(HttpServletRequest request) {
         if (request.getParameter("verb") != null) {
@@ -73,11 +78,15 @@ public class RequestHandler {
 
     }
 
-    /** Empty constructor for XStream. */
+    /**
+     * Empty constructor for XStream.
+     */
     public RequestHandler() {
     }
 
     /**
+     * <p>Getter for the field <code>verb</code>.</p>
+     *
      * @return the verb
      */
     public Verb getVerb() {
@@ -85,6 +94,8 @@ public class RequestHandler {
     }
 
     /**
+     * <p>Setter for the field <code>verb</code>.</p>
+     *
      * @param verb the verb to set
      */
     public void setVerb(Verb verb) {
@@ -92,6 +103,8 @@ public class RequestHandler {
     }
 
     /**
+     * <p>Getter for the field <code>metadataPrefix</code>.</p>
+     *
      * @return the metadataPrefix
      */
     public Metadata getMetadataPrefix() {
@@ -99,6 +112,8 @@ public class RequestHandler {
     }
 
     /**
+     * <p>Setter for the field <code>metadataPrefix</code>.</p>
+     *
      * @param metadataPrefix the metadataPrefix to set
      */
     public void setMetadataPrefix(Metadata metadataPrefix) {
@@ -106,6 +121,8 @@ public class RequestHandler {
     }
 
     /**
+     * <p>Getter for the field <code>identifier</code>.</p>
+     *
      * @return the identifier
      */
     public String getIdentifier() {
@@ -113,6 +130,8 @@ public class RequestHandler {
     }
 
     /**
+     * <p>Setter for the field <code>identifier</code>.</p>
+     *
      * @param identifier the identifier to set
      */
     public void setIdentifier(String identifier) {
@@ -120,6 +139,8 @@ public class RequestHandler {
     }
 
     /**
+     * <p>Getter for the field <code>from</code>.</p>
+     *
      * @return the from
      */
     public String getFrom() {
@@ -127,6 +148,8 @@ public class RequestHandler {
     }
 
     /**
+     * <p>Setter for the field <code>from</code>.</p>
+     *
      * @param from the from to set
      */
     public void setFrom(String from) {
@@ -134,6 +157,8 @@ public class RequestHandler {
     }
 
     /**
+     * <p>Getter for the field <code>until</code>.</p>
+     *
      * @return the until
      */
     public String getUntil() {
@@ -141,11 +166,12 @@ public class RequestHandler {
     }
 
     /**
-     * 
-     * @param from
-     * @return
+     * <p>getFromTimestamp.</p>
+     *
+     * @param from a {@link java.lang.String} object.
      * @should convert date to timestamp correctly
      * @should set time to 000000 if none given
+     * @return a long.
      */
     public static long getFromTimestamp(String from) {
         if (from == null) {
@@ -166,11 +192,12 @@ public class RequestHandler {
     }
 
     /**
-     * 
-     * @param until
-     * @return
+     * <p>getUntilTimestamp.</p>
+     *
+     * @param until a {@link java.lang.String} object.
      * @should convert date to timestamp correctly
      * @should set time to 235959 if none given
+     * @return a long.
      */
     public static long getUntilTimestamp(String until) {
         if (until == null) {
@@ -192,6 +219,8 @@ public class RequestHandler {
     }
 
     /**
+     * <p>Setter for the field <code>until</code>.</p>
+     *
      * @param until the until to set
      */
     public void setUntil(String until) {
@@ -199,6 +228,8 @@ public class RequestHandler {
     }
 
     /**
+     * <p>Getter for the field <code>set</code>.</p>
+     *
      * @return the set
      */
     public String getSet() {
@@ -206,6 +237,8 @@ public class RequestHandler {
     }
 
     /**
+     * <p>Setter for the field <code>set</code>.</p>
+     *
      * @param set the set to set
      */
     public void setSet(String set) {

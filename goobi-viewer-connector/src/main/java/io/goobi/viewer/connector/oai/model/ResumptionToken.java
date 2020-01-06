@@ -22,11 +22,17 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 import io.goobi.viewer.connector.oai.RequestHandler;
 
+/**
+ * <p>ResumptionToken class.</p>
+ *
+ */
 @XStreamAlias("ResumptionToken")
 public class ResumptionToken {
 
+    /** Constant <code>TOKEN_NAME_PREFIX="oai_"</code> */
     public static final String TOKEN_NAME_PREFIX = "oai_";
     
+    /** Constant <code>TOKEN_NAME_PATTERN</code> */
     public static Pattern TOKEN_NAME_PATTERN = Pattern.compile(TOKEN_NAME_PREFIX + "[0-9]{13}");
 
     @XStreamAsAttribute
@@ -49,14 +55,14 @@ public class ResumptionToken {
 
     /**
      * creates a unique resumption token when number of hits is greater than list size
-     * 
-     * @param tokenName
-     * @param hits
-     * @param rawHits
-     * @param virtualCursor
-     * @param rawCursor
-     * @param expirationDate
-     * @param handler
+     *
+     * @param tokenName a {@link java.lang.String} object.
+     * @param hits a long.
+     * @param rawHits a long.
+     * @param virtualCursor a int.
+     * @param rawCursor a int.
+     * @param expirationDate a long.
+     * @param handler a {@link io.goobi.viewer.connector.oai.RequestHandler} object.
      */
     public ResumptionToken(String tokenName, long hits, long rawHits, int virtualCursor, int rawCursor, long expirationDate, RequestHandler handler) {
         this.tokenName = tokenName;
@@ -68,11 +74,18 @@ public class ResumptionToken {
         this.handler = handler;
     }
 
+    /**
+     * <p>hasExpired.</p>
+     *
+     * @return a boolean.
+     */
     public boolean hasExpired() {
         return System.currentTimeMillis() > expirationDate;
     }
 
     /**
+     * <p>Setter for the field <code>hits</code>.</p>
+     *
      * @param hits the hits to set
      */
     public void setHits(long hits) {
@@ -80,6 +93,8 @@ public class ResumptionToken {
     }
 
     /**
+     * <p>Getter for the field <code>hits</code>.</p>
+     *
      * @return the hits
      */
     public long getHits() {
@@ -87,6 +102,8 @@ public class ResumptionToken {
     }
 
     /**
+     * <p>Getter for the field <code>rawHits</code>.</p>
+     *
      * @return the rawHits
      */
     public long getRawHits() {
@@ -94,6 +111,8 @@ public class ResumptionToken {
     }
 
     /**
+     * <p>Setter for the field <code>rawHits</code>.</p>
+     *
      * @param rawHits the rawHits to set
      */
     public void setRawHits(long rawHits) {
@@ -101,6 +120,8 @@ public class ResumptionToken {
     }
 
     /**
+     * <p>Getter for the field <code>virtualCursor</code>.</p>
+     *
      * @return the virtualCursor
      */
     public int getVirtualCursor() {
@@ -108,6 +129,8 @@ public class ResumptionToken {
     }
 
     /**
+     * <p>Setter for the field <code>virtualCursor</code>.</p>
+     *
      * @param virtualCursor the virtualCursor to set
      */
     public void setVirtualCursor(int virtualCursor) {
@@ -115,6 +138,8 @@ public class ResumptionToken {
     }
 
     /**
+     * <p>Getter for the field <code>rawCursor</code>.</p>
+     *
      * @return the rawCursor
      */
     public int getRawCursor() {
@@ -122,6 +147,8 @@ public class ResumptionToken {
     }
 
     /**
+     * <p>Setter for the field <code>rawCursor</code>.</p>
+     *
      * @param rawCursor the rawCursor to set
      */
     public void setRawCursor(int rawCursor) {
@@ -129,6 +156,8 @@ public class ResumptionToken {
     }
 
     /**
+     * <p>Setter for the field <code>expirationDate</code>.</p>
+     *
      * @param expirationDate the expirationDate to set
      */
     public void setExpirationDate(long expirationDate) {
@@ -136,6 +165,8 @@ public class ResumptionToken {
     }
 
     /**
+     * <p>Getter for the field <code>expirationDate</code>.</p>
+     *
      * @return the date
      */
     public long getExpirationDate() {
@@ -143,6 +174,8 @@ public class ResumptionToken {
     }
 
     /**
+     * <p>Setter for the field <code>tokenName</code>.</p>
+     *
      * @param tokenName the tokenName to set
      */
     public void setTokenName(String tokenName) {
@@ -150,6 +183,8 @@ public class ResumptionToken {
     }
 
     /**
+     * <p>Getter for the field <code>tokenName</code>.</p>
+     *
      * @return the tokenName
      */
     public String getTokenName() {
@@ -157,6 +192,8 @@ public class ResumptionToken {
     }
 
     /**
+     * <p>Setter for the field <code>handler</code>.</p>
+     *
      * @param handler the handler to set
      */
     public void setHandler(RequestHandler handler) {
@@ -164,6 +201,8 @@ public class ResumptionToken {
     }
 
     /**
+     * <p>Getter for the field <code>handler</code>.</p>
+     *
      * @return the handler
      */
     public RequestHandler getHandler() {

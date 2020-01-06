@@ -27,6 +27,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import io.goobi.viewer.connector.utils.Utils;
 
+/**
+ * <p>ToolServlet class.</p>
+ *
+ */
 public class ToolServlet extends HttpServlet {
 
     private static final long serialVersionUID = -3185526115340932005L;
@@ -34,6 +38,7 @@ public class ToolServlet extends HttpServlet {
     /* (non-Javadoc)
      * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
+    /** {@inheritDoc} */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = null;
@@ -71,6 +76,7 @@ public class ToolServlet extends HttpServlet {
     /* (non-Javadoc)
      * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
+    /** {@inheritDoc} */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         doGet(req, resp);

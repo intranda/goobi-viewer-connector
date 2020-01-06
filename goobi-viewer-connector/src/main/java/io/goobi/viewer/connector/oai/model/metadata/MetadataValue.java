@@ -57,9 +57,9 @@ public class MetadataValue implements Serializable {
     }
 
     /**
+     * <p>getComboValueShort.</p>
      *
-     * @param index
-     * @return
+     * @param index a int.
      * @should construct param correctly
      * @should construct multivalued param correctly
      * @should not add prefix if first param
@@ -67,6 +67,7 @@ public class MetadataValue implements Serializable {
      * @should return empty string if value is empty
      * @should not add null prefix
      * @should not add null suffix
+     * @return a {@link java.lang.String} object.
      */
     public String getComboValueShort(int index) {
         StringBuilder sb = new StringBuilder();
@@ -99,7 +100,10 @@ public class MetadataValue implements Serializable {
     }
 
     /**
+     * <p>getParamLabelWithColon.</p>
+     *
      * @return the paramLabels
+     * @param index a int.
      */
     public String getParamLabelWithColon(int index) {
         if (paramLabels.size() > index && paramLabels.get(index) != null) {
@@ -109,6 +113,8 @@ public class MetadataValue implements Serializable {
     }
 
     /**
+     * <p>Getter for the field <code>paramLabels</code>.</p>
+     *
      * @return the paramLabels
      */
     public List<String> getParamLabels() {
@@ -116,6 +122,8 @@ public class MetadataValue implements Serializable {
     }
 
     /**
+     * <p>Getter for the field <code>paramValues</code>.</p>
+     *
      * @return the paramValues
      */
     public List<List<String>> getParamValues() {
@@ -123,6 +131,8 @@ public class MetadataValue implements Serializable {
     }
 
     /**
+     * <p>Getter for the field <code>paramPrefixes</code>.</p>
+     *
      * @return the paramPrefixes
      */
     public List<String> getParamPrefixes() {
@@ -130,6 +140,8 @@ public class MetadataValue implements Serializable {
     }
 
     /**
+     * <p>Getter for the field <code>paramSuffixes</code>.</p>
+     *
      * @return the paramSuffixes
      */
     public List<String> getParamSuffixes() {
@@ -137,12 +149,20 @@ public class MetadataValue implements Serializable {
     }
 
     /**
+     * <p>Getter for the field <code>paramUrls</code>.</p>
+     *
      * @return the paramUrls
      */
     public List<String> getParamUrls() {
         return paramUrls;
     }
 
+    /**
+     * <p>hasParamValue.</p>
+     *
+     * @param paramLabel a {@link java.lang.String} object.
+     * @return a boolean.
+     */
     public boolean hasParamValue(String paramLabel) {
         int index = paramLabels.indexOf(paramLabel);
         if (index > -1 && index < paramValues.size()) {
@@ -151,6 +171,12 @@ public class MetadataValue implements Serializable {
         return false;
     }
 
+    /**
+     * <p>getParamValue.</p>
+     *
+     * @param paramLabel a {@link java.lang.String} object.
+     * @return a {@link java.lang.String} object.
+     */
     public String getParamValue(String paramLabel) {
         int index = paramLabels.indexOf(paramLabel);
         if (index > -1 && index < paramValues.size()) {
@@ -160,6 +186,8 @@ public class MetadataValue implements Serializable {
     }
 
     /**
+     * <p>Getter for the field <code>masterValue</code>.</p>
+     *
      * @return the masterValue
      */
     public String getMasterValue() {
@@ -171,6 +199,8 @@ public class MetadataValue implements Serializable {
     }
 
     /**
+     * <p>Setter for the field <code>masterValue</code>.</p>
+     *
      * @param masterValue the masterValue to set
      */
     public void setMasterValue(String masterValue) {
@@ -178,6 +208,8 @@ public class MetadataValue implements Serializable {
     }
 
     /**
+     * <p>getGroupTypeForUrl.</p>
+     *
      * @return the groupType
      */
     public String getGroupTypeForUrl() {
@@ -188,12 +220,15 @@ public class MetadataValue implements Serializable {
     }
 
     /**
+     * <p>Setter for the field <code>groupType</code>.</p>
+     *
      * @param groupType the groupType to set
      */
     public void setGroupType(String groupType) {
         this.groupType = groupType;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

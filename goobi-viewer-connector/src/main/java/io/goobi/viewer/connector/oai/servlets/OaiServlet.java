@@ -44,6 +44,10 @@ import io.goobi.viewer.connector.oai.model.ErrorCode;
 import io.goobi.viewer.connector.oai.model.formats.Format;
 import io.goobi.viewer.connector.utils.Utils;
 
+/**
+ * <p>OaiServlet class.</p>
+ *
+ */
 public class OaiServlet extends HttpServlet {
 
     private static final long serialVersionUID = -2357047964682340928L;
@@ -53,6 +57,7 @@ public class OaiServlet extends HttpServlet {
     private static DateTimeFormatter formatterISO8601Date = ISODateTimeFormat.date(); // yyyy-MM-dd
     private static DateTimeFormatter formatterISO8601DateTimeFullWithTimeZone = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ");
 
+    /** {@inheritDoc} */
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse res) throws ServletException, IOException {
         String queryString = (request.getQueryString() != null ? "?" + request.getQueryString() : "");
@@ -234,14 +239,15 @@ public class OaiServlet extends HttpServlet {
     }
 
     /**
-     * 
-     * @param from
-     * @param until
-     * @return
+     * <p>checkDatestamps.</p>
+     *
+     * @param from a {@link java.lang.String} object.
+     * @param until a {@link java.lang.String} object.
      * @should return false if from is not well formed
      * @should return false if until is not well formed
      * @should return false if from after until
      * @should return true if from and until correct
+     * @return a boolean.
      */
     public static boolean checkDatestamps(String from, String until) {
         boolean dateTime = false;
@@ -313,6 +319,7 @@ public class OaiServlet extends HttpServlet {
         return true;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         doGet(req, res);

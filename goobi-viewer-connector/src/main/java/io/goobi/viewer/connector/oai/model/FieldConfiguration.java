@@ -29,6 +29,18 @@ public class FieldConfiguration {
     private final String prefix;
     private final String suffix;
 
+    /**
+     * <p>Constructor for FieldConfiguration.</p>
+     *
+     * @param fieldName a {@link java.lang.String} object.
+     * @param valueSource a {@link java.lang.String} object.
+     * @param translate a boolean.
+     * @param multivalued a boolean.
+     * @param useTopstructValueIfNoneFound a boolean.
+     * @param defaultValue a {@link java.lang.String} object.
+     * @param prefix a {@link java.lang.String} object.
+     * @param suffix a {@link java.lang.String} object.
+     */
     public FieldConfiguration(String fieldName, String valueSource, boolean translate, boolean multivalued, boolean useTopstructValueIfNoneFound,
             String defaultValue, String prefix, String suffix) {
         if (fieldName == null) {
@@ -46,6 +58,8 @@ public class FieldConfiguration {
     }
 
     /**
+     * <p>Getter for the field <code>fieldName</code>.</p>
+     *
      * @return the fieldName
      */
     public String getFieldName() {
@@ -53,6 +67,8 @@ public class FieldConfiguration {
     }
 
     /**
+     * <p>Getter for the field <code>valueSource</code>.</p>
+     *
      * @return the valueSource
      */
     public String getValueSource() {
@@ -60,6 +76,8 @@ public class FieldConfiguration {
     }
 
     /**
+     * <p>isTranslate.</p>
+     *
      * @return the translate
      */
     public boolean isTranslate() {
@@ -67,6 +85,8 @@ public class FieldConfiguration {
     }
 
     /**
+     * <p>isMultivalued.</p>
+     *
      * @return the multivalued
      */
     public boolean isMultivalued() {
@@ -74,6 +94,8 @@ public class FieldConfiguration {
     }
 
     /**
+     * <p>isUseTopstructValueIfNoneFound.</p>
+     *
      * @return the useTopstructValueIfNoneFound
      */
     public boolean isUseTopstructValueIfNoneFound() {
@@ -81,6 +103,8 @@ public class FieldConfiguration {
     }
 
     /**
+     * <p>Getter for the field <code>defaultValue</code>.</p>
+     *
      * @return the defaultValue
      */
     public String getDefaultValue() {
@@ -88,6 +112,8 @@ public class FieldConfiguration {
     }
 
     /**
+     * <p>Getter for the field <code>prefix</code>.</p>
+     *
      * @return the prefix
      */
     public String getPrefix() {
@@ -95,6 +121,8 @@ public class FieldConfiguration {
     }
 
     /**
+     * <p>Getter for the field <code>suffix</code>.</p>
+     *
      * @return the suffix
      */
     public String getSuffix() {

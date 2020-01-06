@@ -23,6 +23,10 @@ import org.apache.commons.cli.MissingArgumentException;
 
 import io.goobi.viewer.connector.oai.enums.Metadata;
 
+/**
+ * <p>SruRequestParameter class.</p>
+ *
+ */
 public class SruRequestParameter {
 
     // mandatory   The string: 'searchRetrieve'.
@@ -71,8 +75,10 @@ public class SruRequestParameter {
     private int maximumTerms = 0;
 
     /**
-     * @throws MissingArgumentException
-     * 
+     * <p>Constructor for SruRequestParameter.</p>
+     *
+     * @throws org.apache.commons.cli.MissingArgumentException
+     * @param request a {@link javax.servlet.http.HttpServletRequest} object.
      */
     public SruRequestParameter(HttpServletRequest request) throws MissingArgumentException {
         if (request.getParameter("operation") != null) {
@@ -162,55 +168,117 @@ public class SruRequestParameter {
         }
     }
 
+    /**
+     * <p>Getter for the field <code>operation</code>.</p>
+     *
+     * @return a {@link io.goobi.viewer.connector.sru.SruOperation} object.
+     */
     public SruOperation getOperation() {
         return operation;
     }
 
+    /**
+     * <p>Getter for the field <code>version</code>.</p>
+     *
+     * @return a {@link java.lang.String} object.
+     */
     public String getVersion() {
         return version;
     }
 
+    /**
+     * <p>Getter for the field <code>query</code>.</p>
+     *
+     * @return a {@link java.lang.String} object.
+     */
     public String getQuery() {
         return query;
     }
 
+    /**
+     * <p>Getter for the field <code>startRecord</code>.</p>
+     *
+     * @return a int.
+     */
     public int getStartRecord() {
         return startRecord;
     }
 
+    /**
+     * <p>Getter for the field <code>maximumRecords</code>.</p>
+     *
+     * @return a int.
+     */
     public int getMaximumRecords() {
         return maximumRecords;
     }
 
+    /**
+     * <p>Getter for the field <code>recordPacking</code>.</p>
+     *
+     * @return a {@link java.lang.String} object.
+     */
     public String getRecordPacking() {
         return recordPacking;
     }
 
+    /**
+     * <p>Getter for the field <code>recordSchema</code>.</p>
+     *
+     * @return a {@link io.goobi.viewer.connector.oai.enums.Metadata} object.
+     */
     public Metadata getRecordSchema() {
         return recordSchema;
     }
 
+    /**
+     * <p>Getter for the field <code>recordXPath</code>.</p>
+     *
+     * @return a {@link java.lang.String} object.
+     */
     public String getRecordXPath() {
         return recordXPath;
     }
 
+    /**
+     * <p>Getter for the field <code>resultSetTTL</code>.</p>
+     *
+     * @return a {@link java.lang.String} object.
+     */
     public String getResultSetTTL() {
         return resultSetTTL;
     }
 
+    /**
+     * <p>Getter for the field <code>sortKeys</code>.</p>
+     *
+     * @return a {@link java.lang.String} object.
+     */
     public String getSortKeys() {
         return sortKeys;
     }
 
+    /**
+     * <p>Getter for the field <code>stylesheet</code>.</p>
+     *
+     * @return a {@link java.lang.String} object.
+     */
     public String getStylesheet() {
         return stylesheet;
     }
 
+    /**
+     * <p>Getter for the field <code>extraRequestData</code>.</p>
+     *
+     * @return a {@link java.lang.String} object.
+     */
     public String getExtraRequestData() {
         return extraRequestData;
     }
 
     /**
+     * <p>Getter for the field <code>scanClause</code>.</p>
+     *
      * @return the scanClause
      */
     public String getScanClause() {
@@ -218,6 +286,8 @@ public class SruRequestParameter {
     }
 
     /**
+     * <p>Getter for the field <code>maximumTerms</code>.</p>
+     *
      * @return the maximumTerms
      */
     public int getMaximumTerms() {
@@ -225,12 +295,15 @@ public class SruRequestParameter {
     }
 
     /**
+     * <p>Getter for the field <code>responsePosition</code>.</p>
+     *
      * @return the responsePosition
      */
     public int getResponsePosition() {
         return responsePosition;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return "SruRequestParameter [operation=" + operation + ", version=" + version + ", query=" + query + ", startRecord=" + startRecord

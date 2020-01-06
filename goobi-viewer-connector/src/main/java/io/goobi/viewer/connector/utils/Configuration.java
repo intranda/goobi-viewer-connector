@@ -39,10 +39,15 @@ import io.goobi.viewer.connector.oai.model.metadata.Metadata;
 import io.goobi.viewer.connector.oai.model.metadata.MetadataParameter;
 import io.goobi.viewer.connector.oai.model.metadata.MetadataParameter.MetadataParameterType;
 
+/**
+ * <p>Configuration class.</p>
+ *
+ */
 public final class Configuration {
 
     private static final Logger logger = LoggerFactory.getLogger(Configuration.class);
 
+    /** Constant <code>DEFAULT_CONFIG_FILE="config_oai.xml"</code> */
     public static final String DEFAULT_CONFIG_FILE = "config_oai.xml";
     private static final String DEFAULT_VIEWER_CONFIG_FILE = "config_viewer.xml";
 
@@ -50,6 +55,11 @@ public final class Configuration {
     private XMLConfiguration configDefault = null;
     private XMLConfiguration viewerConfig = null;
 
+    /**
+     * <p>Constructor for Configuration.</p>
+     *
+     * @param configPath a {@link java.lang.String} object.
+     */
     public Configuration(String configPath) {
         // Load default configuration
         try {
@@ -83,7 +93,7 @@ public final class Configuration {
     /**
      * ns is needed as parameter for every xml element, otherwise the standard-ns is printed out in every element the standard return String =
      * http://www.openarchives.org/OAI/2.0/
-     * 
+     *
      * @return the Standard Namespace for the xml response
      */
     public Namespace getStandardNameSpace() {
@@ -190,10 +200,9 @@ public final class Configuration {
 
     /**
      * this method returns a HashMap with information for the oai header and identify verb
-     * 
-     * @return {@link HashMap}
+     *
+     * @return {@link java.util.HashMap}
      */
-
     public Map<String, String> getIdentifyTags() {
         Map<String, String> identifyTags = new HashMap<>();
 
@@ -209,8 +218,8 @@ public final class Configuration {
 
     /**
      * This method generates a HashMap with information for oai header
-     * 
-     * @return {@link HashMap}
+     *
+     * @return {@link java.util.HashMap}
      */
     public Map<String, String> getOaiIdentifier() {
         Map<String, String> oaiIdentifier = new HashMap<>();
@@ -221,7 +230,8 @@ public final class Configuration {
     }
 
     /**
-     * 
+     * <p>getViewerConfigFolder.</p>
+     *
      * @return Configured viewerConfigFolder in the default config file; /opt/digiverso/viewer/config/ if no value configured
      * @should return correct value
      */
@@ -239,16 +249,18 @@ public final class Configuration {
     }
 
     /**
-     * 
-     * @return
+     * <p>getOaiFolder.</p>
+     *
      * @should return correct value
+     * @return a {@link java.lang.String} object.
      */
     public String getOaiFolder() {
         return getLocalString("oaiFolder", "/opt/digiverso/viewer/oai/");
     }
 
     /**
-     * 
+     * <p>getResumptionTokenFolder.</p>
+     *
      * @return folder for resumptionToken
      * @should return correct value
      */
@@ -257,7 +269,8 @@ public final class Configuration {
     }
 
     /**
-     * 
+     * <p>getIndexUrl.</p>
+     *
      * @return where to find the index
      * @should return correct value
      */
@@ -266,7 +279,8 @@ public final class Configuration {
     }
 
     /**
-     * 
+     * <p>getHitsPerToken.</p>
+     *
      * @return number of hits per page/token
      * @should return correct value
      */
@@ -275,39 +289,46 @@ public final class Configuration {
     }
 
     /**
-     * 
+     * <p>getHitsPerTokenForMetadataFormat.</p>
+     *
      * @return number of hits per page/token
      * @should return correct value
      * @should return default value for unknown formats
+     * @param metadataFormat a {@link java.lang.String} object.
      */
     public int getHitsPerTokenForMetadataFormat(String metadataFormat) {
         return getLocalInt(metadataFormat + ".hitsPerToken", getHitsPerToken());
     }
 
     /**
-     * 
+     * <p>getVersionDisriminatorFieldForMetadataFormat.</p>
+     *
      * @return number of hits per page/token
      * @should return correct value
+     * @param metadataFormat a {@link java.lang.String} object.
      */
     public String getVersionDisriminatorFieldForMetadataFormat(String metadataFormat) {
         return getLocalString(metadataFormat + ".versionDiscriminatorField", null);
     }
 
     /**
-     * 
+     * <p>isMetadataFormatEnabled.</p>
+     *
      * @return number of hits per page/token
      * @should return correct value
      * @should return false for unknown formats
+     * @param metadataFormat a {@link java.lang.String} object.
      */
     public boolean isMetadataFormatEnabled(String metadataFormat) {
         return getLocalBoolean(metadataFormat + ".enabled", false);
     }
 
     /**
-     * 
-     * @param metadataFormat
-     * @return
+     * <p>getFieldForMetadataFormat.</p>
+     *
+     * @param metadataFormat a {@link java.lang.String} object.
      * @should return all values
+     * @return a {@link java.util.List} object.
      */
     public List<FieldConfiguration> getFieldForMetadataFormat(String metadataFormat) {
         if (metadataFormat == null) {
@@ -344,10 +365,11 @@ public final class Configuration {
     }
 
     /**
-     * 
-     * @param metadataFormat
-     * @return
+     * <p>getSetSpecFieldsForMetadataFormat.</p>
+     *
+     * @param metadataFormat a {@link java.lang.String} object.
      * @should return all values
+     * @return a {@link java.util.List} object.
      */
     public List<String> getSetSpecFieldsForMetadataFormat(String metadataFormat) {
         if (metadataFormat == null) {
@@ -358,15 +380,18 @@ public final class Configuration {
     }
 
     /**
+     * <p>getHarvestUrl.</p>
+     *
      * @return Harvest servlet URL
      * @should return correct value
-     * 
      */
     public String getHarvestUrl() {
         return getLocalString("harvestUrl", "http://localhost:8080/viewer/harvest");
     }
 
     /**
+     * <p>getContentApiUrl.</p>
+     *
      * @return Content file REST API URL
      * @should return correct value
      */
@@ -375,6 +400,8 @@ public final class Configuration {
     }
 
     /**
+     * <p>getFulltextUrl.</p>
+     *
      * @return Full-text file URL with placeholders for PI and page.
      * @should return correct value
      */
@@ -384,9 +411,9 @@ public final class Configuration {
 
     /**
      * Returns mappings for the ESE "type" element.
-     * 
-     * @return
+     *
      * @should return all values
+     * @return a {@link java.util.Map} object.
      */
     @SuppressWarnings("rawtypes")
     public Map<String, String> getEseTypes() {
@@ -404,6 +431,8 @@ public final class Configuration {
     }
 
     /**
+     * <p>getMods2MarcXsl.</p>
+     *
      * @return Path to the MODS2MARC XSLT stylesheet.
      * @should return correct value
      */
@@ -412,7 +441,8 @@ public final class Configuration {
     }
 
     /**
-     * 
+     * <p>getUrnResolverUrl.</p>
+     *
      * @return URN resolver URL.
      * @should return correct value
      */
@@ -421,7 +451,8 @@ public final class Configuration {
     }
 
     /**
-     * 
+     * <p>getPiResolverUrl.</p>
+     *
      * @return PI resolver URL.
      * @should return correct value
      */
@@ -430,7 +461,8 @@ public final class Configuration {
     }
 
     /**
-     * 
+     * <p>getDocumentResolverUrl.</p>
+     *
      * @return METS/LIDO resolver URL.
      * @should return correct value
      */
@@ -440,9 +472,9 @@ public final class Configuration {
 
     /**
      * Returns a list of additional docstruct types "type" element.
-     * 
-     * @return
+     *
      * @should return all values
+     * @return a {@link java.util.List} object.
      */
     @SuppressWarnings("rawtypes")
     public List<String> getAdditionalDocstructTypes() {
@@ -461,63 +493,70 @@ public final class Configuration {
     }
 
     /**
-     * 
-     * @return
+     * <p>getUrnPrefixBlacklist.</p>
+     *
      * @should return all values
+     * @return a {@link java.util.List} object.
      */
     public List<String> getUrnPrefixBlacklist() {
         return getLocalList("epicur.blacklist.urnPrefix", new ArrayList<String>(0));
     }
 
     /**
-     * 
-     * @return
+     * <p>getEseProviderField.</p>
+     *
      * @should return correct value
+     * @return a {@link java.lang.String} object.
      */
     public String getEseProviderField() {
         return getLocalString("ese.providerField", null);
     }
 
     /**
-     * 
-     * @return
+     * <p>getEseDataProviderField.</p>
+     *
      * @should return correct value
+     * @return a {@link java.lang.String} object.
      */
     public String getEseDataProviderField() {
         return getLocalString("ese.dataProviderField", null);
     }
 
     /**
-     * 
-     * @return
+     * <p>getEseDefaultProvider.</p>
+     *
      * @should return correct value
+     * @return a {@link java.lang.String} object.
      */
     public String getEseDefaultProvider() {
         return getLocalString("ese.defaultProvider", null);
     }
 
     /**
-     * 
-     * @return
+     * <p>getEseRightsField.</p>
+     *
      * @should return correct value
+     * @return a {@link java.lang.String} object.
      */
     public String getEseRightsField() {
         return getLocalString("ese.rightsField", null);
     }
 
     /**
-     * 
-     * @return
+     * <p>getEseDefaultRightsUrl.</p>
+     *
      * @should return correct value
+     * @return a {@link java.lang.String} object.
      */
     public String getEseDefaultRightsUrl() {
         return getLocalString("ese.defaultRightsUrl", null);
     }
 
     /**
-     * 
-     * @return
+     * <p>getAllValuesSets.</p>
+     *
      * @should return all values
+     * @return a {@link java.util.List} object.
      */
     public List<Set> getAllValuesSets() {
         List<HierarchicalConfiguration> types = getLocalConfigurationsAt("sets.allValuesSet");
@@ -535,9 +574,10 @@ public final class Configuration {
     }
 
     /**
-     * 
-     * @return
+     * <p>getAdditionalSets.</p>
+     *
      * @should return all values
+     * @return a {@link java.util.List} object.
      */
     public List<Set> getAdditionalSets() {
         List<HierarchicalConfiguration> types = getLocalConfigurationsAt("sets.set");
@@ -554,27 +594,30 @@ public final class Configuration {
     }
 
     /**
-     * 
-     * @return
+     * <p>getBaseURL.</p>
+     *
      * @should return correct value
+     * @return a {@link java.lang.String} object.
      */
     public String getBaseURL() {
         return getLocalString("identifyTags.baseURL", null);
     }
 
     /**
-     * 
-     * @return
+     * <p>isBaseUrlUseInRequestElement.</p>
+     *
      * @should return correct value
+     * @return a boolean.
      */
     public boolean isBaseUrlUseInRequestElement() {
         return getLocalBoolean("identifyTags.baseURL[@useInRequestElement]", false);
     }
 
     /**
-     * 
-     * @return
+     * <p>isUseCollectionBlacklist.</p>
+     *
      * @should return correct value
+     * @return a boolean.
      */
     public boolean isUseCollectionBlacklist() {
         return getLocalBoolean("useCollectionBlacklist", true);
@@ -582,9 +625,9 @@ public final class Configuration {
 
     /**
      * Returns collection names to be omitted from search results, listings etc. from config_viewer.xml
-     * 
-     * @return
+     *
      * @should return all key-value pairs
+     * @return a {@link java.util.List} object.
      */
     public List<String> getCollectionBlacklist() {
         List<String> ret = new ArrayList<>();
@@ -607,10 +650,10 @@ public final class Configuration {
     }
 
     /**
-     * 
-     * @return
+     * <p>getCollectionBlacklistFilterSuffix.</p>
+     *
      * @should construct suffix correctly
-     * 
+     * @return a {@link java.lang.String} object.
      */
     public String getCollectionBlacklistFilterSuffix() {
         StringBuilder sbQuery = new StringBuilder();
@@ -627,8 +670,10 @@ public final class Configuration {
     }
 
     /**
-     * @return
+     * <p>getRestrictedAccessConditions.</p>
+     *
      * @should return all values
+     * @return a {@link java.util.List} object.
      */
     public List<LicenseType> getRestrictedAccessConditions() {
         List<HierarchicalConfiguration> elements = getLocalConfigurationsAt("solr.restrictions.restriction");
@@ -649,23 +694,30 @@ public final class Configuration {
     }
 
     /**
-     * 
-     * @return
+     * <p>getQuerySuffix.</p>
+     *
      * @should return correct value
+     * @return a {@link java.lang.String} object.
      */
     public String getQuerySuffix() {
         return getLocalString("solr.querySuffix", "");
     }
 
+    /**
+     * <p>getLocalRessourceBundleFile.</p>
+     *
+     * @return a {@link java.lang.String} object.
+     */
     public String getLocalRessourceBundleFile() {
         return getOaiFolder() + "messages_de.properties";
     }
 
     /**
-     * 
-     * @return
+     * <p>getDefaultLocale.</p>
+     *
      * @should return correct value
      * @should return English if locale not found
+     * @return a {@link java.util.Locale} object.
      */
     public Locale getDefaultLocale() {
         String language = getLocalString("defaultLocale", "en");
@@ -678,11 +730,13 @@ public final class Configuration {
     }
 
     /**
-     * @param metadataFormat
-     * @param template
-     * @return
+     * <p>getMetadataConfiguration.</p>
+     *
+     * @param metadataFormat a {@link java.lang.String} object.
+     * @param template a {@link java.lang.String} object.
      * @should return correct template configuration
      * @should return default template configuration if template not found
+     * @return a {@link java.util.List} object.
      */
     @SuppressWarnings({ "rawtypes" })
     public List<Metadata> getMetadataConfiguration(String metadataFormat, String template) {

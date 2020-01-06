@@ -44,6 +44,7 @@ public class EuropeanaFormat extends OAIDCFormat {
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String)
      */
+    /** {@inheritDoc} */
     @Override
     public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
             throws SolrServerException {
@@ -58,6 +59,7 @@ public class EuropeanaFormat extends OAIDCFormat {
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler)
      */
+    /** {@inheritDoc} */
     @Override
     public Element createGetRecord(RequestHandler handler) {
         if (handler.getIdentifier() == null) {

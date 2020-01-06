@@ -17,6 +17,10 @@ package io.goobi.viewer.connector.sru;
 
 import io.goobi.viewer.connector.utils.SolrConstants;
 
+/**
+ * <p>SearchField class.</p>
+ *
+ */
 public enum SearchField {
 
     anywhere("any", null, "anywhere", "*", true, false, false),
@@ -49,6 +53,8 @@ public enum SearchField {
     }
 
     /**
+     * <p>Getter for the field <code>internalName</code>.</p>
+     *
      * @return the internalName
      */
     public String getInternalName() {
@@ -56,6 +62,8 @@ public enum SearchField {
     }
 
     /**
+     * <p>Getter for the field <code>dcName</code>.</p>
+     *
      * @return the dcName
      */
     public String getDcName() {
@@ -63,6 +71,8 @@ public enum SearchField {
     }
 
     /**
+     * <p>Getter for the field <code>cqlName</code>.</p>
+     *
      * @return the cqlName
      */
     public String getCqlName() {
@@ -70,6 +80,8 @@ public enum SearchField {
     }
 
     /**
+     * <p>Getter for the field <code>solrName</code>.</p>
+     *
      * @return the solrName
      */
     public String getSolrName() {
@@ -77,6 +89,8 @@ public enum SearchField {
     }
 
     /**
+     * <p>isSeachable.</p>
+     *
      * @return the seachable
      */
     public boolean isSeachable() {
@@ -84,6 +98,8 @@ public enum SearchField {
     }
 
     /**
+     * <p>isScanable.</p>
+     *
      * @return the scanable
      */
     public boolean isScanable() {
@@ -91,12 +107,20 @@ public enum SearchField {
     }
 
     /**
+     * <p>isSortable.</p>
+     *
      * @return the sortable
      */
     public boolean isSortable() {
         return sortable;
     }
 
+    /**
+     * <p>getFieldByDcName.</p>
+     *
+     * @param name a {@link java.lang.String} object.
+     * @return a {@link io.goobi.viewer.connector.sru.SearchField} object.
+     */
     public static SearchField getFieldByDcName(String name) {
         for (SearchField field : SearchField.values()) {
             if (field.getDcName() != null && field.getDcName().equalsIgnoreCase(name)) {
@@ -106,6 +130,12 @@ public enum SearchField {
         return null;
     }
 
+    /**
+     * <p>getFieldByCqlName.</p>
+     *
+     * @param name a {@link java.lang.String} object.
+     * @return a {@link io.goobi.viewer.connector.sru.SearchField} object.
+     */
     public static SearchField getFieldByCqlName(String name) {
         for (SearchField field : SearchField.values()) {
             if (field.getCqlName() != null && field.getCqlName().equalsIgnoreCase(name)) {
@@ -115,6 +145,12 @@ public enum SearchField {
         return null;
     }
 
+    /**
+     * <p>getFieldBySolrName.</p>
+     *
+     * @param name a {@link java.lang.String} object.
+     * @return a {@link io.goobi.viewer.connector.sru.SearchField} object.
+     */
     public static SearchField getFieldBySolrName(String name) {
         for (SearchField field : SearchField.values()) {
             if (field.getSolrName() != null && field.getSolrName().equalsIgnoreCase(name)) {
@@ -124,6 +160,12 @@ public enum SearchField {
         return null;
     }
 
+    /**
+     * <p>getFieldByInternalName.</p>
+     *
+     * @param name a {@link java.lang.String} object.
+     * @return a {@link io.goobi.viewer.connector.sru.SearchField} object.
+     */
     public static SearchField getFieldByInternalName(String name) {
         for (SearchField field : SearchField.values()) {
             if (field.getInternalName().equalsIgnoreCase(name)) {

@@ -13,9 +13,16 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
+/**
+ * <p>Version class.</p>
+ *
+ */
 public class Version {
+    /** Constant <code>VERSION</code> */
     public final static String VERSION;
+    /** Constant <code>BUILDVERSION</code> */
     public final static String BUILDVERSION;
+    /** Constant <code>BUILDDATE</code> */
     public final static String BUILDDATE;
 
     static {

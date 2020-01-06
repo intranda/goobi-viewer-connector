@@ -53,6 +53,7 @@ public class TEIFormat extends Format {
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String)
      */
+    /** {@inheritDoc} */
     @Override
     public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
             throws SolrServerException {
@@ -89,6 +90,7 @@ public class TEIFormat extends Format {
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler)
      */
+    /** {@inheritDoc} */
     @Override
     public Element createGetRecord(RequestHandler handler) {
         if (handler.getIdentifier() == null) {
@@ -246,14 +248,9 @@ public class TEIFormat extends Format {
     }
 
     /**
+     * {@inheritDoc}
+     *
      * Modified header generation where identifers also contain the language code.
-     * 
-     * @param doc Document from which to extract values.
-     * @param topstructDoc If not null, the datestamp value will be determined from this instead.
-     * @param handler
-     * @param requestedVersion
-     * @return
-     * @throws SolrServerException
      */
     protected static Element getHeader(SolrDocument doc, SolrDocument topstructDoc, RequestHandler handler, String requestedVersion)
             throws SolrServerException {
@@ -301,6 +298,7 @@ public class TEIFormat extends Format {
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map, java.lang.String)
      */
+    /** {@inheritDoc} */
     @Override
     public long getTotalHits(Map<String, String> params, String versionDiscriminatorField) throws IOException, SolrServerException {
         if (StringUtils.isNotEmpty(versionDiscriminatorField)) {

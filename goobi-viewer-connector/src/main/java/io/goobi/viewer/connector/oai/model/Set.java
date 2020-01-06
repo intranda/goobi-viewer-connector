@@ -18,6 +18,10 @@ package io.goobi.viewer.connector.oai.model;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * <p>Set class.</p>
+ *
+ */
 public class Set {
 
     private final String setName;
@@ -26,25 +30,49 @@ public class Set {
     private final List<String> values = new ArrayList<>();
     private boolean translate = false;
 
+    /**
+     * <p>Constructor for Set.</p>
+     *
+     * @param setName a {@link java.lang.String} object.
+     * @param setSpec a {@link java.lang.String} object.
+     * @param setQuery a {@link java.lang.String} object.
+     */
     public Set(String setName, String setSpec, String setQuery) {
         this.setName = setName;
         this.setSpec = setSpec;
         this.setQuery = setQuery;
     }
 
+    /**
+     * <p>Getter for the field <code>setName</code>.</p>
+     *
+     * @return a {@link java.lang.String} object.
+     */
     public String getSetName() {
         return setName;
     }
 
+    /**
+     * <p>Getter for the field <code>setSpec</code>.</p>
+     *
+     * @return a {@link java.lang.String} object.
+     */
     public String getSetSpec() {
         return setSpec;
     }
 
+    /**
+     * <p>Getter for the field <code>setQuery</code>.</p>
+     *
+     * @return a {@link java.lang.String} object.
+     */
     public String getSetQuery() {
         return setQuery;
     }
 
     /**
+     * <p>Getter for the field <code>values</code>.</p>
+     *
      * @return the values
      */
     public List<String> getValues() {
@@ -52,6 +80,8 @@ public class Set {
     }
 
     /**
+     * <p>isTranslate.</p>
+     *
      * @return the translate
      */
     public boolean isTranslate() {
@@ -59,6 +89,8 @@ public class Set {
     }
 
     /**
+     * <p>Setter for the field <code>translate</code>.</p>
+     *
      * @param translate the translate to set
      */
     public void setTranslate(boolean translate) {

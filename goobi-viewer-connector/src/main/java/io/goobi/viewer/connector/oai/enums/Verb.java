@@ -15,6 +15,10 @@
  */
 package io.goobi.viewer.connector.oai.enums;
 
+/**
+ * <p>Verb class.</p>
+ *
+ */
 public enum Verb {
 
 	GetRecord("GetRecord"), Identify("Identify"), ListIdentifiers("ListIdentifiers"), ListMetadataFormats("ListMetadataFormats"), ListRecords(
@@ -26,10 +30,21 @@ public enum Verb {
 		this.title = title;
 	}
 
+	/**
+	 * <p>Getter for the field <code>title</code>.</p>
+	 *
+	 * @return a {@link java.lang.String} object.
+	 */
 	public String getTitle() {
 		return title;
 	}
 
+	/**
+	 * <p>getByTitle.</p>
+	 *
+	 * @param title a {@link java.lang.String} object.
+	 * @return a {@link io.goobi.viewer.connector.oai.enums.Verb} object.
+	 */
 	public static Verb getByTitle(String title) {
 		for (Verb v : Verb.values()) {
 			if (v.getTitle().equals(title)) {

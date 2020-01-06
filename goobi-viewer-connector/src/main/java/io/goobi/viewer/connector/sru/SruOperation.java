@@ -15,6 +15,10 @@
  */
 package io.goobi.viewer.connector.sru;
 
+/**
+ * <p>SruOperation class.</p>
+ *
+ */
 public enum SruOperation {
 
     SCAN("scan"),
@@ -33,12 +37,20 @@ public enum SruOperation {
     }
     
     /**
+     * <p>Getter for the field <code>title</code>.</p>
+     *
      * @return the title
      */
     public String getTitle() {
         return title;
     }
     
+    /**
+     * <p>getByTitle.</p>
+     *
+     * @param title a {@link java.lang.String} object.
+     * @return a {@link io.goobi.viewer.connector.sru.SruOperation} object.
+     */
     public static SruOperation getByTitle(String title) {
         for (SruOperation operation : SruOperation.values()) {
             if (operation.getTitle().equalsIgnoreCase(title)) {

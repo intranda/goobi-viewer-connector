@@ -24,15 +24,21 @@ import org.slf4j.LoggerFactory;
 
 import io.goobi.viewer.connector.utils.Utils;
 
+/**
+ * <p>ContextListener class.</p>
+ *
+ */
 public class ContextListener implements ServletContextListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ContextListener.class);
 
+    /** {@inheritDoc} */
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         logger.info(Utils.getVersion());
     }
 
+    /** {@inheritDoc} */
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         // Shut all loggers down to prevent memory leaks when re-deploying the context

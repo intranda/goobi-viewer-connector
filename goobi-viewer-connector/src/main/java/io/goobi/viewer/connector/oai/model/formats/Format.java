@@ -58,52 +58,63 @@ import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.SolrSearchIndex;
 import io.goobi.viewer.connector.utils.Utils;
 
+/**
+ * <p>Abstract Format class.</p>
+ *
+ */
 public abstract class Format {
 
     private final static Logger logger = LoggerFactory.getLogger(Format.class);
 
+    /** Constant <code>XML</code> */
     protected static final Namespace XML = Namespace.getNamespace("xml", "http://www.w3.org/XML/1998/namespace");
+    /** Constant <code>XSI</code> */
     protected static final Namespace XSI = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
 
+    /** Constant <code>expiration=259200000L</code> */
     protected static long expiration = 259200000L; // 3 days
 
     protected SolrSearchIndex solr = DataManager.getInstance().getSearchIndex();
 
     /**
-     * 
-     * @param handler
-     * @param firstVirtualRow
-     * @param firstRawRow
-     * @param numRows
-     * @param versionDiscriminatorField
-     * @return
-     * @throws SolrServerException
+     * <p>createListRecords.</p>
+     *
+     * @param handler a {@link io.goobi.viewer.connector.oai.RequestHandler} object.
+     * @param firstVirtualRow a int.
+     * @param firstRawRow a int.
+     * @param numRows a int.
+     * @param versionDiscriminatorField a {@link java.lang.String} object.
+     * @throws org.apache.solr.client.solrj.SolrServerException
+     * @return a {@link org.jdom2.Element} object.
+     * @throws java.io.IOException if any.
      */
     public abstract Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows,
             String versionDiscriminatorField) throws IOException, SolrServerException;
 
     /**
-     * 
-     * @param handler
-     * @return
+     * <p>createGetRecord.</p>
+     *
+     * @param handler a {@link io.goobi.viewer.connector.oai.RequestHandler} object.
+     * @return a {@link org.jdom2.Element} object.
      */
     public abstract Element createGetRecord(RequestHandler handler);
 
     /**
-     * 
-     * @param params
-     * @param versionDiscriminatorField
-     * @return
-     * @throws IOException
-     * @throws SolrServerException
+     * <p>getTotalHits.</p>
+     *
+     * @param params a {@link java.util.Map} object.
+     * @param versionDiscriminatorField a {@link java.lang.String} object.
+     * @throws java.io.IOException
+     * @throws org.apache.solr.client.solrj.SolrServerException
+     * @return a long.
      */
     public abstract long getTotalHits(Map<String, String> params, String versionDiscriminatorField) throws IOException, SolrServerException;
 
     /**
      * for the server request ?verb=Identify this method build the xml section in the Identify element
-     * 
+     *
      * @return the identify Element for the xml tree
-     * @throws SolrServerException
+     * @throws org.apache.solr.client.solrj.SolrServerException
      */
     public static Element getIdentifyXML() throws SolrServerException {
         // TODO: optional parameter: compression is not implemented
@@ -146,8 +157,8 @@ public abstract class Format {
 
     /**
      * for the server request ?verb=ListMetadataFormats this method build the xml section
-     * 
-     * @return
+     *
+     * @return a {@link org.jdom2.Element} object.
      */
     public static Element createMetadataFormats() {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
@@ -176,10 +187,10 @@ public abstract class Format {
 
     /**
      * for the server request ?verb=ListSets this method build the xml section
-     * 
-     * @param handler
-     * @return
-     * @throws SolrServerException
+     *
+     * @throws org.apache.solr.client.solrj.SolrServerException
+     * @param locale a {@link java.util.Locale} object.
+     * @return a {@link org.jdom2.Element} object.
      */
     public static Element createListSets(Locale locale) throws SolrServerException {
         // Add all values sets (a set for each existing field value)
@@ -237,14 +248,14 @@ public abstract class Format {
 
     /**
      * for the server request ?verb=ListIdentifiers this method build the xml section
-     * 
-     * @param handler
-     * @param firstVirtualRow
-     * @param firstRawRow
-     * @param numRows
-     * @param fieldStatistics
-     * @return
-     * @throws SolrServerException
+     *
+     * @param handler a {@link io.goobi.viewer.connector.oai.RequestHandler} object.
+     * @param firstVirtualRow a int.
+     * @param firstRawRow a int.
+     * @param numRows a int.
+     * @throws org.apache.solr.client.solrj.SolrServerException
+     * @param versionDiscriminatorField a {@link java.lang.String} object.
+     * @return a {@link org.jdom2.Element} object.
      */
     public Element createListIdentifiers(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
             throws SolrServerException {
@@ -310,9 +321,9 @@ public abstract class Format {
 
     /**
      * creates root element for oai protocol
-     * 
-     * @param elementName
-     * @return
+     *
+     * @param elementName a {@link java.lang.String} object.
+     * @return a {@link org.jdom2.Element} object.
      */
     public static Element getOaiPmhElement(String elementName) {
         Element oaiPmh = new Element(elementName);
@@ -326,11 +337,13 @@ public abstract class Format {
 
     /**
      * create the header for listIdentifiers and ListRecords, because there are both the same
-     * 
+     *
      * @param doc Document from which to extract values.
      * @param topstructDoc If not null, the datestamp value will be determined from this instead.
-     * @return
-     * @throws SolrServerException
+     * @throws org.apache.solr.client.solrj.SolrServerException
+     * @param handler a {@link io.goobi.viewer.connector.oai.RequestHandler} object.
+     * @param requestedVersion a {@link java.lang.String} object.
+     * @return a {@link org.jdom2.Element} object.
      */
     protected static Element getHeader(SolrDocument doc, SolrDocument topstructDoc, RequestHandler handler, String requestedVersion)
             throws SolrServerException {
@@ -396,26 +409,28 @@ public abstract class Format {
     }
 
     /**
-     * 
-     * @param hits
-     * @param cursor
-     * @param xmlns
-     * @param handler
-     * @return
+     * <p>createResumptionTokenAndElement.</p>
+     *
+     * @param hits a long.
+     * @param cursor a int.
+     * @param xmlns a {@link org.jdom2.Namespace} object.
+     * @param handler a {@link io.goobi.viewer.connector.oai.RequestHandler} object.
+     * @return a {@link org.jdom2.Element} object.
      */
     protected static Element createResumptionTokenAndElement(long hits, int cursor, Namespace xmlns, RequestHandler handler) {
         return createResumptionTokenAndElement(hits, hits, cursor, cursor, xmlns, handler);
     }
 
     /**
-     * 
-     * @param virtualHits
-     * @param rawHits
-     * @param virtualCursor
-     * @param rawCursor
-     * @param xmlns
-     * @param handler
-     * @return
+     * <p>createResumptionTokenAndElement.</p>
+     *
+     * @param virtualHits a long.
+     * @param rawHits a long.
+     * @param virtualCursor a int.
+     * @param rawCursor a int.
+     * @param xmlns a {@link org.jdom2.Namespace} object.
+     * @param handler a {@link io.goobi.viewer.connector.oai.RequestHandler} object.
+     * @return a {@link org.jdom2.Element} object.
      */
     protected static Element createResumptionTokenAndElement(long virtualHits, long rawHits, int virtualCursor, int rawCursor, Namespace xmlns,
             RequestHandler handler) {
@@ -453,10 +468,10 @@ public abstract class Format {
 
     /**
      * handle token
-     * 
-     * @param resumptionToken
-     * @return
+     *
+     * @param resumptionToken a {@link java.lang.String} object.
      * @should return error if resumption token name illegal
+     * @return a {@link org.jdom2.Element} object.
      */
     public static Element handleToken(String resumptionToken) {
         if (resumptionToken == null) {
@@ -517,7 +532,7 @@ public abstract class Format {
     }
 
     /**
-     * 
+     * <p>removeExpiredTokens.</p>
      */
     public static void removeExpiredTokens() {
         File tokenFolder = new File(DataManager.getInstance().getConfiguration().getResumptionTokenFolder());
@@ -549,8 +564,8 @@ public abstract class Format {
 
     /**
      * Returns an instance of a format matching the given metadata prefix.
-     * 
-     * @param metadataPrefix
+     *
+     * @param metadataPrefix a {@link io.goobi.viewer.connector.oai.enums.Metadata} object.
      * @return Format instance; null if prefix not recognized
      */
     public static Format getFormatByMetadataPrefix(Metadata metadataPrefix) {

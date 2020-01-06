@@ -20,6 +20,10 @@ import java.io.Serializable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * <p>MetadataParameter class.</p>
+ *
+ */
 public class MetadataParameter implements Serializable {
 
     public enum MetadataParameterType {
@@ -93,6 +97,7 @@ public class MetadataParameter implements Serializable {
      *
      * @see java.lang.Object#hashCode()
      */
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -107,6 +112,7 @@ public class MetadataParameter implements Serializable {
      *
      * @see java.lang.Object#equals(java.lang.Object)
      */
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -133,16 +139,17 @@ public class MetadataParameter implements Serializable {
     }
 
     /**
-     * 
-     * @param type
-     * @param source
-     * @param key
-     * @param overrideMasterValue
-     * @param defaultValue
-     * @param prefix
-     * @param suffix
-     * @param addUrl
-     * @param dontUseTopstructValue
+     * <p>Constructor for MetadataParameter.</p>
+     *
+     * @param type a {@link io.goobi.viewer.connector.oai.model.metadata.MetadataParameter.MetadataParameterType} object.
+     * @param source a {@link java.lang.String} object.
+     * @param key a {@link java.lang.String} object.
+     * @param overrideMasterValue a {@link java.lang.String} object.
+     * @param defaultValue a {@link java.lang.String} object.
+     * @param prefix a {@link java.lang.String} object.
+     * @param suffix a {@link java.lang.String} object.
+     * @param addUrl a boolean.
+     * @param dontUseTopstructValue a boolean.
      */
     public MetadataParameter(MetadataParameterType type, String source, String key, String overrideMasterValue, String defaultValue, String prefix,
             String suffix, boolean addUrl, boolean dontUseTopstructValue) {
@@ -158,6 +165,8 @@ public class MetadataParameter implements Serializable {
     }
 
     /**
+     * <p>Getter for the field <code>source</code>.</p>
+     *
      * @return the source
      */
     public String getSource() {
@@ -165,6 +174,8 @@ public class MetadataParameter implements Serializable {
     }
 
     /**
+     * <p>Getter for the field <code>type</code>.</p>
+     *
      * @return the type
      */
     public MetadataParameterType getType() {
@@ -172,6 +183,8 @@ public class MetadataParameter implements Serializable {
     }
 
     /**
+     * <p>Setter for the field <code>type</code>.</p>
+     *
      * @param type the type to set
      */
     public void setType(MetadataParameterType type) {
@@ -179,6 +192,8 @@ public class MetadataParameter implements Serializable {
     }
 
     /**
+     * <p>Getter for the field <code>key</code>.</p>
+     *
      * @return the key
      */
     public String getKey() {
@@ -186,6 +201,8 @@ public class MetadataParameter implements Serializable {
     }
 
     /**
+     * <p>Getter for the field <code>overrideMasterValue</code>.</p>
+     *
      * @return the overrideMasterValue
      */
     public String getOverrideMasterValue() {
@@ -193,6 +210,8 @@ public class MetadataParameter implements Serializable {
     }
 
     /**
+     * <p>Getter for the field <code>defaultValue</code>.</p>
+     *
      * @return the defaultValue
      */
     public String getDefaultValue() {
@@ -200,6 +219,8 @@ public class MetadataParameter implements Serializable {
     }
 
     /**
+     * <p>Getter for the field <code>prefix</code>.</p>
+     *
      * @return the prefix
      */
     public String getPrefix() {
@@ -207,6 +228,8 @@ public class MetadataParameter implements Serializable {
     }
 
     /**
+     * <p>Getter for the field <code>suffix</code>.</p>
+     *
      * @return the suffix
      */
     public String getSuffix() {
@@ -214,6 +237,8 @@ public class MetadataParameter implements Serializable {
     }
 
     /**
+     * <p>isAddUrl.</p>
+     *
      * @return the addUrl
      */
     public boolean isAddUrl() {
@@ -221,12 +246,15 @@ public class MetadataParameter implements Serializable {
     }
 
     /**
+     * <p>isDontUseTopstructValue.</p>
+     *
      * @return the dontUseTopstructValue
      */
     public boolean isDontUseTopstructValue() {
         return dontUseTopstructValue;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return new StringBuilder("Key: ").append(key)

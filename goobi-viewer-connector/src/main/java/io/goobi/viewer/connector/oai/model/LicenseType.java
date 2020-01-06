@@ -17,12 +17,23 @@ package io.goobi.viewer.connector.oai.model;
 
 import java.util.Calendar;
 
+/**
+ * <p>LicenseType class.</p>
+ *
+ */
 public class LicenseType {
 
     private final String field;
     private final String value;
     private final String conditions;
 
+    /**
+     * <p>Constructor for LicenseType.</p>
+     *
+     * @param field a {@link java.lang.String} object.
+     * @param value a {@link java.lang.String} object.
+     * @param conditions a {@link java.lang.String} object.
+     */
     public LicenseType(String field, String value, String conditions) {
         if (field == null) {
             throw new IllegalArgumentException("field may not be null");
@@ -36,6 +47,8 @@ public class LicenseType {
     }
 
     /**
+     * <p>Getter for the field <code>field</code>.</p>
+     *
      * @return the field
      */
     public String getField() {
@@ -43,6 +56,8 @@ public class LicenseType {
     }
 
     /**
+     * <p>Getter for the field <code>value</code>.</p>
+     *
      * @return the value
      */
     public String getValue() {
@@ -50,12 +65,19 @@ public class LicenseType {
     }
 
     /**
+     * <p>Getter for the field <code>conditions</code>.</p>
+     *
      * @return the conditions
      */
     public String getConditions() {
         return conditions;
     }
 
+    /**
+     * <p>getProcessedConditions.</p>
+     *
+     * @return a {@link java.lang.String} object.
+     */
     public String getProcessedConditions() {
         String conditions = this.conditions;
         if (conditions.contains("NOW/YEAR") && !conditions.contains("DATE_")) {

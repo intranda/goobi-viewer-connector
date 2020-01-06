@@ -51,6 +51,7 @@ public class EpicurFormat extends Format {
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String)
      */
+    /** {@inheritDoc} */
     @Override
     public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
             throws SolrServerException {
@@ -147,6 +148,7 @@ public class EpicurFormat extends Format {
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler)
      */
+    /** {@inheritDoc} */
     @Override
     public Element createGetRecord(RequestHandler handler) {
         logger.trace("createGetRecord");
@@ -415,6 +417,7 @@ public class EpicurFormat extends Format {
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map, java.lang.String)
      */
+    /** {@inheritDoc} */
     @Override
     public long getTotalHits(Map<String, String> params, String versionDiscriminatorField) throws IOException, SolrServerException {
         // Hit count may differ for epicur

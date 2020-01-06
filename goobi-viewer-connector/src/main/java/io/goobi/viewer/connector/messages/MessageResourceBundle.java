@@ -30,6 +30,10 @@ import org.slf4j.LoggerFactory;
 
 import io.goobi.viewer.connector.DataManager;
 
+/**
+ * <p>MessageResourceBundle class.</p>
+ *
+ */
 public class MessageResourceBundle extends ResourceBundle {
 
     private static final Logger logger = LoggerFactory.getLogger(MessageResourceBundle.class);
@@ -37,6 +41,11 @@ public class MessageResourceBundle extends ResourceBundle {
     static ResourceBundle bundle = null;
     static ResourceBundle localBundle = null;
 
+    /**
+     * <p>loadResourceBundle.</p>
+     *
+     * @param inLocale a {@link java.util.Locale} object.
+     */
     public static synchronized void loadResourceBundle(Locale inLocale) {
         Locale locale;
         if (inLocale != null) {
@@ -69,23 +78,33 @@ public class MessageResourceBundle extends ResourceBundle {
         return null;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected Object handleGetObject(String key) {
         return getTranslation(key, Locale.ENGLISH);
     }
 
     /**
-     * 
-     * @param text
-     * @param locale
-     * @return
+     * <p>getTranslation.</p>
+     *
+     * @param text a {@link java.lang.String} object.
+     * @param locale a {@link java.util.Locale} object.
      * @should translate text correctly
+     * @return a {@link java.lang.String} object.
      */
     public static String getTranslation(String text, Locale locale) {
         loadResourceBundle(locale);
         return MessageResourceBundle.getTranslation(text, bundle, localBundle);
     }
 
+    /**
+     * <p>getTranslation.</p>
+     *
+     * @param key a {@link java.lang.String} object.
+     * @param globalBundle a {@link java.util.ResourceBundle} object.
+     * @param localBundle a {@link java.util.ResourceBundle} object.
+     * @return a {@link java.lang.String} object.
+     */
     public static String getTranslation(String key, ResourceBundle globalBundle, ResourceBundle localBundle) {
         if (key != null) {
             // Remove trailing asterisk
@@ -156,6 +175,13 @@ public class MessageResourceBundle extends ResourceBundle {
         return key;
     }
 
+    /**
+     * <p>getMessagesValues.</p>
+     *
+     * @param locale a {@link java.util.Locale} object.
+     * @param keyPrefix a {@link java.lang.String} object.
+     * @return a {@link java.util.List} object.
+     */
     public static List<String> getMessagesValues(Locale locale, String keyPrefix) {
         ResourceBundle rb = loadLocalResourceBundle(locale);
         List<String> res = new ArrayList<>();
@@ -171,6 +197,7 @@ public class MessageResourceBundle extends ResourceBundle {
         return res;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Enumeration<String> getKeys() {
         return null;

@@ -36,18 +36,24 @@ import org.slf4j.LoggerFactory;
 import io.goobi.viewer.connector.Version;
 import io.goobi.viewer.connector.oai.RequestHandler;
 
+/**
+ * <p>Utils class.</p>
+ *
+ */
 public class Utils {
 
     private static final Logger logger = LoggerFactory.getLogger(Utils.class);
 
     private static final int HTTP_TIMEOUT = 10000;
+    /** Constant <code>DEFAULT_ENCODING="UTF-8"</code> */
     public static final String DEFAULT_ENCODING = "UTF-8";
 
+    /** Constant <code>formatterISO8601DateTimeFullWithTimeZone</code> */
     public static DateTimeFormatter formatterISO8601DateTimeFullWithTimeZone = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     /**
      * insert some chars in the time string
-     * 
+     *
      * @param milliSecondsAdd milliseconds to add to the current utc time if milliSecondsAdd = 0, no milli are added
      * @return the time in the format YYYY-MM-DDThh:mm:ssZ
      */
@@ -56,21 +62,23 @@ public class Utils {
     }
 
     /**
-     * 
-     * @param milliSeconds
-     * @return
+     * <p>convertDate.</p>
+     *
+     * @param milliSeconds a long.
      * @should convert time correctly
+     * @return a {@link java.lang.String} object.
      */
     public static String convertDate(long milliSeconds) {
         return formatterISO8601DateTimeFullWithTimeZone.withZoneUTC().print(milliSeconds);
     }
 
     /**
-     * 
-     * @param url
-     * @return
-     * @throws IOException
-     * @throws UnsupportedOperationException
+     * <p>getWebContent.</p>
+     *
+     * @param url a {@link java.lang.String} object.
+     * @throws java.io.IOException
+     * @throws java.lang.UnsupportedOperationException
+     * @return a {@link java.lang.String} object.
      */
     public static String getWebContent(String url) throws UnsupportedOperationException, IOException {
         logger.trace("getWebContent: {}", url);
@@ -95,6 +103,14 @@ public class Utils {
         return "";
     }
 
+    /**
+     * <p>getHttpResponseStatus.</p>
+     *
+     * @param url a {@link java.lang.String} object.
+     * @return a int.
+     * @throws java.lang.UnsupportedOperationException if any.
+     * @throws java.io.IOException if any.
+     */
     public static int getHttpResponseStatus(String url) throws UnsupportedOperationException, IOException {
         RequestConfig defaultRequestConfig = RequestConfig.custom()
                 .setSocketTimeout(HTTP_TIMEOUT)
@@ -112,19 +128,20 @@ public class Utils {
 
     /**
      * Returns the application version number.
-     * 
-     * @return
+     *
+     * @return a {@link java.lang.String} object.
      */
     public static String getVersion() {
         return Version.VERSION + "-" + Version.BUILDDATE + "-" + Version.BUILDVERSION;
     }
 
     /**
-     * 
-     * @param identifier
-     * @param languageCodeLength
-     * @return
+     * <p>splitIdentifierAndLanguageCode.</p>
+     *
+     * @param identifier a {@link java.lang.String} object.
+     * @param languageCodeLength a int.
      * @should split identifier correctly
+     * @return an array of {@link java.lang.String} objects.
      */
     public static String[] splitIdentifierAndLanguageCode(String identifier, int languageCodeLength) {
         if (identifier == null) {
@@ -148,9 +165,10 @@ public class Utils {
     }
 
     /**
-     * 
-     * @param datestring
-     * @return
+     * <p>parseDate.</p>
+     *
+     * @param datestring a {@link java.lang.Object} object.
+     * @return a {@link java.lang.String} object.
      */
     public static String parseDate(Object datestring) {
         if (datestring instanceof Long) {
@@ -161,7 +179,7 @@ public class Utils {
 
     /**
      * generates timestamp object from request
-     * 
+     *
      * @param requestHandler The request that was send to the server(servlet)
      * @return a HashMap with the values from, until and set as string
      * @should contain from timestamp

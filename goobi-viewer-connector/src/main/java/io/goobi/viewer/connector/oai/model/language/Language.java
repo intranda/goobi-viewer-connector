@@ -15,6 +15,10 @@
  */
 package io.goobi.viewer.connector.oai.model.language;
 
+/**
+ * <p>Language class.</p>
+ *
+ */
 public class Language {
 
     private String isoCode;
@@ -24,6 +28,8 @@ public class Language {
     private String germanName;
 
     /**
+     * <p>Getter for the field <code>isoCode</code>.</p>
+     *
      * @return the language code according to iso 639-2/B
      */
     public String getIsoCode() {
@@ -31,13 +37,17 @@ public class Language {
     }
 
     /**
-     * @param the language code according to iso 639-2/B
+     * <p>Setter for the field <code>isoCode</code>.</p>
+     *
+     * @param isoCode a {@link java.lang.String} object.
      */
     public void setIsoCode(String isoCode) {
         this.isoCode = isoCode;
     }
 
     /**
+     * <p>Getter for the field <code>isoCodeOld</code>.</p>
+     *
      * @return the language code according to iso 639-1
      */
     public String getIsoCodeOld() {
@@ -45,13 +55,17 @@ public class Language {
     }
 
     /**
-     * @param the language code according to iso 639-1
+     * <p>Setter for the field <code>isoCodeOld</code>.</p>
+     *
+     * @param isoCodeOld a {@link java.lang.String} object.
      */
     public void setIsoCodeOld(String isoCodeOld) {
         this.isoCodeOld = isoCodeOld;
     }
 
     /**
+     * <p>Getter for the field <code>englishName</code>.</p>
+     *
      * @return the englishName
      */
     public String getEnglishName() {
@@ -59,6 +73,8 @@ public class Language {
     }
 
     /**
+     * <p>Setter for the field <code>englishName</code>.</p>
+     *
      * @param englishName the englishName to set
      */
     public void setEnglishName(String englishName) {
@@ -66,6 +82,8 @@ public class Language {
     }
 
     /**
+     * <p>Getter for the field <code>frenchName</code>.</p>
+     *
      * @return the frenchName
      */
     public String getFrenchName() {
@@ -73,6 +91,8 @@ public class Language {
     }
 
     /**
+     * <p>Setter for the field <code>frenchName</code>.</p>
+     *
      * @param frenchName the frenchName to set
      */
     public void setFrenchName(String frenchName) {
@@ -80,6 +100,8 @@ public class Language {
     }
 
     /**
+     * <p>Getter for the field <code>germanName</code>.</p>
+     *
      * @return the germanName
      */
     public String getGermanName() {
@@ -87,6 +109,8 @@ public class Language {
     }
 
     /**
+     * <p>Setter for the field <code>germanName</code>.</p>
+     *
      * @param germanName the germanName to set
      */
     public void setGermanName(String germanName) {

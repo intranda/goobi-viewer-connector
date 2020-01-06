@@ -15,6 +15,10 @@
  */
 package io.goobi.viewer.connector.oai.enums;
 
+/**
+ * <p>Metadata class.</p>
+ *
+ */
 public enum Metadata {
     mets("mets", "http://www.loc.gov/mets/mets.xsd", "mets", "http://www.loc.gov/METS/", true, true),
     mods("mods", "http://www.loc.gov/standards/mods/v3/mods-3-3.xsd", "mods", "http://www.loc.gov/mods/v3", false, true),
@@ -63,26 +67,45 @@ public enum Metadata {
         this.sruSet = sruSet;
     }
 
+    /**
+     * <p>Getter for the field <code>metadataPrefix</code>.</p>
+     *
+     * @return a {@link java.lang.String} object.
+     */
     public String getMetadataPrefix() {
         return metadataPrefix;
     }
 
+    /**
+     * <p>Getter for the field <code>schema</code>.</p>
+     *
+     * @return a {@link java.lang.String} object.
+     */
     public String getSchema() {
         return schema;
     }
 
     /**
+     * <p>Getter for the field <code>metadataNamespacePrefix</code>.</p>
+     *
      * @return the metadataNamespacePrefix
      */
     public String getMetadataNamespacePrefix() {
         return metadataNamespacePrefix;
     }
 
+    /**
+     * <p>Getter for the field <code>metadataNamespaceUri</code>.</p>
+     *
+     * @return a {@link java.lang.String} object.
+     */
     public String getMetadataNamespaceUri() {
         return metadataNamespaceUri;
     }
 
     /**
+     * <p>isSruSet.</p>
+     *
      * @return the sruSet
      */
     public boolean isSruSet() {
@@ -90,12 +113,20 @@ public enum Metadata {
     }
 
     /**
+     * <p>isOaiSet.</p>
+     *
      * @return the oaiSet
      */
     public boolean isOaiSet() {
         return oaiSet;
     }
 
+    /**
+     * <p>getByMetadataPrefix.</p>
+     *
+     * @param metadataPrefix a {@link java.lang.String} object.
+     * @return a {@link io.goobi.viewer.connector.oai.enums.Metadata} object.
+     */
     public static Metadata getByMetadataPrefix(String metadataPrefix) {
         for (Metadata m : Metadata.values()) {
             if (m.getMetadataPrefix().equals(metadataPrefix)) {
