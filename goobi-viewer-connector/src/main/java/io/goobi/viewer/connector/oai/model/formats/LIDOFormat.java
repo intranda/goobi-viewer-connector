@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.goobi.viewer.connector.DataManager;
+import io.goobi.viewer.connector.exceptions.HTTPException;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
@@ -67,6 +68,8 @@ public class LIDOFormat extends Format {
             return new ErrorCode().getIdDoesNotExist();
         } catch (JDOMException e) {
             return new ErrorCode().getCannotDisseminateFormat();
+        } catch (HTTPException e) {
+            return new ErrorCode().getIdDoesNotExist();
         }
     }
 
@@ -92,6 +95,8 @@ public class LIDOFormat extends Format {
             return new ErrorCode().getCannotDisseminateFormat();
         } catch (SolrServerException e) {
             return new ErrorCode().getIdDoesNotExist();
+        } catch (HTTPException e) {
+            return new ErrorCode().getIdDoesNotExist();
         }
     }
 
@@ -108,9 +113,10 @@ public class LIDOFormat extends Format {
      * @throws IOException
      * @throws JDOMException
      * @throws SolrServerException
+     * @throws HTTPException
      */
     private static Element generateLido(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler,
-            String recordType) throws JDOMException, IOException, SolrServerException {
+            String recordType) throws JDOMException, IOException, SolrServerException, HTTPException {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element xmlListRecords = new Element(recordType, xmlns);
 
@@ -129,7 +135,7 @@ public class LIDOFormat extends Format {
                 continue;
             }
             String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl()).append(pi).toString();
-            String xml = Utils.getWebContent(url);
+            String xml = Utils.getWebContentGET(url);
             if (StringUtils.isEmpty(xml)) {
                 xmlListRecords.addContent(new ErrorCode().getIdDoesNotExist());
                 continue;

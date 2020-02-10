@@ -40,7 +40,9 @@ import io.goobi.viewer.connector.oai.model.metadata.MetadataParameter;
 import io.goobi.viewer.connector.oai.model.metadata.MetadataParameter.MetadataParameterType;
 
 /**
- * <p>Configuration class.</p>
+ * <p>
+ * Configuration class.
+ * </p>
  *
  */
 public final class Configuration {
@@ -56,7 +58,9 @@ public final class Configuration {
     private XMLConfiguration viewerConfig = null;
 
     /**
-     * <p>Constructor for Configuration.</p>
+     * <p>
+     * Constructor for Configuration.
+     * </p>
      *
      * @param configPath a {@link java.lang.String} object.
      */
@@ -88,7 +92,6 @@ public final class Configuration {
             logger.error(e.getMessage(), e);
         }
     }
-
 
     /**
      * ns is needed as parameter for every xml element, otherwise the standard-ns is printed out in every element the standard return String =
@@ -230,13 +233,15 @@ public final class Configuration {
     }
 
     /**
-     * <p>getViewerConfigFolder.</p>
+     * <p>
+     * getViewerConfigFolder.
+     * </p>
      *
      * @return Configured viewerConfigFolder in the default config file; /opt/digiverso/viewer/config/ if no value configured
      * @should return correct value
      */
     public String getViewerConfigFolder() {
-        
+
         String configLocalPath = configDefault.getString("viewerConfigFolder", "/opt/digiverso/viewer/config/");
         if (!configLocalPath.endsWith("/")) {
             configLocalPath += "/";
@@ -245,11 +250,13 @@ public final class Configuration {
         if (os.indexOf("win") >= 0 && configLocalPath.startsWith("/opt/")) {
             configLocalPath = configLocalPath.replace("/opt", "C:");
         }
-        return configLocalPath;        
+        return configLocalPath;
     }
 
     /**
-     * <p>getOaiFolder.</p>
+     * <p>
+     * getOaiFolder.
+     * </p>
      *
      * @should return correct value
      * @return a {@link java.lang.String} object.
@@ -259,7 +266,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getResumptionTokenFolder.</p>
+     * <p>
+     * getResumptionTokenFolder.
+     * </p>
      *
      * @return folder for resumptionToken
      * @should return correct value
@@ -269,7 +278,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getIndexUrl.</p>
+     * <p>
+     * getIndexUrl.
+     * </p>
      *
      * @return where to find the index
      * @should return correct value
@@ -279,7 +290,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getHitsPerToken.</p>
+     * <p>
+     * getHitsPerToken.
+     * </p>
      *
      * @return number of hits per page/token
      * @should return correct value
@@ -289,7 +302,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getHitsPerTokenForMetadataFormat.</p>
+     * <p>
+     * getHitsPerTokenForMetadataFormat.
+     * </p>
      *
      * @return number of hits per page/token
      * @should return correct value
@@ -301,7 +316,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getVersionDisriminatorFieldForMetadataFormat.</p>
+     * <p>
+     * getVersionDisriminatorFieldForMetadataFormat.
+     * </p>
      *
      * @return number of hits per page/token
      * @should return correct value
@@ -312,7 +329,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>isMetadataFormatEnabled.</p>
+     * <p>
+     * isMetadataFormatEnabled.
+     * </p>
      *
      * @return number of hits per page/token
      * @should return correct value
@@ -324,7 +343,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getFieldForMetadataFormat.</p>
+     * <p>
+     * getFieldForMetadataFormat.
+     * </p>
      *
      * @param metadataFormat a {@link java.lang.String} object.
      * @should return all values
@@ -365,7 +386,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getSetSpecFieldsForMetadataFormat.</p>
+     * <p>
+     * getSetSpecFieldsForMetadataFormat.
+     * </p>
      *
      * @param metadataFormat a {@link java.lang.String} object.
      * @should return all values
@@ -380,7 +403,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getHarvestUrl.</p>
+     * <p>
+     * getHarvestUrl.
+     * </p>
      *
      * @return Harvest servlet URL
      * @should return correct value
@@ -390,17 +415,33 @@ public final class Configuration {
     }
 
     /**
-     * <p>getContentApiUrl.</p>
+     * <p>
+     * getContentApiUrl.
+     * </p>
      *
      * @return Content file REST API URL
      * @should return correct value
      */
     public String getContentApiUrl() {
-        return getLocalString("contentApiUrl", "http://localhost:8080/viewer/rest/content/");
+        return getRestApiUrl() + "content/";
     }
 
     /**
-     * <p>getFulltextUrl.</p>
+     * <p>
+     * getRestApiUrl.
+     * </p>
+     *
+     * @return REST API URL
+     * @should return correct value
+     */
+    public String getRestApiUrl() {
+        return getLocalString("restApiUrl", "http://localhost:8080/viewer/rest/");
+    }
+
+    /**
+     * <p>
+     * getFulltextUrl.
+     * </p>
      *
      * @return Full-text file URL with placeholders for PI and page.
      * @should return correct value
@@ -431,7 +472,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getMods2MarcXsl.</p>
+     * <p>
+     * getMods2MarcXsl.
+     * </p>
      *
      * @return Path to the MODS2MARC XSLT stylesheet.
      * @should return correct value
@@ -441,7 +484,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getUrnResolverUrl.</p>
+     * <p>
+     * getUrnResolverUrl.
+     * </p>
      *
      * @return URN resolver URL.
      * @should return correct value
@@ -451,7 +496,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getPiResolverUrl.</p>
+     * <p>
+     * getPiResolverUrl.
+     * </p>
      *
      * @return PI resolver URL.
      * @should return correct value
@@ -461,7 +508,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getDocumentResolverUrl.</p>
+     * <p>
+     * getDocumentResolverUrl.
+     * </p>
      *
      * @return METS/LIDO resolver URL.
      * @should return correct value
@@ -493,7 +542,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getUrnPrefixBlacklist.</p>
+     * <p>
+     * getUrnPrefixBlacklist.
+     * </p>
      *
      * @should return all values
      * @return a {@link java.util.List} object.
@@ -503,7 +554,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getEseProviderField.</p>
+     * <p>
+     * getEseProviderField.
+     * </p>
      *
      * @should return correct value
      * @return a {@link java.lang.String} object.
@@ -513,7 +566,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getEseDataProviderField.</p>
+     * <p>
+     * getEseDataProviderField.
+     * </p>
      *
      * @should return correct value
      * @return a {@link java.lang.String} object.
@@ -523,7 +578,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getEseDefaultProvider.</p>
+     * <p>
+     * getEseDefaultProvider.
+     * </p>
      *
      * @should return correct value
      * @return a {@link java.lang.String} object.
@@ -533,7 +590,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getEseRightsField.</p>
+     * <p>
+     * getEseRightsField.
+     * </p>
      *
      * @should return correct value
      * @return a {@link java.lang.String} object.
@@ -543,7 +602,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getEseDefaultRightsUrl.</p>
+     * <p>
+     * getEseDefaultRightsUrl.
+     * </p>
      *
      * @should return correct value
      * @return a {@link java.lang.String} object.
@@ -553,7 +614,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getAllValuesSets.</p>
+     * <p>
+     * getAllValuesSets.
+     * </p>
      *
      * @should return all values
      * @return a {@link java.util.List} object.
@@ -574,7 +637,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getAdditionalSets.</p>
+     * <p>
+     * getAdditionalSets.
+     * </p>
      *
      * @should return all values
      * @return a {@link java.util.List} object.
@@ -594,7 +659,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getBaseURL.</p>
+     * <p>
+     * getBaseURL.
+     * </p>
      *
      * @should return correct value
      * @return a {@link java.lang.String} object.
@@ -604,7 +671,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>isBaseUrlUseInRequestElement.</p>
+     * <p>
+     * isBaseUrlUseInRequestElement.
+     * </p>
      *
      * @should return correct value
      * @return a boolean.
@@ -614,7 +683,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>isUseCollectionBlacklist.</p>
+     * <p>
+     * isUseCollectionBlacklist.
+     * </p>
      *
      * @should return correct value
      * @return a boolean.
@@ -650,7 +721,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getCollectionBlacklistFilterSuffix.</p>
+     * <p>
+     * getCollectionBlacklistFilterSuffix.
+     * </p>
      *
      * @should construct suffix correctly
      * @return a {@link java.lang.String} object.
@@ -670,7 +743,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getRestrictedAccessConditions.</p>
+     * <p>
+     * getRestrictedAccessConditions.
+     * </p>
      *
      * @should return all values
      * @return a {@link java.util.List} object.
@@ -694,7 +769,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getQuerySuffix.</p>
+     * <p>
+     * getQuerySuffix.
+     * </p>
      *
      * @should return correct value
      * @return a {@link java.lang.String} object.
@@ -704,7 +781,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getLocalRessourceBundleFile.</p>
+     * <p>
+     * getLocalRessourceBundleFile.
+     * </p>
      *
      * @return a {@link java.lang.String} object.
      */
@@ -713,7 +792,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getDefaultLocale.</p>
+     * <p>
+     * getDefaultLocale.
+     * </p>
      *
      * @should return correct value
      * @should return English if locale not found
@@ -730,7 +811,9 @@ public final class Configuration {
     }
 
     /**
-     * <p>getMetadataConfiguration.</p>
+     * <p>
+     * getMetadataConfiguration.
+     * </p>
      *
      * @param metadataFormat a {@link java.lang.String} object.
      * @param template a {@link java.lang.String} object.

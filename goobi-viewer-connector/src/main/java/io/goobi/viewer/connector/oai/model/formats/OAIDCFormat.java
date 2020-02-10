@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
@@ -32,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.goobi.viewer.connector.DataManager;
+import io.goobi.viewer.connector.exceptions.HTTPException;
 import io.goobi.viewer.connector.messages.MessageResourceBundle;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
@@ -306,6 +308,26 @@ public class OAIDCFormat extends Format {
                             finishedValues.add(val);
                             break;
                     }
+                } else if ("#TOC#".equals(md.getMasterValue())) {
+                    // Generated TOC as plain text
+                    if (!openAccess) {
+                        continue;
+                    }
+
+                    try {
+                        String url = DataManager.getInstance().getConfiguration().getRestApiUrl() + "records/toc/"
+                                + (String) doc.getFieldValue(SolrConstants.PI) + "/";
+                        String val = Utils.getWebContentGET(url);
+                        if (StringUtils.isNotEmpty(val)) {
+                            finishedValues.add(val);
+                        }
+                    } catch (ClientProtocolException e) {
+                        logger.error(e.getMessage(), e);
+                    } catch (IOException e) {
+                        logger.error(e.getMessage(), e);
+                    } catch (HTTPException e) {
+                        logger.error(e.getCode() + ": " + e.getMessage());
+                    }
                 } else if (!md.getParams().isEmpty()) {
                     // Parameter configuration
                     String firstField = md.getParams().get(0).getKey();
@@ -380,7 +402,9 @@ public class OAIDCFormat extends Format {
     }
 
     /**
-     * <p>getAnchorTitle.</p>
+     * <p>
+     * getAnchorTitle.
+     * </p>
      *
      * @param doc a {@link org.apache.solr.common.SolrDocument} object.
      * @return a {@link java.lang.String} object.
@@ -400,7 +424,9 @@ public class OAIDCFormat extends Format {
     }
 
     /**
-     * <p>generateDcSource.</p>
+     * <p>
+     * generateDcSource.
+     * </p>
      *
      * @param doc a {@link org.apache.solr.common.SolrDocument} object.
      * @param topstructDoc a {@link org.apache.solr.common.SolrDocument} object.
@@ -497,7 +523,9 @@ public class OAIDCFormat extends Format {
     }
 
     /**
-     * <p>generateFulltextUrls.</p>
+     * <p>
+     * generateFulltextUrls.
+     * </p>
      *
      * @param namespace a {@link org.jdom2.Namespace} object.
      * @throws org.apache.solr.client.solrj.SolrServerException

@@ -83,8 +83,8 @@
 	<!-- harvestUrl: URL for havesting overview page and crowdsourcing updates -->
 	<harvestUrl>http://localhost:8080/viewer/harvest</harvestUrl>
 
-	<!-- contentApiUrl: Rest API for full-text/ALTO/TEI/CMDI retrieval -->
-	<contentApiUrl>http://localhost:8080/viewer/rest/content/</contentApiUrl>
+	<!-- restApiUrl: Goobi viewer REST API for full-text/ALTO/TEI/CMDI and TOC retrieval -->
+	<restApiUrl>http://localhost:8080/viewer/rest/</restApiUrl>
 
 	<!-- fulltextUrl: URL for a single plain full-text page; contains placeholders
 		for PI and page number; can be used for REST or older ContentServlet URLs.
@@ -138,6 +138,7 @@
 				</metadata>
 				<metadata label="fulltext" value="#AUTO#">
 				</metadata>
+				<metadata label="description" value="#TOC#" />
 			</template>
 			<template name="PeriodicalVolume">
 				<metadata label="title" value="{0}{1}">
@@ -173,6 +174,7 @@
 				</metadata>
 				<metadata label="fulltext" value="#AUTO#">
 				</metadata>
+                <metadata label="description" value="#TOC#" />
 			</template>
 		</fields>
 		<setSpec>

@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.goobi.viewer.connector.DataManager;
+import io.goobi.viewer.connector.exceptions.HTTPException;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
 import io.goobi.viewer.connector.oai.model.language.Language;
@@ -84,6 +85,8 @@ public class TEIFormat extends Format {
             return new ErrorCode().getIdDoesNotExist();
         } catch (JDOMException e) {
             return new ErrorCode().getCannotDisseminateFormat();
+        } catch (HTTPException e) {
+            return new ErrorCode().getIdDoesNotExist();
         }
     }
 
@@ -115,6 +118,8 @@ public class TEIFormat extends Format {
                 return new ErrorCode().getCannotDisseminateFormat();
             } catch (SolrServerException e) {
                 return new ErrorCode().getIdDoesNotExist();
+            } catch (HTTPException e) {
+                return new ErrorCode().getIdDoesNotExist();
             }
         }
         try {
@@ -123,8 +128,9 @@ public class TEIFormat extends Format {
                 return new ErrorCode().getIdDoesNotExist();
             }
             Element record = generateTeiCmdi(Collections.singletonList(doc), 1L, 1L, 0, 0, 1, handler, "GetRecord",
-                    DataManager.getInstance().getConfiguration().getVersionDisriminatorFieldForMetadataFormat(
-                            handler.getMetadataPrefix().getMetadataPrefix()),
+                    DataManager.getInstance()
+                            .getConfiguration()
+                            .getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().getMetadataPrefix()),
                     null);
             return record;
         } catch (IOException e) {
@@ -132,6 +138,8 @@ public class TEIFormat extends Format {
         } catch (JDOMException e) {
             return new ErrorCode().getCannotDisseminateFormat();
         } catch (SolrServerException e) {
+            return new ErrorCode().getIdDoesNotExist();
+        } catch (HTTPException e) {
             return new ErrorCode().getIdDoesNotExist();
         }
     }
@@ -153,10 +161,11 @@ public class TEIFormat extends Format {
      * @throws IOException
      * @throws JDOMException
      * @throws SolrServerException
+     * @throws HTTPException
      */
     private static Element generateTeiCmdi(List<SolrDocument> records, long totalVirtualHits, long totalRawHits, int firstVirtualRow, int firstRawRow,
             int numRows, RequestHandler handler, String recordType, String versionDiscriminatorField, String requestedVersion)
-            throws JDOMException, IOException, SolrServerException {
+            throws JDOMException, IOException, SolrServerException, HTTPException {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element xmlListRecords = new Element(recordType, xmlns);
 
@@ -183,7 +192,7 @@ public class TEIFormat extends Format {
                             .append(version)
                             .append('/')
                             .toString();
-                    String xml = Utils.getWebContent(url);
+                    String xml = Utils.getWebContentGET(url);
                     if (StringUtils.isEmpty(xml)) {
                         xmlListRecords.addContent(new ErrorCode().getCannotDisseminateFormat());
                         continue;
@@ -239,8 +248,8 @@ public class TEIFormat extends Format {
 
         // Create resumption token
         if (totalRawHits > firstRawRow + numRows) {
-            Element resumption =
-                    createResumptionTokenAndElement(totalVirtualHits, totalRawHits, firstVirtualRow + virtualHitCount, firstRawRow + numRows, xmlns, handler);
+            Element resumption = createResumptionTokenAndElement(totalVirtualHits, totalRawHits, firstVirtualRow + virtualHitCount,
+                    firstRawRow + numRows, xmlns, handler);
             xmlListRecords.addContent(resumption);
         }
 

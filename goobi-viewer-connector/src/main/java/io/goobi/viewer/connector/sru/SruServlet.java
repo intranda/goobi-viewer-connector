@@ -46,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.goobi.viewer.connector.DataManager;
+import io.goobi.viewer.connector.exceptions.HTTPException;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.SolrSearchIndex;
@@ -53,7 +54,9 @@ import io.goobi.viewer.connector.utils.Utils;
 import io.goobi.viewer.connector.utils.XmlTools;
 
 /**
- * <p>SruServlet class.</p>
+ * <p>
+ * SruServlet class.
+ * </p>
  *
  */
 public class SruServlet extends HttpServlet {
@@ -433,7 +436,7 @@ public class SruServlet extends HttpServlet {
                 .append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))
                 .toString();
         try {
-            String xml = Utils.getWebContent(url);
+            String xml = Utils.getWebContentGET(url);
             if (StringUtils.isEmpty(xml)) {
                 return;
             }
@@ -450,6 +453,8 @@ public class SruServlet extends HttpServlet {
             logger.error(e.getMessage(), e);
         } catch (JDOMException e) {
             logger.error(e.getMessage(), e);
+        } catch (HTTPException e) {
+            logger.error(e.getCode() + ": " + e.getMessage());
         }
     }
 
@@ -607,7 +612,7 @@ public class SruServlet extends HttpServlet {
         String pi = (String) document.getFieldValue(SolrConstants.PI_TOPSTRUCT);
         String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl()).append(pi).toString();
         try {
-            String xml = Utils.getWebContent(url);
+            String xml = Utils.getWebContentGET(url);
             if (StringUtils.isEmpty(xml)) {
                 return;
             }
@@ -663,6 +668,8 @@ public class SruServlet extends HttpServlet {
             logger.error(e.getMessage(), e);
         } catch (JDOMException e) {
             logger.error(e.getMessage(), e);
+        } catch (HTTPException e) {
+            logger.error(e.getCode() + ": " + e.getMessage());
         }
     }
 
@@ -675,7 +682,7 @@ public class SruServlet extends HttpServlet {
                 .append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))
                 .toString();
         try {
-            String xml = Utils.getWebContent(url);
+            String xml = Utils.getWebContentGET(url);
             if (StringUtils.isEmpty(xml)) {
                 return;
             }
@@ -700,6 +707,8 @@ public class SruServlet extends HttpServlet {
             logger.error(e.getMessage(), e);
         } catch (JDOMException e) {
             logger.error(e.getMessage(), e);
+        } catch (HTTPException e) {
+            logger.error(e.getCode() + ": " + e.getMessage());
         }
     }
 
@@ -713,7 +722,7 @@ public class SruServlet extends HttpServlet {
                 .toString();
         logger.trace("generateMetsRecord");
         try {
-            String xml = Utils.getWebContent(url);
+            String xml = Utils.getWebContentGET(url);
             if (StringUtils.isEmpty(xml)) {
                 return;
             }
@@ -735,6 +744,8 @@ public class SruServlet extends HttpServlet {
             logger.error(e.getMessage(), e);
         } catch (JDOMException e) {
             logger.error(e.getMessage(), e);
+        } catch (HTTPException e) {
+            logger.error(e.getCode() + ": " + e.getMessage());
         }
     }
 
