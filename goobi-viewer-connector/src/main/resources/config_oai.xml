@@ -120,6 +120,10 @@
 				<metadata label="type" value="{0}">
 					<param type="translatedfield" key="DOCSTRCT" />
 				</metadata>
+				<!--
+				<metadata label="description" value="#TOC#">
+				</metadata>
+				-->
 				<metadata label="type" value="text">
 				</metadata>
 				<metadata label="format" value="image/jpeg">
