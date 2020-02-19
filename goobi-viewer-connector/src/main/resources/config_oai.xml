@@ -120,24 +120,17 @@
 				<metadata label="type" value="{0}">
 					<param type="translatedfield" key="DOCSTRCT" />
 				</metadata>
-				<metadata label="type" value="text">
-				</metadata>
-				<metadata label="format" value="image/jpeg">
-				</metadata>
-				<metadata label="format" value="application/pdf">
-				</metadata>
-				<metadata label="identifier" value="#AUTO#">
-				</metadata>
-				<metadata label="source" value="#AUTO#">
-				</metadata>
-				<metadata label="rights" value="#AUTO#">
-				</metadata>
+				<metadata label="type" value="text" />
+				<metadata label="format" value="image/jpeg" />
+				<metadata label="format" value="application/pdf" />
+				<metadata label="identifier" value="#AUTO#" />
+				<metadata label="source" value="#AUTO#" />
+				<metadata label="rights" value="#AUTO#" />
 				<metadata label="url" value="http://localhost:8080/viewer/image/{0}/{1}/">
 					<param type="field" key="PI_TOPSTRUCT" />
 					<param type="field" key="THUMBPAGENO" />
 				</metadata>
-				<metadata label="fulltext" value="#AUTO#">
-				</metadata>
+				<metadata label="fulltext" value="#AUTO#" />
 				<metadata label="description" value="#TOC#" />
 			</template>
 			<template name="PeriodicalVolume">
@@ -160,21 +153,14 @@
 				<metadata label="type" value="{0}">
 					<param type="translatedfield" key="DOCSTRCT" />
 				</metadata>
-				<metadata label="type" value="text">
-				</metadata>
-				<metadata label="format" value="image/jpeg">
-				</metadata>
-				<metadata label="format" value="application/pdf">
-				</metadata>
-				<metadata label="identifier" value="#AUTO#">
-				</metadata>
-				<metadata label="source" value="#AUTO#">
-				</metadata>
-				<metadata label="rights" value="#AUTO#">
-				</metadata>
-				<metadata label="fulltext" value="#AUTO#">
-				</metadata>
-                <metadata label="description" value="#TOC#" />
+				<metadata label="type" value="text" />
+				<metadata label="format" value="image/jpeg" />
+				<metadata label="format" value="application/pdf" />
+				<metadata label="identifier" value="#AUTO#" />
+				<metadata label="source" value="#AUTO#" />
+				<metadata label="rights" value="#AUTO#" />
+				<metadata label="fulltext" value="#AUTO#" />
+				<metadata label="description" value="#TOC#" />
 			</template>
 		</fields>
 		<setSpec>
