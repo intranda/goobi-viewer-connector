@@ -6,7 +6,7 @@
 			<PatternLayout
 				pattern="%-5level %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %location%n        %msg%n" />
 		</Console>
-		<RollingFile name="rolling" fileName="build/oai.log" filePattern="build/oai.%d{MM-dd-yyyy}.log.gz">
+		<RollingFile name="rolling" fileName="target/oai.log" filePattern="build/oai.%d{MM-dd-yyyy}.log.gz">
             <PatternLayout
                 pattern="%-5level %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %location%n        %msg%n" />
             <SizeBasedTriggeringPolicy size="20 MB" />
