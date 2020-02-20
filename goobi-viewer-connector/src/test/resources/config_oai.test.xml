@@ -60,9 +60,8 @@
     <!-- harvestUrl: URL for havesting overview page and crowdsourcing updates -->
     <harvestUrl>http://localhost/viewer/harvest
     </harvestUrl>
-    <!-- contentApiUrl: Rest API for full-text/ALTO/TEI/CMDI retrieval -->
-    <contentApiUrl>http://localhost/viewer/rest/content/
-    </contentApiUrl>
+    <!-- restApiUrl: Goobi viewer REST API for full-text/ALTO/TEI/CMDI and TOC retrieval -->
+    <restApiUrl>http://localhost/viewer/rest/</restApiUrl>
     <!-- fulltextUrl: URL for a single plain full-text page; contains placeholders 
         for PI and page number; can be used for REST or older ContentServlet URLs. 
         Allowed placeholders:

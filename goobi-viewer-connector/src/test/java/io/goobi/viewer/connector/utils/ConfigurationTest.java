@@ -413,12 +413,12 @@ public class ConfigurationTest extends AbstractTest {
     }
 
     /**
-     * @see Configuration#getContentApiUrl()
+     * @see Configuration#getRestApiUrl()
      * @verifies return correct value
      */
     @Test
-    public void getContentApiUrl_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals("http://localhost/viewer/rest/content/", DataManager.getInstance().getConfiguration().getContentApiUrl());
+    public void getRestApiUrl_shouldReturnCorrectValue() throws Exception {
+        Assert.assertEquals("http://localhost/viewer/rest/", DataManager.getInstance().getConfiguration().getRestApiUrl());
     }
 
     /**

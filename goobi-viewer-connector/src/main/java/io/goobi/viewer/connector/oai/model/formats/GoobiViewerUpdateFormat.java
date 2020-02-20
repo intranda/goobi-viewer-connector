@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrDocument;
 import org.jdom2.Element;
@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.goobi.viewer.connector.DataManager;
+import io.goobi.viewer.connector.exceptions.HTTPException;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
@@ -73,26 +74,30 @@ public class GoobiViewerUpdateFormat extends Format {
         }
         sbUrl.append("&first=").append(firstVirtualRow).append("&pageSize=").append(numRows);
 
-        String rawJSON = Utils.getWebContent(sbUrl.toString());
-        JSONArray jsonArray = null;
-        long totalHits = 0;
-        if (StringUtils.isNotEmpty(rawJSON)) {
+        try {
+            String rawJSON = Utils.getWebContentGET(sbUrl.toString());
+            JSONArray jsonArray = null;
+            long totalHits = 0;
+            if (StringUtils.isNotEmpty(rawJSON)) {
+                try {
+                    jsonArray = (JSONArray) new JSONParser().parse(rawJSON);
+                    totalHits = (long) jsonArray.get(0);
+                    jsonArray.remove(0);
+                } catch (ParseException e) {
+                    logger.error(e.getMessage());
+                    throw new IOException(e.getMessage());
+                }
+            }
+            if (totalHits == 0) {
+                return new ErrorCode().getNoRecordsMatch();
+            }
             try {
-                jsonArray = (JSONArray) new JSONParser().parse(rawJSON);
-                totalHits = (long) jsonArray.get(0);
-                jsonArray.remove(0);
-            } catch (ParseException e) {
-                logger.error(e.getMessage());
+                return generateGoobiViewerUpdates(jsonArray, totalHits, firstVirtualRow, numRows, handler, "ListRecords");
+            } catch (JDOMException e) {
                 throw new IOException(e.getMessage());
             }
-        }
-        if (totalHits == 0) {
-            return new ErrorCode().getNoRecordsMatch();
-        }
-        try {
-            return generateGoobiViewerUpdates(jsonArray, totalHits, firstVirtualRow, numRows, handler, "ListRecords");
-        } catch (JDOMException e) {
-            throw new IOException(e.getMessage());
+        } catch (HTTPException e) {
+            throw new IOException(e.getCode() + ": " + e.getMessage());
         }
     }
 
@@ -288,15 +293,19 @@ public class GoobiViewerUpdateFormat extends Format {
     @Override
     public long getTotalHits(Map<String, String> params, String versionDiscriminatorField) throws IOException, SolrServerException {
         String url = DataManager.getInstance().getConfiguration().getHarvestUrl() + "?action=getlist_" + params.get("metadataPrefix").substring(3);
-        String rawJSON = Utils.getWebContent(url);
-        if (StringUtils.isNotEmpty(rawJSON)) {
-            try {
-                JSONArray jsonArray = (JSONArray) new JSONParser().parse(rawJSON);
-                return (long) jsonArray.get(0);
-            } catch (ParseException e) {
-                logger.error(e.getMessage());
-                throw new IOException(e.getMessage());
+        try {
+            String rawJSON = Utils.getWebContentGET(url);
+            if (StringUtils.isNotEmpty(rawJSON)) {
+                try {
+                    JSONArray jsonArray = (JSONArray) new JSONParser().parse(rawJSON);
+                    return (long) jsonArray.get(0);
+                } catch (ParseException e) {
+                    logger.error(e.getMessage());
+                    throw new IOException(e.getMessage());
+                }
             }
+        } catch (HTTPException e) {
+            throw new IOException(e.getCode() + ": " + e.getMessage());
         }
 
         return 0;
