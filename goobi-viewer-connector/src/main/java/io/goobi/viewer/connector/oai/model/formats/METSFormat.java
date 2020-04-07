@@ -184,22 +184,25 @@ public class METSFormat extends Format {
             }
 
             org.jdom2.Document metsFile = XmlTools.getDocumentFromString(xml, null);
-            Element mets_root = metsFile.getRootElement();
-            Element newmets = new Element(Metadata.mets.getMetadataPrefix(), mets);
-            newmets.addNamespaceDeclaration(XSI);
-            newmets.addNamespaceDeclaration(mods);
-            newmets.addNamespaceDeclaration(dv);
-            newmets.addNamespaceDeclaration(xlink);
-            newmets.setAttribute("schemaLocation",
+            Element metsRoot = metsFile.getRootElement();
+            Element newMetsRoot = new Element(Metadata.mets.getMetadataPrefix(), mets);
+            newMetsRoot.addNamespaceDeclaration(XSI);
+            newMetsRoot.addNamespaceDeclaration(mods);
+            newMetsRoot.addNamespaceDeclaration(dv);
+            newMetsRoot.addNamespaceDeclaration(xlink);
+            newMetsRoot.setAttribute("schemaLocation",
                     "http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-3.xsd http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/version17/mets.v1-7.xsd",
                     XSI);
-            newmets.addContent(mets_root.cloneContent());
+            if (metsRoot.getAttributeValue("OBJID") != null) {
+                newMetsRoot.setAttribute("OBJID", metsRoot.getAttributeValue("OBJID"));
+            }
+            newMetsRoot.addContent(metsRoot.cloneContent());
 
             Element record = new Element("record", xmlns);
             Element header = getHeader(doc, null, handler, null);
             record.addContent(header);
             Element metadata = new Element("metadata", xmlns);
-            metadata.addContent(newmets);
+            metadata.addContent(newMetsRoot);
             record.addContent(metadata);
             xmlListRecords.addContent(record);
         }

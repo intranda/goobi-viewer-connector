@@ -295,9 +295,19 @@ public class OAIDCFormat extends Format {
                             finishedValues.add(val);
                             break;
                         case "source":
+                            if (topstructDoc == null) {
+                                logger.warn("No topstruct found for IDDOC:{} - is this a page document? Please check the base query.",
+                                        doc.getFieldValue(SolrConstants.IDDOC));
+                                continue;
+                            }
                             oai_dc.addContent(generateDcSource(doc, topstructDoc, anchorDoc, nsDc));
                             break;
                         case "fulltext":
+                            if (topstructDoc == null) {
+                                logger.warn("No topstruct found for IDDOC:{} - is this a page document? Please check the base query.",
+                                        doc.getFieldValue(SolrConstants.IDDOC));
+                                continue;
+                            }
                             for (Element oai_fulltext : generateFulltextUrls((String) topstructDoc.getFieldValue(SolrConstants.PI_TOPSTRUCT),
                                     (String) topstructDoc.getFieldValue(SolrConstants.DATAREPOSITORY), nsDc)) {
                                 oai_dc.addContent(oai_fulltext);
