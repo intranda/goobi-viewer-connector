@@ -51,7 +51,7 @@
 		<joda-time.version>2.10.6</joda-time.version>
 		<junit.version>4.13</junit.version>
 		<json-simple.version>1.1.1</json-simple.version>
-		<log4j.version>2.13.1</log4j.version>
+		<log4j.version>2.13.2</log4j.version>
 		<slf4j.version>1.7.30</slf4j.version>
 		<solr.version>4.10.4</solr.version>
 		<tomcat.version>9.0.34</tomcat.version>
