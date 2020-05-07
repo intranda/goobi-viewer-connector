@@ -245,7 +245,8 @@ public class EpicurFormat extends Format {
         // xmlns="urn:nbn:de:1111-2004033116"
 
         if (dateDeleted != null) {
-            status = "url_delete";
+            // "url_delete" is no longer allowed
+            status = "url_update_general";
         } else {
             if (dateCreated != null && dateUpdated != null) {
                 if (dateUpdated > dateCreated) {
@@ -267,7 +268,10 @@ public class EpicurFormat extends Format {
         record.addContent(schemaIdentifier);
 
         Element resource = new Element("resource", xmlns);
-        record.addContent(resource);
+        // add no resource element if the record is deleted
+        if (dateDeleted == null) {
+            record.addContent(resource);
+        }
 
         Element identifier = new Element("identifier", xmlns);
         identifier.setAttribute("origin", "original");
