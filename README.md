@@ -1,5 +1,5 @@
 # Goobi viewer - Connector
-[![](https://github.com/intranda/goobi-viewer-connector/workflows/.github/workflows/default.yml/badge.svg)
+![Standard CI](https://github.com/intranda/goobi-viewer-connector/workflows/Standard%20CI/badge.svg)
 > Connector application as part of the highly flexible digital library framework - made by the Goobi developer team
 
 
