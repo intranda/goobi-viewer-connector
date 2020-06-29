@@ -113,7 +113,7 @@ public class Utils {
                 if (code == HttpStatus.SC_OK) {
                     return EntityUtils.toString(response.getEntity(), DEFAULT_ENCODING);
                 }
-                logger.trace("{}: {}", code, response.getStatusLine().getReasonPhrase());
+                logger.trace("{}: {}; URL: {}", code, response.getStatusLine().getReasonPhrase(), urlString);
                 throw new HTTPException(code, response.getStatusLine().getReasonPhrase());
             }
         }

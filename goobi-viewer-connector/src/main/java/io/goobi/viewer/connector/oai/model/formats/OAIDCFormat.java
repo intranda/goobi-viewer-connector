@@ -59,7 +59,7 @@ public class OAIDCFormat extends Format {
     /** {@inheritDoc} */
     @Override
     public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
-            throws SolrServerException {
+            throws SolrServerException, IOException {
         QueryResponse qr;
         long totalVirtualHits;
         long totalRawHits;
@@ -141,10 +141,11 @@ public class OAIDCFormat extends Format {
      * @param requestedVersion
      * @return
      * @throws SolrServerException
+     * @throws IOException
      */
     private Element generateDC(List<SolrDocument> records, long totalVirtualHits, long totalRawHits, int firstVirtualRow, int firstRawRow,
             int numRows, RequestHandler handler, String recordType, String versionDiscriminatorField, String requestedVersion)
-            throws SolrServerException {
+            throws SolrServerException, IOException {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Namespace nsOaiDoc = Namespace.getNamespace(Metadata.oai_dc.getMetadataNamespacePrefix(), Metadata.oai_dc.getMetadataNamespaceUri());
         Element xmlListRecords = new Element(recordType, xmlns);
@@ -199,9 +200,10 @@ public class OAIDCFormat extends Format {
      * @param nsOaiDoc
      * @return
      * @throws SolrServerException
+     * @throws IOException
      */
     private Element generateSingleDCRecord(SolrDocument doc, RequestHandler handler, String requestedVersion, Namespace xmlns, Namespace nsOaiDoc)
-            throws SolrServerException {
+            throws SolrServerException, IOException {
         Element record = new Element("record", xmlns);
         boolean isWork = doc.getFieldValue(SolrConstants.ISWORK) != null && (boolean) doc.getFieldValue(SolrConstants.ISWORK);
         boolean isAnchor = doc.getFieldValue(SolrConstants.ISANCHOR) != null && (boolean) doc.getFieldValue(SolrConstants.ISANCHOR);
@@ -428,6 +430,8 @@ public class OAIDCFormat extends Format {
             }
         } catch (SolrServerException e) {
             logger.error(e.getMessage(), e);
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
         }
 
         return null;
@@ -542,8 +546,10 @@ public class OAIDCFormat extends Format {
      * @param pi a {@link java.lang.String} object.
      * @param dataRepository a {@link java.lang.String} object.
      * @return a {@link java.util.List} object.
+     * @throws IOException
      */
-    protected static List<Element> generateFulltextUrls(String pi, String dataRepository, Namespace namespace) throws SolrServerException {
+    protected static List<Element> generateFulltextUrls(String pi, String dataRepository, Namespace namespace)
+            throws SolrServerException, IOException {
         if (pi == null) {
             throw new IllegalArgumentException("pi may not be null");
         }

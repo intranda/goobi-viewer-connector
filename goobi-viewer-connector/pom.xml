@@ -53,9 +53,9 @@
 		<json-simple.version>1.1.1</json-simple.version>
 		<log4j.version>2.13.3</log4j.version>
 		<slf4j.version>1.7.30</slf4j.version>
-		<solr.version>4.10.4</solr.version>
+		<solr.version>8.5.2</solr.version>
 		<tomcat.version>9.0.36</tomcat.version>
-		<!-- This xerces version needs to be added explicitly because otherwise
+		<!-- This xerces version needs to be added explicitly because otherwise 
 			Solr will use an older one that's incompatible -->
 		<xerces.version>2.12.0</xerces.version>
 		<!-- This xml-apis version is needed with this xerxes version -->
@@ -217,26 +217,26 @@
 	<build>
 		<finalName>M2M</finalName>
 		<plugins>
-                        <plugin>
-                                <groupId>org.apache.maven.plugins</groupId>
-                                <artifactId>maven-enforcer-plugin</artifactId>
-                                <version>3.0.0-M3</version>
-                                <executions>
-                                        <execution>
-                                                <id>enforce-maven</id>
-                                                <goals>
-                                                        <goal>enforce</goal>
-                                                </goals>
-                                                <configuration>
-                                                        <rules>
-                                                                <requireMavenVersion>
-                                                                        <version>3.3.9</version>
-                                                                </requireMavenVersion>
-                                                        </rules>
-                                                </configuration>
-                                        </execution>
-                                </executions>
-                        </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>3.0.0-M3</version>
+				<executions>
+					<execution>
+						<id>enforce-maven</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireMavenVersion>
+									<version>3.3.9</version>
+								</requireMavenVersion>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.1</version>
@@ -254,7 +254,6 @@
 					<wtpversion>2.0</wtpversion>
 					<wtpContextName>M2M</wtpContextName>
 					<packagingExcludes>**/rebel.xml</packagingExcludes>
-					<packagingExcludes>WEB-INF/lib/zookeeper-*.jar</packagingExcludes>
 					<archive>
 						<addMavenDescriptor>false</addMavenDescriptor>
 						<manifestEntries>
@@ -315,21 +314,21 @@
 					</execution>
 				</executions>
 			</plugin>
-                        <plugin>
-                                <groupId>org.apache.maven.plugins</groupId>
-                                <artifactId>maven-javadoc-plugin</artifactId>
-                                <version>3.1.1</version>
-                                <configuration>
-                                        <doclint>none</doclint>
-                                        <fixTags>link,throws,return,param</fixTags>
-                                        <tags>
-                                                <tag>
-                                                        <name>should</name>
-                                                        <placement>X</placement>
-                                                </tag>
-                                        </tags>
-                                </configuration>
-                        </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.1.1</version>
+				<configuration>
+					<doclint>none</doclint>
+					<fixTags>link,throws,return,param</fixTags>
+					<tags>
+						<tag>
+							<name>should</name>
+							<placement>X</placement>
+						</tag>
+					</tags>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>versions-maven-plugin</artifactId>

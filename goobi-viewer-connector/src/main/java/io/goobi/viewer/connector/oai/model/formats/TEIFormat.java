@@ -262,7 +262,7 @@ public class TEIFormat extends Format {
      * Modified header generation where identifers also contain the language code.
      */
     protected static Element getHeader(SolrDocument doc, SolrDocument topstructDoc, RequestHandler handler, String requestedVersion)
-            throws SolrServerException {
+            throws SolrServerException, IOException {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element header = new Element("header", xmlns);
         // identifier

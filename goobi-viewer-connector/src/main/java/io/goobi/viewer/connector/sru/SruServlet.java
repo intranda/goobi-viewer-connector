@@ -201,9 +201,10 @@ public class SruServlet extends HttpServlet {
      * @param solr
      * @return
      * @throws SolrServerException
+     * @throws IOException
      */
     private static Element generateSearchRetrieve(SruRequestParameter parameter, HttpServletRequest request, SolrSearchIndex solr)
-            throws SolrServerException {
+            throws SolrServerException, IOException {
         Element root = new Element("searchRetrieveResponse", SRU_NAMESPACE);
         Element version = new Element("version", SRU_NAMESPACE);
         version.setText(parameter.getVersion());
@@ -380,9 +381,10 @@ public class SruServlet extends HttpServlet {
      * @param solrDocuments
      * @param parameter
      * @throws SolrServerException
+     * @throws IOException
      */
     private static void generateRecords(Element records, List<SolrDocument> solrDocuments, SruRequestParameter parameter, HttpServletRequest request,
-            SolrSearchIndex solr) throws SolrServerException {
+            SolrSearchIndex solr) throws SolrServerException, IOException {
         if (solrDocuments == null || solrDocuments.isEmpty()) {
             return;
         }
@@ -462,8 +464,9 @@ public class SruServlet extends HttpServlet {
      * @param document
      * @param recordData
      * @throws SolrServerException
+     * @throws IOException
      */
-    private static void generateDcRecord(SolrDocument doc, Element recordData, SolrSearchIndex solr) throws SolrServerException {
+    private static void generateDcRecord(SolrDocument doc, Element recordData, SolrSearchIndex solr) throws SolrServerException, IOException {
         Element dc = new Element("record", DC_NAMEPSACE);
 
         String title = null;
@@ -594,7 +597,7 @@ public class SruServlet extends HttpServlet {
         recordData.addContent(dc);
     }
 
-    private static String getAnchorTitle(SolrDocument doc, SolrSearchIndex solr) throws SolrServerException {
+    private static String getAnchorTitle(SolrDocument doc, SolrSearchIndex solr) throws SolrServerException, IOException {
         String iddocParent = (String) doc.getFieldValue(SolrConstants.IDDOC_PARENT);
         SolrDocumentList hits = solr.search(SolrConstants.IDDOC + ":" + iddocParent);
         if (hits != null && !hits.isEmpty()) {
