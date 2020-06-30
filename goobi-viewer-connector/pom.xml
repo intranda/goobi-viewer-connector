@@ -33,7 +33,7 @@
 		<skipTests>false</skipTests>
 
 		<!-- Manifest information -->
-		<maven.build.timestamp.format>yyyy-MM-dd_HH-mm</maven.build.timestamp.format>
+		<maven.build.timestamp.format>yyyy-MM-dd HH-mm</maven.build.timestamp.format>
 		<buildDate>${maven.build.timestamp}</buildDate>
 
 		<commons-cli.version>1.4</commons-cli.version>
@@ -50,7 +50,6 @@
 		<jdom2.version>2.0.6</jdom2.version>
 		<joda-time.version>2.10.6</joda-time.version>
 		<junit.version>4.13</junit.version>
-		<json-simple.version>1.1.1</json-simple.version>
 		<log4j.version>2.13.3</log4j.version>
 		<slf4j.version>1.7.30</slf4j.version>
 		<solr.version>8.5.2</solr.version>
@@ -143,11 +142,6 @@
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
 			<version>${joda-time.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.googlecode.json-simple</groupId>
-			<artifactId>json-simple</artifactId>
-			<version>${json-simple.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -257,7 +251,7 @@
 					<archive>
 						<addMavenDescriptor>false</addMavenDescriptor>
 						<manifestEntries>
-							<ApplicationName>Goobi-viewer-connector</ApplicationName>
+							<ApplicationName>goobi-viewer-connector</ApplicationName>
 							<version>${project.version}</version>
 							<Implementation-Version>${buildNumber}</Implementation-Version>
 							<Implementation-Build-Date>${buildDate}</Implementation-Build-Date>
