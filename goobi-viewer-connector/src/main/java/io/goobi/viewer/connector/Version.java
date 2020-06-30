@@ -83,7 +83,7 @@ public class Version {
     public static String asJSON() {
         return new JSONObject().put("application", APPLICATION)
                 .put("version", VERSION)
-                .put("build.date", BUILDDATE)
+                .put("build-date", BUILDDATE)
                 .put("git-revision", BUILDVERSION)
                 .toString();
     }
