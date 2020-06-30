@@ -12,12 +12,17 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
 
 /**
- * <p>Version class.</p>
+ * <p>
+ * Version class.
+ * </p>
  *
  */
 public class Version {
+    /** Constant <code>APPLICATION</code> */
+    public final static String APPLICATION;
     /** Constant <code>VERSION</code> */
     public final static String VERSION;
     /** Constant <code>BUILDVERSION</code> */
@@ -28,10 +33,12 @@ public class Version {
     static {
         String manifest = getManifestStringFromJar();
         if (StringUtils.isNotBlank(manifest)) {
-            VERSION = getInfo("ApplicationName", manifest) + " " + getInfo("version", manifest);
+            APPLICATION = getInfo("ApplicationName", manifest);
+            VERSION = getInfo("version", manifest);
             BUILDDATE = getInfo("Implementation-Build-Date", manifest);
             BUILDVERSION = getInfo("Implementation-Version", manifest);
         } else {
+            APPLICATION = "goobi-viewer-connector";
             VERSION = "unknown";
             BUILDDATE = new Date().toString();
             BUILDVERSION = "unknown";
@@ -49,7 +56,7 @@ public class Version {
             manifestPath = classPath.substring(0, classPath.lastIndexOf("/WEB-INF/")) + "/META-INF/MANIFEST.MF";
         } else {
             // Eclipse WTP
-             manifestPath = classPath.substring(0, classPath.lastIndexOf("/classes/")) + "/m2e-wtp/web-resources/META-INF/MANIFEST.MF";
+            manifestPath = classPath.substring(0, classPath.lastIndexOf("/classes/")) + "/m2e-wtp/web-resources/META-INF/MANIFEST.MF";
         }
         try (InputStream inputStream = new URL(manifestPath).openStream()) {
             StringWriter writer = new StringWriter();
@@ -71,6 +78,14 @@ public class Version {
             return matcher.group(1);
         }
         return "?";
+    }
+
+    public static String asJSON() {
+        return new JSONObject().put("application", APPLICATION)
+                .put("version", VERSION)
+                .put("build.date", BUILDDATE)
+                .put("git-revision", BUILDVERSION)
+                .toString();
     }
 
 }

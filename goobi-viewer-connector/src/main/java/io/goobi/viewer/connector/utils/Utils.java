@@ -218,7 +218,7 @@ public class Utils {
      * @return a {@link java.lang.String} object.
      */
     public static String getVersion() {
-        return Version.VERSION + "-" + Version.BUILDDATE + "-" + Version.BUILDVERSION;
+        return Version.asJSON();
     }
 
     /**
