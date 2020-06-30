@@ -55,8 +55,6 @@
 		<slf4j.version>1.7.30</slf4j.version>
 		<solr.version>8.5.2</solr.version>
 		<tomcat.version>9.0.36</tomcat.version>
-		<!-- This xerces version needs to be added explicitly because otherwise 
-			Solr will use an older one that's incompatible -->
 		<xerces.version>2.12.0</xerces.version>
 		<!-- This xml-apis version is needed with this xerxes version -->
 		<xml-apis.version>1.4.01</xml-apis.version>
@@ -336,7 +334,24 @@
 				<configuration>
 					<rulesUri>file://${basedir}/version-number-rules.xml</rulesUri>
 				</configuration>
-			</plugin>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.1.1</version>
+                <executions>
+                    <execution>
+                        <id>analyze</id>
+                        <goals>
+                            <goal>analyze-only</goal>
+                        </goals>
+                        <configuration>
+                            <failOnWarning>false</failOnWarning>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 	</build>
 </project>
