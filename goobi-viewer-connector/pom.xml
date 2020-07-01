@@ -255,7 +255,7 @@
 					<archive>
 						<addMavenDescriptor>false</addMavenDescriptor>
 						<manifestEntries>
-							<ApplicationName>goobi-viewer-connector</ApplicationName>
+							<ApplicationName>Goobi viewer Connector</ApplicationName>
 							<version>${project.version}</version>
 							<Implementation-Version>${buildNumber}</Implementation-Version>
 							<Implementation-Build-Date>${buildDate}</Implementation-Build-Date>
