@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -42,6 +43,8 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -309,5 +312,29 @@ public class Utils {
         }
 
         return datestamp;
+    }
+
+    /**
+     * 
+     * @param json JSON string
+     * @return Version information as a single line string
+     * @should format string correctly
+     */
+    public static String formatVersionString(String json) {
+        final String notAvailableKey = "admin__dashboard_versions_not_available";
+
+        if (StringUtils.isEmpty(json)) {
+            return "NOT AVAILABLE";
+        }
+
+        JSONObject jsonObj = new JSONObject(json);
+        try {
+            return jsonObj.getString("application") + " " + jsonObj.getString("version")
+                    + " " + jsonObj.getString("build-date")
+                    + " " + jsonObj.getString("git-revision");
+        } catch (JSONException e) {
+            logger.error(e.getMessage());
+            return "NOT AVAILABLE";
+        }
     }
 }
