@@ -33,7 +33,7 @@
 		<skipTests>false</skipTests>
 
 		<!-- Manifest information -->
-		<maven.build.timestamp.format>yyyy-MM-dd HH-mm</maven.build.timestamp.format>
+		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 		<buildDate>${maven.build.timestamp}</buildDate>
 
 		<commons-cli.version>1.4</commons-cli.version>
