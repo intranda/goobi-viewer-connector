@@ -58,7 +58,7 @@
 		<xerces.version>2.12.0</xerces.version>
 		<!-- This xml-apis version is needed with this xerxes version -->
 		<xml-apis.version>1.4.01</xml-apis.version>
-		<xstream.version>1.4.11.1</xstream.version>
+		<xstream.version>1.4.12</xstream.version>
 	</properties>
 
 
