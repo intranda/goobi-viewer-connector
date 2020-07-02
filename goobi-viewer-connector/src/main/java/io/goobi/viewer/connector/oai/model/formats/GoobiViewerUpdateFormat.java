@@ -25,10 +25,8 @@ import org.apache.solr.common.SolrDocument;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,14 +77,9 @@ public class GoobiViewerUpdateFormat extends Format {
             JSONArray jsonArray = null;
             long totalHits = 0;
             if (StringUtils.isNotEmpty(rawJSON)) {
-                try {
-                    jsonArray = (JSONArray) new JSONParser().parse(rawJSON);
-                    totalHits = (long) jsonArray.get(0);
-                    jsonArray.remove(0);
-                } catch (ParseException e) {
-                    logger.error(e.getMessage());
-                    throw new IOException(e.getMessage());
-                }
+                jsonArray = new JSONArray(rawJSON);
+                totalHits = Long.valueOf(((int) jsonArray.get(0)));
+                jsonArray.remove(0);
             }
             if (totalHits == 0) {
                 return new ErrorCode().getNoRecordsMatch();
@@ -106,7 +99,6 @@ public class GoobiViewerUpdateFormat extends Format {
      */
     /** {@inheritDoc} */
     @Override
-    @SuppressWarnings("unchecked")
     public Element createGetRecord(RequestHandler handler) {
         logger.trace("createGetRecord: {}", handler.getIdentifier());
         if (handler.getIdentifier() == null) {
@@ -146,7 +138,7 @@ public class GoobiViewerUpdateFormat extends Format {
             JSONArray jsonArray = new JSONArray();
             JSONObject jsonObj = new JSONObject();
             jsonObj.put("id", handler.getIdentifier());
-            jsonArray.add(jsonObj);
+            jsonArray.put(jsonObj);
             return generateGoobiViewerUpdates(jsonArray, 1L, 0, 1, handler, "GetRecord");
         } catch (IOException e) {
             return new ErrorCode().getIdDoesNotExist();
@@ -187,8 +179,8 @@ public class GoobiViewerUpdateFormat extends Format {
         Element xmlListRecords = new Element(recordType, xmlns);
 
         int useNumRows = numRows;
-        if (jsonArray.size() < useNumRows) {
-            useNumRows = jsonArray.size();
+        if (jsonArray.length() < useNumRows) {
+            useNumRows = jsonArray.length();
         }
         StringBuilder sbUrlRoot = new StringBuilder(DataManager.getInstance().getConfiguration().getHarvestUrl()).append('?');
         if (handler.getFrom() != null) {
@@ -199,7 +191,7 @@ public class GoobiViewerUpdateFormat extends Format {
         }
         sbUrlRoot.append("&identifier=");
         String urlRoot = sbUrlRoot.toString();
-        for (int i = 0; i < jsonArray.size(); ++i) {
+        for (int i = 0; i < jsonArray.length(); ++i) {
             JSONObject jsonObj = (JSONObject) jsonArray.get(i);
             String identifier = (String) jsonObj.get("id");
 
@@ -296,13 +288,8 @@ public class GoobiViewerUpdateFormat extends Format {
         try {
             String rawJSON = Utils.getWebContentGET(url);
             if (StringUtils.isNotEmpty(rawJSON)) {
-                try {
-                    JSONArray jsonArray = (JSONArray) new JSONParser().parse(rawJSON);
-                    return (long) jsonArray.get(0);
-                } catch (ParseException e) {
-                    logger.error(e.getMessage());
-                    throw new IOException(e.getMessage());
-                }
+                JSONArray jsonArray = new JSONArray(rawJSON);
+                return Long.valueOf((int) jsonArray.get(0));
             }
         } catch (HTTPException e) {
             throw new IOException(e.getCode() + ": " + e.getMessage());

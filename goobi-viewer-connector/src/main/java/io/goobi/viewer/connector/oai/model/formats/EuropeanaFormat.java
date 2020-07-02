@@ -47,7 +47,7 @@ public class EuropeanaFormat extends OAIDCFormat {
     /** {@inheritDoc} */
     @Override
     public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
-            throws SolrServerException {
+            throws SolrServerException, IOException {
         QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false,
                 SolrSearchIndex.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes()), null);
         if (qr.getResults().isEmpty()) {
@@ -89,9 +89,10 @@ public class EuropeanaFormat extends OAIDCFormat {
      * @param recordType
      * @return
      * @throws SolrServerException
+     * @throws IOException
      */
     private Element generateESE(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler, String recordType)
-            throws SolrServerException {
+            throws SolrServerException, IOException {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Namespace nsDc = Namespace.getNamespace(Metadata.dc.getMetadataNamespacePrefix(), Metadata.dc.getMetadataNamespaceUri());
         Namespace nsDcTerms = Namespace.getNamespace("dcterms", "http://purl.org/dc/terms/");

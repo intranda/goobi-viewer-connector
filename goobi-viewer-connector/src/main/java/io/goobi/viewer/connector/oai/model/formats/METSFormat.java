@@ -54,7 +54,7 @@ public class METSFormat extends Format {
     /** {@inheritDoc} */
     @Override
     public Element createListIdentifiers(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
-            throws SolrServerException {
+            throws SolrServerException, IOException {
         Map<String, String> datestamp = Utils.filterDatestampFromRequest(handler);
 
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
@@ -105,8 +105,6 @@ public class METSFormat extends Format {
             return new ErrorCode().getIdDoesNotExist();
         } catch (JDOMException e) {
             return new ErrorCode().getCannotDisseminateFormat();
-        } catch (HTTPException e) {
-            return new ErrorCode().getIdDoesNotExist();
         }
     }
 
@@ -133,8 +131,6 @@ public class METSFormat extends Format {
             return new ErrorCode().getCannotDisseminateFormat();
         } catch (SolrServerException e) {
             return new ErrorCode().getIdDoesNotExist();
-        } catch (HTTPException e) {
-            return new ErrorCode().getIdDoesNotExist();
         }
     }
 
@@ -154,7 +150,7 @@ public class METSFormat extends Format {
      * @throws HTTPException
      */
     private static Element generateMets(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler,
-            String recordType) throws JDOMException, IOException, SolrServerException, HTTPException {
+            String recordType) throws JDOMException, IOException, SolrServerException {
         logger.trace("generateMets");
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element xmlListRecords = new Element(recordType, xmlns);
@@ -177,7 +173,13 @@ public class METSFormat extends Format {
                 continue;
             }
             String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl()).append(pi).toString();
-            String xml = Utils.getWebContentGET(url);
+            String xml = null;
+            try {
+                xml = Utils.getWebContentGET(url);
+            } catch (HTTPException e) {
+                xmlListRecords.addContent(new ErrorCode().getIdDoesNotExist());
+                continue;
+            }
             if (StringUtils.isEmpty(xml)) {
                 xmlListRecords.addContent(new ErrorCode().getIdDoesNotExist());
                 continue;

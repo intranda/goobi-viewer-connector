@@ -68,8 +68,6 @@ public class LIDOFormat extends Format {
             return new ErrorCode().getIdDoesNotExist();
         } catch (JDOMException e) {
             return new ErrorCode().getCannotDisseminateFormat();
-        } catch (HTTPException e) {
-            return new ErrorCode().getIdDoesNotExist();
         }
     }
 
@@ -95,8 +93,6 @@ public class LIDOFormat extends Format {
             return new ErrorCode().getCannotDisseminateFormat();
         } catch (SolrServerException e) {
             return new ErrorCode().getIdDoesNotExist();
-        } catch (HTTPException e) {
-            return new ErrorCode().getIdDoesNotExist();
         }
     }
 
@@ -116,7 +112,7 @@ public class LIDOFormat extends Format {
      * @throws HTTPException
      */
     private static Element generateLido(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler,
-            String recordType) throws JDOMException, IOException, SolrServerException, HTTPException {
+            String recordType) throws JDOMException, IOException, SolrServerException {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element xmlListRecords = new Element(recordType, xmlns);
 
@@ -135,7 +131,13 @@ public class LIDOFormat extends Format {
                 continue;
             }
             String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl()).append(pi).toString();
-            String xml = Utils.getWebContentGET(url);
+            String xml = null;
+            try {
+                xml = Utils.getWebContentGET(url);
+            } catch (HTTPException e) {
+                xmlListRecords.addContent(new ErrorCode().getIdDoesNotExist());
+                continue;
+            }
             if (StringUtils.isEmpty(xml)) {
                 xmlListRecords.addContent(new ErrorCode().getIdDoesNotExist());
                 continue;

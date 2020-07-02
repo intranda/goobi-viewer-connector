@@ -35,7 +35,7 @@ public class ContextListener implements ServletContextListener {
     /** {@inheritDoc} */
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        logger.info(Utils.getVersion());
+        logger.info(Utils.formatVersionString(Utils.getVersion()));
     }
 
     /** {@inheritDoc} */

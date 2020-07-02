@@ -15,14 +15,12 @@
  */
 package io.goobi.viewer.connector;
 
-import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
-import io.goobi.viewer.connector.DataManager;
-import io.goobi.viewer.connector.utils.Configuration;
 import io.goobi.viewer.connector.utils.SolrSearchIndex;
 
 /**
@@ -30,48 +28,25 @@ import io.goobi.viewer.connector.utils.SolrSearchIndex;
  */
 public abstract class AbstractSolrEnabledTest extends AbstractTest {
 
-    private static final String CORE_NAME = "test-viewer";
-
-    // private static String solrPath = "/opt/digiverso/viewer/apache-solr/";
-    private static String solrUrl = "http://localhost:8080/solr";
-    // private static CoreContainer coreContainer;
+    private static final String SOLR_TEST_URL = "https://viewer-testing-index.goobi.io/solr/collection1";
 
     @BeforeClass
     public static void setUpClass() throws Exception {
         AbstractTest.setUpClass();
-
-        String os = System.getProperty("os.name").toLowerCase();
-        if (os.indexOf("win") >= 0) {
-            // solrPath = "C:/digiverso/viewer/apache-solr-test/";
-            solrUrl = "http://localhost:8081/solr";
-        }
-        //        File solrDir = new File(solrPath);
-        //        Assert.assertTrue("Solr folder not found in " + solrPath, solrDir.isDirectory());
-        //
-        //        coreContainer = new CoreContainer(solrPath);
-        //        coreContainer.load();
     }
 
     @Before
     public void setUp() throws Exception {
-        //        Assert.assertTrue("Core '" + CORE_NAME + "' is not loaded.", coreContainer.isLoaded(CORE_NAME));
-        //        EmbeddedSolrServer server = new EmbeddedSolrServer(coreContainer, CORE_NAME);
-        HttpSolrServer server = SolrSearchIndex.getNewHttpSolrServer(solrUrl + '/' + CORE_NAME);
-        DataManager.getInstance().injectSearchIndex(new SolrSearchIndex(server, true));
+        HttpSolrClient client = SolrSearchIndex.getNewHttpSolrClient(SOLR_TEST_URL);
+        DataManager.getInstance().injectSearchIndex(new SolrSearchIndex(client, true));
     }
 
     @After
     public void tearDown() throws Exception {
-        //        if (coreContainer != null) {
-        //            coreContainer.getClass(); // random call so that there is no red PMD warning
-        //        }
     }
 
     @AfterClass
     public static void tearDownClass() throws Exception {
         AbstractTest.tearDownClass();
-        //        if (coreContainer != null) {
-        //            coreContainer.shutdown();
-        //        }
     }
 }

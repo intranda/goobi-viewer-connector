@@ -51,10 +51,14 @@ public class EpicurFormat extends Format {
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String)
      */
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     * 
+     * @throws IOException
+     */
     @Override
     public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
-            throws SolrServerException {
+            throws SolrServerException, IOException {
         logger.trace("createListRecords");
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
 

@@ -44,7 +44,7 @@ public class SolrSearchIndexTest extends AbstractSolrEnabledTest {
      */
     @Test
     public void getSets_shouldReturnAllValues() throws Exception {
-        Assert.assertEquals(28, DataManager.getInstance()
+        Assert.assertEquals(42, DataManager.getInstance()
                 .getSearchIndex()
                 .getSets(SolrConstants.DC)
                 .size());
