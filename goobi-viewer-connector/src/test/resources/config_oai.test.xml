@@ -84,6 +84,9 @@
             <field>DC</field>
             <field>DOCSTRCT</field>
         </setSpec>
+        <accessConditions>
+            <mapping accessCondition="Public Domain Mark 1.0">info:eu-repo/semantics/openAccess</mapping>
+        </accessConditions>
     </oai_dc>
 
 	<!-- ese: Value configuration for mandatory ESE fields -->

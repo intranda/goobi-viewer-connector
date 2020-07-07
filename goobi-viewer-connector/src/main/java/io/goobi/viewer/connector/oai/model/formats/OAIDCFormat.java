@@ -18,8 +18,10 @@ package io.goobi.viewer.connector.oai.model.formats;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.ClientProtocolException;
@@ -208,11 +210,12 @@ public class OAIDCFormat extends Format {
         boolean isWork = doc.getFieldValue(SolrConstants.ISWORK) != null && (boolean) doc.getFieldValue(SolrConstants.ISWORK);
         boolean isAnchor = doc.getFieldValue(SolrConstants.ISANCHOR) != null && (boolean) doc.getFieldValue(SolrConstants.ISANCHOR);
         boolean openAccess = true;
+        Set<String> accessConditions = new HashSet<>();
         if (doc.getFieldValues(SolrConstants.ACCESSCONDITION) != null) {
             for (Object o : doc.getFieldValues(SolrConstants.ACCESSCONDITION)) {
+                accessConditions.add((String) o);
                 if (!SolrConstants.OPEN_ACCESS_VALUE.equals(o)) {
                     openAccess = false;
-                    break;
                 }
             }
         }
@@ -290,9 +293,16 @@ public class OAIDCFormat extends Format {
                             break;
                         case "rights":
                             if (openAccess) {
-                                val = "info:eu-repo/semantics/openAccess";
+                                val = ACCESSCONDITION_OPENACCESS;
                             } else {
-                                val = "info:eu-repo/semantics/closedAccess";
+                                for (String accessCondition : accessConditions) {
+                                    val = DataManager.getInstance()
+                                            .getConfiguration()
+                                            .getAccessConditionMappingForMetadataFormat(Metadata.oai_dc.name(), accessCondition);
+                                }
+                                if (StringUtils.isEmpty(val)) {
+                                    val = ACCESSCONDITION_CLOSEDACCESS;
+                                }
                             }
                             finishedValues.add(val);
                             break;

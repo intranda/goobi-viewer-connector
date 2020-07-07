@@ -73,6 +73,9 @@ public abstract class Format {
     /** Constant <code>XSI</code> */
     protected static final Namespace XSI = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
 
+    public static final String ACCESSCONDITION_OPENACCESS = "info:eu-repo/semantics/openAccess";
+    public static final String ACCESSCONDITION_CLOSEDACCESS = "info:eu-repo/semantics/closedAccess";
+
     /** Constant <code>expiration=259200000L</code> */
     protected static long expiration = 259200000L; // 3 days
 
