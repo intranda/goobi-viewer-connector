@@ -84,7 +84,7 @@
 	<harvestUrl>http://localhost:8080/viewer/harvest</harvestUrl>
 
 	<!-- restApiUrl: Goobi viewer REST API for full-text/ALTO/TEI/CMDI and TOC retrieval -->
-	<restApiUrl>http://localhost:8080/viewer/rest/</restApiUrl>
+	<restApiUrl>http://localhost:8080/viewer/api/v1/</restApiUrl>
 
 	<!-- fulltextUrl: URL for a single plain full-text page; contains placeholders
 		for PI and page number; can be used for REST or older ContentServlet URLs.

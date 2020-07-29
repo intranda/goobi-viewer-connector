@@ -449,5 +449,9 @@ public class ConfigurationTest extends AbstractTest {
                 DataManager.getInstance()
                         .getConfiguration()
                         .getAccessConditionMappingForMetadataFormat(Metadata.oai_dc.name(), "Public Domain Mark 1.0"));
+        Assert.assertEquals(Format.ACCESSCONDITION_OPENACCESS,
+                DataManager.getInstance()
+                        .getConfiguration()
+                        .getAccessConditionMappingForMetadataFormat(Metadata.oai_dc.name(), "Rechte vorbehalten - Freier Zugang"));
     }
 }

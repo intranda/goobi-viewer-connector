@@ -337,9 +337,16 @@ public class OAIDCFormat extends Format {
                     }
 
                     try {
-                        String url = DataManager.getInstance().getConfiguration().getRestApiUrl() + "records/toc/"
-                                + (String) doc.getFieldValue(SolrConstants.PI) + "/";
+                        String url = DataManager.getInstance().getConfiguration().getRestApiUrl() + "records/"
+                                + (String) doc.getFieldValue(SolrConstants.PI) + "/toc/";
                         String val = Utils.getWebContentGET(url);
+                        if (StringUtils.isEmpty(val)) {
+                            // Old API fallback
+                            url = DataManager.getInstance().getConfiguration().getRestApiUrl() + "records/toc/"
+                                    + (String) doc.getFieldValue(SolrConstants.PI) + "/";
+                            val = Utils.getWebContentGET(url);
+                        }
+
                         if (StringUtils.isNotEmpty(val)) {
                             finishedValues.add(val);
                         }

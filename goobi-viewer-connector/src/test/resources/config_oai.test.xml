@@ -86,6 +86,7 @@
         </setSpec>
         <accessConditions>
             <mapping accessCondition="Public Domain Mark 1.0">info:eu-repo/semantics/openAccess</mapping>
+            <mapping accessCondition="Rechte vorbehalten - Freier Zugang">info:eu-repo/semantics/openAccess</mapping>
         </accessConditions>
     </oai_dc>
 

@@ -184,15 +184,31 @@ public class TEIFormat extends Format {
                 }
                 for (String version : versions) {
                     virtualHitCount++; // Count hit even if the XML file is ultimately unavailable
-                    String url = new StringBuilder(DataManager.getInstance().getConfiguration().getContentApiUrl())
-                            .append(handler.getMetadataPrefix().getMetadataPrefix())
-                            .append('/')
+                    String url = new StringBuilder(DataManager.getInstance().getConfiguration().getRestApiUrl())
+                            .append("records/")
                             .append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))
+                            .append('/')
+                            .append(handler.getMetadataPrefix().getMetadataPrefix())
                             .append('/')
                             .append(version)
                             .append('/')
                             .toString();
+                    logger.trace("api url: {}", url);
                     String xml = Utils.getWebContentGET(url);
+                    if (StringUtils.isEmpty(xml)) {
+                        // Old API fallback
+                        url = new StringBuilder(DataManager.getInstance().getConfiguration().getRestApiUrl())
+                                .append("content/")
+                                .append(handler.getMetadataPrefix().getMetadataPrefix())
+                                .append('/')
+                                .append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))
+                                .append('/')
+                                .append(version)
+                                .append('/')
+                                .toString();
+                        logger.trace("old url: {}", url);
+                        xml = Utils.getWebContentGET(url);
+                    }
                     if (StringUtils.isEmpty(xml)) {
                         xmlListRecords.addContent(new ErrorCode().getCannotDisseminateFormat());
                         continue;

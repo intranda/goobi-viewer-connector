@@ -450,18 +450,6 @@ public final class Configuration {
 
     /**
      * <p>
-     * getContentApiUrl.
-     * </p>
-     *
-     * @return Content file REST API URL
-     * @should return correct value
-     */
-    public String getContentApiUrl() {
-        return getRestApiUrl() + "content/";
-    }
-
-    /**
-     * <p>
      * getRestApiUrl.
      * </p>
      *
