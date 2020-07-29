@@ -321,7 +321,7 @@ public class OAIDCFormat extends Format {
                                 continue;
                             }
                             for (Element oai_fulltext : generateFulltextUrls((String) topstructDoc.getFieldValue(SolrConstants.PI_TOPSTRUCT),
-                                    (String) topstructDoc.getFieldValue(SolrConstants.DATAREPOSITORY), nsDc)) {
+                                    nsDc)) {
                                 oai_dc.addContent(oai_fulltext);
                             }
                             break;
@@ -561,11 +561,10 @@ public class OAIDCFormat extends Format {
      * @param namespace a {@link org.jdom2.Namespace} object.
      * @throws org.apache.solr.client.solrj.SolrServerException
      * @param pi a {@link java.lang.String} object.
-     * @param dataRepository a {@link java.lang.String} object.
      * @return a {@link java.util.List} object.
      * @throws IOException
      */
-    protected static List<Element> generateFulltextUrls(String pi, String dataRepository, Namespace namespace)
+    protected static List<Element> generateFulltextUrls(String pi, Namespace namespace)
             throws SolrServerException, IOException {
         if (pi == null) {
             throw new IllegalArgumentException("pi may not be null");
@@ -580,9 +579,6 @@ public class OAIDCFormat extends Format {
         Collections.sort(orderedPageList);
 
         String urlTemplate = DataManager.getInstance().getConfiguration().getFulltextUrl().replace("{pi}", pi);
-        if (dataRepository != null) {
-            urlTemplate = urlTemplate.replace("{dataRepository}", dataRepository);
-        }
         List<Element> ret = new ArrayList<>(orderedPageList.size());
         for (int i : orderedPageList) {
             String filePath = fulltextFilePaths.get(i); // file path relative to the data repository (Goobi viewer 3.2 and later)
@@ -590,7 +586,7 @@ public class OAIDCFormat extends Format {
                 continue;
             }
             String fileName = filePath.substring(filePath.lastIndexOf('/') + 1); // pure file name
-            String url = urlTemplate.replace("{page}", String.valueOf(i)).replace("{filePath}", filePath).replace("{fileName}", fileName);
+            String url = urlTemplate.replace("{page}", String.valueOf(i)).replace("{fileName}", fileName);
             Element dc_fulltext = new Element("source", namespace);
             dc_fulltext.setText(url);
             ret.add(dc_fulltext);

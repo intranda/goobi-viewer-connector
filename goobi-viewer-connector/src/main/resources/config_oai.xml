@@ -89,12 +89,10 @@
 	<!-- fulltextUrl: URL for a single plain full-text page; contains placeholders
 		for PI and page number; can be used for REST or older ContentServlet URLs.
 		Allowed placeholders:
-		  {dataRepository} (e.g. '1'),
 		  {pi} (e.g 'PPN123456789'),
 		  {fileName} (e.g. '00000001.txt'),
-		  {filePath} (e.g 'fulltext_crowd/PPN123456789/00000001.txt'),
 		  {page} (e.g. '1') -->
-	<fulltextUrl>http://localhost:8080/viewer/rest/content/fulltext/{pi}/{fileName}/</fulltextUrl>
+	<fulltextUrl>http://localhost:8080/viewer/api/v1/records/{pi}/files/plaintext/{fileName}/</fulltextUrl>
 
 
 	<oai_dc>
