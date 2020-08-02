@@ -32,8 +32,6 @@ public class MetadataValue implements Serializable {
 
     private static final long serialVersionUID = -3162322038017977356L;
 
-    private static final Logger logger = LoggerFactory.getLogger(MetadataValue.class);
-
     private final List<String> paramLabels = new ArrayList<>();
 
     /**

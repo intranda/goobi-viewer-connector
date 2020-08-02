@@ -30,8 +30,6 @@ public class Metadata implements Serializable {
 
     private static final long serialVersionUID = 4346850402844125222L;
 
-    private static final Logger logger = LoggerFactory.getLogger(Metadata.class);
-
     /** Label from messages.properties. */
     private final String label;
     /** Value from messages.properties (with placeholders) */

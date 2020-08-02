@@ -28,8 +28,6 @@ import io.goobi.viewer.connector.utils.SolrSearchIndex;
  */
 public final class DataManager {
 
-    private static final Logger logger = LoggerFactory.getLogger(DataManager.class);
-
     private static final Object lock = new Object();
 
     private static volatile DataManager instance = null;
