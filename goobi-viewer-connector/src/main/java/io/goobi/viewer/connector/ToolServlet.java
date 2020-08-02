@@ -66,8 +66,12 @@ public class ToolServlet extends HttpServlet {
         switch (action) {
             case "getVersion":
                 response.setContentType("text/html"); {
-                ServletOutputStream output = response.getOutputStream();
-                output.write(Utils.getVersion().getBytes(StandardCharsets.UTF_8));
+                try {
+                    ServletOutputStream output = response.getOutputStream();
+                    output.write(Utils.getVersion().getBytes(StandardCharsets.UTF_8));
+                }
+                catch (IOException e) {
+                }
             }
                 break;
         }
@@ -79,6 +83,10 @@ public class ToolServlet extends HttpServlet {
     /** {@inheritDoc} */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doGet(req, resp);
+        try {
+            doGet(req, resp);
+        }
+        catch (ServletException | IOException e) {
+        }
     }
 }

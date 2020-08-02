@@ -127,9 +127,12 @@ public class OaiServlet extends HttpServlet {
             else if (handler.getVerb().equals(Verb.Identify)) {
                 try {
                     root.addContent(Format.getIdentifyXML());
-                } catch (SolrServerException e) {
+                } catch (IOException | SolrServerException e) {
                     logger.error(e.getMessage(), e);
-                    res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                    try {
+                        res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                    } catch (IOException e1) {
+                    }
                     return;
                 }
             }
@@ -149,13 +152,19 @@ public class OaiServlet extends HttpServlet {
                                 .getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().name());
                         Format format = Format.getFormatByMetadataPrefix(handler.getMetadataPrefix());
                         if (format != null) {
-                            root.addContent(format.createListIdentifiers(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
+                            try {
+                                root.addContent(format.createListIdentifiers(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
+                            } catch (IOException e) {
+                            }
                         } else {
                             root.addContent(new ErrorCode().getBadArgument());
                         }
                     } catch (SolrServerException e) {
                         logger.error(e.getMessage(), e);
-                        res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                        try {
+                            res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                        } catch (IOException e1) {
+                        }
                         return;
                     }
                 }
@@ -182,13 +191,19 @@ public class OaiServlet extends HttpServlet {
                         logger.trace(handler.getMetadataPrefix().getMetadataPrefix());
                         Format format = Format.getFormatByMetadataPrefix(handler.getMetadataPrefix());
                         if (format != null) {
-                            root.addContent(format.createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
+                            try {
+                                root.addContent(format.createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
+                            } catch (IOException e) {
+                            }
                         } else {
                             root.addContent(new ErrorCode().getBadArgument());
                         }
                     } catch (SolrServerException e) {
                         logger.error(e.getMessage(), e);
-                        res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                        try {
+                            res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                        } catch (IOException e1) {
+                        }
                         return;
                     }
                 }
@@ -213,9 +228,12 @@ public class OaiServlet extends HttpServlet {
             } else if (handler.getVerb().equals(Verb.ListSets)) {
                 try {
                     root.addContent(Format.createListSets(DataManager.getInstance().getConfiguration().getDefaultLocale())); // TODO
-                } catch (SolrServerException e) {
+                } catch (IOException | SolrServerException e) {
                     logger.error(e.getMessage(), e);
-                    res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                    try {
+                        res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                    } catch (IOException e1) {
+                    }
                     return;
                 }
             } else {
@@ -230,10 +248,16 @@ public class OaiServlet extends HttpServlet {
             String ueblerhack = xmlOut.outputString(doc);
             ueblerhack = ueblerhack.replace("<epicur", "<epicur xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
             res.setCharacterEncoding("utf-8");
-            ServletOutputStream out = res.getOutputStream();
-            out.print(ueblerhack);
+            try {
+                ServletOutputStream out = res.getOutputStream();
+                out.print(ueblerhack);
+            } catch (IOException e) {
+            }
         } else {
-            xmlOut.output(doc, res.getOutputStream());
+            try {
+                xmlOut.output(doc, res.getOutputStream());
+            } catch (IOException e) {
+            }
         }
 
     }
@@ -322,6 +346,9 @@ public class OaiServlet extends HttpServlet {
     /** {@inheritDoc} */
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-        doGet(req, res);
+        try {
+            doGet(req, res);
+        } catch (ServletException | IOException e) {
+        }
     }
 }
