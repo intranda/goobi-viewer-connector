@@ -120,7 +120,7 @@ public class MessageResourceBundle extends ResourceBundle {
             // Remove leading SORT_
             if (key.startsWith("SORT_")) {
                 String newKey = key.replace("SORT_", "");
-                if (localBundle.containsKey("MD_" + newKey)) {
+                if (localBundle != null && localBundle.containsKey("MD_" + newKey)) {
                     return localBundle.getString("MD_" + newKey);
                 }
                 if (localBundle.containsKey(newKey)) {
@@ -130,7 +130,7 @@ public class MessageResourceBundle extends ResourceBundle {
             // Remove leading FACET_
             if (key.startsWith("FACET_")) {
                 String newKey = key.replace("FACET_", "");
-                if (localBundle.containsKey("MD_" + newKey)) {
+                if (localBundle != null && localBundle.containsKey("MD_" + newKey)) {
                     return localBundle.getString("MD_" + newKey);
                 }
                 if (localBundle.containsKey(newKey)) {
@@ -145,7 +145,7 @@ public class MessageResourceBundle extends ResourceBundle {
                 }
 
                 // Remove leading SORT_
-                if (key.startsWith("SORT_")) {
+                if (key != null && key.startsWith("SORT_")) {
                     String newKey = key.replace("SORT_", "");
                     if (globalBundle.containsKey("MD_" + newKey)) {
                         return globalBundle.getString("MD_" + newKey);
