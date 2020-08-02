@@ -17,6 +17,7 @@ package io.goobi.viewer.connector;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 import javax.servlet.ServletException;
@@ -67,7 +68,7 @@ public class ToolServlet extends HttpServlet {
             case "getVersion":
                 response.setContentType("text/html"); {
                 ServletOutputStream output = response.getOutputStream();
-                output.write(Utils.getVersion().getBytes(Charset.forName("utf-8")));
+                output.write(Utils.getVersion().getBytes(StandardCharsets.UTF_8));
             }
                 break;
         }

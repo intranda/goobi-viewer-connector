@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -60,7 +61,7 @@ public class Version {
         }
         try (InputStream inputStream = new URL(manifestPath).openStream()) {
             StringWriter writer = new StringWriter();
-            IOUtils.copy(inputStream, writer, "utf-8");
+            IOUtils.copy(inputStream, writer, StandardCharsets.UTF_8);
             String manifestString = writer.toString();
             value = manifestString;
         } catch (MalformedURLException e) {
