@@ -36,7 +36,7 @@ public class RequestHandler {
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
 
     /** Constant <code>formatter</code> */
-    public static DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss").withZoneUTC();
+    public static final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss").withZoneUTC();
 
     @XStreamAlias("verb")
     private Verb verb = null;
