@@ -132,6 +132,7 @@ public class OaiServlet extends HttpServlet {
                     try {
                         res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
                     } catch (IOException e1) {
+                        logger.error(e1.getMessage(), e1);
                     }
                     return;
                 }
@@ -155,6 +156,7 @@ public class OaiServlet extends HttpServlet {
                             try {
                                 root.addContent(format.createListIdentifiers(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
                             } catch (IOException e) {
+                                logger.error(e.getMessage(), e);
                             }
                         } else {
                             root.addContent(new ErrorCode().getBadArgument());
@@ -164,6 +166,7 @@ public class OaiServlet extends HttpServlet {
                         try {
                             res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
                         } catch (IOException e1) {
+                            logger.error(e1.getMessage(), e1);
                         }
                         return;
                     }
@@ -194,6 +197,7 @@ public class OaiServlet extends HttpServlet {
                             try {
                                 root.addContent(format.createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
                             } catch (IOException e) {
+                                logger.error(e.getMessage(), e);
                             }
                         } else {
                             root.addContent(new ErrorCode().getBadArgument());
@@ -203,6 +207,7 @@ public class OaiServlet extends HttpServlet {
                         try {
                             res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
                         } catch (IOException e1) {
+                            logger.error(e1.getMessage(), e1);
                         }
                         return;
                     }
@@ -233,6 +238,7 @@ public class OaiServlet extends HttpServlet {
                     try {
                         res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
                     } catch (IOException e1) {
+                        logger.error(e1.getMessage(), e1);
                     }
                     return;
                 }
@@ -252,11 +258,13 @@ public class OaiServlet extends HttpServlet {
                 ServletOutputStream out = res.getOutputStream();
                 out.print(ueblerhack);
             } catch (IOException e) {
+                logger.error(e.getMessage(), e);
             }
         } else {
             try {
                 xmlOut.output(doc, res.getOutputStream());
             } catch (IOException e) {
+                logger.error(e.getMessage(), e);
             }
         }
 
@@ -349,6 +357,7 @@ public class OaiServlet extends HttpServlet {
         try {
             doGet(req, res);
         } catch (ServletException | IOException e) {
+            logger.error(e.getMessage(), e);
         }
     }
 }
