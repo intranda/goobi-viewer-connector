@@ -302,7 +302,11 @@ public class XmlTools {
             JDOMSource docFrom = new JDOMSource(doc);
             JDOMResult docTo = new JDOMResult();
 
-            Transformer transformer = TransformerFactory.newInstance().newTransformer(new StreamSource(stylesheetPath));
+
+            TransformerFactory transformerFactory = javax.xml.transform.TransformerFactory.newInstance();
+            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+            Transformer transformer = transformerFactory.newTransformer(new StreamSource(stylesheetPath));
             if (params != null && !params.isEmpty()) {
                 for (String param : params.keySet()) {
                     transformer.setParameter(param, params.get(param));
