@@ -23,13 +23,13 @@ import org.json.JSONObject;
  */
 public class Version {
     /** Constant <code>APPLICATION</code> */
-    public final static String APPLICATION;
+    public static final String APPLICATION;
     /** Constant <code>VERSION</code> */
-    public final static String VERSION;
+    public static final String VERSION;
     /** Constant <code>BUILDVERSION</code> */
-    public final static String BUILDVERSION;
+    public static final String BUILDVERSION;
     /** Constant <code>BUILDDATE</code> */
-    public final static String BUILDDATE;
+    public static final String BUILDDATE;
 
     static {
         String manifest = getManifestStringFromJar();
