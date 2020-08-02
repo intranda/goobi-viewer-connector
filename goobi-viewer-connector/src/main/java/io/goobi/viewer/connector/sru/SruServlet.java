@@ -113,6 +113,7 @@ public class SruServlet extends HttpServlet {
                     try {
                         missingArgument(response, "query");
                     } catch (IOException e) {
+                        logger.error(e.getMessage(), e);
                     }
 
                     String queryString = request.getQueryString();
@@ -126,6 +127,7 @@ public class SruServlet extends HttpServlet {
                     try {
                         wrongSchema(response, request.getParameter("recordSchema"));
                     } catch (IOException e) {
+                        logger.error(e.getMessage(), e);
                     }
                     return;
                 }
@@ -137,6 +139,7 @@ public class SruServlet extends HttpServlet {
                     try {
                         response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Index unreachable");
                     } catch (IOException e1) {
+                        logger.error(e.getMessage(), e);
                     }
                     return;
                 }
@@ -152,6 +155,7 @@ public class SruServlet extends HttpServlet {
                     try {
                         missingArgument(response, "scanClause");
                     } catch (IOException e) {
+                        logger.error(e.getMessage(), e);
                     }
 
                     String queryString = request.getQueryString();
@@ -167,6 +171,7 @@ public class SruServlet extends HttpServlet {
                 try {
                     unsupportedOperation(response, "scan");
                 } catch (IOException e1) {
+                    logger.error(e.getMessage(), e);
                 }
                 return;
 
@@ -182,6 +187,7 @@ public class SruServlet extends HttpServlet {
         try {
             xmlOut.output(doc, response.getOutputStream());
         } catch (IOException e) {
+            logger.error(e.getMessage(), e);
         }
 
     }

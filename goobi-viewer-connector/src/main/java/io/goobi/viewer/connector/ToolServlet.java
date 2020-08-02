@@ -71,6 +71,7 @@ public class ToolServlet extends HttpServlet {
                     output.write(Utils.getVersion().getBytes(StandardCharsets.UTF_8));
                 }
                 catch (IOException e) {
+                    logger.error(e.getMessage(), e);
                 }
             }
                 break;
@@ -87,6 +88,7 @@ public class ToolServlet extends HttpServlet {
             doGet(req, resp);
         }
         catch (ServletException | IOException e) {
+            logger.error(e.getMessage(), e);
         }
     }
 }
