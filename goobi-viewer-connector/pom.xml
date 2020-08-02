@@ -166,7 +166,8 @@
 
 	<build>
 		<finalName>M2M</finalName>
-		<plugins>
+        <plugins>
+            <!-- used for mvn versions:display-plugin-updates -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
@@ -299,6 +300,7 @@
 					</execution>
 				</executions>
             </plugin>
+            <!-- used for mvn versions:display-dependency-updates -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>versions-maven-plugin</artifactId>
@@ -307,7 +309,7 @@
 					<rulesUri>file://${basedir}/version-number-rules.xml</rulesUri>
 				</configuration>
             </plugin>
-
+            <!-- used for mvn verify-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
