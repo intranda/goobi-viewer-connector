@@ -142,6 +142,7 @@ public class XmlTools {
         try {
             byteArray = string.getBytes(encoding);
         } catch (UnsupportedEncodingException e) {
+            logger.error(e.getMessage(), e);
         }
         ByteArrayInputStream baos = new ByteArrayInputStream(byteArray);
 

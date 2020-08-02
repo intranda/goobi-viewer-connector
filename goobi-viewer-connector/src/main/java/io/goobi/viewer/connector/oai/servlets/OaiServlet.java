@@ -153,15 +153,11 @@ public class OaiServlet extends HttpServlet {
                                 .getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().name());
                         Format format = Format.getFormatByMetadataPrefix(handler.getMetadataPrefix());
                         if (format != null) {
-                            try {
-                                root.addContent(format.createListIdentifiers(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
-                            } catch (IOException e) {
-                                logger.error(e.getMessage(), e);
-                            }
+                            root.addContent(format.createListIdentifiers(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
                         } else {
                             root.addContent(new ErrorCode().getBadArgument());
                         }
-                    } catch (SolrServerException e) {
+                    } catch (IOException | SolrServerException e) {
                         logger.error(e.getMessage(), e);
                         try {
                             res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -194,15 +190,11 @@ public class OaiServlet extends HttpServlet {
                         logger.trace(handler.getMetadataPrefix().getMetadataPrefix());
                         Format format = Format.getFormatByMetadataPrefix(handler.getMetadataPrefix());
                         if (format != null) {
-                            try {
-                                root.addContent(format.createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
-                            } catch (IOException e) {
-                                logger.error(e.getMessage(), e);
-                            }
+                            root.addContent(format.createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
                         } else {
                             root.addContent(new ErrorCode().getBadArgument());
                         }
-                    } catch (SolrServerException e) {
+                    } catch (IOException | SolrServerException e) {
                         logger.error(e.getMessage(), e);
                         try {
                             res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());

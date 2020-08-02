@@ -112,10 +112,8 @@ public class MessageResourceBundle extends ResourceBundle {
                 key = key.substring(0, key.length() - 1);
             }
 
-            if (localBundle != null) {
-                if (localBundle.containsKey(key)) {
-                    return localBundle.getString(key);
-                }
+            if (localBundle != null && localBundle.containsKey(key)) {
+                return localBundle.getString(key);
             }
             // Remove leading SORT_
             if (key.startsWith("SORT_")) {

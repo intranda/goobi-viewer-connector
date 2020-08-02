@@ -574,6 +574,7 @@ public abstract class Format {
                         count++;
                     }
                 } catch (FileNotFoundException e) {
+                    logger.error(e.getMessage(), e);
                 } catch (IOException e) {
                     logger.error(e.getMessage(), e);
                 }
