@@ -15,8 +15,6 @@
  */
 package io.goobi.viewer.connector.sru;
 
-import java.io.UnsupportedEncodingException;
-
 import java.nio.charset.StandardCharsets;
 
 import javax.servlet.http.HttpServletRequest;
