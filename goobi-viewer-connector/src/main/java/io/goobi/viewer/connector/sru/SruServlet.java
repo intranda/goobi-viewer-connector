@@ -139,7 +139,7 @@ public class SruServlet extends HttpServlet {
                     try {
                         response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Index unreachable");
                     } catch (IOException e1) {
-                        logger.error(e.getMessage(), e);
+                        logger.error(e1.getMessage(), e1);
                     }
                     return;
                 }
@@ -171,7 +171,7 @@ public class SruServlet extends HttpServlet {
                 try {
                     unsupportedOperation(response, "scan");
                 } catch (IOException e1) {
-                    logger.error(e.getMessage(), e);
+                    logger.error(e1.getMessage(), e1);
                 }
                 return;
 

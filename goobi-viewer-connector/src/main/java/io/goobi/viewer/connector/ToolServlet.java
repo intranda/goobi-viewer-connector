@@ -25,6 +25,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.goobi.viewer.connector.utils.Utils;
 
 /**
@@ -34,6 +37,8 @@ import io.goobi.viewer.connector.utils.Utils;
 public class ToolServlet extends HttpServlet {
 
     private static final long serialVersionUID = -3185526115340932005L;
+
+    private static final Logger logger = LoggerFactory.getLogger(ToolServlet.class);
 
     /* (non-Javadoc)
      * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
