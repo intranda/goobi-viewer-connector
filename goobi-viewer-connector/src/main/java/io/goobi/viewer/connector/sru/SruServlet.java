@@ -62,7 +62,7 @@ import io.goobi.viewer.connector.utils.XmlTools;
 public class SruServlet extends HttpServlet {
 
     private static final long serialVersionUID = -6396567784411891113L;
-    private final static Logger logger = LoggerFactory.getLogger(SruServlet.class);
+    private static final Logger logger = LoggerFactory.getLogger(SruServlet.class);
 
     private static final Namespace SRU_NAMESPACE = Namespace.getNamespace("srw", "http://www.loc.gov/zing/srw/");
     private static final Namespace EXPLAIN_NAMESPACE = Namespace.getNamespace("ns", "http://explain.z3950.org/dtd/2.0/");

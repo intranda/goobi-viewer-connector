@@ -39,7 +39,7 @@ import io.goobi.viewer.connector.utils.XmlTools;
  */
 public class MARCXMLFormat extends METSFormat {
 
-    private final static Logger logger = LoggerFactory.getLogger(MARCXMLFormat.class);
+    private static final Logger logger = LoggerFactory.getLogger(MARCXMLFormat.class);
 
     static final Namespace xmlns = Namespace.getNamespace("http://www.openarchives.org/OAI/2.0/");
     static final Namespace nsMets = Namespace.getNamespace("mets", "http://www.loc.gov/METS/");

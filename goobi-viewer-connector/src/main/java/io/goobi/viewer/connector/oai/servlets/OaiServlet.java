@@ -52,7 +52,7 @@ public class OaiServlet extends HttpServlet {
 
     private static final long serialVersionUID = -2357047964682340928L;
 
-    private final static Logger logger = LoggerFactory.getLogger(OaiServlet.class);
+    private static final Logger logger = LoggerFactory.getLogger(OaiServlet.class);
 
     private static DateTimeFormatter formatterISO8601Date = ISODateTimeFormat.date(); // yyyy-MM-dd
     private static DateTimeFormatter formatterISO8601DateTimeFullWithTimeZone = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ");

@@ -67,7 +67,7 @@ import io.goobi.viewer.connector.utils.Utils;
  */
 public abstract class Format {
 
-    private final static Logger logger = LoggerFactory.getLogger(Format.class);
+    private static final Logger logger = LoggerFactory.getLogger(Format.class);
 
     /** Constant <code>XML</code> */
     protected static final Namespace XML = Namespace.getNamespace("xml", "http://www.w3.org/XML/1998/namespace");
