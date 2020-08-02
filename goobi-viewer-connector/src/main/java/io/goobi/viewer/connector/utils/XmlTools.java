@@ -35,6 +35,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.stream.StreamSource;
+import javax.xml.XMLConstants;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jdom2.Document;
@@ -74,7 +75,11 @@ public class XmlTools {
      */
     public static Document readXmlFile(String filePath) throws FileNotFoundException, IOException, JDOMException {
         try (FileInputStream fis = new FileInputStream(new File(filePath))) {
-            return new SAXBuilder().build(fis);
+            SAXBuilder builder = new SAXBuilder();
+            builder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            builder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+            Document document = builder.build(fis);
+            return document;
         }
     }
 
@@ -90,7 +95,11 @@ public class XmlTools {
      */
     public static Document readXmlFile(URL url) throws FileNotFoundException, IOException, JDOMException {
         try (InputStream is = url.openStream()) {
-            return new SAXBuilder().build(is);
+            SAXBuilder builder = new SAXBuilder();
+            builder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            builder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+            Document document = builder.build(is);
+            return document;
         }
     }
 
@@ -106,7 +115,11 @@ public class XmlTools {
      */
     public static Document readXmlFile(Path path) throws FileNotFoundException, IOException, JDOMException {
         try (InputStream is = Files.newInputStream(path)) {
-            return new SAXBuilder().build(is);
+            SAXBuilder builder = new SAXBuilder();
+            builder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            builder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+            Document document = builder.build(is);
+            return document;
         }
     }
 
@@ -134,8 +147,9 @@ public class XmlTools {
 
         // Reader reader = new StringReader(hOCRText);
         SAXBuilder builder = new SAXBuilder();
+        builder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        builder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
         Document document = builder.build(baos);
-
         return document;
     }
 
