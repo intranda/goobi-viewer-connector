@@ -110,21 +110,34 @@ public class SruServlet extends HttpServlet {
             case SEARCHRETRIEVE:
                 logger.debug("operation is searchRetrieve");
                 if (parameter.getQuery() == null || parameter.getQuery().isEmpty()) {
-                    missingArgument(response, "query");
-                    logger.info("cannot process request {}, parameter 'query' is missing.", request.getQueryString());
+                    try {
+                        missingArgument(response, "query");
+                    } catch (IOException e) {
+                    }
+
+                    String queryString = request.getQueryString();
+                    queryString = queryString.replaceAll("[\n|\r|\t]", "_");
+
+                    logger.info("cannot process request {}, parameter 'query' is missing.", queryString);
                     return;
                 }
 
                 if (parameter.getRecordSchema() == null) {
-                    wrongSchema(response, request.getParameter("recordSchema"));
+                    try {
+                        wrongSchema(response, request.getParameter("recordSchema"));
+                    } catch (IOException e) {
+                    }
                     return;
                 }
                 try {
                     Element searchRetrieve = generateSearchRetrieve(parameter, request, DataManager.getInstance().getSearchIndex());
                     doc.setRootElement(searchRetrieve);
-                } catch (SolrServerException e) {
+                } catch (IOException | SolrServerException e) {
                     logger.error(e.getMessage(), e);
-                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Index unreachable");
+                    try {
+                        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Index unreachable");
+                    } catch (IOException e1) {
+                    }
                     return;
                 }
                 break;
@@ -136,15 +149,25 @@ public class SruServlet extends HttpServlet {
             case SCAN:
                 logger.debug("operation is scan");
                 if (parameter.getScanClause() == null || parameter.getScanClause().isEmpty()) {
-                    missingArgument(response, "scanClause");
-                    logger.info("Cannot process request {}, parameter 'scanClause' is missing.", request.getQueryString());
+                    try {
+                        missingArgument(response, "scanClause");
+                    } catch (IOException e) {
+                    }
+
+                    String queryString = request.getQueryString();
+                    queryString = queryString.replaceAll("[\n|\r|\t]", "_");
+
+                    logger.info("Cannot process request {}, parameter 'scanClause' is missing.", queryString);
                     return;
                 }
                 // http://aleph20.ub.hu-berlin.de:5661/hub01?version=1.1&operation=scan&scanClause=BV040552415&maximumRecords=1
                 // http://services.dnb.de/sru/authorities?operation=scan&version=1.1&scanClause=Maximilian
                 // http://s2w.visuallibrary.net/dps/sru/?operation=scan&version=1.1&scanClause=Augsburg
                 // http://sru.gbv.de/opac-de-27?version=1.2&operation=scan&scanClause=Augsburg
-                unsupportedOperation(response, "scan");
+                try {
+                    unsupportedOperation(response, "scan");
+                } catch (IOException e1) {
+                }
                 return;
 
             case UNSUPPORTETPARAMETER:
@@ -156,7 +179,10 @@ public class SruServlet extends HttpServlet {
         Format format = Format.getPrettyFormat();
         format.setEncoding("utf-8");
         XMLOutputter xmlOut = new XMLOutputter(format);
-        xmlOut.output(doc, response.getOutputStream());
+        try {
+            xmlOut.output(doc, response.getOutputStream());
+        } catch (IOException e) {
+        }
 
     }
 
