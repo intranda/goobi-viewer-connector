@@ -123,7 +123,7 @@ public class MessageResourceBundle extends ResourceBundle {
                 if (localBundle != null && localBundle.containsKey("MD_" + newKey)) {
                     return localBundle.getString("MD_" + newKey);
                 }
-                if (localBundle.containsKey(newKey)) {
+                if (localBundle!= null && localBundle.containsKey(newKey)) {
                     return localBundle.getString(newKey);
                 }
             }
@@ -133,7 +133,7 @@ public class MessageResourceBundle extends ResourceBundle {
                 if (localBundle != null && localBundle.containsKey("MD_" + newKey)) {
                     return localBundle.getString("MD_" + newKey);
                 }
-                if (localBundle.containsKey(newKey)) {
+                if (localBundle != null && localBundle.containsKey(newKey)) {
                     return localBundle.getString(newKey);
                 }
             }
@@ -155,7 +155,7 @@ public class MessageResourceBundle extends ResourceBundle {
                     }
                 }
                 // Remove leading FACET_
-                if (key.startsWith("FACET_")) {
+                if (key != null && key.startsWith("FACET_")) {
                     String newKey = key.replace("FACET_", "");
                     if (globalBundle.containsKey("MD_" + newKey)) {
                         return globalBundle.getString("MD_" + newKey);
