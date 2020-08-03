@@ -89,23 +89,11 @@ public class SruServlet extends HttpServlet {
             logger.debug(parameter.toString());
         } catch (MissingArgumentException e) {
             if (e.getMessage().contains("version")) {
-                try {
-                    missingArgument(response, "version");
-                } catch (IOException e1) {
-                    logger.error(e1.getMessage(), e1);
-                }
+                missingArgument(response, "version");
             } else if (e.getMessage().contains("operation")) {
-                try {
-                    missingArgument(response, "operation");
-                } catch (IOException e1) {
-                    logger.error(e1.getMessage(), e1);
-                }
+                missingArgument(response, "operation");
             } else {
-                try {
-                    missingArgument(response, "");
-                } catch (IOException e1) {
-                    logger.error(e1.getMessage(), e1);
-                }
+                missingArgument(response, "");
             }
             logger.error(e.getMessage(), e);
             return;
@@ -122,37 +110,21 @@ public class SruServlet extends HttpServlet {
             case SEARCHRETRIEVE:
                 logger.debug("operation is searchRetrieve");
                 if (parameter.getQuery() == null || parameter.getQuery().isEmpty()) {
-                    try {
-                        missingArgument(response, "query");
-                    } catch (IOException e) {
-                        logger.error(e.getMessage(), e);
-                    }
-
-                    String queryString = request.getQueryString();
-                    queryString = queryString.replaceAll("[\n|\r|\t]", "_");
-
-                    logger.info("cannot process request {}, parameter 'query' is missing.", queryString);
+                    missingArgument(response, "query");
+                    logger.info("cannot process request {}, parameter 'query' is missing.", request.getQueryString());
                     return;
                 }
 
                 if (parameter.getRecordSchema() == null) {
-                    try {
-                        wrongSchema(response, request.getParameter("recordSchema"));
-                    } catch (IOException e) {
-                        logger.error(e.getMessage(), e);
-                    }
+                    wrongSchema(response, request.getParameter("recordSchema"));
                     return;
                 }
                 try {
                     Element searchRetrieve = generateSearchRetrieve(parameter, request, DataManager.getInstance().getSearchIndex());
                     doc.setRootElement(searchRetrieve);
-                } catch (IOException | SolrServerException e) {
+                } catch (SolrServerException e) {
                     logger.error(e.getMessage(), e);
-                    try {
-                        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Index unreachable");
-                    } catch (IOException e1) {
-                        logger.error(e1.getMessage(), e1);
-                    }
+                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Index unreachable");
                     return;
                 }
                 break;
@@ -164,47 +136,26 @@ public class SruServlet extends HttpServlet {
             case SCAN:
                 logger.debug("operation is scan");
                 if (parameter.getScanClause() == null || parameter.getScanClause().isEmpty()) {
-                    try {
-                        missingArgument(response, "scanClause");
-                    } catch (IOException e) {
-                        logger.error(e.getMessage(), e);
-                    }
-
-                    String queryString = request.getQueryString();
-                    queryString = queryString.replaceAll("[\n|\r|\t]", "_");
-
-                    logger.info("Cannot process request {}, parameter 'scanClause' is missing.", queryString);
+                    missingArgument(response, "scanClause");
+                    logger.info("Cannot process request {}, parameter 'scanClause' is missing.", request.getQueryString());
                     return;
                 }
                 // http://aleph20.ub.hu-berlin.de:5661/hub01?version=1.1&operation=scan&scanClause=BV040552415&maximumRecords=1
                 // http://services.dnb.de/sru/authorities?operation=scan&version=1.1&scanClause=Maximilian
                 // http://s2w.visuallibrary.net/dps/sru/?operation=scan&version=1.1&scanClause=Augsburg
                 // http://sru.gbv.de/opac-de-27?version=1.2&operation=scan&scanClause=Augsburg
-                try {
-                    unsupportedOperation(response, "scan");
-                } catch (IOException e1) {
-                    logger.error(e1.getMessage(), e1);
-                }
+                unsupportedOperation(response, "scan");
                 return;
-
             case UNSUPPORTETPARAMETER:
             default:
-                try {
-                    unsupportedOperation(response, request.getParameter("operation"));
-                } catch (IOException e) {
-                    logger.error(e.getMessage(), e);
-                }
+                unsupportedOperation(response, request.getParameter("operation"));
                 return;
         }
 
         Format format = Format.getPrettyFormat();
         format.setEncoding("utf-8");
         XMLOutputter xmlOut = new XMLOutputter(format);
-        try {
             xmlOut.output(doc, response.getOutputStream());
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-        }
 
     }
 
@@ -1203,10 +1154,6 @@ public class SruServlet extends HttpServlet {
     /** {@inheritDoc} */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        try {
             doGet(req, resp);
-        } catch (IOException | ServletException e) {
-            logger.error(e.getMessage(), e);
-        }
     }
 }
