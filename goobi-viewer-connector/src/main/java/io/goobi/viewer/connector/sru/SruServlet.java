@@ -1205,7 +1205,7 @@ public class SruServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             doGet(req, resp);
-        } catch (IOException e) {
+        } catch (IOException | ServletException e) {
             logger.error(e.getMessage(), e);
         }
     }
