@@ -89,11 +89,23 @@ public class SruServlet extends HttpServlet {
             logger.debug(parameter.toString());
         } catch (MissingArgumentException e) {
             if (e.getMessage().contains("version")) {
-                missingArgument(response, "version");
+                try {
+                    missingArgument(response, "version");
+                } catch (IOException e1) {
+                    logger.error(e1.getMessage(), e1);
+                }
             } else if (e.getMessage().contains("operation")) {
-                missingArgument(response, "operation");
+                try {
+                    missingArgument(response, "operation");
+                } catch (IOException e1) {
+                    logger.error(e1.getMessage(), e1);
+                }
             } else {
-                missingArgument(response, "");
+                try {
+                    missingArgument(response, "");
+                } catch (IOException e1) {
+                    logger.error(e1.getMessage(), e1);
+                }
             }
             logger.error(e.getMessage(), e);
             return;
@@ -177,7 +189,11 @@ public class SruServlet extends HttpServlet {
 
             case UNSUPPORTETPARAMETER:
             default:
-                unsupportedOperation(response, request.getParameter("operation"));
+                try {
+                    unsupportedOperation(response, request.getParameter("operation"));
+                } catch (IOException e) {
+                    logger.error(e.getMessage(), e);
+                }
                 return;
         }
 
@@ -1187,6 +1203,10 @@ public class SruServlet extends HttpServlet {
     /** {@inheritDoc} */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doGet(req, resp);
+        try {
+            doGet(req, resp);
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+        }
     }
 }
