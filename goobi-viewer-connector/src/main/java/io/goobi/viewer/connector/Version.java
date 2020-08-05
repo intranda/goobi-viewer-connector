@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,13 +23,13 @@ import org.json.JSONObject;
  */
 public class Version {
     /** Constant <code>APPLICATION</code> */
-    public final static String APPLICATION;
+    public static final String APPLICATION;
     /** Constant <code>VERSION</code> */
-    public final static String VERSION;
+    public static final String VERSION;
     /** Constant <code>BUILDVERSION</code> */
-    public final static String BUILDVERSION;
+    public static final String BUILDVERSION;
     /** Constant <code>BUILDDATE</code> */
-    public final static String BUILDDATE;
+    public static final String BUILDDATE;
 
     static {
         String manifest = getManifestStringFromJar();
@@ -60,7 +61,7 @@ public class Version {
         }
         try (InputStream inputStream = new URL(manifestPath).openStream()) {
             StringWriter writer = new StringWriter();
-            IOUtils.copy(inputStream, writer, "utf-8");
+            IOUtils.copy(inputStream, writer, StandardCharsets.UTF_8);
             String manifestString = writer.toString();
             value = manifestString;
         } catch (MalformedURLException e) {

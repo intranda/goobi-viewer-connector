@@ -45,14 +45,16 @@ import io.goobi.viewer.connector.oai.model.formats.Format;
 import io.goobi.viewer.connector.utils.Utils;
 
 /**
- * <p>OaiServlet class.</p>
+ * <p>
+ * OaiServlet class.
+ * </p>
  *
  */
 public class OaiServlet extends HttpServlet {
 
     private static final long serialVersionUID = -2357047964682340928L;
 
-    private final static Logger logger = LoggerFactory.getLogger(OaiServlet.class);
+    private static final Logger logger = LoggerFactory.getLogger(OaiServlet.class);
 
     private static DateTimeFormatter formatterISO8601Date = ISODateTimeFormat.date(); // yyyy-MM-dd
     private static DateTimeFormatter formatterISO8601DateTimeFullWithTimeZone = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ");
@@ -239,7 +241,9 @@ public class OaiServlet extends HttpServlet {
     }
 
     /**
-     * <p>checkDatestamps.</p>
+     * <p>
+     * checkDatestamps.
+     * </p>
      *
      * @param from a {@link java.lang.String} object.
      * @param until a {@link java.lang.String} object.

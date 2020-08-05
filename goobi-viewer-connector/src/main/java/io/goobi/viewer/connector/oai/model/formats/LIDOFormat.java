@@ -45,9 +45,9 @@ import io.goobi.viewer.connector.utils.XmlTools;
  */
 public class LIDOFormat extends Format {
 
-    private final static Logger logger = LoggerFactory.getLogger(LIDOFormat.class);
+    private static final Logger logger = LoggerFactory.getLogger(LIDOFormat.class);
 
-    private final static String QUERY_SUFFIX = " +" + SolrConstants.SOURCEDOCFORMAT + ":LIDO";
+    private static final String QUERY_SUFFIX = " +" + SolrConstants.SOURCEDOCFORMAT + ":LIDO";
 
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String)

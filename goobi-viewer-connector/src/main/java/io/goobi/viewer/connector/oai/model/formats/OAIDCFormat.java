@@ -18,8 +18,10 @@ package io.goobi.viewer.connector.oai.model.formats;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.ClientProtocolException;
@@ -208,11 +210,12 @@ public class OAIDCFormat extends Format {
         boolean isWork = doc.getFieldValue(SolrConstants.ISWORK) != null && (boolean) doc.getFieldValue(SolrConstants.ISWORK);
         boolean isAnchor = doc.getFieldValue(SolrConstants.ISANCHOR) != null && (boolean) doc.getFieldValue(SolrConstants.ISANCHOR);
         boolean openAccess = true;
+        Set<String> accessConditions = new HashSet<>();
         if (doc.getFieldValues(SolrConstants.ACCESSCONDITION) != null) {
             for (Object o : doc.getFieldValues(SolrConstants.ACCESSCONDITION)) {
+                accessConditions.add((String) o);
                 if (!SolrConstants.OPEN_ACCESS_VALUE.equals(o)) {
                     openAccess = false;
-                    break;
                 }
             }
         }
@@ -290,9 +293,16 @@ public class OAIDCFormat extends Format {
                             break;
                         case "rights":
                             if (openAccess) {
-                                val = "info:eu-repo/semantics/openAccess";
+                                val = ACCESSCONDITION_OPENACCESS;
                             } else {
-                                val = "info:eu-repo/semantics/closedAccess";
+                                for (String accessCondition : accessConditions) {
+                                    val = DataManager.getInstance()
+                                            .getConfiguration()
+                                            .getAccessConditionMappingForMetadataFormat(Metadata.oai_dc.name(), accessCondition);
+                                }
+                                if (StringUtils.isEmpty(val)) {
+                                    val = ACCESSCONDITION_CLOSEDACCESS;
+                                }
                             }
                             finishedValues.add(val);
                             break;
@@ -311,7 +321,7 @@ public class OAIDCFormat extends Format {
                                 continue;
                             }
                             for (Element oai_fulltext : generateFulltextUrls((String) topstructDoc.getFieldValue(SolrConstants.PI_TOPSTRUCT),
-                                    (String) topstructDoc.getFieldValue(SolrConstants.DATAREPOSITORY), nsDc)) {
+                                    nsDc)) {
                                 oai_dc.addContent(oai_fulltext);
                             }
                             break;
@@ -327,9 +337,16 @@ public class OAIDCFormat extends Format {
                     }
 
                     try {
-                        String url = DataManager.getInstance().getConfiguration().getRestApiUrl() + "records/toc/"
-                                + (String) doc.getFieldValue(SolrConstants.PI) + "/";
+                        String url = DataManager.getInstance().getConfiguration().getRestApiUrl() + "records/"
+                                + (String) doc.getFieldValue(SolrConstants.PI) + "/toc/";
                         String val = Utils.getWebContentGET(url);
+                        if (StringUtils.isEmpty(val)) {
+                            // Old API fallback
+                            url = DataManager.getInstance().getConfiguration().getRestApiUrl() + "records/toc/"
+                                    + (String) doc.getFieldValue(SolrConstants.PI) + "/";
+                            val = Utils.getWebContentGET(url);
+                        }
+
                         if (StringUtils.isNotEmpty(val)) {
                             finishedValues.add(val);
                         }
@@ -544,11 +561,10 @@ public class OAIDCFormat extends Format {
      * @param namespace a {@link org.jdom2.Namespace} object.
      * @throws org.apache.solr.client.solrj.SolrServerException
      * @param pi a {@link java.lang.String} object.
-     * @param dataRepository a {@link java.lang.String} object.
      * @return a {@link java.util.List} object.
      * @throws IOException
      */
-    protected static List<Element> generateFulltextUrls(String pi, String dataRepository, Namespace namespace)
+    protected static List<Element> generateFulltextUrls(String pi, Namespace namespace)
             throws SolrServerException, IOException {
         if (pi == null) {
             throw new IllegalArgumentException("pi may not be null");
@@ -563,9 +579,6 @@ public class OAIDCFormat extends Format {
         Collections.sort(orderedPageList);
 
         String urlTemplate = DataManager.getInstance().getConfiguration().getFulltextUrl().replace("{pi}", pi);
-        if (dataRepository != null) {
-            urlTemplate = urlTemplate.replace("{dataRepository}", dataRepository);
-        }
         List<Element> ret = new ArrayList<>(orderedPageList.size());
         for (int i : orderedPageList) {
             String filePath = fulltextFilePaths.get(i); // file path relative to the data repository (Goobi viewer 3.2 and later)
@@ -573,7 +586,7 @@ public class OAIDCFormat extends Format {
                 continue;
             }
             String fileName = filePath.substring(filePath.lastIndexOf('/') + 1); // pure file name
-            String url = urlTemplate.replace("{page}", String.valueOf(i)).replace("{filePath}", filePath).replace("{fileName}", fileName);
+            String url = urlTemplate.replace("{page}", String.valueOf(i)).replace("{fileName}", fileName);
             Element dc_fulltext = new Element("source", namespace);
             dc_fulltext.setText(url);
             ret.add(dc_fulltext);

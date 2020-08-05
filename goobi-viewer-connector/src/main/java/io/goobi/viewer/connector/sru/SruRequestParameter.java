@@ -15,7 +15,7 @@
  */
 package io.goobi.viewer.connector.sru;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -94,11 +94,7 @@ public class SruRequestParameter {
         }
 
         if (request.getParameter("query") != null) {
-            try {
-                query = new String(request.getParameter("query").getBytes("iso-8859-1"), "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                query = request.getParameter("query");
-            }
+            query = new String(request.getParameter("query").getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
         }
 
         if (request.getParameter("startRecord") != null) {

@@ -32,6 +32,11 @@
 		<jdk.version>1.8</jdk.version>
 		<skipTests>false</skipTests>
 
+        <!-- Sonar -->
+        <sonar.projectKey>intranda_goobi-viewer-connector</sonar.projectKey>
+        <sonar.organization>intranda</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+
 		<!-- Manifest information -->
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 		<buildDate>${maven.build.timestamp}</buildDate>
@@ -41,11 +46,9 @@
 		<commons-configuration.version>1.10</commons-configuration.version>
 		<commons-io.version>2.7</commons-io.version>
 		<commons-jxpath.version>1.3</commons-jxpath.version>
-		<commons-lang3.version>3.10</commons-lang3.version>
-		<commons-logging.version>1.2</commons-logging.version>
+		<commons-lang3.version>3.11</commons-lang3.version>
 		<httpclient.version>4.5.12</httpclient.version>
 		<httpcore.version>4.4.13</httpcore.version>
-		<httpmime.version>4.5.12</httpmime.version>
 		<jaxen.version>1.2.0</jaxen.version>
 		<jdom2.version>2.0.6</jdom2.version>
 		<joda-time.version>2.10.6</joda-time.version>
@@ -54,10 +57,7 @@
 		<log4j.version>2.13.3</log4j.version>
 		<slf4j.version>1.7.30</slf4j.version>
 		<solr.version>8.5.2</solr.version>
-		<tomcat.version>9.0.36</tomcat.version>
-		<xerces.version>2.12.0</xerces.version>
-		<!-- This xml-apis version is needed with this xerxes version -->
-		<xml-apis.version>1.4.01</xml-apis.version>
+		<tomcat.version>9.0.37</tomcat.version>
 		<xstream.version>1.4.12</xstream.version>
 	</properties>
 
@@ -78,12 +78,6 @@
 			<groupId>commons-configuration</groupId>
 			<artifactId>commons-configuration</artifactId>
 			<version>${commons-configuration.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -101,31 +95,14 @@
 			<version>${commons-lang3.version}</version>
 		</dependency>
 		<dependency>
-			<artifactId>commons-logging</artifactId>
-			<groupId>commons-logging</groupId>
-			<version>${commons-logging.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
 			<version>${httpclient.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpcore</artifactId>
 			<version>${httpcore.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpmime</artifactId>
-			<version>${httpmime.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>jaxen</groupId>
@@ -160,27 +137,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
-			<version>${log4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-slf4j-impl</artifactId>
 			<version>${log4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>${slf4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>jcl-over-slf4j</artifactId>
-			<version>${slf4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>jul-to-slf4j</artifactId>
 			<version>${slf4j.version}</version>
 		</dependency>
 		<dependency>
@@ -195,16 +157,6 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>xerces</groupId>
-			<artifactId>xercesImpl</artifactId>
-			<version>${xerces.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>xml-apis</groupId>
-			<artifactId>xml-apis</artifactId>
-			<version>${xml-apis.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
 			<artifactId>xstream</artifactId>
 			<version>${xstream.version}</version>
@@ -214,7 +166,8 @@
 
 	<build>
 		<finalName>M2M</finalName>
-		<plugins>
+        <plugins>
+            <!-- used for mvn versions:display-plugin-updates -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
@@ -326,7 +279,28 @@
 						</tag>
 					</tags>
 				</configuration>
-			</plugin>
+            </plugin>
+            <!-- used for test coverage report in Jenkins -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.5</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+            </plugin>
+            <!-- used for mvn versions:display-dependency-updates -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>versions-maven-plugin</artifactId>
@@ -335,7 +309,7 @@
 					<rulesUri>file://${basedir}/version-number-rules.xml</rulesUri>
 				</configuration>
             </plugin>
-
+            <!-- used for mvn verify-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -348,6 +322,16 @@
                         </goals>
                         <configuration>
                             <failOnWarning>false</failOnWarning>
+                            <ignoredUnusedDeclaredDependencies>
+                                <!-- JXPath is used at XPathExpressionEngine from org.apache.commons.configuration2, i.e. LanguageHelper -->
+                                <ignoredUnusedDeclaredDependency>commons-jxpath:commons-jxpath</ignoredUnusedDeclaredDependency>
+
+                                <!-- jaxen is needed by jdom2 -->
+                                <ignoredUnusedDeclaredDependency>jaxen:jaxen</ignoredUnusedDeclaredDependency>
+
+                                <!-- this is needed during runtime, otherwise we have no logfiles -->
+                                <ignoredUnusedDeclaredDependency>org.apache.logging.log4j:log4j-slf4j-impl</ignoredUnusedDeclaredDependency>
+                            </ignoredUnusedDeclaredDependencies>
                         </configuration>
                     </execution>
                 </executions>

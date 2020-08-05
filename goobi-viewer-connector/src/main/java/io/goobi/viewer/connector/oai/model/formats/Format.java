@@ -24,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -66,12 +67,15 @@ import io.goobi.viewer.connector.utils.Utils;
  */
 public abstract class Format {
 
-    private final static Logger logger = LoggerFactory.getLogger(Format.class);
+    private static final Logger logger = LoggerFactory.getLogger(Format.class);
 
     /** Constant <code>XML</code> */
     protected static final Namespace XML = Namespace.getNamespace("xml", "http://www.w3.org/XML/1998/namespace");
     /** Constant <code>XSI</code> */
     protected static final Namespace XSI = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+
+    public static final String ACCESSCONDITION_OPENACCESS = "info:eu-repo/semantics/openAccess";
+    public static final String ACCESSCONDITION_CLOSEDACCESS = "info:eu-repo/semantics/closedAccess";
 
     /** Constant <code>expiration=259200000L</code> */
     protected static long expiration = 259200000L; // 3 days
@@ -476,7 +480,7 @@ public abstract class Format {
     private static void saveToken(ResumptionToken token) throws IOException {
         File f = new File(DataManager.getInstance().getConfiguration().getResumptionTokenFolder(), token.getTokenName());
         XStream xStream = new XStream(new DomDriver());
-        try (BufferedWriter outfile = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), "UTF8"))) {
+        try (BufferedWriter outfile = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8))) {
             xStream.toXML(token, outfile);
             outfile.flush();
         }
@@ -570,6 +574,7 @@ public abstract class Format {
                         count++;
                     }
                 } catch (FileNotFoundException e) {
+                    logger.error(e.getMessage(), e);
                 } catch (IOException e) {
                     logger.error(e.getMessage(), e);
                 }

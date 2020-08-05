@@ -62,7 +62,7 @@ import io.goobi.viewer.connector.utils.XmlTools;
 public class SruServlet extends HttpServlet {
 
     private static final long serialVersionUID = -6396567784411891113L;
-    private final static Logger logger = LoggerFactory.getLogger(SruServlet.class);
+    private static final Logger logger = LoggerFactory.getLogger(SruServlet.class);
 
     private static final Namespace SRU_NAMESPACE = Namespace.getNamespace("srw", "http://www.loc.gov/zing/srw/");
     private static final Namespace EXPLAIN_NAMESPACE = Namespace.getNamespace("ns", "http://explain.z3950.org/dtd/2.0/");
@@ -146,7 +146,6 @@ public class SruServlet extends HttpServlet {
                 // http://sru.gbv.de/opac-de-27?version=1.2&operation=scan&scanClause=Augsburg
                 unsupportedOperation(response, "scan");
                 return;
-
             case UNSUPPORTETPARAMETER:
             default:
                 unsupportedOperation(response, request.getParameter("operation"));
@@ -156,7 +155,7 @@ public class SruServlet extends HttpServlet {
         Format format = Format.getPrettyFormat();
         format.setEncoding("utf-8");
         XMLOutputter xmlOut = new XMLOutputter(format);
-        xmlOut.output(doc, response.getOutputStream());
+            xmlOut.output(doc, response.getOutputStream());
 
     }
 
@@ -1155,6 +1154,6 @@ public class SruServlet extends HttpServlet {
     /** {@inheritDoc} */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doGet(req, resp);
+            doGet(req, resp);
     }
 }

@@ -15,9 +15,6 @@
  */
 package io.goobi.viewer.connector;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.goobi.viewer.connector.oai.model.language.LanguageHelper;
 import io.goobi.viewer.connector.utils.Configuration;
 import io.goobi.viewer.connector.utils.SolrSearchIndex;
@@ -27,8 +24,6 @@ import io.goobi.viewer.connector.utils.SolrSearchIndex;
  *
  */
 public final class DataManager {
-
-    private static final Logger logger = LoggerFactory.getLogger(DataManager.class);
 
     private static final Object lock = new Object();
 

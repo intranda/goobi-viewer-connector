@@ -403,6 +403,40 @@ public final class Configuration {
     }
 
     /**
+     * 
+     * @param metadataFormat Metadata format
+     * @param accessCondition Access condition name
+     * @return Mapped value; null if none found
+     * @should return correct value
+     */
+    public String getAccessConditionMappingForMetadataFormat(String metadataFormat, String accessCondition) {
+        if (metadataFormat == null) {
+            throw new IllegalArgumentException("metadataFormat may not be null");
+        }
+        if (accessCondition == null) {
+            return null;
+        }
+
+        List<HierarchicalConfiguration> elements = getLocalConfigurationsAt(metadataFormat + ".accessConditions.mapping");
+        if (elements == null || elements.isEmpty()) {
+            return null;
+        }
+
+        List<FieldConfiguration> ret = new ArrayList<>(elements.size());
+        for (Iterator<HierarchicalConfiguration> it = elements.iterator(); it.hasNext();) {
+            HierarchicalConfiguration sub = it.next();
+            Map<String, String> fieldConfig = new HashMap<>();
+            String key = sub.getString("[@accessCondition]", null);
+            if (accessCondition.equals(key)) {
+                return sub.getString(".");
+            }
+
+        }
+
+        return null;
+    }
+
+    /**
      * <p>
      * getHarvestUrl.
      * </p>
@@ -412,18 +446,6 @@ public final class Configuration {
      */
     public String getHarvestUrl() {
         return getLocalString("harvestUrl", "http://localhost:8080/viewer/harvest");
-    }
-
-    /**
-     * <p>
-     * getContentApiUrl.
-     * </p>
-     *
-     * @return Content file REST API URL
-     * @should return correct value
-     */
-    public String getContentApiUrl() {
-        return getRestApiUrl() + "content/";
     }
 
     /**

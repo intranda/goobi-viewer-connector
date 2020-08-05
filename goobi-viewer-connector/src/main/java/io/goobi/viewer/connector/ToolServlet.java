@@ -16,7 +16,7 @@
 package io.goobi.viewer.connector;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 import javax.servlet.ServletException;
@@ -24,6 +24,9 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.goobi.viewer.connector.utils.Utils;
 
@@ -34,6 +37,8 @@ import io.goobi.viewer.connector.utils.Utils;
 public class ToolServlet extends HttpServlet {
 
     private static final long serialVersionUID = -3185526115340932005L;
+
+    private static final Logger logger = LoggerFactory.getLogger(ToolServlet.class);
 
     /* (non-Javadoc)
      * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
@@ -66,9 +71,9 @@ public class ToolServlet extends HttpServlet {
         switch (action) {
             case "getVersion":
                 response.setContentType("text/html"); {
-                ServletOutputStream output = response.getOutputStream();
-                output.write(Utils.getVersion().getBytes(Charset.forName("utf-8")));
-            }
+                    ServletOutputStream output = response.getOutputStream();
+                    output.write(Utils.getVersion().getBytes(StandardCharsets.UTF_8));
+                }
                 break;
         }
     }
@@ -79,6 +84,6 @@ public class ToolServlet extends HttpServlet {
     /** {@inheritDoc} */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doGet(req, resp);
-    }
+            doGet(req, resp);
+        }
 }

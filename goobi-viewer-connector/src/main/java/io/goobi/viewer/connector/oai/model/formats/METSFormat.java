@@ -44,9 +44,9 @@ import io.goobi.viewer.connector.utils.XmlTools;
  */
 public class METSFormat extends Format {
 
-    private final static Logger logger = LoggerFactory.getLogger(METSFormat.class);
+    private static final Logger logger = LoggerFactory.getLogger(METSFormat.class);
 
-    private final static String QUERY_SUFFIX = " +(" + SolrConstants.SOURCEDOCFORMAT + ":METS " + SolrConstants.DATEDELETED + ":*)";
+    private static final String QUERY_SUFFIX = " +(" + SolrConstants.SOURCEDOCFORMAT + ":METS " + SolrConstants.DATEDELETED + ":*)";
 
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListIdentifiers(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String)

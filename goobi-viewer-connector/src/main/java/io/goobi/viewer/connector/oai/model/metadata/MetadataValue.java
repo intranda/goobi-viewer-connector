@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.goobi.viewer.connector.messages.MessageResourceBundle;
 
@@ -31,8 +29,6 @@ import io.goobi.viewer.connector.messages.MessageResourceBundle;
 public class MetadataValue implements Serializable {
 
     private static final long serialVersionUID = -3162322038017977356L;
-
-    private static final Logger logger = LoggerFactory.getLogger(MetadataValue.class);
 
     private final List<String> paramLabels = new ArrayList<>();
 

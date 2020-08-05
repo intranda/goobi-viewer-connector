@@ -28,8 +28,7 @@ import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.model.FieldConfiguration;
 import io.goobi.viewer.connector.oai.model.LicenseType;
 import io.goobi.viewer.connector.oai.model.Set;
-import io.goobi.viewer.connector.utils.Configuration;
-import io.goobi.viewer.connector.utils.SolrConstants;
+import io.goobi.viewer.connector.oai.model.formats.Format;
 
 public class ConfigurationTest extends AbstractTest {
 
@@ -438,5 +437,21 @@ public class ConfigurationTest extends AbstractTest {
     public void getFulltextUrl_shouldReturnCorrectValue() throws Exception {
         Assert.assertEquals("http://localhost/viewer/rest/content/fulltext/{pi}/{page}/",
                 DataManager.getInstance().getConfiguration().getFulltextUrl());
+    }
+
+    /**
+     * @see Configuration#getAccessConditionMappingForMetadataFormat(String,String)
+     * @verifies return correct value
+     */
+    @Test
+    public void getAccessConditionMappingForMetadataFormat_shouldReturnCorrectValue() throws Exception {
+        Assert.assertEquals(Format.ACCESSCONDITION_OPENACCESS,
+                DataManager.getInstance()
+                        .getConfiguration()
+                        .getAccessConditionMappingForMetadataFormat(Metadata.oai_dc.name(), "Public Domain Mark 1.0"));
+        Assert.assertEquals(Format.ACCESSCONDITION_OPENACCESS,
+                DataManager.getInstance()
+                        .getConfiguration()
+                        .getAccessConditionMappingForMetadataFormat(Metadata.oai_dc.name(), "Rechte vorbehalten - Freier Zugang"));
     }
 }
