@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.goobi.viewer</groupId>
 	<artifactId>connector</artifactId>
-	<version>4.9.0</version>
+	<version>4.10.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 
 
@@ -56,7 +56,7 @@
 		<junit.version>4.13</junit.version>
 		<log4j.version>2.13.3</log4j.version>
 		<slf4j.version>1.7.30</slf4j.version>
-		<solr.version>8.5.2</solr.version>
+		<solr.version>8.6.2</solr.version>
 		<tomcat.version>9.0.37</tomcat.version>
 		<xstream.version>1.4.12</xstream.version>
 	</properties>
