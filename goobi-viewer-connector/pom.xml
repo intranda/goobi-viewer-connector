@@ -51,7 +51,6 @@
 		<httpcore.version>4.4.13</httpcore.version>
 		<jaxen.version>1.2.0</jaxen.version>
 		<jdom2.version>2.0.6</jdom2.version>
-		<joda-time.version>2.10.6</joda-time.version>
 		<json.version>20200518</json.version>
 		<junit.version>4.13</junit.version>
 		<log4j.version>2.13.3</log4j.version>
@@ -113,11 +112,6 @@
 			<groupId>org.jdom</groupId>
 			<artifactId>jdom2</artifactId>
 			<version>${jdom2.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>joda-time</groupId>
-			<artifactId>joda-time</artifactId>
-			<version>${joda-time.version}</version>
 		</dependency>
         <dependency>
             <groupId>org.json</groupId>

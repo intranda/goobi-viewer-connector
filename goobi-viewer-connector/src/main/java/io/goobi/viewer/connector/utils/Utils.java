@@ -18,6 +18,11 @@ package io.goobi.viewer.connector.utils;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,8 +46,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -66,17 +69,30 @@ public class Utils {
     /** Constant <code>DEFAULT_ENCODING="UTF-8"</code> */
     public static final String DEFAULT_ENCODING = "UTF-8";
 
-    /** Constant <code>formatterISO8601DateTimeFullWithTimeZone</code> */
-    public static DateTimeFormatter formatterISO8601DateTimeFullWithTimeZone = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    /** Constant <code>formatterISO8601DateTimeWithOffset</code> */
+    public static DateTimeFormatter formatterISO8601DateTimeWithOffset = DateTimeFormatter.ISO_OFFSET_DATE_TIME; // yyyy-MM-dd'T'HH:mm:ss+01:00
+    /** Constant <code>formatterISO8601Date</code> */
+    public static java.time.format.DateTimeFormatter formatterISO8601Date = DateTimeFormatter.ISO_LOCAL_DATE; // yyyy-MM-dd
+    /** Constant <code>formatterISO8601Date</code> */
+    public static java.time.format.DateTimeFormatter formatterISO8601Time = DateTimeFormatter.ISO_LOCAL_TIME; // HH:mm:ss
+    /** Constant <code>formatterBasicDateTime</code> */
+    public static DateTimeFormatter formatterISO8601BasicDateTime = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
     /**
      * insert some chars in the time string
      *
+     * @param ldt LocalDateTime to use
      * @param milliSecondsAdd milliseconds to add to the current utc time if milliSecondsAdd = 0, no milli are added
+     * @should format time correctly
      * @return the time in the format YYYY-MM-DDThh:mm:ssZ
      */
-    public static String getCurrentUTCTime(long milliSecondsAdd) {
-        return formatterISO8601DateTimeFullWithTimeZone.withZoneUTC().print(System.currentTimeMillis() + milliSecondsAdd);
+    public static String getCurrentUTCTime(LocalDateTime ldt, long milliSecondsAdd) {
+        if (ldt == null) {
+            throw new IllegalArgumentException("ldt may not be null");
+        }
+        return ldt.atOffset(ZoneOffset.UTC)
+                .plus(milliSecondsAdd, ChronoUnit.MILLIS)
+                .format(formatterISO8601DateTimeWithOffset);
     }
 
     /**
@@ -89,7 +105,9 @@ public class Utils {
      * @return a {@link java.lang.String} object.
      */
     public static String convertDate(long milliSeconds) {
-        return formatterISO8601DateTimeFullWithTimeZone.withZoneUTC().print(milliSeconds);
+        return Instant.ofEpochMilli(milliSeconds)
+                .atOffset(ZoneOffset.UTC)
+                .format(formatterISO8601DateTimeWithOffset);
     }
 
     /**
