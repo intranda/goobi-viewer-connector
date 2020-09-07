@@ -7,13 +7,15 @@ import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
+
+import io.goobi.viewer.connector.utils.Utils;
 
 /**
  * <p>
@@ -41,7 +43,7 @@ public class Version {
         } else {
             APPLICATION = "goobi-viewer-connector";
             VERSION = "unknown";
-            BUILDDATE = new Date().toString();
+            BUILDDATE = LocalDateTime.now().format(Utils.formatterISO8601DateTimeNoSeconds);
             BUILDVERSION = "unknown";
         }
     }

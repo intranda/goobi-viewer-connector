@@ -77,6 +77,8 @@ public class Utils {
     public static java.time.format.DateTimeFormatter formatterISO8601Time = DateTimeFormatter.ISO_LOCAL_TIME; // HH:mm:ss
     /** Constant <code>formatterBasicDateTime</code> */
     public static DateTimeFormatter formatterISO8601BasicDateTime = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+    /** Constant <code>formatterISO8601DateTimeNoSeconds</code> */
+    public static DateTimeFormatter formatterISO8601DateTimeNoSeconds = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     /**
      * insert some chars in the time string
