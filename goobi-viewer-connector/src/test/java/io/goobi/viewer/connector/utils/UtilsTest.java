@@ -15,22 +15,14 @@
  */
 package io.goobi.viewer.connector.utils;
 
+import java.time.LocalDateTime;
+
 import org.junit.Assert;
 import org.junit.Test;
 
 import io.goobi.viewer.connector.AbstractTest;
-import io.goobi.viewer.connector.utils.Utils;
 
 public class UtilsTest extends AbstractTest {
-
-    /**
-     * @see Utils#getDocumentFromString(String,String)
-     * @verifies build document correctly
-     */
-    @Test
-    public void getDocumentFromString_shouldBuildDocumentCorrectly() throws Exception {
-        Assert.assertEquals("2016-05-23T10:40:00Z", Utils.convertDate(1464000000000L));
-    }
 
     /**
      * @see Utils#splitIdentifierAndLanguageCode(String,int)
@@ -51,5 +43,23 @@ public class UtilsTest extends AbstractTest {
             Assert.assertNull(result[1]);
         }
 
+    }
+
+    /**
+     * @see Utils#convertDate(long)
+     * @verifies convert time correctly
+     */
+    @Test
+    public void convertDate_shouldConvertTimeCorrectly() throws Exception {
+        Assert.assertEquals("2016-05-23T10:40:00Z", Utils.convertDate(1464000000000L));
+    }
+
+    /**
+     * @see Utils#getCurrentUTCTime(long)
+     * @verifies format time correctly
+     */
+    @Test
+    public void getCurrentUTCTime_shouldFormatTimeCorrectly() throws Exception {
+        Assert.assertEquals("2020-09-07T14:30:01Z", Utils.getCurrentUTCTime(LocalDateTime.of(2020, 9, 7, 14, 30, 00), 1000));
     }
 }

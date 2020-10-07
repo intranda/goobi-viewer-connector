@@ -15,10 +15,12 @@
  */
 package io.goobi.viewer.connector.oai;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+
 import javax.servlet.http.HttpServletRequest;
 
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,17 +28,17 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.enums.Verb;
+import io.goobi.viewer.connector.utils.Utils;
 
 /**
- * <p>RequestHandler class.</p>
+ * <p>
+ * RequestHandler class.
+ * </p>
  *
  */
 public class RequestHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
-
-    /** Constant <code>formatter</code> */
-    public static final DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMddHHmmss").withZoneUTC();
 
     @XStreamAlias("verb")
     private Verb verb = null;
@@ -85,7 +87,9 @@ public class RequestHandler {
     }
 
     /**
-     * <p>Getter for the field <code>verb</code>.</p>
+     * <p>
+     * Getter for the field <code>verb</code>.
+     * </p>
      *
      * @return the verb
      */
@@ -94,7 +98,9 @@ public class RequestHandler {
     }
 
     /**
-     * <p>Setter for the field <code>verb</code>.</p>
+     * <p>
+     * Setter for the field <code>verb</code>.
+     * </p>
      *
      * @param verb the verb to set
      */
@@ -103,7 +109,9 @@ public class RequestHandler {
     }
 
     /**
-     * <p>Getter for the field <code>metadataPrefix</code>.</p>
+     * <p>
+     * Getter for the field <code>metadataPrefix</code>.
+     * </p>
      *
      * @return the metadataPrefix
      */
@@ -112,7 +120,9 @@ public class RequestHandler {
     }
 
     /**
-     * <p>Setter for the field <code>metadataPrefix</code>.</p>
+     * <p>
+     * Setter for the field <code>metadataPrefix</code>.
+     * </p>
      *
      * @param metadataPrefix the metadataPrefix to set
      */
@@ -121,7 +131,9 @@ public class RequestHandler {
     }
 
     /**
-     * <p>Getter for the field <code>identifier</code>.</p>
+     * <p>
+     * Getter for the field <code>identifier</code>.
+     * </p>
      *
      * @return the identifier
      */
@@ -130,7 +142,9 @@ public class RequestHandler {
     }
 
     /**
-     * <p>Setter for the field <code>identifier</code>.</p>
+     * <p>
+     * Setter for the field <code>identifier</code>.
+     * </p>
      *
      * @param identifier the identifier to set
      */
@@ -139,7 +153,9 @@ public class RequestHandler {
     }
 
     /**
-     * <p>Getter for the field <code>from</code>.</p>
+     * <p>
+     * Getter for the field <code>from</code>.
+     * </p>
      *
      * @return the from
      */
@@ -148,7 +164,9 @@ public class RequestHandler {
     }
 
     /**
-     * <p>Setter for the field <code>from</code>.</p>
+     * <p>
+     * Setter for the field <code>from</code>.
+     * </p>
      *
      * @param from the from to set
      */
@@ -157,7 +175,9 @@ public class RequestHandler {
     }
 
     /**
-     * <p>Getter for the field <code>until</code>.</p>
+     * <p>
+     * Getter for the field <code>until</code>.
+     * </p>
      *
      * @return the until
      */
@@ -166,7 +186,9 @@ public class RequestHandler {
     }
 
     /**
-     * <p>getFromTimestamp.</p>
+     * <p>
+     * getFromTimestamp.
+     * </p>
      *
      * @param from a {@link java.lang.String} object.
      * @should convert date to timestamp correctly
@@ -183,7 +205,9 @@ public class RequestHandler {
             }
         }
         try {
-            return formatter.parseDateTime(from).getMillis();
+            return LocalDateTime.parse(from, Utils.formatterISO8601BasicDateTime)
+                    .toInstant(ZoneOffset.UTC)
+                    .toEpochMilli();
         } catch (IllegalArgumentException e) {
             logger.debug(e.getMessage());
         }
@@ -192,12 +216,14 @@ public class RequestHandler {
     }
 
     /**
-     * <p>getUntilTimestamp.</p>
+     * <p>
+     * getUntilTimestamp.
+     * </p>
      *
      * @param until a {@link java.lang.String} object.
+     * @return a long.
      * @should convert date to timestamp correctly
      * @should set time to 235959 if none given
-     * @return a long.
      */
     public static long getUntilTimestamp(String until) {
         if (until == null) {
@@ -209,8 +235,10 @@ public class RequestHandler {
             }
         }
         try {
-            long timestamp = formatter.parseDateTime(until).getMillis() + 999;
-            return timestamp;
+            return LocalDateTime.parse(until, Utils.formatterISO8601BasicDateTime)
+                    .plus(999, ChronoUnit.MILLIS)
+                    .toInstant(ZoneOffset.UTC)
+                    .toEpochMilli();
         } catch (IllegalArgumentException e) {
             logger.debug(e.getMessage());
         }
@@ -219,7 +247,9 @@ public class RequestHandler {
     }
 
     /**
-     * <p>Setter for the field <code>until</code>.</p>
+     * <p>
+     * Setter for the field <code>until</code>.
+     * </p>
      *
      * @param until the until to set
      */
@@ -228,7 +258,9 @@ public class RequestHandler {
     }
 
     /**
-     * <p>Getter for the field <code>set</code>.</p>
+     * <p>
+     * Getter for the field <code>set</code>.
+     * </p>
      *
      * @return the set
      */
@@ -237,7 +269,9 @@ public class RequestHandler {
     }
 
     /**
-     * <p>Setter for the field <code>set</code>.</p>
+     * <p>
+     * Setter for the field <code>set</code>.
+     * </p>
      *
      * @param set the set to set
      */

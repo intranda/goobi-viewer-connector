@@ -16,16 +16,16 @@
 package io.goobi.viewer.connector.utils;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -533,13 +533,11 @@ public class SolrSearchIndex {
             if (resp.getResults().size() > 0) {
                 SolrDocument doc = resp.getResults().get(0);
                 if (doc.getFieldValue(SolrConstants.DATECREATED) != null) {
-                    Date d = new Date((Long) doc.getFieldValue(SolrConstants.DATECREATED));
-                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");// ;YYYY-MM-DDThh:mm:ssZ
-                    SimpleDateFormat hours = new SimpleDateFormat("HH:mm:ss");
-                    format.setTimeZone(TimeZone.getTimeZone("GMT"));
-                    hours.setTimeZone(TimeZone.getTimeZone("GMT"));
-                    String yearMonthDay = format.format(d);
-                    String hourMinuteSeconde = hours.format(d);
+                    LocalDateTime ldt = Instant.ofEpochMilli((Long) doc.getFieldValue(SolrConstants.DATECREATED))
+                            .atZone(ZoneOffset.UTC)
+                            .toLocalDateTime();
+                    String yearMonthDay = ldt.format(Utils.formatterISO8601Date);
+                    String hourMinuteSeconde = ldt.format(Utils.formatterISO8601Time);
 
                     return yearMonthDay + "T" + hourMinuteSeconde + "Z";
                 }

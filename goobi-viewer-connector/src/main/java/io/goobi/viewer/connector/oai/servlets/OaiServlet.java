@@ -16,6 +16,9 @@
 package io.goobi.viewer.connector.oai.servlets;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -30,9 +33,6 @@ import org.jdom2.Element;
 import org.jdom2.Namespace;
 import org.jdom2.ProcessingInstruction;
 import org.jdom2.output.XMLOutputter;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,9 +56,6 @@ public class OaiServlet extends HttpServlet {
 
     private static final Logger logger = LoggerFactory.getLogger(OaiServlet.class);
 
-    private static DateTimeFormatter formatterISO8601Date = ISODateTimeFormat.date(); // yyyy-MM-dd
-    private static DateTimeFormatter formatterISO8601DateTimeFullWithTimeZone = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZ");
-
     /** {@inheritDoc} */
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse res) throws ServletException, IOException {
@@ -75,7 +72,7 @@ public class OaiServlet extends HttpServlet {
 
         Element responseDate = new Element("responseDate", xmlns);
 
-        responseDate.setText(Utils.getCurrentUTCTime(0));
+        responseDate.setText(Utils.getCurrentUTCTime(LocalDateTime.now(), 0));
         root.addContent(responseDate);
 
         RequestHandler handler = new RequestHandler(request);
@@ -260,17 +257,17 @@ public class OaiServlet extends HttpServlet {
                 // Date/time
                 dateTime = true;
                 try {
-                    formatterISO8601DateTimeFullWithTimeZone.parseDateTime(from);
-                } catch (IllegalArgumentException e) {
-                    logger.debug(e.getMessage());
+                    LocalDateTime.parse(from, Utils.formatterISO8601DateTimeWithOffset);
+                } catch (DateTimeParseException e) {
+                    logger.error(e.getMessage());
                     return false;
                 }
             } else {
                 // Just date
                 try {
-                    formatterISO8601Date.parseDateTime(from);
-                } catch (IllegalArgumentException e) {
-                    logger.debug(e.getMessage());
+                    LocalDate.parse(from, Utils.formatterISO8601Date);
+                } catch (DateTimeParseException e) {
+                    logger.error(e.getMessage());
                     return false;
                 }
             }
@@ -280,43 +277,41 @@ public class OaiServlet extends HttpServlet {
                 // Date/time
                 dateTime = true;
                 try {
-                    formatterISO8601DateTimeFullWithTimeZone.parseDateTime(until);
-                } catch (IllegalArgumentException e) {
+                    LocalDateTime.parse(until, Utils.formatterISO8601DateTimeWithOffset);
+                } catch (DateTimeParseException e) {
+                    logger.error(e.getMessage());
                     return false;
                 }
             } else {
                 // Just date
                 try {
-                    formatterISO8601Date.parseDateTime(until);
-                } catch (IllegalArgumentException e) {
-                    logger.debug(e.getMessage());
+                    LocalDate.parse(until, Utils.formatterISO8601Date);
+                } catch (DateTimeParseException e) {
+                    logger.error(e.getMessage());
                     return false;
                 }
             }
         }
         if (from != null && until != null) {
-            // Check for different from/until formats
+            // Check for different from/until formats ('from' may not be later than 'until')
             if (dateTime) {
-                // 'from' may not be later than 'until'
+                LocalDateTime ldtFrom = LocalDateTime.parse(from, Utils.formatterISO8601DateTimeWithOffset);
+                LocalDateTime ldtUntil = LocalDateTime.parse(until, Utils.formatterISO8601DateTimeWithOffset);
                 try {
-                    if (formatterISO8601DateTimeFullWithTimeZone.parseDateTime(from)
-                            .getMillis() > formatterISO8601DateTimeFullWithTimeZone.parseDateTime(until).getMillis()) {
-                        return false;
-                    }
-                } catch (IllegalArgumentException e) {
+                    return !ldtFrom.isAfter(ldtUntil);
+                } catch (DateTimeParseException e) {
                     logger.error(e.getMessage());
                     return false;
                 }
-            } else {
-                // 'from' may not be later than 'until'
-                try {
-                    if (formatterISO8601Date.parseDateTime(from).getMillis() > formatterISO8601Date.parseDateTime(until).getMillis()) {
-                        return false;
-                    }
-                } catch (IllegalArgumentException e) {
-                    logger.error(e.getMessage());
-                    return false;
-                }
+            }
+
+            LocalDate ldFrom = LocalDate.parse(from, Utils.formatterISO8601Date);
+            LocalDate ldUntil = LocalDate.parse(until, Utils.formatterISO8601Date);
+            try {
+                return !ldFrom.isAfter(ldUntil);
+            } catch (DateTimeParseException e) {
+                logger.error(e.getMessage());
+                return false;
             }
         }
 

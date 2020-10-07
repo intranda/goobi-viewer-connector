@@ -15,10 +15,12 @@
  */
 package io.goobi.viewer.connector.oai.model;
 
-import java.util.Calendar;
+import java.time.LocalDate;
 
 /**
- * <p>LicenseType class.</p>
+ * <p>
+ * LicenseType class.
+ * </p>
  *
  */
 public class LicenseType {
@@ -28,7 +30,9 @@ public class LicenseType {
     private final String conditions;
 
     /**
-     * <p>Constructor for LicenseType.</p>
+     * <p>
+     * Constructor for LicenseType.
+     * </p>
      *
      * @param field a {@link java.lang.String} object.
      * @param value a {@link java.lang.String} object.
@@ -47,7 +51,9 @@ public class LicenseType {
     }
 
     /**
-     * <p>Getter for the field <code>field</code>.</p>
+     * <p>
+     * Getter for the field <code>field</code>.
+     * </p>
      *
      * @return the field
      */
@@ -56,7 +62,9 @@ public class LicenseType {
     }
 
     /**
-     * <p>Getter for the field <code>value</code>.</p>
+     * <p>
+     * Getter for the field <code>value</code>.
+     * </p>
      *
      * @return the value
      */
@@ -65,7 +73,9 @@ public class LicenseType {
     }
 
     /**
-     * <p>Getter for the field <code>conditions</code>.</p>
+     * <p>
+     * Getter for the field <code>conditions</code>.
+     * </p>
      *
      * @return the conditions
      */
@@ -74,7 +84,9 @@ public class LicenseType {
     }
 
     /**
-     * <p>getProcessedConditions.</p>
+     * <p>
+     * getProcessedConditions.
+     * </p>
      *
      * @return a {@link java.lang.String} object.
      */
@@ -82,7 +94,8 @@ public class LicenseType {
         String conditions = this.conditions;
         if (conditions.contains("NOW/YEAR") && !conditions.contains("DATE_")) {
             // Hack for getting the current year as a number for non-date Solr fields
-            conditions = conditions.replace("NOW/YEAR", String.valueOf(Calendar.getInstance().get(Calendar.YEAR)));
+            conditions = conditions.replace("NOW/YEAR", String.valueOf(LocalDate.now().getYear()));
+
         }
 
         return conditions;
