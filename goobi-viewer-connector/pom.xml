@@ -315,7 +315,7 @@
                             <goal>analyze-only</goal>
                         </goals>
                         <configuration>
-                            <failOnWarning>false</failOnWarning>
+                            <failOnWarning>true</failOnWarning>
                             <ignoredUnusedDeclaredDependencies>
                                 <!-- JXPath is used at XPathExpressionEngine from org.apache.commons.configuration2, i.e. LanguageHelper -->
                                 <ignoredUnusedDeclaredDependency>commons-jxpath:commons-jxpath</ignoredUnusedDeclaredDependency>
@@ -325,6 +325,9 @@
 
                                 <!-- this is needed during runtime, otherwise we have no logfiles -->
                                 <ignoredUnusedDeclaredDependency>org.apache.logging.log4j:log4j-slf4j-impl</ignoredUnusedDeclaredDependency>
+
+                                <!-- this is needed for commons-configuration 1.10. We can remove it when migrating to commons-configuration2-->
+                                <ignoredUnusedDeclaredDependency>commons-collections:commons-collections</ignoredUnusedDeclaredDependency>
                             </ignoredUnusedDeclaredDependencies>
                         </configuration>
                     </execution>
