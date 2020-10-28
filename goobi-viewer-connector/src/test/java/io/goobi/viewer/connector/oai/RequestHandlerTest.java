@@ -19,7 +19,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import io.goobi.viewer.connector.AbstractTest;
-import io.goobi.viewer.connector.oai.RequestHandler;
 
 public class RequestHandlerTest extends AbstractTest {
 

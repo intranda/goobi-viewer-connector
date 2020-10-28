@@ -307,13 +307,13 @@ public class Utils {
         String from = null;
         if (requestHandler.getFrom() != null) {
             from = requestHandler.getFrom();
-            from = from.replace("-", "").replace("T", "").replace(":", "").replace("Z", "");
+            from = cleanUpTimestamp(from);
             datestamp.put("from", from);
         }
         String until = null;
         if (requestHandler.getUntil() != null) {
             until = requestHandler.getUntil();
-            until = until.replace("-", "").replace("T", "").replace(":", "").replace("Z", "");
+            until = cleanUpTimestamp(until);
             datestamp.put("until", until);
         }
 
@@ -332,6 +332,25 @@ public class Utils {
         }
 
         return datestamp;
+    }
+
+    /**
+     * 
+     * @param timestamp
+     * @return
+     * @should clean up timestamp correctly
+     */
+    public static String cleanUpTimestamp(String timestamp) {
+        if (StringUtils.isEmpty(timestamp)) {
+            return timestamp;
+        }
+
+        // Remove milliseconds
+        if (timestamp.contains(".")) {
+            timestamp = timestamp.substring(0, timestamp.indexOf("."));
+        }
+
+        return timestamp.replace("-", "").replace("T", "").replace(":", "").replace("Z", "");
     }
 
     /**
