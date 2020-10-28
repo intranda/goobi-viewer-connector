@@ -12,6 +12,7 @@
 
   <Properties>
     <Property name="baseDir">/opt/digiverso/logs</Property>
+    <Property name="logLevel">$${env:LOGGERLEVEL:-ERROR}</Property>
   </Properties>
 
   <ThresholdFilter level="TRACE" />
@@ -19,7 +20,7 @@
   <Appenders>
     <Console name="stdout">
       <PatternLayout pattern="%-5level %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %location%n        %msg%n" />
-      <ThresholdFilter level="ERROR" />
+      <ThresholdFilter level="${logLevel}" />
     </Console>
 
     <RollingFile name="oai" fileName="${baseDir}/oai.log" filePattern="${baseDir}/oai.log.%d{yyyy-MM-dd}.gz">
