@@ -332,9 +332,9 @@ public class OAIDCFormat extends Format {
                     }
                 } else if ("#TOC#".equals(md.getMasterValue())) {
                     // Generated TOC as plain text
-                    if (!openAccess) {
-                        continue;
-                    }
+                    //                    if (!openAccess) {
+                    //                        continue;
+                    //                    }
 
                     try {
                         String url = DataManager.getInstance().getConfiguration().getRestApiUrl() + "records/"

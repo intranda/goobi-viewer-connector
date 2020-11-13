@@ -182,6 +182,7 @@ public class RequestHandler {
      * @return the until
      */
     public String getUntil() {
+        logger.trace("until: " + until);
         return until;
     }
 
@@ -226,10 +227,11 @@ public class RequestHandler {
      * @should set time to 235959 if none given
      */
     public static long getUntilTimestamp(String until) {
+        // logger.trace("getUntilTimestamp: {}", until);
         if (until == null) {
             until = "99991231235959";
         } else {
-            until = until.replace("-", "").replace("T", "").replace(":", "").replace("Z", "");
+            until = Utils.cleanUpTimestamp(until);
             if (until.length() == 8) {
                 until = until + "235959";
             }

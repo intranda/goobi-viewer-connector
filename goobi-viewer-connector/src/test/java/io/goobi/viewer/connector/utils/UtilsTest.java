@@ -62,4 +62,14 @@ public class UtilsTest extends AbstractTest {
     public void getCurrentUTCTime_shouldFormatTimeCorrectly() throws Exception {
         Assert.assertEquals("2020-09-07T14:30:01Z", Utils.getCurrentUTCTime(LocalDateTime.of(2020, 9, 7, 14, 30, 00), 1000));
     }
+
+    /**
+     * @see Utils#cleanUpTimestamp(String)
+     * @verifies clean up timestamp correctly
+     */
+    @Test
+    public void cleanUpTimestamp_shouldCleanUpTimestampCorrectly() throws Exception {
+        Assert.assertEquals("20201028133500", Utils.cleanUpTimestamp("2020-10-28T13:35:00"));
+        Assert.assertEquals("20201028133500", Utils.cleanUpTimestamp("2020-10-28T13:35:00.000"));
+    }
 }
