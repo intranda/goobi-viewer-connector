@@ -562,6 +562,9 @@ public abstract class Format {
             int count = 0;
             XStream xStream = new XStream(new DomDriver());
             for (File tokenFile : tokenFolder.listFiles()) {
+                if (tokenFile.isDirectory()) {
+                    continue;
+                }
                 try (FileInputStream fis = new FileInputStream(tokenFile)) {
                     ResumptionToken token = (ResumptionToken) xStream.fromXML(fis);
                     if (token.hasExpired() && FileUtils.deleteQuietly(tokenFile)) {
@@ -574,7 +577,7 @@ public abstract class Format {
                         count++;
                     }
                 } catch (FileNotFoundException e) {
-                    logger.error(e.getMessage(), e);
+                    logger.error(e.getMessage());
                 } catch (IOException e) {
                     logger.error(e.getMessage(), e);
                 }
