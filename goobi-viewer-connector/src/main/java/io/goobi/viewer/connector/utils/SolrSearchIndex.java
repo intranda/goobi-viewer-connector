@@ -64,8 +64,9 @@ public class SolrSearchIndex {
 
     /** Constant <code>MAX_HITS=Integer.MAX_VALUE</code> */
     public static final int MAX_HITS = Integer.MAX_VALUE;
-    private static final int TIMEOUT_SO = 10000;
-    private static final int TIMEOUT_CONNECTION = 10000;
+    private static final int TIMEOUT_SO = 300000;
+    private static final int TIMEOUT_CONNECTION = 300000;
+    private static final int RETRY_ATTEMPTS = 20;
 
     private SolrClient client;
     private final boolean testMode;
@@ -154,9 +155,8 @@ public class SolrSearchIndex {
     public SolrDocumentList search(String query) throws SolrServerException, IOException {
         SolrQuery solrQuery = new SolrQuery(query + getAllSuffixes());
         solrQuery.setRows(MAX_HITS);
-        QueryResponse resp = client.query(solrQuery);
 
-        return resp.getResults();
+        return querySolr(solrQuery, RETRY_ATTEMPTS).getResults();
     }
 
     /**
@@ -193,18 +193,13 @@ public class SolrSearchIndex {
                 }
             }
         }
-        if (params != null && !params.isEmpty())
-
-        {
+        if (params != null && !params.isEmpty()) {
             for (String key : params.keySet()) {
                 solrQuery.set(key, params.get(key));
             }
         }
 
-        QueryResponse resp = client.query(solrQuery);
-
-        return resp;
-
+        return querySolr(solrQuery, RETRY_ATTEMPTS);
     }
 
     /**
@@ -241,11 +236,41 @@ public class SolrSearchIndex {
                 solrQuery.setGetFieldStatistics(field);
             }
         }
-        QueryResponse resp = client.query(solrQuery);
+
+        QueryResponse resp = querySolr(solrQuery, RETRY_ATTEMPTS);
         logger.debug("Total hits (Solr only): {}, fetched records {} - {}", resp.getResults().getNumFound(), firstRow,
                 firstRow + resp.getResults().size() - 1);
 
         return resp;
+    }
+
+    /**
+     * Attempts multiple times to query the Solr client with the given query.
+     * 
+     * @param solrQuery Readily built SolrQuery object
+     * @param tries Number of attempts to query Solr before giving up
+     * @return
+     * @throws SolrServerException
+     * @throws IOException
+     */
+    QueryResponse querySolr(SolrQuery solrQuery, int tries) throws SolrServerException, IOException {
+        if (solrQuery == null) {
+            throw new IllegalArgumentException("solrQuery may not be null");
+        }
+
+        while (tries > 0) {
+            tries--;
+            try {
+                return client.query(solrQuery);
+            } catch (SolrServerException e) {
+                if (tries == 0 || !e.getMessage().toLowerCase().contains("timeout")) {
+                    throw e;
+                }
+                logger.error(e.getMessage());
+            }
+        }
+
+        return new QueryResponse();
     }
 
     /**
