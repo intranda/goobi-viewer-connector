@@ -37,7 +37,7 @@ import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
 import io.goobi.viewer.connector.oai.model.language.Language;
 import io.goobi.viewer.connector.utils.SolrConstants;
-import io.goobi.viewer.connector.utils.SolrSearchIndex;
+import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
 import io.goobi.viewer.connector.utils.XmlTools;
 
@@ -66,7 +66,7 @@ public class TEIFormat extends Format {
             // One OAI record for each record version
             qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false,
                     " AND " + versionDiscriminatorField + ":*", Collections.singletonList(versionDiscriminatorField));
-            totalVirtualHits = SolrSearchIndex.getFieldCount(qr, versionDiscriminatorField);
+            totalVirtualHits = SolrSearchTools.getFieldCount(qr, versionDiscriminatorField);
             totalRawHits = qr.getResults().getNumFound();
         } else {
             // One OAI record for each record proper
@@ -180,7 +180,7 @@ public class TEIFormat extends Format {
             List<String> versions = Collections.singletonList(requestedVersion);
             for (SolrDocument doc : records) {
                 if (requestedVersion == null) {
-                    versions = SolrSearchIndex.getMetadataValues(doc, versionDiscriminatorField);
+                    versions = SolrSearchTools.getMetadataValues(doc, versionDiscriminatorField);
                 }
                 for (String version : versions) {
                     virtualHitCount++; // Count hit even if the XML file is ultimately unavailable
@@ -289,7 +289,7 @@ public class TEIFormat extends Format {
         // datestamp
         Element datestamp = new Element("datestamp", xmlns);
         long untilTimestamp = RequestHandler.getUntilTimestamp(handler.getUntil());
-        long timestampModified = SolrSearchIndex.getLatestValidDateUpdated(topstructDoc != null ? topstructDoc : doc, untilTimestamp);
+        long timestampModified = SolrSearchTools.getLatestValidDateUpdated(topstructDoc != null ? topstructDoc : doc, untilTimestamp);
         datestamp.setText(Utils.parseDate(timestampModified));
         if (StringUtils.isEmpty(datestamp.getText()) && doc.getFieldValue(SolrConstants.ISANCHOR) != null) {
             datestamp.setText(Utils.parseDate(DataManager.getInstance().getSearchIndex().getLatestVolumeTimestamp(doc, untilTimestamp)));
@@ -330,7 +330,7 @@ public class TEIFormat extends Format {
             // Query Solr index for the count of the discriminator field
             QueryResponse qr = solr.search(params.get("from"), params.get("until"), params.get("set"), params.get("metadataPrefix"), 0, 0, false,
                     " AND " + versionDiscriminatorField + ":*", Collections.singletonList(versionDiscriminatorField));
-            return SolrSearchIndex.getFieldCount(qr, versionDiscriminatorField);
+            return SolrSearchTools.getFieldCount(qr, versionDiscriminatorField);
         }
         return solr.getTotalHitNumber(params, false, null, null);
     }

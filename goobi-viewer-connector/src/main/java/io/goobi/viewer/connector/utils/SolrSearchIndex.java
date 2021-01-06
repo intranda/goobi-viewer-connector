@@ -21,7 +21,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +36,6 @@ import org.apache.solr.client.solrj.impl.BinaryRequestWriter;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.FacetField.Count;
-import org.apache.solr.client.solrj.response.FieldStatsInfo;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
@@ -46,10 +44,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.goobi.viewer.connector.DataManager;
-import io.goobi.viewer.connector.oai.RequestHandler;
-import io.goobi.viewer.connector.oai.enums.Metadata;
-import io.goobi.viewer.connector.oai.model.LicenseType;
-import io.goobi.viewer.connector.oai.model.Set;
 
 /**
  * <p>
@@ -143,6 +137,35 @@ public class SolrSearchIndex {
     }
 
     /**
+     * Attempts multiple times to query the Solr client with the given query.
+     * 
+     * @param solrQuery Readily built SolrQuery object
+     * @param tries Number of attempts to query Solr before giving up
+     * @return
+     * @throws SolrServerException
+     * @throws IOException
+     */
+    QueryResponse querySolr(SolrQuery solrQuery, int tries) throws SolrServerException, IOException {
+        if (solrQuery == null) {
+            throw new IllegalArgumentException("solrQuery may not be null");
+        }
+
+        while (tries > 0) {
+            tries--;
+            try {
+                return client.query(solrQuery);
+            } catch (SolrServerException e) {
+                if (tries == 0 || !e.getMessage().toLowerCase().contains("timeout")) {
+                    throw e;
+                }
+                logger.error(e.getMessage());
+            }
+        }
+
+        return new QueryResponse();
+    }
+
+    /**
      * <p>
      * search.
      * </p>
@@ -153,7 +176,7 @@ public class SolrSearchIndex {
      * @throws IOException
      */
     public SolrDocumentList search(String query) throws SolrServerException, IOException {
-        SolrQuery solrQuery = new SolrQuery(query + getAllSuffixes());
+        SolrQuery solrQuery = new SolrQuery(query + SolrSearchTools.getAllSuffixes());
         solrQuery.setRows(MAX_HITS);
 
         return querySolr(solrQuery, RETRY_ATTEMPTS).getResults();
@@ -220,11 +243,11 @@ public class SolrSearchIndex {
      */
     public QueryResponse search(String from, String until, String setSpec, String metadataPrefix, int firstRow, int numRows, boolean urnOnly,
             String querySuffix, List<String> fieldStatistics) throws IOException, SolrServerException {
-        StringBuilder sbQuery = new StringBuilder(buildQueryString(from, until, setSpec, metadataPrefix, urnOnly, querySuffix));
+        StringBuilder sbQuery = new StringBuilder(SolrSearchTools.buildQueryString(from, until, setSpec, metadataPrefix, urnOnly, querySuffix));
         if (urnOnly) {
             sbQuery.append(" +(").append(SolrConstants.URN).append(":* ").append(SolrConstants.IMAGEURN_OAI).append(":*)");
         }
-        sbQuery.append(getAllSuffixes());
+        sbQuery.append(SolrSearchTools.getAllSuffixes());
         logger.debug("OAI query: {}", sbQuery.toString());
         logger.trace("start: {}, rows: {}", firstRow, numRows);
         SolrQuery solrQuery = new SolrQuery(sbQuery.toString());
@@ -242,35 +265,6 @@ public class SolrSearchIndex {
                 firstRow + resp.getResults().size() - 1);
 
         return resp;
-    }
-
-    /**
-     * Attempts multiple times to query the Solr client with the given query.
-     * 
-     * @param solrQuery Readily built SolrQuery object
-     * @param tries Number of attempts to query Solr before giving up
-     * @return
-     * @throws SolrServerException
-     * @throws IOException
-     */
-    QueryResponse querySolr(SolrQuery solrQuery, int tries) throws SolrServerException, IOException {
-        if (solrQuery == null) {
-            throw new IllegalArgumentException("solrQuery may not be null");
-        }
-
-        while (tries > 0) {
-            tries--;
-            try {
-                return client.query(solrQuery);
-            } catch (SolrServerException e) {
-                if (tries == 0 || !e.getMessage().toLowerCase().contains("timeout")) {
-                    throw e;
-                }
-                logger.error(e.getMessage());
-            }
-        }
-
-        return new QueryResponse();
     }
 
     /**
@@ -330,7 +324,7 @@ public class SolrSearchIndex {
      */
     public SolrDocument getListRecord(final String identifier) throws IOException, SolrServerException {
         logger.trace("getListRecord");
-        SolrDocumentList ret = query(identifier, 1);
+        SolrDocumentList ret = queryForIdentifier(identifier, 1);
         if (!ret.isEmpty()) {
             return ret.get(0);
         }
@@ -349,7 +343,7 @@ public class SolrSearchIndex {
      * @throws IOException
      */
     public boolean isRecordExists(final String identifier) throws SolrServerException, IOException {
-        return !query(identifier, 0).isEmpty();
+        return !queryForIdentifier(identifier, 0).isEmpty();
     }
 
     /**
@@ -360,7 +354,7 @@ public class SolrSearchIndex {
      * @throws SolrServerException
      * @throws IOException
      */
-    private SolrDocumentList query(final String identifier, int rows) throws SolrServerException, IOException {
+    private SolrDocumentList queryForIdentifier(final String identifier, int rows) throws SolrServerException, IOException {
         String useIdentifier = ClientUtils.escapeQueryChars(identifier);
 
         StringBuilder sb = new StringBuilder();
@@ -377,90 +371,12 @@ public class SolrSearchIndex {
                 .append(':')
                 .append(useIdentifier)
                 .append(')');
-        sb.append(getAllSuffixes());
+        sb.append(SolrSearchTools.getAllSuffixes());
         logger.debug(sb.toString());
         SolrQuery solrQuery = new SolrQuery(sb.toString());
         solrQuery.setRows(rows);
-        QueryResponse resp = client.query(solrQuery);
 
-        return resp.getResults();
-    }
-
-    /**
-     * build the query String depending on the variables
-     * 
-     * @param from
-     * @param until
-     * @param setSpec
-     * @param metadataPrefix
-     * @param excludeAnchor
-     * @param querySuffix
-     * @return
-     */
-    private static String buildQueryString(String from, String until, String setSpec, String metadataPrefix, boolean excludeAnchor,
-            String querySuffix) {
-        StringBuilder sbQuery = new StringBuilder();
-        sbQuery.append("+(+(").append(SolrConstants.ISWORK).append(":true");
-        if (!excludeAnchor) {
-            sbQuery.append(' ').append(SolrConstants.ISANCHOR).append(":true");
-        }
-        sbQuery.append(' ').append(SolrConstants.DATEDELETED).append(":*)");
-        if (StringUtils.isNotEmpty(querySuffix)) {
-            sbQuery.append(querySuffix);
-        }
-        sbQuery.append(')');
-        // Solr timestamp range is irrelevant for iv_* formats
-        if (!Metadata.iv_overviewpage.name().equals(metadataPrefix) && !Metadata.iv_crowdsourcing.name().equals(metadataPrefix)
-                && (from != null || until != null)) {
-            long fromTimestamp = RequestHandler.getFromTimestamp(from);
-            long untilTimestamp = RequestHandler.getUntilTimestamp(until);
-            if (fromTimestamp == untilTimestamp) {
-                untilTimestamp += 999;
-            }
-            sbQuery.append(" +")
-                    .append(SolrConstants.DATEUPDATED)
-                    .append(":[")
-                    .append(normalizeDate(String.valueOf(fromTimestamp)))
-                    .append(" TO ")
-                    .append(normalizeDate(String.valueOf(untilTimestamp)))
-                    .append(']');
-
-        }
-        if (setSpec != null) {
-            boolean defaultSet = true;
-            // Use DC as the set field by default 
-            String setQuery = SolrConstants.DC + ":" + setSpec;
-
-            // Check whether this is an additional set and if so, use its custom query
-            {
-                List<Set> additionalSetList = DataManager.getInstance().getConfiguration().getAdditionalSets();
-                for (Set s : additionalSetList) {
-                    if (s.getSetSpec().equals(setSpec)) {
-                        defaultSet = false;
-                        sbQuery = new StringBuilder(); // Replace query
-                        setQuery = s.getSetQuery();
-                        break;
-                    }
-                }
-            }
-            // Check whether this is an all-values set and if so, use its field
-            if (defaultSet && setSpec.contains(":")) {
-                List<Set> allValuesSetList = DataManager.getInstance().getConfiguration().getAllValuesSets();
-                for (Set s : allValuesSetList) {
-                    if (s.getSetName().equals(setSpec.substring(0, setSpec.indexOf(":")))) {
-                        defaultSet = false;
-                        setQuery = setSpec;
-                        break;
-                    }
-                }
-            }
-            if (sbQuery.length() > 0) {
-                sbQuery.append(" +");
-            }
-            sbQuery.append(setQuery);
-        }
-
-        return sbQuery.toString();
+        return querySolr(solrQuery, RETRY_ATTEMPTS).getResults();
     }
 
     /**
@@ -475,13 +391,13 @@ public class SolrSearchIndex {
     public List<String> getSets(String field) throws SolrServerException, IOException {
         List<String> ret = new ArrayList<>();
 
-        SolrQuery query = new SolrQuery();
-        query.setQuery(field + ":* " + DataManager.getInstance().getConfiguration().getCollectionBlacklistFilterSuffix());
-        query.setStart(0);
-        query.setRows(0);
-        query.addFacetField(field);
-        logger.trace("Set query: {}", query.getQuery());
-        QueryResponse resp = client.query(query);
+        SolrQuery solrQuery = new SolrQuery();
+        solrQuery.setQuery(field + ":* " + DataManager.getInstance().getConfiguration().getCollectionBlacklistFilterSuffix());
+        solrQuery.setStart(0);
+        solrQuery.setRows(0);
+        solrQuery.addFacetField(field);
+        logger.trace("Set query: {}", solrQuery.getQuery());
+        QueryResponse resp = querySolr(solrQuery, RETRY_ATTEMPTS);
 
         FacetField facetField = resp.getFacetField(field);
         if (facetField != null) {
@@ -513,12 +429,12 @@ public class SolrSearchIndex {
      */
     public long getTotalHitNumber(Map<String, String> params, boolean urnOnly, String querySuffix, List<String> fieldStatistics)
             throws IOException, SolrServerException {
-        StringBuilder sbQuery = new StringBuilder(
-                buildQueryString(params.get("from"), params.get("until"), params.get("set"), params.get("metadataPrefix"), urnOnly, querySuffix));
+        StringBuilder sbQuery = new StringBuilder(SolrSearchTools.buildQueryString(params.get("from"), params.get("until"), params.get("set"),
+                params.get("metadataPrefix"), urnOnly, querySuffix));
         if (urnOnly) {
             sbQuery.append(" AND (").append(SolrConstants.URN).append(":* OR ").append(SolrConstants.IMAGEURN_OAI).append(":*)");
         }
-        sbQuery.append(getAllSuffixes());
+        sbQuery.append(SolrSearchTools.getAllSuffixes());
         logger.debug("OAI query: {}", sbQuery.toString());
         SolrQuery solrQuery = new SolrQuery(sbQuery.toString());
         solrQuery.setStart(0);
@@ -529,8 +445,7 @@ public class SolrSearchIndex {
                 solrQuery.setGetFieldStatistics(field);
             }
         }
-        QueryResponse resp = client.query(solrQuery);
-
+        QueryResponse resp = querySolr(solrQuery, RETRY_ATTEMPTS);
         long num = resp.getResults().getNumFound();
         logger.debug("Total hits: {}", num);
         return num;
@@ -547,14 +462,13 @@ public class SolrSearchIndex {
      */
     public String getEarliestRecordDatestamp() throws SolrServerException, IOException {
         try {
-            String searchStr = SolrConstants.ISWORK + ":true" + getAllSuffixes();
+            String searchStr = SolrConstants.ISWORK + ":true" + SolrSearchTools.getAllSuffixes();
 
             SolrQuery solrQuery = new SolrQuery(searchStr);
             solrQuery.setRows(1);
             solrQuery.addField(SolrConstants.DATECREATED);
             solrQuery.addSort(SolrConstants.DATECREATED, ORDER.asc);
-            QueryResponse resp = client.query(solrQuery);
-
+            QueryResponse resp = querySolr(solrQuery, RETRY_ATTEMPTS);
             if (resp.getResults().size() > 0) {
                 SolrDocument doc = resp.getResults().get(0);
                 if (doc.getFieldValue(SolrConstants.DATECREATED) != null) {
@@ -583,134 +497,30 @@ public class SolrSearchIndex {
      * @throws IOException
      */
     public long getLatestVolumeTimestamp(SolrDocument anchorDoc, long untilTimestamp) throws SolrServerException, IOException {
-        if (anchorDoc.getFieldValue(SolrConstants.ISANCHOR) != null && (Boolean) anchorDoc.getFieldValue(SolrConstants.ISANCHOR)) {
-            SolrDocumentList volumes = search(
-                    SolrConstants.ISWORK + ":true AND " + SolrConstants.IDDOC_PARENT + ":" + (String) anchorDoc.getFieldValue(SolrConstants.IDDOC));
-            if (volumes != null) {
-                long latest = 0;
-                for (SolrDocument volume : volumes) {
-                    long volumeTimestamp = getLatestValidDateUpdated(volume, untilTimestamp);
-                    if (latest < volumeTimestamp) {
-                        latest = volumeTimestamp;
-                    }
-                }
+        if (anchorDoc.getFieldValue(SolrConstants.ISANCHOR) == null || (Boolean) anchorDoc.getFieldValue(SolrConstants.ISANCHOR) == false) {
+            return -1;
+        }
 
-                if (latest > 0) {
-                    return latest;
-                }
+        SolrDocumentList volumes = search(
+                SolrConstants.ISWORK + ":true AND " + SolrConstants.IDDOC_PARENT + ":" + (String) anchorDoc.getFieldValue(SolrConstants.IDDOC));
+        if (volumes == null) {
+            return -1;
+        }
+
+        long latest = 0;
+        for (SolrDocument volume : volumes) {
+            long volumeTimestamp = SolrSearchTools.getLatestValidDateUpdated(volume, untilTimestamp);
+            if (latest < volumeTimestamp) {
+                latest = volumeTimestamp;
             }
+        }
+
+        if (latest > 0) {
+            return latest;
         }
 
         return -1;
-    }
 
-    /**
-     * Returns the blacklist filter suffix (if enabled), followed by the user-agnostic access condition suffix.
-     *
-     * @return a {@link java.lang.String} object.
-     */
-    public static String getAllSuffixes() {
-        StringBuilder sb = new StringBuilder();
-        if (DataManager.getInstance().getConfiguration().isUseCollectionBlacklist()) {
-            sb.append(DataManager.getInstance().getConfiguration().getCollectionBlacklistFilterSuffix());
-        }
-        List<LicenseType> restrictedLicenseTypes = DataManager.getInstance().getConfiguration().getRestrictedAccessConditions();
-        if (!restrictedLicenseTypes.isEmpty()) {
-            sb.append(" -(");
-            boolean moreThanOne = false;
-            for (LicenseType licenseType : restrictedLicenseTypes) {
-                if (moreThanOne) {
-                    sb.append(" OR ");
-                }
-                if (StringUtils.isNotEmpty(licenseType.getConditions())) {
-                    if (licenseType.getConditions().charAt(0) == '-') {
-                        // do not wrap the conditions in parentheses if it starts with a negation, otherwise it won't work
-                        sb.append('(')
-                                .append(licenseType.getField())
-                                .append(":\"")
-                                .append(licenseType.getValue())
-                                .append("\" AND ")
-                                .append(licenseType.getProcessedConditions())
-                                .append(')');
-                    } else {
-                        sb.append('(')
-                                .append(licenseType.getField())
-                                .append(":\"")
-                                .append(licenseType.getValue())
-                                .append("\" AND (")
-                                .append(licenseType.getProcessedConditions())
-                                .append("))");
-                    }
-                } else {
-                    sb.append(licenseType.getField()).append(':').append(licenseType.getValue());
-                }
-                moreThanOne = true;
-            }
-            sb.append(')');
-        }
-        String querySuffix = DataManager.getInstance().getConfiguration().getQuerySuffix();
-        if (StringUtils.isNotEmpty(querySuffix)) {
-            if (querySuffix.charAt(0) != ' ') {
-                sb.append(' ');
-            }
-            sb.append(querySuffix);
-        }
-
-        return sb.toString();
-    }
-
-    /**
-     * 
-     * @param date
-     * @return
-     */
-    private static String normalizeDate(String date) {
-        if (date != null) {
-            if (date.charAt(0) == '-' || date.length() > 12) {
-                return date;
-            }
-            switch (date.length()) {
-                case 8:
-                    return "00000" + date;
-                case 9:
-                    return "0000" + date;
-                case 10:
-                    return "000" + date;
-                case 11:
-                    return "00" + date;
-                case 12:
-                    return "0" + date;
-                default: // nothing
-            }
-        }
-
-        return date;
-    }
-
-    /**
-     * Returns the latest DATEUPDATED value on the given <code>SolrDocument</code> that is no larger than <code>untilTimestamp</code>. Returns 0 if no
-     * such value is found.
-     *
-     * @param doc a {@link org.apache.solr.common.SolrDocument} object.
-     * @param untilTimestamp a long.
-     * @return Latest DATEUPDATED value is less than or equals untilTimestamp on doc; 0 if none found.
-     * @should return correct value
-     * @should return 0 if no valid value is found
-     */
-    public static Long getLatestValidDateUpdated(SolrDocument doc, long untilTimestamp) {
-        long ret = 0;
-        Collection<Object> dateUpdatedValues = doc.getFieldValues(SolrConstants.DATEUPDATED);
-        if (dateUpdatedValues != null && !dateUpdatedValues.isEmpty()) {
-            // Get latest DATEUPDATED values
-            for (Object o : dateUpdatedValues) {
-                long dateUpdated = (Long) o;
-                if (dateUpdated > ret && dateUpdated <= untilTimestamp) {
-                    ret = dateUpdated;
-                }
-            }
-        }
-
-        return ret;
     }
 
     /**
@@ -733,171 +543,6 @@ public class SolrSearchIndex {
         }
 
         return null;
-    }
-
-    /**
-     * <p>
-     * getSingleFieldValue.
-     * </p>
-     *
-     * @param doc a {@link org.apache.solr.common.SolrDocument} object.
-     * @param field a {@link java.lang.String} object.
-     * @return a {@link java.lang.Object} object.
-     */
-    public static Object getSingleFieldValue(SolrDocument doc, String field) {
-        Collection<Object> valueList = doc.getFieldValues(field);
-        if (valueList != null && !valueList.isEmpty()) {
-            return valueList.iterator().next();
-        }
-
-        return null;
-    }
-
-    /**
-     * <p>
-     * getSingleFieldStringValue.
-     * </p>
-     *
-     * @param doc a {@link org.apache.solr.common.SolrDocument} object.
-     * @param field a {@link java.lang.String} object.
-     * @return a {@link java.lang.String} object.
-     */
-    public static String getSingleFieldStringValue(SolrDocument doc, String field) {
-        return (String) getSingleFieldValue(doc, field);
-    }
-
-    /**
-     * Returns a list with all (string) values for the given field name in the given SolrDocument.
-     *
-     * @param doc a {@link org.apache.solr.common.SolrDocument} object.
-     * @param fieldName a {@link java.lang.String} object.
-     * @should return all values for the given field
-     * @return a {@link java.util.List} object.
-     */
-    public static List<String> getMetadataValues(SolrDocument doc, String fieldName) {
-        if (doc != null) {
-            Collection<Object> values = doc.getFieldValues(fieldName);
-            if (values != null) {
-                List<String> ret = new ArrayList<>(values.size());
-                for (Object value : values) {
-                    if (value instanceof String) {
-                        ret.add((String) value);
-                    } else {
-                        ret.add(String.valueOf(value));
-                    }
-                }
-                return ret;
-            }
-        }
-
-        return Collections.emptyList();
-    }
-
-    /**
-     * <p>
-     * getFieldCount.
-     * </p>
-     *
-     * @param queryResponse a {@link org.apache.solr.client.solrj.response.QueryResponse} object.
-     * @param field a {@link java.lang.String} object.
-     * @return a long.
-     */
-    public static long getFieldCount(QueryResponse queryResponse, String field) {
-        if (queryResponse == null) {
-            throw new IllegalArgumentException("queryResponse may not be null");
-        }
-        if (field == null) {
-            throw new IllegalArgumentException("field may not be null");
-        }
-
-        long ret = 0;
-        FieldStatsInfo info = queryResponse.getFieldStatsInfo().get(field);
-        if (info != null) {
-            Object count = info.getCount();
-            if (count instanceof Long || count instanceof Integer) {
-                ret = (long) count;
-            } else if (count instanceof Double) {
-                ret = ((Double) count).longValue();
-            }
-            logger.trace("Total hits via {} value count: {}", field, ret);
-        }
-
-        return ret;
-    }
-
-    /**
-     * <p>
-     * getAdditionalDocstructsQuerySuffix.
-     * </p>
-     *
-     * @should build query suffix correctly
-     * @param additionalDocstructTypes a {@link java.util.List} object.
-     * @return a {@link java.lang.String} object.
-     */
-    public static String getAdditionalDocstructsQuerySuffix(List<String> additionalDocstructTypes) {
-        StringBuilder sbQuerySuffix = new StringBuilder();
-        if (additionalDocstructTypes != null && !additionalDocstructTypes.isEmpty()) {
-            sbQuerySuffix.append(" OR (").append(SolrConstants.DOCTYPE).append(":DOCSTRCT AND (");
-            int count = 0;
-            for (String docstructType : additionalDocstructTypes) {
-                if (StringUtils.isNotBlank(docstructType)) {
-                    if (count > 0) {
-                        sbQuerySuffix.append(" OR ");
-                    }
-                    sbQuerySuffix.append(SolrConstants.DOCSTRCT).append(':').append(docstructType);
-                    count++;
-                } else {
-                    logger.warn("Empty element found in <additionalDocstructTypes>.");
-                }
-            }
-            sbQuerySuffix.append("))");
-            // Avoid returning an invalid subquery if all configured values are blank
-            if (count == 0) {
-                return "";
-            }
-        }
-
-        return sbQuerySuffix.toString();
-    }
-
-    /**
-     * <p>
-     * getUrnPrefixBlacklistSuffix.
-     * </p>
-     *
-     * @should build query suffix correctly
-     * @param urnPrefixBlacklist a {@link java.util.List} object.
-     * @return a {@link java.lang.String} object.
-     */
-    public static String getUrnPrefixBlacklistSuffix(List<String> urnPrefixBlacklist) {
-        StringBuilder sbQuerySuffix = new StringBuilder();
-        if (urnPrefixBlacklist != null && !urnPrefixBlacklist.isEmpty()) {
-            int count = 0;
-            for (String urnPrefix : urnPrefixBlacklist) {
-                if (StringUtils.isNotBlank(urnPrefix)) {
-                    urnPrefix = ClientUtils.escapeQueryChars(urnPrefix);
-                    urnPrefix += '*';
-                    sbQuerySuffix.append(" -")
-                            .append("URN_UNTOKENIZED:")
-                            .append(urnPrefix)
-                            .append(" -")
-                            .append("IMAGEURN_UNTOKENIZED:")
-                            .append(urnPrefix)
-                            .append(" -")
-                            .append("IMAGEURN_OAI_UNTOKENIZED:")
-                            .append(urnPrefix);
-                    count++;
-                } else {
-                    logger.warn("Empty element found in <additionalDocstructTypes>.");
-                }
-            }
-            // Avoid returning an invalid subquery if all configured values are blank
-            if (count == 0) {
-                return "";
-            }
-        }
-
-        return sbQuerySuffix.toString();
     }
 
     /**

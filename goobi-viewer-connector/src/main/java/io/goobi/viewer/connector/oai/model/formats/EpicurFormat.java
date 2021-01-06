@@ -37,6 +37,7 @@ import io.goobi.viewer.connector.oai.enums.Verb;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
 import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.SolrSearchIndex;
+import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
 
 /**
@@ -63,9 +64,9 @@ public class EpicurFormat extends Format {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
 
         String urnPrefixBlacklistSuffix =
-                SolrSearchIndex.getUrnPrefixBlacklistSuffix(DataManager.getInstance().getConfiguration().getUrnPrefixBlacklist());
+                SolrSearchTools.getUrnPrefixBlacklistSuffix(DataManager.getInstance().getConfiguration().getUrnPrefixBlacklist());
         String querySuffix = urnPrefixBlacklistSuffix
-                + SolrSearchIndex.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes());
+                + SolrSearchTools.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes());
         QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, true, querySuffix, null);
         SolrDocumentList records = qr.getResults();
         if (records.isEmpty()) {
@@ -77,7 +78,7 @@ public class EpicurFormat extends Format {
         }
         int pagecount = 0;
         for (SolrDocument doc : records) {
-            long dateUpdated = SolrSearchIndex.getLatestValidDateUpdated(doc, RequestHandler.getUntilTimestamp(handler.getUntil()));
+            long dateUpdated = SolrSearchTools.getLatestValidDateUpdated(doc, RequestHandler.getUntilTimestamp(handler.getUntil()));
             Long dateDeleted = (Long) doc.getFieldValue(SolrConstants.DATEDELETED);
             if (doc.getFieldValue(SolrConstants.URN) != null) {
                 Element record = new Element("record", xmlns);
@@ -167,7 +168,7 @@ public class EpicurFormat extends Format {
             Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
             Element getRecord = new Element("GetRecord", xmlns);
             Element record = new Element("record", xmlns);
-            long dateupdated = SolrSearchIndex.getLatestValidDateUpdated(doc, RequestHandler.getUntilTimestamp(handler.getUntil()));
+            long dateupdated = SolrSearchTools.getLatestValidDateUpdated(doc, RequestHandler.getUntilTimestamp(handler.getUntil()));
             Element header = generateEpicurPageHeader(doc, handler.getIdentifier(), dateupdated);
             record.addContent(header);
             Element metadata = new Element("metadata", xmlns);
@@ -429,10 +430,10 @@ public class EpicurFormat extends Format {
     @Override
     public long getTotalHits(Map<String, String> params, String versionDiscriminatorField) throws IOException, SolrServerException {
         // Hit count may differ for epicur
-        String querySuffix = SolrSearchIndex.getUrnPrefixBlacklistSuffix(DataManager.getInstance().getConfiguration().getUrnPrefixBlacklist());
+        String querySuffix = SolrSearchTools.getUrnPrefixBlacklistSuffix(DataManager.getInstance().getConfiguration().getUrnPrefixBlacklist());
         if (!Verb.ListIdentifiers.getTitle().equals(params.get("verb"))) {
             querySuffix +=
-                    SolrSearchIndex.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes());
+                    SolrSearchTools.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes());
         }
         // Query Solr index for the total hits number
         return solr.getTotalHitNumber(params, true, querySuffix, null);

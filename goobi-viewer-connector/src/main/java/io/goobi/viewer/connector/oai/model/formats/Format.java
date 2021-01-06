@@ -57,6 +57,7 @@ import io.goobi.viewer.connector.oai.model.Set;
 import io.goobi.viewer.connector.oai.model.language.Language;
 import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.SolrSearchIndex;
+import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
 
 /**
@@ -292,10 +293,10 @@ public abstract class Format {
             if (qr.getResults().isEmpty()) {
                 return new ErrorCode().getNoRecordsMatch();
             }
-            totalVirtualHits = SolrSearchIndex.getFieldCount(qr, versionDiscriminatorField);
+            totalVirtualHits = SolrSearchTools.getFieldCount(qr, versionDiscriminatorField);
             totalRawHits = qr.getResults().getNumFound();
             for (SolrDocument doc : qr.getResults()) {
-                List<String> versions = SolrSearchIndex.getMetadataValues(doc, versionDiscriminatorField);
+                List<String> versions = SolrSearchTools.getMetadataValues(doc, versionDiscriminatorField);
                 for (String version : versions) {
                     String iso3code = version;
                     // Make sure to add the ISO-3 language code
@@ -384,7 +385,7 @@ public abstract class Format {
         // datestamp
         Element datestamp = new Element("datestamp", xmlns);
         long untilTimestamp = RequestHandler.getUntilTimestamp(handler.getUntil());
-        long timestampModified = SolrSearchIndex.getLatestValidDateUpdated(topstructDoc != null ? topstructDoc : doc, untilTimestamp);
+        long timestampModified = SolrSearchTools.getLatestValidDateUpdated(topstructDoc != null ? topstructDoc : doc, untilTimestamp);
         datestamp.setText(Utils.parseDate(timestampModified));
         if (StringUtils.isEmpty(datestamp.getText()) && doc.getFieldValue(SolrConstants.ISANCHOR) != null) {
             datestamp.setText(Utils.parseDate(DataManager.getInstance().getSearchIndex().getLatestVolumeTimestamp(doc, untilTimestamp)));

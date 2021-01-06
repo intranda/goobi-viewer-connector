@@ -15,7 +15,6 @@
  */
 package io.goobi.viewer.connector.utils;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -30,8 +29,6 @@ import org.slf4j.LoggerFactory;
 import io.goobi.viewer.connector.AbstractSolrEnabledTest;
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.enums.Metadata;
-import io.goobi.viewer.connector.utils.SolrConstants;
-import io.goobi.viewer.connector.utils.SolrSearchIndex;
 
 public class SolrSearchIndexTest extends AbstractSolrEnabledTest {
 
@@ -48,30 +45,6 @@ public class SolrSearchIndexTest extends AbstractSolrEnabledTest {
                 .getSearchIndex()
                 .getSets(SolrConstants.DC)
                 .size());
-    }
-
-    /**
-     * @see SolrSearchIndex#getLatestValidDateUpdated(SolrDocument,long)
-     * @verifies return correct value
-     */
-    @Test
-    public void getLatestValidDateUpdated_shouldReturnCorrectValue() throws Exception {
-        SolrDocument doc = new SolrDocument();
-        doc.addField(SolrConstants.DATEUPDATED, 1L);
-        doc.addField(SolrConstants.DATEUPDATED, 2L);
-        doc.addField(SolrConstants.DATEUPDATED, 3L);
-        doc.addField(SolrConstants.DATEUPDATED, 4L);
-        Assert.assertEquals(Long.valueOf(3), SolrSearchIndex.getLatestValidDateUpdated(doc, 3));
-    }
-
-    /**
-     * @see SolrSearchIndex#getLatestValidDateUpdated(SolrDocument,long)
-     * @verifies return 0 if no valid value is found
-     */
-    @Test
-    public void getLatestValidDateUpdated_shouldReturn0IfNoValidValueIsFound() throws Exception {
-        SolrDocument doc = new SolrDocument();
-        Assert.assertEquals(Long.valueOf(0), SolrSearchIndex.getLatestValidDateUpdated(doc, System.currentTimeMillis()));
     }
 
     /**
@@ -118,29 +91,5 @@ public class SolrSearchIndexTest extends AbstractSolrEnabledTest {
             Assert.assertTrue(dateCreated > previous);
             previous = dateCreated;
         }
-    }
-
-    /**
-     * @see SolrSearchIndex#getAdditionalDocstructsQuerySuffix(List)
-     * @verifies build query suffix correctly
-     */
-    @Test
-    public void getAdditionalDocstructsQuerySuffix_shouldBuildQuerySuffixCorrectly() throws Exception {
-        Assert.assertEquals(" OR (" + SolrConstants.DOCTYPE + ":DOCSTRCT AND (" + SolrConstants.DOCSTRCT + ":Article))",
-                SolrSearchIndex.getAdditionalDocstructsQuerySuffix(Collections.singletonList("Article")));
-    }
-
-    /**
-     * @see SolrSearchIndex#getUrnPrefixBlacklistSuffix(List)
-     * @verifies build query suffix correctly
-     */
-    @Test
-    public void getUrnPrefixBlacklistSuffix_shouldBuildQuerySuffixCorrectly() throws Exception {
-        List<String> prefixes = new ArrayList<>();
-        prefixes.add("urn:nbn:de:test-1");
-        prefixes.add("urn:nbn:de:hidden-1");
-        Assert.assertEquals(
-                " -URN_UNTOKENIZED:urn\\:nbn\\:de\\:test\\-1* -IMAGEURN_UNTOKENIZED:urn\\:nbn\\:de\\:test\\-1* -IMAGEURN_OAI_UNTOKENIZED:urn\\:nbn\\:de\\:test\\-1* -URN_UNTOKENIZED:urn\\:nbn\\:de\\:hidden\\-1* -IMAGEURN_UNTOKENIZED:urn\\:nbn\\:de\\:hidden\\-1* -IMAGEURN_OAI_UNTOKENIZED:urn\\:nbn\\:de\\:hidden\\-1*",
-                SolrSearchIndex.getUrnPrefixBlacklistSuffix(prefixes));
     }
 }
