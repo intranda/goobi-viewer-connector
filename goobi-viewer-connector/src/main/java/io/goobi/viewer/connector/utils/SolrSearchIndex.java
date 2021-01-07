@@ -155,7 +155,7 @@ public class SolrSearchIndex {
             try {
                 return client.query(solrQuery);
             } catch (SolrServerException e) {
-                if (tries == 0 || !e.getMessage().toLowerCase().contains("timeout")) {
+                if (tries == 0 || !(e.getMessage().toLowerCase().contains("timeout") || e.getMessage().toLowerCase().contains("timed out"))) {
                     throw e;
                 }
                 logger.error(e.getMessage());
