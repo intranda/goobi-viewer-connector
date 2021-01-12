@@ -78,6 +78,8 @@ public abstract class Format {
     public static final String ACCESSCONDITION_OPENACCESS = "info:eu-repo/semantics/openAccess";
     public static final String ACCESSCONDITION_CLOSEDACCESS = "info:eu-repo/semantics/closedAccess";
 
+    protected final String[] IDENTIFIER_FIELDS = { SolrConstants.PI, SolrConstants.PI_TOPSTRUCT };
+
     /** Constant <code>expiration=259200000L</code> */
     protected static long expiration = 259200000L; // 3 days
 
@@ -280,6 +282,9 @@ public abstract class Format {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element xmlListIdentifiers = new Element("ListIdentifiers", xmlns);
 
+        List<String> setSpecFields =
+                DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix().name());
+
         QueryResponse qr;
         long totalVirtualHits;
         int virtualHitCount = 0;
@@ -288,7 +293,7 @@ public abstract class Format {
             // One OAI record for each record version
             qr = DataManager.getInstance()
                     .getSearchIndex()
-                    .getListIdentifiers(datestamp, firstRawRow, numRows, " AND " + versionDiscriminatorField + ":*",
+                    .getListIdentifiers(datestamp, firstRawRow, numRows, " AND " + versionDiscriminatorField + ":*", null,
                             Collections.singletonList(versionDiscriminatorField));
             if (qr.getResults().isEmpty()) {
                 return new ErrorCode().getNoRecordsMatch();
@@ -306,20 +311,20 @@ public abstract class Format {
                             iso3code = lang.getIsoCode();
                         }
                     }
-                    Element header = getHeader(doc, null, handler, iso3code);
+                    Element header = getHeader(doc, null, handler, iso3code, setSpecFields);
                     xmlListIdentifiers.addContent(header);
                     virtualHitCount++;
                 }
             }
         } else {
             // One OAI record for each record proper
-            qr = DataManager.getInstance().getSearchIndex().getListIdentifiers(datestamp, firstRawRow, numRows, null, null);
+            qr = DataManager.getInstance().getSearchIndex().getListIdentifiers(datestamp, firstRawRow, numRows, null, null, null);
             if (qr.getResults().isEmpty()) {
                 return new ErrorCode().getNoRecordsMatch();
             }
             totalVirtualHits = totalRawHits = qr.getResults().getNumFound();
             for (SolrDocument doc : qr.getResults()) {
-                Element header = getHeader(doc, null, handler, null);
+                Element header = getHeader(doc, null, handler, null, setSpecFields);
                 xmlListIdentifiers.addContent(header);
                 virtualHitCount++;
             }
@@ -358,11 +363,13 @@ public abstract class Format {
      * @param topstructDoc If not null, the datestamp value will be determined from this instead.
      * @param handler a {@link io.goobi.viewer.connector.oai.RequestHandler} object.
      * @param requestedVersion a {@link java.lang.String} object.
+     * @param setSpecFields
      * @return a {@link org.jdom2.Element} object.
      * @throws org.apache.solr.client.solrj.SolrServerException
      * @throws IOException
      */
-    protected static Element getHeader(SolrDocument doc, SolrDocument topstructDoc, RequestHandler handler, String requestedVersion)
+    protected static Element getHeader(SolrDocument doc, SolrDocument topstructDoc, RequestHandler handler, String requestedVersion,
+            List<String> setSpecFields)
             throws SolrServerException, IOException {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element header = new Element("header", xmlns);
@@ -399,9 +406,7 @@ public abstract class Format {
             header.addContent(setSpec);
         } else if (handler.getMetadataPrefix() != null) {
             // setSpec from config
-            List<String> setSpecFields =
-                    DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix().name());
-            if (!setSpecFields.isEmpty()) {
+            if (setSpecFields != null && !setSpecFields.isEmpty()) {
                 for (String setSpecField : setSpecFields) {
                     if (!doc.containsKey(setSpecField)) {
                         continue;

@@ -236,13 +236,14 @@ public class SolrSearchIndex {
      * @param numRows a int.
      * @param urnOnly a boolean.
      * @param querySuffix a {@link java.lang.String} object.
+     * @param fieldList Optional list of fields to return.
      * @param fieldStatistics a {@link java.util.List} object.
      * @return list of hits as {@link org.apache.solr.common.SolrDocument}
      * @throws java.io.IOException
      * @throws org.apache.solr.client.solrj.SolrServerException
      */
     public QueryResponse search(String from, String until, String setSpec, String metadataPrefix, int firstRow, int numRows, boolean urnOnly,
-            String querySuffix, List<String> fieldStatistics) throws IOException, SolrServerException {
+            String querySuffix, List<String> fieldList, List<String> fieldStatistics) throws IOException, SolrServerException {
         StringBuilder sbQuery = new StringBuilder(SolrSearchTools.buildQueryString(from, until, setSpec, metadataPrefix, urnOnly, querySuffix));
         if (urnOnly) {
             sbQuery.append(" +(").append(SolrConstants.URN).append(":* ").append(SolrConstants.IMAGEURN_OAI).append(":*)");
@@ -254,6 +255,13 @@ public class SolrSearchIndex {
         solrQuery.setStart(firstRow);
         solrQuery.setRows(numRows);
         solrQuery.addSort(SolrConstants.DATECREATED, ORDER.asc);
+        if (fieldList != null && !fieldList.isEmpty()) {
+            for (String field : fieldList) {
+                if (StringUtils.isNotEmpty(field)) {
+                    solrQuery.addField(field);
+                }
+            }
+        }
         if (fieldStatistics != null && !fieldStatistics.isEmpty()) {
             for (String field : fieldStatistics) {
                 solrQuery.setGetFieldStatistics(field);
@@ -274,15 +282,16 @@ public class SolrSearchIndex {
      * @param firstRawRow a int.
      * @param numRows a int.
      * @param querySuffix a {@link java.lang.String} object.
-     * @throws org.apache.solr.client.solrj.SolrServerException
+     * @param fieldList Optional list of fields to return.
      * @param fieldStatistics a {@link java.util.List} object.
      * @return a {@link org.apache.solr.client.solrj.response.QueryResponse} object.
+     * @throws org.apache.solr.client.solrj.SolrServerException
      */
-    public QueryResponse getListIdentifiers(Map<String, String> params, int firstRawRow, int numRows, String querySuffix,
+    public QueryResponse getListIdentifiers(Map<String, String> params, int firstRawRow, int numRows, String querySuffix, List<String> fieldList,
             List<String> fieldStatistics) throws SolrServerException {
         try {
             return search(params.get("from"), params.get("until"), params.get("set"), params.get("metadataPrefix"), firstRawRow, numRows, false,
-                    querySuffix, fieldStatistics);
+                    querySuffix, fieldList, fieldStatistics);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }
@@ -298,15 +307,17 @@ public class SolrSearchIndex {
      * @param numRows a int.
      * @param urnOnly a boolean.
      * @param querySuffix a {@link java.lang.String} object.
+     * @param fieldList Optional list of fields to return.
      * @param fieldStatistics a {@link java.util.List} object.
      * @throws org.apache.solr.client.solrj.SolrServerException
      * @return a {@link org.apache.solr.client.solrj.response.QueryResponse} object.
      */
     public QueryResponse getListRecords(Map<String, String> params, int firstRow, int numRows, boolean urnOnly, String querySuffix,
+            List<String> fieldList,
             List<String> fieldStatistics) throws SolrServerException {
         try {
             return search(params.get("from"), params.get("until"), params.get("set"), params.get("metadataPrefix"), firstRow, numRows, urnOnly,
-                    querySuffix, fieldStatistics);
+                    querySuffix, fieldList, fieldStatistics);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }
@@ -318,13 +329,14 @@ public class SolrSearchIndex {
      * Searches for identifier and return {@link org.apache.solr.common.SolrDocument} identifier can be PPN or URN (doc or page)
      *
      * @param identifier Identifier to search
+     * @param fieldList Optional list of fields to return.
      * @return {@link org.apache.solr.common.SolrDocument}
      * @throws java.io.IOException
      * @throws org.apache.solr.client.solrj.SolrServerException
      */
-    public SolrDocument getListRecord(final String identifier) throws IOException, SolrServerException {
+    public SolrDocument getListRecord(final String identifier, List<String> fieldList) throws IOException, SolrServerException {
         logger.trace("getListRecord");
-        SolrDocumentList ret = queryForIdentifier(identifier, 1);
+        SolrDocumentList ret = queryForIdentifier(identifier, 1, fieldList);
         if (!ret.isEmpty()) {
             return ret.get(0);
         }
@@ -343,18 +355,19 @@ public class SolrSearchIndex {
      * @throws IOException
      */
     public boolean isRecordExists(final String identifier) throws SolrServerException, IOException {
-        return !queryForIdentifier(identifier, 0).isEmpty();
+        return !queryForIdentifier(identifier, 0, null).isEmpty();
     }
 
     /**
      * 
-     * @param identifier
-     * @param rows
+     * @param identifier Record identifier.
+     * @param rows Number of hits to return.
+     * @param fieldList Optional list of fields to return.
      * @return
      * @throws SolrServerException
      * @throws IOException
      */
-    private SolrDocumentList queryForIdentifier(final String identifier, int rows) throws SolrServerException, IOException {
+    private SolrDocumentList queryForIdentifier(final String identifier, int rows, List<String> fieldList) throws SolrServerException, IOException {
         String useIdentifier = ClientUtils.escapeQueryChars(identifier);
 
         StringBuilder sb = new StringBuilder();
@@ -375,6 +388,13 @@ public class SolrSearchIndex {
         logger.debug(sb.toString());
         SolrQuery solrQuery = new SolrQuery(sb.toString());
         solrQuery.setRows(rows);
+        if (fieldList != null && !fieldList.isEmpty()) {
+            for (String field : fieldList) {
+                if (StringUtils.isNotEmpty(field)) {
+                    solrQuery.addField(field);
+                }
+            }
+        }
 
         return querySolr(solrQuery, RETRY_ATTEMPTS).getResults();
     }

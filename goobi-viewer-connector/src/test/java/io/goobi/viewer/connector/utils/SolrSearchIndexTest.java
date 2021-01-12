@@ -68,7 +68,7 @@ public class SolrSearchIndexTest extends AbstractSolrEnabledTest {
     public void search_shouldReturnCorrectNumberOfRows() throws Exception {
         QueryResponse qr = DataManager.getInstance()
                 .getSearchIndex()
-                .search(null, null, null, Metadata.oai_dc.name(), 0, 55, false, null, null);
+                .search(null, null, null, Metadata.oai_dc.name(), 0, 55, false, null, null, null);
         Assert.assertEquals(55, qr.getResults()
                 .size());
     }
@@ -81,7 +81,7 @@ public class SolrSearchIndexTest extends AbstractSolrEnabledTest {
     public void search_shouldSortResultsCorrectly() throws Exception {
         QueryResponse qr = DataManager.getInstance()
                 .getSearchIndex()
-                .search(null, null, null, Metadata.oai_dc.name(), 0, 10, false, null, null);
+                .search(null, null, null, Metadata.oai_dc.name(), 0, 10, false, null, null, null);
         Assert.assertFalse(qr.getResults()
                 .isEmpty());
         long previous = 0;

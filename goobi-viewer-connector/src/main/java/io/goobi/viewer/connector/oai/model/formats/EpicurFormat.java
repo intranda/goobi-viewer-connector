@@ -16,6 +16,8 @@
 package io.goobi.viewer.connector.oai.model.formats;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -49,6 +51,11 @@ public class EpicurFormat extends Format {
 
     private static Namespace EPICUR = Namespace.getNamespace("epicur", "urn:nbn:de:1111-2004033116");
 
+    private static String[] FIELDS =
+            { SolrConstants.DATECREATED, SolrConstants.DATEDELETED, SolrConstants.PI, SolrConstants.PI_TOPSTRUCT, SolrConstants.URN };
+
+    private List<String> setSpecFields = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.epicur.name());
+
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String)
      */
@@ -67,7 +74,10 @@ public class EpicurFormat extends Format {
                 SolrSearchTools.getUrnPrefixBlacklistSuffix(DataManager.getInstance().getConfiguration().getUrnPrefixBlacklist());
         String querySuffix = urnPrefixBlacklistSuffix
                 + SolrSearchTools.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes());
-        QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, true, querySuffix, null);
+        List<String> fieldList = new ArrayList<>(Arrays.asList(FIELDS));
+        fieldList.addAll(setSpecFields);
+        QueryResponse qr =
+                solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, true, querySuffix, fieldList, null);
         SolrDocumentList records = qr.getResults();
         if (records.isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
@@ -82,7 +92,7 @@ public class EpicurFormat extends Format {
             Long dateDeleted = (Long) doc.getFieldValue(SolrConstants.DATEDELETED);
             if (doc.getFieldValue(SolrConstants.URN) != null) {
                 Element record = new Element("record", xmlns);
-                Element header = generateEpicurHeader(doc, dateUpdated);
+                Element header = generateEpicurHeader(doc, dateUpdated, setSpecFields);
                 record.addContent(header);
                 Element metadata = new Element("metadata", xmlns);
                 record.addContent(metadata);
@@ -109,7 +119,7 @@ public class EpicurFormat extends Format {
                     for (SolrDocument pageDoc : qrInner.getResults()) {
                         String imgUrn = (String) pageDoc.getFieldValue(SolrConstants.IMAGEURN);
                         Element pagerecord = new Element("record", xmlns);
-                        Element pageheader = generateEpicurPageHeader(doc, imgUrn, dateUpdated);
+                        Element pageheader = generateEpicurPageHeader(doc, imgUrn, dateUpdated, setSpecFields);
                         pagerecord.addContent(pageheader);
                         Element pagemetadata = new Element("metadata", xmlns);
                         pagerecord.addContent(pagemetadata);
@@ -127,7 +137,7 @@ public class EpicurFormat extends Format {
                     for (Object obj : pageUrnValues) {
                         String imgUrn = (String) obj;
                         Element pagerecord = new Element("record", xmlns);
-                        Element pageheader = generateEpicurPageHeader(doc, imgUrn, dateUpdated);
+                        Element pageheader = generateEpicurPageHeader(doc, imgUrn, dateUpdated, setSpecFields);
                         pagerecord.addContent(pageheader);
                         Element pagemetadata = new Element("metadata", xmlns);
                         pagerecord.addContent(pagemetadata);
@@ -160,8 +170,10 @@ public class EpicurFormat extends Format {
         if (handler.getIdentifier() == null) {
             return new ErrorCode().getBadArgument();
         }
+        List<String> fieldList = new ArrayList<>(Arrays.asList(FIELDS));
+        fieldList.addAll(setSpecFields);
         try {
-            SolrDocument doc = solr.getListRecord(handler.getIdentifier());
+            SolrDocument doc = solr.getListRecord(handler.getIdentifier(), fieldList);
             if (doc == null) {
                 return new ErrorCode().getIdDoesNotExist();
             }
@@ -169,7 +181,7 @@ public class EpicurFormat extends Format {
             Element getRecord = new Element("GetRecord", xmlns);
             Element record = new Element("record", xmlns);
             long dateupdated = SolrSearchTools.getLatestValidDateUpdated(doc, RequestHandler.getUntilTimestamp(handler.getUntil()));
-            Element header = generateEpicurPageHeader(doc, handler.getIdentifier(), dateupdated);
+            Element header = generateEpicurPageHeader(doc, handler.getIdentifier(), dateupdated, setSpecFields);
             record.addContent(header);
             Element metadata = new Element("metadata", xmlns);
             record.addContent(metadata);
@@ -191,9 +203,10 @@ public class EpicurFormat extends Format {
      * 
      * @param doc
      * @param dateUpdated
+     * @param setSpecFields
      * @return
      */
-    private static Element generateEpicurHeader(SolrDocument doc, long dateUpdated) {
+    private static Element generateEpicurHeader(SolrDocument doc, long dateUpdated, List<String> setSpecFields) {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element header = new Element("header", xmlns);
         Element identifier = new Element("identifier", xmlns);
@@ -205,7 +218,6 @@ public class EpicurFormat extends Format {
         datestamp.setText(Utils.parseDate(dateUpdated));
         header.addContent(datestamp);
         // setSpec
-        List<String> setSpecFields = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.epicur.name());
         if (!setSpecFields.isEmpty()) {
             for (String setSpecField : setSpecFields) {
                 if (doc.containsKey(setSpecField)) {
@@ -302,9 +314,10 @@ public class EpicurFormat extends Format {
      * @param doc
      * @param urn
      * @param dateUpdated
+     * @param setSpecFields
      * @return
      */
-    private static Element generateEpicurPageHeader(SolrDocument doc, String urn, long dateUpdated) {
+    private static Element generateEpicurPageHeader(SolrDocument doc, String urn, long dateUpdated, List<String> setSpecFields) {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element header = new Element("header", xmlns);
 
@@ -316,8 +329,7 @@ public class EpicurFormat extends Format {
         datestamp.setText(Utils.parseDate(dateUpdated));
         header.addContent(datestamp);
         // setSpec
-        List<String> setSpecFields = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.epicur.name());
-        if (!setSpecFields.isEmpty()) {
+        if (setSpecFields != null && !setSpecFields.isEmpty()) {
             for (String setSpecField : setSpecFields) {
                 if (doc.containsKey(setSpecField)) {
                     for (Object fieldValue : doc.getFieldValues(setSpecField)) {
