@@ -88,7 +88,7 @@ public class LIDOFormat extends Format {
         if (handler.getIdentifier() == null) {
             return new ErrorCode().getBadArgument();
         }
-        List<String> fieldList = Arrays.asList(IDENTIFIER_FIELDS);
+        List<String> fieldList = new ArrayList<>(Arrays.asList(IDENTIFIER_FIELDS));
         fieldList.addAll(setSpecFields);
         try {
             SolrDocument doc = solr.getListRecord(handler.getIdentifier(), fieldList);
