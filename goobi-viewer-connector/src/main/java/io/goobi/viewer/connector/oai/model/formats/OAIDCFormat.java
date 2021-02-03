@@ -45,7 +45,7 @@ import io.goobi.viewer.connector.oai.model.language.Language;
 import io.goobi.viewer.connector.oai.model.metadata.MetadataParameter;
 import io.goobi.viewer.connector.oai.model.metadata.MetadataParameter.MetadataParameterType;
 import io.goobi.viewer.connector.utils.SolrConstants;
-import io.goobi.viewer.connector.utils.SolrSearchIndex;
+import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
 
 /**
@@ -54,6 +54,8 @@ import io.goobi.viewer.connector.utils.Utils;
 public class OAIDCFormat extends Format {
 
     private static final Logger logger = LoggerFactory.getLogger(OAIDCFormat.class);
+
+    private List<String> setSpecFields = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.oai_dc.name());
 
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String)
@@ -68,16 +70,16 @@ public class OAIDCFormat extends Format {
         if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
             // One OAI record for each record version
             qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false,
-                    SolrSearchIndex.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes())
+                    SolrSearchTools.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes())
                             + " AND " + versionDiscriminatorField + ":*",
-                    Collections.singletonList(versionDiscriminatorField));
-            totalVirtualHits = SolrSearchIndex.getFieldCount(qr, versionDiscriminatorField);
+                    null, Collections.singletonList(versionDiscriminatorField));
+            totalVirtualHits = SolrSearchTools.getFieldCount(qr, versionDiscriminatorField);
             totalRawHits = qr.getResults().getNumFound();
         } else {
             // One OAI record for each record proper
             qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false,
-                    SolrSearchIndex.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes()),
-                    null);
+                    SolrSearchTools.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes()),
+                    null, null);
             totalVirtualHits = totalRawHits = qr.getResults().getNumFound();
 
         }
@@ -104,7 +106,7 @@ public class OAIDCFormat extends Format {
         if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
             String[] identifierSplit = Utils.splitIdentifierAndLanguageCode(handler.getIdentifier(), 3);
             try {
-                SolrDocument doc = solr.getListRecord(identifierSplit[0]);
+                SolrDocument doc = solr.getListRecord(identifierSplit[0], null);
                 if (doc == null) {
                     return new ErrorCode().getIdDoesNotExist();
                 }
@@ -117,7 +119,7 @@ public class OAIDCFormat extends Format {
             }
         }
         try {
-            SolrDocument doc = solr.getListRecord(handler.getIdentifier());
+            SolrDocument doc = solr.getListRecord(handler.getIdentifier(), null);
             if (doc == null) {
                 return new ErrorCode().getIdDoesNotExist();
             }
@@ -133,7 +135,8 @@ public class OAIDCFormat extends Format {
      * generates oai_dc records
      * 
      * @param records
-     * @param totalHits
+     * @param totalVirtualHits
+     * @param totalRawHits
      * @param firstVirtualRow
      * @param firstRawRow
      * @param numRows
@@ -161,7 +164,7 @@ public class OAIDCFormat extends Format {
             List<String> versions = Collections.singletonList(requestedVersion);
             for (SolrDocument doc : records) {
                 if (requestedVersion == null) {
-                    versions = SolrSearchIndex.getMetadataValues(doc, versionDiscriminatorField);
+                    versions = SolrSearchTools.getMetadataValues(doc, versionDiscriminatorField);
                 }
                 for (String version : versions) {
                     virtualHitCount++;
@@ -173,12 +176,12 @@ public class OAIDCFormat extends Format {
                             iso3code = lang.getIsoCode();
                         }
                     }
-                    xmlListRecords.addContent(generateSingleDCRecord(doc, handler, iso3code, xmlns, nsOaiDoc));
+                    xmlListRecords.addContent(generateSingleDCRecord(doc, handler, iso3code, xmlns, nsOaiDoc, setSpecFields));
                 }
             }
         } else {
             for (SolrDocument doc : records) {
-                xmlListRecords.addContent(generateSingleDCRecord(doc, handler, null, xmlns, nsOaiDoc));
+                xmlListRecords.addContent(generateSingleDCRecord(doc, handler, null, xmlns, nsOaiDoc, setSpecFields));
                 virtualHitCount++;
             }
         }
@@ -200,11 +203,13 @@ public class OAIDCFormat extends Format {
      * @param requestedVersion
      * @param xmlns
      * @param nsOaiDoc
+     * @param setSpecFields
      * @return
      * @throws SolrServerException
      * @throws IOException
      */
-    private Element generateSingleDCRecord(SolrDocument doc, RequestHandler handler, String requestedVersion, Namespace xmlns, Namespace nsOaiDoc)
+    private Element generateSingleDCRecord(SolrDocument doc, RequestHandler handler, String requestedVersion, Namespace xmlns, Namespace nsOaiDoc,
+            List<String> setSpecFields)
             throws SolrServerException, IOException {
         Element record = new Element("record", xmlns);
         boolean isWork = doc.getFieldValue(SolrConstants.ISWORK) != null && (boolean) doc.getFieldValue(SolrConstants.ISWORK);
@@ -247,7 +252,7 @@ public class OAIDCFormat extends Format {
         }
         String docstruct = (String) doc.getFieldValue(SolrConstants.DOCSTRCT);
 
-        Element header = getHeader(doc, topstructDoc, handler, requestedVersion);
+        Element header = getHeader(doc, topstructDoc, handler, requestedVersion, setSpecFields);
         record.addContent(header);
 
         if ("deleted".equals(header.getAttributeValue("status"))) {
@@ -360,7 +365,7 @@ public class OAIDCFormat extends Format {
                 } else if (!md.getParams().isEmpty()) {
                     // Parameter configuration
                     String firstField = md.getParams().get(0).getKey();
-                    int numValues = SolrSearchIndex.getMetadataValues(doc, firstField).size();
+                    int numValues = SolrSearchTools.getMetadataValues(doc, firstField).size();
                     // for each instance of the first field value
                     for (int i = 0; i < numValues; ++i) {
                         String val = md.getMasterValue();
@@ -371,9 +376,9 @@ public class OAIDCFormat extends Format {
                                 restrictedContent = true;
                             }
                             String paramVal = "";
-                            List<String> values = SolrSearchIndex.getMetadataValues(doc, param.getKey());
+                            List<String> values = SolrSearchTools.getMetadataValues(doc, param.getKey());
                             if (values.isEmpty() && !param.isDontUseTopstructValue()) {
-                                values = SolrSearchIndex.getMetadataValues(topstructDoc, param.getKey());
+                                values = SolrSearchTools.getMetadataValues(topstructDoc, param.getKey());
                             }
                             if (!values.isEmpty()) {
                                 paramVal = values.size() > i ? values.get(i) : "";
@@ -604,15 +609,15 @@ public class OAIDCFormat extends Format {
         String querySuffix = "";
         if (!Verb.ListIdentifiers.getTitle().equals(params.get("verb"))) {
             querySuffix +=
-                    SolrSearchIndex.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes());
+                    SolrSearchTools.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes());
         }
         // Query Solr index for the total hits number
 
         if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
             // Query Solr index for the count of the discriminator field
             QueryResponse qr = solr.search(params.get("from"), params.get("until"), params.get("set"), params.get("metadataPrefix"), 0, 0, false,
-                    querySuffix + " AND " + versionDiscriminatorField + ":*", Collections.singletonList(versionDiscriminatorField));
-            return SolrSearchIndex.getFieldCount(qr, versionDiscriminatorField);
+                    querySuffix + " AND " + versionDiscriminatorField + ":*", null, Collections.singletonList(versionDiscriminatorField));
+            return SolrSearchTools.getFieldCount(qr, versionDiscriminatorField);
         }
         return solr.getTotalHitNumber(params, false, querySuffix, null);
     }

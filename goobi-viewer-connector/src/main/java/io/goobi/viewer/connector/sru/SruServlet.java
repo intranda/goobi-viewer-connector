@@ -50,6 +50,7 @@ import io.goobi.viewer.connector.exceptions.HTTPException;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.SolrSearchIndex;
+import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
 import io.goobi.viewer.connector.utils.XmlTools;
 
@@ -335,7 +336,7 @@ public class SruServlet extends HttpServlet {
                 break;
         }
         sbValue.append(" AND (").append(SolrConstants.ISWORK).append(":true OR ").append(SolrConstants.ISANCHOR).append(":true)");
-        sbValue.append(SolrSearchIndex.getAllSuffixes());
+        sbValue.append(SolrSearchTools.getAllSuffixes());
         logger.trace(sbValue.toString());
         return sbValue.toString();
     }

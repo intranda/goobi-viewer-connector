@@ -16,6 +16,7 @@
 package io.goobi.viewer.connector.oai.model.formats;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,7 @@ import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
 import io.goobi.viewer.connector.oai.model.language.Language;
 import io.goobi.viewer.connector.utils.SolrConstants;
-import io.goobi.viewer.connector.utils.SolrSearchIndex;
+import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
 import io.goobi.viewer.connector.utils.XmlTools;
 
@@ -65,12 +66,14 @@ public class TEIFormat extends Format {
         if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
             // One OAI record for each record version
             qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false,
-                    " AND " + versionDiscriminatorField + ":*", Collections.singletonList(versionDiscriminatorField));
-            totalVirtualHits = SolrSearchIndex.getFieldCount(qr, versionDiscriminatorField);
+                    " AND " + versionDiscriminatorField + ":*", Arrays.asList(IDENTIFIER_FIELDS),
+                    Collections.singletonList(versionDiscriminatorField));
+            totalVirtualHits = SolrSearchTools.getFieldCount(qr, versionDiscriminatorField);
             totalRawHits = qr.getResults().getNumFound();
         } else {
             // One OAI record for each record proper
-            qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false, null, null);
+            qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false, null, Arrays.asList(IDENTIFIER_FIELDS),
+                    null);
             totalVirtualHits = totalRawHits = qr.getResults().getNumFound();
         }
         if (qr.getResults().isEmpty()) {
@@ -99,13 +102,16 @@ public class TEIFormat extends Format {
         if (handler.getIdentifier() == null) {
             return new ErrorCode().getBadArgument();
         }
+        
+        List<String> setSpecFields =
+                DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix().name());
 
         String versionDiscriminatorField =
                 DataManager.getInstance().getConfiguration().getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().name());
         if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
             String[] identifierSplit = Utils.splitIdentifierAndLanguageCode(handler.getIdentifier(), 3);
             try {
-                SolrDocument doc = solr.getListRecord(identifierSplit[0]);
+                SolrDocument doc = solr.getListRecord(identifierSplit[0], null);
                 if (doc == null) {
                     return new ErrorCode().getIdDoesNotExist();
                 }
@@ -123,7 +129,7 @@ public class TEIFormat extends Format {
             }
         }
         try {
-            SolrDocument doc = solr.getListRecord(handler.getIdentifier());
+            SolrDocument doc = solr.getListRecord(handler.getIdentifier(), null);
             if (doc == null) {
                 return new ErrorCode().getIdDoesNotExist();
             }
@@ -172,6 +178,9 @@ public class TEIFormat extends Format {
         Namespace namespace = Namespace.getNamespace(handler.getMetadataPrefix().getMetadataNamespacePrefix(),
                 handler.getMetadataPrefix().getMetadataNamespaceUri());
 
+        List<String> setSpecFields =
+                DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix().name());
+
         if (records.size() < numRows) {
             numRows = records.size();
         }
@@ -180,7 +189,7 @@ public class TEIFormat extends Format {
             List<String> versions = Collections.singletonList(requestedVersion);
             for (SolrDocument doc : records) {
                 if (requestedVersion == null) {
-                    versions = SolrSearchIndex.getMetadataValues(doc, versionDiscriminatorField);
+                    versions = SolrSearchTools.getMetadataValues(doc, versionDiscriminatorField);
                 }
                 for (String version : versions) {
                     virtualHitCount++; // Count hit even if the XML file is ultimately unavailable
@@ -248,7 +257,7 @@ public class TEIFormat extends Format {
                         }
                     }
                     Element record = new Element("record", xmlns);
-                    Element header = getHeader(doc, null, handler, iso3code);
+                    Element header = getHeader(doc, null, handler, iso3code, setSpecFields);
                     record.addContent(header);
                     Element metadata = new Element("metadata", xmlns);
                     metadata.addContent(newDoc);
@@ -275,9 +284,10 @@ public class TEIFormat extends Format {
     /**
      * {@inheritDoc}
      *
-     * Modified header generation where identifers also contain the language code.
+     * Modified header generation where identifiers also contain the language code.
      */
-    protected static Element getHeader(SolrDocument doc, SolrDocument topstructDoc, RequestHandler handler, String requestedVersion)
+    protected static Element getHeader(SolrDocument doc, SolrDocument topstructDoc, RequestHandler handler, String requestedVersion,
+            List<String> setSpecFields)
             throws SolrServerException, IOException {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element header = new Element("header", xmlns);
@@ -289,16 +299,14 @@ public class TEIFormat extends Format {
         // datestamp
         Element datestamp = new Element("datestamp", xmlns);
         long untilTimestamp = RequestHandler.getUntilTimestamp(handler.getUntil());
-        long timestampModified = SolrSearchIndex.getLatestValidDateUpdated(topstructDoc != null ? topstructDoc : doc, untilTimestamp);
+        long timestampModified = SolrSearchTools.getLatestValidDateUpdated(topstructDoc != null ? topstructDoc : doc, untilTimestamp);
         datestamp.setText(Utils.parseDate(timestampModified));
         if (StringUtils.isEmpty(datestamp.getText()) && doc.getFieldValue(SolrConstants.ISANCHOR) != null) {
             datestamp.setText(Utils.parseDate(DataManager.getInstance().getSearchIndex().getLatestVolumeTimestamp(doc, untilTimestamp)));
         }
         header.addContent(datestamp);
         // setSpec
-        List<String> setSpecFields =
-                DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix().name());
-        if (!setSpecFields.isEmpty()) {
+        if (setSpecFields != null && !setSpecFields.isEmpty()) {
             for (String setSpecField : setSpecFields) {
                 if (doc.containsKey(setSpecField)) {
                     for (Object fieldValue : doc.getFieldValues(setSpecField)) {
@@ -329,8 +337,8 @@ public class TEIFormat extends Format {
         if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
             // Query Solr index for the count of the discriminator field
             QueryResponse qr = solr.search(params.get("from"), params.get("until"), params.get("set"), params.get("metadataPrefix"), 0, 0, false,
-                    " AND " + versionDiscriminatorField + ":*", Collections.singletonList(versionDiscriminatorField));
-            return SolrSearchIndex.getFieldCount(qr, versionDiscriminatorField);
+                    " AND " + versionDiscriminatorField + ":*", null, Collections.singletonList(versionDiscriminatorField));
+            return SolrSearchTools.getFieldCount(qr, versionDiscriminatorField);
         }
         return solr.getTotalHitNumber(params, false, null, null);
     }

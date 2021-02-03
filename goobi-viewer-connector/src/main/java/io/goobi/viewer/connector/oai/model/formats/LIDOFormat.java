@@ -16,6 +16,8 @@
 package io.goobi.viewer.connector.oai.model.formats;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +50,8 @@ public class LIDOFormat extends Format {
     private static final Logger logger = LoggerFactory.getLogger(LIDOFormat.class);
 
     private static final String QUERY_SUFFIX = " +" + SolrConstants.SOURCEDOCFORMAT + ":LIDO";
+    
+    private List<String> setSpecFields = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.lido.name());
 
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String)
@@ -56,12 +60,16 @@ public class LIDOFormat extends Format {
     @Override
     public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
             throws IOException, SolrServerException {
-        QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false, QUERY_SUFFIX, null);
+        List<String> fieldList = new ArrayList<>(Arrays.asList(IDENTIFIER_FIELDS));
+        fieldList.addAll(setSpecFields);
+        QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false, QUERY_SUFFIX,
+                fieldList, null);
         if (qr.getResults().isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
         try {
-            Element xmlListRecords = generateLido(qr.getResults(), qr.getResults().getNumFound(), firstRawRow, numRows, handler, "ListRecords");
+            Element xmlListRecords =
+                    generateLido(qr.getResults(), qr.getResults().getNumFound(), firstRawRow, numRows, handler, "ListRecords", setSpecFields);
             return xmlListRecords;
         } catch (IOException e) {
             logger.error(e.getMessage());
@@ -80,12 +88,14 @@ public class LIDOFormat extends Format {
         if (handler.getIdentifier() == null) {
             return new ErrorCode().getBadArgument();
         }
+        List<String> fieldList = new ArrayList<>(Arrays.asList(IDENTIFIER_FIELDS));
+        fieldList.addAll(setSpecFields);
         try {
-            SolrDocument doc = solr.getListRecord(handler.getIdentifier());
+            SolrDocument doc = solr.getListRecord(handler.getIdentifier(), fieldList);
             if (doc == null) {
                 return new ErrorCode().getIdDoesNotExist();
             }
-            Element record = generateLido(Collections.singletonList(doc), 1L, 0, 1, handler, "GetRecord");
+            Element record = generateLido(Collections.singletonList(doc), 1L, 0, 1, handler, "GetRecord", setSpecFields);
             return record;
         } catch (IOException e) {
             return new ErrorCode().getIdDoesNotExist();
@@ -112,7 +122,7 @@ public class LIDOFormat extends Format {
      * @throws HTTPException
      */
     private static Element generateLido(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler,
-            String recordType) throws JDOMException, IOException, SolrServerException {
+            String recordType, List<String> setSpecFields) throws JDOMException, IOException, SolrServerException {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element xmlListRecords = new Element(recordType, xmlns);
 
@@ -121,6 +131,7 @@ public class LIDOFormat extends Format {
         if (records.size() < numRows) {
             numRows = records.size();
         }
+
         for (SolrDocument doc : records) {
             String pi = (String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT);
             if (pi == null) {
@@ -152,7 +163,7 @@ public class LIDOFormat extends Format {
             newLido.addContent(xmlRoot.cloneContent());
 
             Element record = new Element("record", xmlns);
-            Element header = getHeader(doc, null, handler, null);
+            Element header = getHeader(doc, null, handler, null, setSpecFields);
             record.addContent(header);
             Element metadata = new Element("metadata", xmlns);
             metadata.addContent(newLido);

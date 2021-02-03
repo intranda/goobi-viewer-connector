@@ -33,13 +33,15 @@ import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
 import io.goobi.viewer.connector.utils.SolrConstants;
-import io.goobi.viewer.connector.utils.SolrSearchIndex;
+import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
 
 /**
  * ESE
  */
 public class EuropeanaFormat extends OAIDCFormat {
+
+    private List<String> setSpecFields = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.ese.name());
 
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String)
@@ -49,7 +51,8 @@ public class EuropeanaFormat extends OAIDCFormat {
     public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
             throws SolrServerException, IOException {
         QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false,
-                SolrSearchIndex.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes()), null);
+                SolrSearchTools.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes()),
+                null, null);
         if (qr.getResults().isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
@@ -66,7 +69,7 @@ public class EuropeanaFormat extends OAIDCFormat {
             return new ErrorCode().getBadArgument();
         }
         try {
-            SolrDocument doc = solr.getListRecord(handler.getIdentifier());
+            SolrDocument doc = solr.getListRecord(handler.getIdentifier(), null);
             if (doc == null) {
                 return new ErrorCode().getIdDoesNotExist();
             }
@@ -131,7 +134,7 @@ public class EuropeanaFormat extends OAIDCFormat {
                 }
             }
 
-            Element header = getHeader(doc, topstructDoc, handler, null);
+            Element header = getHeader(doc, topstructDoc, handler, null, setSpecFields);
             record.addContent(header);
 
             String identifier = null;
