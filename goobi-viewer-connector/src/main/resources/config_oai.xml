@@ -64,7 +64,7 @@
 
 
 	<!-- oaiFolder: Folder with messages.properties files, etc. -->
-	<oaiFolder>/opt/digiverso/viewer/oai/</oaiFolder>
+	<oaiFolder>/opt/digiverso/viewer/config/</oaiFolder>
 
 	<!-- Directory containing resumptionToken -->
 	<resumptionTokenFolder>/opt/digiverso/viewer/oai/token/</resumptionTokenFolder>
