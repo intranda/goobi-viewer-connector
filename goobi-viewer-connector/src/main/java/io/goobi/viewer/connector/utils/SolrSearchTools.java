@@ -217,6 +217,7 @@ public class SolrSearchTools {
      * @return Latest DATEUPDATED value is less than or equals untilTimestamp on doc; 0 if none found.
      * @should return correct value
      * @should return 0 if no valid value is found
+     * @should ignore untilTimestamp if zero
      */
     public static Long getLatestValidDateUpdated(SolrDocument doc, long untilTimestamp) {
         long ret = 0;
@@ -225,7 +226,7 @@ public class SolrSearchTools {
             // Get latest DATEUPDATED values
             for (Object o : dateUpdatedValues) {
                 long dateUpdated = (Long) o;
-                if (dateUpdated > ret && dateUpdated <= untilTimestamp) {
+                if (dateUpdated > ret && (untilTimestamp == 0 || dateUpdated <= untilTimestamp)) {
                     ret = dateUpdated;
                 }
             }
