@@ -58,6 +58,21 @@ public class SolrSearchToolsTest {
         doc.addField(SolrConstants.DATEUPDATED, 4L);
         Assert.assertEquals(Long.valueOf(3), SolrSearchTools.getLatestValidDateUpdated(doc, 3));
     }
+    
+
+    /**
+     * @see SolrSearchTools#getLatestValidDateUpdated(SolrDocument,long)
+     * @verifies ignore untilTimestamp if zero
+     */
+    @Test
+    public void getLatestValidDateUpdated_shouldIgnoreUntilTimestampIfZero() throws Exception {
+        SolrDocument doc = new SolrDocument();
+        doc.addField(SolrConstants.DATEUPDATED, 1L);
+        doc.addField(SolrConstants.DATEUPDATED, 2L);
+        doc.addField(SolrConstants.DATEUPDATED, 3L);
+        doc.addField(SolrConstants.DATEUPDATED, 4L);
+        Assert.assertEquals(Long.valueOf(4), SolrSearchTools.getLatestValidDateUpdated(doc, 0));
+    }
 
     /**
      * @see SolrSearchTools#getMetadataValues(SolrDocument,String)

@@ -52,7 +52,8 @@ public class EpicurFormat extends Format {
     private static Namespace EPICUR = Namespace.getNamespace("epicur", "urn:nbn:de:1111-2004033116");
 
     private static String[] FIELDS =
-            { SolrConstants.DATECREATED, SolrConstants.DATEDELETED, SolrConstants.PI, SolrConstants.PI_TOPSTRUCT, SolrConstants.URN };
+            { SolrConstants.DATECREATED, SolrConstants.DATEUPDATED, SolrConstants.DATEDELETED, SolrConstants.PI, SolrConstants.PI_TOPSTRUCT,
+                    SolrConstants.URN };
 
     private List<String> setSpecFields = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.epicur.name());
 

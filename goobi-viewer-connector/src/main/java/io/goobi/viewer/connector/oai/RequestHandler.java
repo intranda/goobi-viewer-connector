@@ -182,7 +182,6 @@ public class RequestHandler {
      * @return the until
      */
     public String getUntil() {
-        logger.trace("until: " + until);
         return until;
     }
 
