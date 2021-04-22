@@ -164,7 +164,7 @@
 		<setSpec>
 			<field>DC</field>
 		</setSpec>
-		
+
 		<accessConditions>
 		    <mapping accessCondition="Public Domain Mark 1.0">info:eu-repo/semantics/openAccess</mapping>
 		</accessConditions>
@@ -279,13 +279,25 @@
 	</cmdi>
 
 
-	<sets>
-	    <!-- <allValuesSet translate="true">DC</allValuesSet> -->
-		<set setName="Alle Sets" setSpec="all" setQuery="+DC:* +DOCTYPE:DOCSTRCT" />
-		<set setName="test" setSpec="test" setQuery="DC:a.b.c.d" />
-		<set setName="ID-TEST" setSpec="ID-TEST" setQuery="PI:aa000274" />
-		<set setName="Alle Monographien" setSpec="monograph" setQuery="+DOCSTRCT:monograph +DOCTYPE:DOCSTRCT" />
-		<set setName="Mehrbändige Werke und Bände" setSpec="multivolume" setQuery="+(DOCSTRCT:MultiVolumeWork DOCSTRCT:Volume)" />
+    <sets>
+            <!-- The following example adds a set for each digital collection -->
+            <!-- <allValuesSet translate="true">DC</allValuesSet> -->
+
+
+            <!-- ##### ATTENTION ##### -->
+            <!--  Some fields like "DC" or "DOCSTRCT" are written into all solr docs of a given record. This means
+                  filtering only for them is not enough. If you want to list only records and anchor records
+                  you have to add this, too:  +(ISWORK:true ISANCHOR:true) -->
+
+            <!-- The folling example adds a set for all records from the digital collection "foo" -->
+            <!-- <set setName="Digital collection foo" setSpec="foo" setQuery="+DC:foo +(ISWORK:true ISANCHOR:true)" /> -->
+
+            <!-- The following example adds a set with all monographs -->
+            <set setName="Monographs" setSpec="monographs" setQuery="+DOCSTRCT:monograph +(ISWORK:true ISANCHOR:true)" />
+
+
+            <!-- The following example lists only one record with a given persistent identifier -->
+            <!-- <set setName="Single identifier" setSpec="id" setQuery="PI:AC1234567" /> -->
 	</sets>
 
 
