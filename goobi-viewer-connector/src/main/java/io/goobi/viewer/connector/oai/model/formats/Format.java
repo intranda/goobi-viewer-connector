@@ -550,6 +550,10 @@ public abstract class Format {
                 return format.createListRecords(token.getHandler(), token.getVirtualCursor(), token.getRawCursor(), hitsPerToken,
                         versionDiscriminatorField);
             }
+        } catch (StreamException | ConversionException e) {
+            // File cannot be de-serialized, so just delete it
+            logger.warn("Token '{}' could not be read, deleting...", f.getName());
+            FileUtils.deleteQuietly(f);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }

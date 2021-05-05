@@ -341,10 +341,18 @@ public class OAIDCFormat extends Format {
                     //                        continue;
                     //                    }
 
+                    String url = DataManager.getInstance().getConfiguration().getRestApiUrl() + "records/"
+                            + (String) doc.getFieldValue(SolrConstants.PI) + "/toc/";
                     try {
-                        String url = DataManager.getInstance().getConfiguration().getRestApiUrl() + "records/"
-                                + (String) doc.getFieldValue(SolrConstants.PI) + "/toc/";
-                        String val = Utils.getWebContentGET(url);
+                        String val = null;
+                        try {
+                            val = Utils.getWebContentGET(url);
+                        } catch (HTTPException e) {
+                            // If the API end point was not found, try the fallback, otherwise re-throw the exception
+                            if (e.getCode() != 404) {
+                                throw e;
+                            }
+                        }
                         if (StringUtils.isEmpty(val)) {
                             // Old API fallback
                             url = DataManager.getInstance().getConfiguration().getRestApiUrl() + "records/toc/"
@@ -360,7 +368,7 @@ public class OAIDCFormat extends Format {
                     } catch (IOException e) {
                         logger.error(e.getMessage(), e);
                     } catch (HTTPException e) {
-                        logger.error(e.getCode() + ": " + e.getMessage());
+                        logger.error(e.getCode() + ": " + url);
                     }
                 } else if (!md.getParams().isEmpty()) {
                     // Parameter configuration
