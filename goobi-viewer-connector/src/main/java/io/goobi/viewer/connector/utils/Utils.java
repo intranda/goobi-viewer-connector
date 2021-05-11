@@ -84,16 +84,16 @@ public class Utils {
      * insert some chars in the time string
      *
      * @param ldt LocalDateTime to use
-     * @param milliSecondsAdd milliseconds to add to the current utc time if milliSecondsAdd = 0, no milli are added
-     * @should format time correctly
      * @return the time in the format YYYY-MM-DDThh:mm:ssZ
+     * @should format time correctly
+     * @should truncate to seconds
      */
-    public static String getCurrentUTCTime(LocalDateTime ldt, long milliSecondsAdd) {
+    public static String getCurrentUTCTime(LocalDateTime ldt) {
         if (ldt == null) {
             throw new IllegalArgumentException("ldt may not be null");
         }
         return ldt.atOffset(ZoneOffset.UTC)
-                .plus(milliSecondsAdd, ChronoUnit.MILLIS)
+                .truncatedTo(ChronoUnit.SECONDS)
                 .format(formatterISO8601DateTimeWithOffset);
     }
 
