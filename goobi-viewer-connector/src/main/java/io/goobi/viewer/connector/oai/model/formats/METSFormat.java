@@ -49,7 +49,7 @@ public class METSFormat extends Format {
     private static final Logger logger = LoggerFactory.getLogger(METSFormat.class);
 
     private static final String QUERY_SUFFIX = " +(" + SolrConstants.SOURCEDOCFORMAT + ":METS " + SolrConstants.DATEDELETED + ":*)";
-    
+
     private List<String> setSpecFields = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.mets.name());
 
     /* (non-Javadoc)
@@ -110,14 +110,8 @@ public class METSFormat extends Format {
         if (qr.getResults().isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
-        try {
-            return generateMets(qr.getResults(), qr.getResults().getNumFound(), firstRawRow, numRows, handler, "ListRecords", setSpecFields);
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-            return new ErrorCode().getIdDoesNotExist();
-        } catch (JDOMException e) {
-            return new ErrorCode().getCannotDisseminateFormat();
-        }
+
+        return generateMets(qr.getResults(), qr.getResults().getNumFound(), firstRawRow, numRows, handler, "ListRecords", setSpecFields);
     }
 
     /* (non-Javadoc)
@@ -136,13 +130,11 @@ public class METSFormat extends Format {
             SolrDocument doc = solr.getListRecord(handler.getIdentifier(), fieldList);
             if (doc == null) {
                 logger.debug("Record not found in index: {}", handler.getIdentifier());
-                return new ErrorCode().getCannotDisseminateFormat();
+                return new ErrorCode().getIdDoesNotExist();
             }
             return generateMets(Collections.singletonList(doc), 1L, 0, 1, handler, "GetRecord", setSpecFields);
         } catch (IOException e) {
             return new ErrorCode().getIdDoesNotExist();
-        } catch (JDOMException e) {
-            return new ErrorCode().getCannotDisseminateFormat();
         } catch (SolrServerException e) {
             return new ErrorCode().getIdDoesNotExist();
         }
@@ -158,13 +150,11 @@ public class METSFormat extends Format {
      * @param handler
      * @param recordType "GetRecord" or "ListRecords"
      * @return
-     * @throws IOException
      * @throws JDOMException
      * @throws SolrServerException
-     * @throws HTTPException
      */
     private static Element generateMets(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler,
-            String recordType, List<String> setSpecFields) throws JDOMException, IOException, SolrServerException {
+            String recordType, List<String> setSpecFields) throws SolrServerException {
         logger.trace("generateMets");
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element xmlListRecords = new Element(recordType, xmlns);
@@ -190,37 +180,51 @@ public class METSFormat extends Format {
             String xml = null;
             try {
                 xml = Utils.getWebContentGET(url);
-            } catch (HTTPException e) {
+            } catch (HTTPException | IOException e) {
+                logger.error("Could not retrieve METS: {}", url);
                 xmlListRecords.addContent(new ErrorCode().getIdDoesNotExist());
                 continue;
             }
+
             if (StringUtils.isEmpty(xml)) {
                 xmlListRecords.addContent(new ErrorCode().getIdDoesNotExist());
                 continue;
             }
 
-            org.jdom2.Document metsFile = XmlTools.getDocumentFromString(xml, null);
-            Element metsRoot = metsFile.getRootElement();
-            Element newMetsRoot = new Element(Metadata.mets.getMetadataPrefix(), mets);
-            newMetsRoot.addNamespaceDeclaration(XSI);
-            newMetsRoot.addNamespaceDeclaration(mods);
-            newMetsRoot.addNamespaceDeclaration(dv);
-            newMetsRoot.addNamespaceDeclaration(xlink);
-            newMetsRoot.setAttribute("schemaLocation",
-                    "http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-3.xsd http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/version17/mets.v1-7.xsd",
-                    XSI);
-            if (metsRoot.getAttributeValue("OBJID") != null) {
-                newMetsRoot.setAttribute("OBJID", metsRoot.getAttributeValue("OBJID"));
-            }
-            newMetsRoot.addContent(metsRoot.cloneContent());
+            try {
+                org.jdom2.Document metsFile = XmlTools.getDocumentFromString(xml, null);
+                Element metsRoot = metsFile.getRootElement();
+                Element newMetsRoot = new Element(Metadata.mets.getMetadataPrefix(), mets);
+                newMetsRoot.addNamespaceDeclaration(XSI);
+                newMetsRoot.addNamespaceDeclaration(mods);
+                newMetsRoot.addNamespaceDeclaration(dv);
+                newMetsRoot.addNamespaceDeclaration(xlink);
+                newMetsRoot.setAttribute("schemaLocation",
+                        "http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-3.xsd http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/version17/mets.v1-7.xsd",
+                        XSI);
+                if (metsRoot.getAttributeValue("OBJID") != null) {
+                    newMetsRoot.setAttribute("OBJID", metsRoot.getAttributeValue("OBJID"));
+                }
+                newMetsRoot.addContent(metsRoot.cloneContent());
 
-            Element record = new Element("record", xmlns);
-            Element header = getHeader(doc, null, handler, null, setSpecFields);
-            record.addContent(header);
-            Element metadata = new Element("metadata", xmlns);
-            metadata.addContent(newMetsRoot);
-            record.addContent(metadata);
-            xmlListRecords.addContent(record);
+                Element record = new Element("record", xmlns);
+                try {
+                    Element header = getHeader(doc, null, handler, null, setSpecFields);
+                    record.addContent(header);
+                    Element metadata = new Element("metadata", xmlns);
+                    metadata.addContent(newMetsRoot);
+                    record.addContent(metadata);
+                    xmlListRecords.addContent(record);
+                } catch (IOException e) {
+                    logger.error("Could not generate header: {}", e.getMessage());
+                    xmlListRecords.addContent(new ErrorCode().getIdDoesNotExist());
+                    continue;
+                }
+            } catch (IOException | JDOMException e) {
+                logger.error("{}:\n{}", e.getMessage(), xml);
+                xmlListRecords.addContent(new ErrorCode().getIdDoesNotExist());
+                continue;
+            }
         }
 
         // Create resumption token

@@ -72,7 +72,7 @@ public class OaiServlet extends HttpServlet {
 
         Element responseDate = new Element("responseDate", xmlns);
 
-        responseDate.setText(Utils.getCurrentUTCTime(LocalDateTime.now(), 0));
+        responseDate.setText(Utils.getCurrentUTCTime(LocalDateTime.now()));
         root.addContent(responseDate);
 
         RequestHandler handler = new RequestHandler(request);

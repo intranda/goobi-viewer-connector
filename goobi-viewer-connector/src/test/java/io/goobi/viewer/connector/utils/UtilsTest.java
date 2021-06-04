@@ -60,7 +60,17 @@ public class UtilsTest extends AbstractTest {
      */
     @Test
     public void getCurrentUTCTime_shouldFormatTimeCorrectly() throws Exception {
-        Assert.assertEquals("2020-09-07T14:30:01Z", Utils.getCurrentUTCTime(LocalDateTime.of(2020, 9, 7, 14, 30, 00), 1000));
+        Assert.assertEquals("2020-09-07T14:30:00Z", Utils.getCurrentUTCTime(LocalDateTime.of(2020, 9, 7, 14, 30, 00)));
+    }
+    
+
+    /**
+     * @see Utils#getCurrentUTCTime(LocalDateTime)
+     * @verifies truncate to seconds
+     */
+    @Test
+    public void getCurrentUTCTime_shouldTruncateToSeconds() throws Exception {
+        Assert.assertEquals("2020-09-07T14:30:00Z", Utils.getCurrentUTCTime(LocalDateTime.of(2020, 9, 7, 14, 30, 00, 1000000)));
     }
 
     /**
