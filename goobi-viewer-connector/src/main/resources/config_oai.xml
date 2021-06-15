@@ -52,7 +52,7 @@
 		<hitsPerToken>100</hitsPerToken>
 
 		<!-- URL to Solr index -->
-		<solrUrl>http://localhost:8081/solr</solrUrl>
+        <solrUrl>http://localhost:8983/solr/collection1</solrUrl>
 
 		<restrictions>
 			<!-- <restriction field="ACCESSCONDITION">restricted1</restriction> -->
