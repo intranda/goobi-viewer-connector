@@ -54,7 +54,7 @@
 		<json.version>20210307</json.version>
 		<junit.version>4.13.2</junit.version>
 		<log4j.version>2.14.1</log4j.version>
-		<slf4j.version>1.7.30</slf4j.version>
+		<slf4j.version>1.7.31</slf4j.version>
 		<solr.version>8.9.0</solr.version>
 		<tomcat.version>9.0.48</tomcat.version>
 		<xstream.version>1.4.17</xstream.version>
