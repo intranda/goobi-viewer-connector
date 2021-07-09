@@ -52,7 +52,7 @@
 		<hitsPerToken>100</hitsPerToken>
 
 		<!-- URL to Solr index -->
-		<solrUrl>http://localhost:8081/solr</solrUrl>
+        <solrUrl>http://localhost:8983/solr/collection1</solrUrl>
 
 		<restrictions>
 			<!-- <restriction field="ACCESSCONDITION">restricted1</restriction> -->
@@ -124,10 +124,12 @@
 				<metadata label="identifier" value="#AUTO#" />
 				<metadata label="source" value="#AUTO#" />
 				<metadata label="rights" value="#AUTO#" />
+				<!--
 				<metadata label="url" value="http://localhost:8080/viewer/image/{0}/{1}/">
 					<param type="field" key="PI_TOPSTRUCT" />
 					<param type="field" key="THUMBPAGENO" />
 				</metadata>
+				-->
 				<metadata label="fulltext" value="#AUTO#" />
 				<metadata label="description" value="#TOC#" />
 			</template>
