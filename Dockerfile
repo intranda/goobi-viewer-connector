@@ -30,5 +30,5 @@ RUN unzip /M2M.war -d /usr/local/tomcat/webapps/M2M && rm /M2M.war
 RUN wget -q -O /opt/digiverso/viewer/oai/MARC21slimUtils.xsl https://raw.githubusercontent.com/intranda/goobi-viewer-connector/master/goobi-viewer-connector/src/main/resources/MARC21slimUtils.xsl && wget -q -O /opt/digiverso/viewer/oai/MODS2MARC21slim.xsl https://raw.githubusercontent.com/intranda/goobi-viewer-connector/master/goobi-viewer-connector/src/main/resources/MODS2MARC21slim.xsl
 
 COPY docker/* /
-COPY docker/config_oai.xml.template /opt/digiverso/viewer/config/config_oai.xml
+COPY docker/config_oai.xml.template /
 CMD ["/run.sh"]
