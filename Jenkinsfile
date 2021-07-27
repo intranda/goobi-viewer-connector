@@ -1,11 +1,6 @@
 pipeline {
 
-  agent {
-    docker {
-      image 'maven:3.6.3-openjdk-11'
-      args '-v $HOME/.m2:/var/maven/.m2:z -v $HOME/.config:/var/maven/.config -v $HOME/.sonar:/var/maven/.sonar -u 1000 -ti -e _JAVA_OPTIONS=-Duser.home=/var/maven -e MAVEN_CONFIG=/var/maven/.m2'
-    }
-  }
+  agent none
 
   options {
     buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '15', daysToKeepStr: '90', numToKeepStr: '')
@@ -18,12 +13,28 @@ pipeline {
       }
     }
     stage('build') {
+      agent {
+        docker {
+          image 'maven:3-jdk-8'
+          args '-v $HOME/.m2:/var/maven/.m2:z -u 1000 -ti -e _JAVA_OPTIONS=-Duser.home=/var/maven -e MAVEN_CONFIG=/var/maven/.m2'
+        }
+      }
       steps {
-              sh 'mvn -f goobi-viewer-connector/pom.xml clean install'
-              recordIssues enabledForFailure: true, aggregatingResults: true, tools: [java(), javaDoc()]
+        sh 'mvn -f goobi-viewer-connector/pom.xml clean install'
+        recordIssues enabledForFailure: true, aggregatingResults: true, tools: [java(), javaDoc()]
+        archiveArtifacts artifacts: '**/target/*.war', fingerprint: true, onlyIfSuccessful: true
+        junit "**/target/surefire-reports/*.xml"
+        step([
+          $class           : 'JacocoPublisher',
+          execPattern      : 'goobi-viewer-connector/target/jacoco.exec',
+          classPattern     : 'goobi-viewer-connector/target/classes/',
+          sourcePattern    : 'goobi-viewer-connector/src/main/java',
+          exclusionPattern : '**/*Test.class'
+        ])
       }
     }
     stage('sonarcloud') {
+      agent any
       when {
         anyOf {
           branch 'sonar_*'
@@ -83,19 +94,6 @@ pipeline {
     }
   }
   post {
-    always {
-      junit "**/target/surefire-reports/*.xml"
-      step([
-        $class           : 'JacocoPublisher',
-        execPattern      : 'goobi-viewer-connector/target/jacoco.exec',
-        classPattern     : 'goobi-viewer-connector/target/classes/',
-        sourcePattern    : 'goobi-viewer-connector/src/main/java',
-        exclusionPattern : '**/*Test.class'
-      ])
-    }
-    success {
-      archiveArtifacts artifacts: '**/target/*.war, */src/main/webapp/oai2.xsl', fingerprint: true
-    }
     changed {
       emailext(
         subject: '${DEFAULT_SUBJECT}',
