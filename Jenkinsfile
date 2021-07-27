@@ -8,6 +8,7 @@ pipeline {
 
   stages {
     stage('prepare') {
+      agent any
       steps {
         sh 'git clean -fdx'
       }
