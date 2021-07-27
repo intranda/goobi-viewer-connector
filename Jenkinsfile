@@ -35,6 +35,52 @@ pipeline {
         }
       }
     }
+    stage('build docker image') {
+      agent any
+      steps {
+        script{
+          docker.withRegistry('https://nexus.intranda.com:4443','jenkins-docker'){
+            dockerimage = docker.build("goobi-viewer-connector:${BRANCH_NAME}-${env.BUILD_ID}_${env.GIT_COMMIT}")
+          }
+        }
+      }
+    }
+    stage('basic tests'){
+      agent any
+      steps{
+        script {
+          dockerimage.inside {
+            sh 'test -d /usr/local/tomcat/webapps/M2M && echo "/usr/local/tomcat/webapps/M2M missing or no directory"'
+            sh 'test -d /opt/digiverso/viewer/oai || echo "/opt/digiverso/viewer/oai missing or no directory"'
+            sh 'test -f /config_oai.xml.template || echo "/config_oai.xml.template missing"'
+            sh 'envsubst -V'
+          }
+        }
+      }
+    }
+    stage('publish docker devel image to internal repository'){
+      agent any
+      steps{
+        script {
+          docker.withRegistry('https://nexus.intranda.com:4443','jenkins-docker'){
+            dockerimage.push("${env.BRANCH_NAME}-${env.BUILD_ID}_${env.GIT_COMMIT}")
+            dockerimage.push("${env.BRANCH_NAME}")
+          }
+        }
+      }
+    }
+    stage('publish docker production image to internal repository'){
+      agent any
+      when { branch 'master' }
+      steps{
+        script {
+          docker.withRegistry('https://nexus.intranda.com:4443','jenkins-docker'){
+            dockerimage.push("${env.TAG_NAME}-${env.BUILD_ID}_${env.GIT_COMMIT}")
+            dockerimage.push("latest")
+          }
+        }
+      }
+    }
   }
   post {
     always {
