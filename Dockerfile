@@ -18,7 +18,7 @@ RUN apt-get update && \
 	rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
 	rm -rf ${CATALINA_HOME}/webapps/*
 
-RUN mkdir -p /opt/digiverso/viewer/oai && mkdir -p /usr/local/tomcat/conf/Catalina/localhost/ && mkdir -p /usr/local/tomcat/webapps/M2M
+RUN mkdir -p /opt/digiverso/viewer/oai && mkdir -p /opt/digiverso/viewer/config && mkdir -p /usr/local/tomcat/conf/Catalina/localhost/ && mkdir -p /usr/local/tomcat/webapps/M2M
 
 # redirect /
 RUN mkdir ${CATALINA_HOME}/webapps/ROOT && \
