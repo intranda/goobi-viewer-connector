@@ -2,7 +2,7 @@ pipeline {
 
   agent {
     docker {
-      image 'maven:3.6.3-openjdk-11'
+      image 'maven:3-jdk-11'
       args '-v $HOME/.m2:/var/maven/.m2:z -v $HOME/.config:/var/maven/.config -v $HOME/.sonar:/var/maven/.sonar -u 1000 -ti -e _JAVA_OPTIONS=-Duser.home=/var/maven -e MAVEN_CONFIG=/var/maven/.m2'
     }
   }
