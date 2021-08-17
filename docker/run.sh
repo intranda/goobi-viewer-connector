@@ -41,9 +41,9 @@ case $CONFIGSOURCE in
       echo "CONFIG_FOLDER: $CONFIG_FOLDER does not exists or is not a folder"
       exit 1
     fi
-    
+
     echo "Copying configuration from local folder"
-    [ -d "$CONFIG_FOLDER" ] && cp -arv "$CONFIG_FOLDER"/* /opt/digiverso/viewer/config/ 
+    [ -d "$CONFIG_FOLDER" ] && cp -arv "$CONFIG_FOLDER"/* /opt/digiverso/viewer/config/
     ;;
 
   *)
