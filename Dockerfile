@@ -11,12 +11,12 @@ FROM tomcat:9-jre11 as ASSEMBLE
 ENV VIEWER_URL http://viewer/viewer
 ENV SOLR_URL http://solr:8983/solr/collection1
 
-RUN apt-get update && \ 
-	apt-get -y install gettext-base \
-	  wget && \
-	apt-get -y clean && \
-	rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-	rm -rf ${CATALINA_HOME}/webapps/*
+RUN apt-get update && \
+    apt-get -y install gettext-base \
+        wget && \
+    apt-get -y clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    rm -rf ${CATALINA_HOME}/webapps/*
 
 RUN mkdir -p /opt/digiverso/viewer/oai && mkdir -p /opt/digiverso/viewer/config && mkdir -p /usr/local/tomcat/conf/Catalina/localhost/ && mkdir -p /usr/local/tomcat/webapps/M2M
 
