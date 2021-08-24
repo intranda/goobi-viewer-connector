@@ -57,7 +57,7 @@
 		<slf4j.version>1.7.32</slf4j.version>
 		<solr.version>8.9.0</solr.version>
 		<tomcat.version>9.0.50</tomcat.version>
-		<xstream.version>1.4.17</xstream.version>
+		<xstream.version>1.4.18</xstream.version>
 	</properties>
 
 
