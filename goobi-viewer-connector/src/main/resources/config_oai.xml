@@ -56,7 +56,7 @@
 
 		<restrictions>
 			<!-- <restriction field="ACCESSCONDITION">restricted1</restriction> -->
-			<!-- <restriction field="ACCESSCONDITION" conditions="-MDNUM_PUBLICRELEASEYEAR:[* TO NOW/YEAR]">restricted2</licenseType> -->
+			<!-- <restriction field="ACCESSCONDITION" conditions="-MDNUM_PUBLICRELEASEYEAR:[* TO NOW/YEAR]">restricted2</restriction> -->
 		</restrictions>
 
 		<querySuffix></querySuffix>
