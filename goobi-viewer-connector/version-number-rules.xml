@@ -22,6 +22,7 @@
                 <ignoreVersion>10.0.7</ignoreVersion>
                 <ignoreVersion>10.0.8</ignoreVersion>
                 <ignoreVersion>10.0.10</ignoreVersion>
+                <ignoreVersion>10.0.11</ignoreVersion>
             </ignoreVersions>
         </rule>
     </rules>
