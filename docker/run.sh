@@ -5,8 +5,9 @@ set -e
 
 set -u
 
-# echo "Settings SOLR and viewre URL from environment..."
+# echo "Applying from environment..."
 envsubst '\$VIEWER_URL \$SOLR_URL' </config_oai.xml.template >/opt/digiverso/viewer/config/config_oai.xml
+envsubst '\$VIEWER_DOMAIN' </usr/local/tomcat/conf/server.xml.template >/usr/local/tomcat/conf/server.xml
 
 
 #if [ -n "${WORKING_STORAGE:-}" ]

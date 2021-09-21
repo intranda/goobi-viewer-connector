@@ -19,7 +19,7 @@ RUN apt-get update && \
     rm -rf ${CATALINA_HOME}/webapps/*
 
 RUN mkdir -p /opt/digiverso/viewer/oai && mkdir -p /opt/digiverso/viewer/config && mkdir -p /usr/local/tomcat/conf/Catalina/localhost/ && mkdir -p /usr/local/tomcat/webapps/M2M
-
+RUN patch --output=/usr/local/tomcat/conf/server.xml.template /usr/local/tomcat/conf/server.xml </server.xml.patch
 # redirect /
 RUN mkdir ${CATALINA_HOME}/webapps/ROOT && \
     echo '<% response.sendRedirect("/M2M/"); %>' > ${CATALINA_HOME}/webapps/ROOT/index.jsp
