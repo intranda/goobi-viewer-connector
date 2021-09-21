@@ -16,6 +16,7 @@ COPY docker/config_oai.xml.template /
 
 RUN apt-get update && \
     apt-get -y install gettext-base \
+        patch \
         wget && \
     apt-get -y clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
