@@ -33,7 +33,7 @@
 	<!-- Definiert die Liste von XML Namespaces, die in der OAI Antwort verwendet 
 		werden -->
 	<oai-identifier>
-		<xmlns>http://www.openarchives.org/OAI/2.0/</xmlns>
+		<namespace>http://www.openarchives.org/OAI/2.0/</namespace>
 		<repositoryIdentifier></repositoryIdentifier>
 	</oai-identifier>
 

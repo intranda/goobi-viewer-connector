@@ -42,7 +42,7 @@
 
 	<!-- List of XML namespaces that are used in the OAI answer -->
 	<oai-identifier>
-		<xmlns>http://www.openarchives.org/OAI/2.0/</xmlns>
+		<namespace>http://www.openarchives.org/OAI/2.0/</namespace>
 		<repositoryIdentifier></repositoryIdentifier>
 	</oai-identifier>
 

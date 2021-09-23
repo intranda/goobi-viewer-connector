@@ -212,8 +212,8 @@ public final class Configuration {
      * @return the Standard Namespace for the xml response
      */
     public Namespace getStandardNameSpace() {
-        String xmlns = getOaiIdentifier().get("xmlns");
-        return Namespace.getNamespace(xmlns);
+        String namespace = getOaiIdentifier().get("namespace");
+        return Namespace.getNamespace(namespace);
     }
 
     /**
