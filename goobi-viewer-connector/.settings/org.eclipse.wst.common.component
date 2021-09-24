@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-    <wb-module deploy-name="M2M">
-        <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
-        <wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
-        <wb-resource deploy-path="/" source-path="/src/main/webapp"/>
-        <wb-resource deploy-path="/" source-path="/webapp"/>
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
+            
+    
+    <wb-module deploy-name="connector-21.09-SNAPSHOT">
+                        
+        
+        <wb-resource deploy-path="/" source-path="/src/main/resources" tag="defaultRootSource"/>
+                        
+        
+        <wb-resource deploy-path="/" source-path="/src/main/java"/>
+                
         <property name="java-output-path" value="/OAI/build/classes"/>
-        <property name="component.exclusion.patterns" value="WEB-INF/lib/zookeeper-*.jar"/>
-        <property name="context-root" value="M2M"/>
+                
+        <property name="context-root" value="connector"/>
+                
+        <property name="component.exclusion.patterns"/>
+                    
+    
     </wb-module>
+        
+
 </project-modules>

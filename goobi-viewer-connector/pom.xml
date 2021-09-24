@@ -7,7 +7,7 @@
 	<groupId>io.goobi.viewer</groupId>
 	<artifactId>connector</artifactId>
 	<version>21.09-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 
 
 	<name>Goobi viewer - Connector</name>
@@ -40,6 +40,8 @@
 		<!-- Manifest information -->
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 		<buildDate>${maven.build.timestamp}</buildDate>
+        
+        <viewer-core.version>21.09-SNAPSHOT</viewer-core.version>
 
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
 		<commons-cli.version>1.4</commons-cli.version>
@@ -62,8 +64,14 @@
 	</properties>
 
 
-
 	<dependencies>
+    
+        <dependency>
+            <groupId>io.goobi.viewer</groupId>
+            <artifactId>viewer-core</artifactId>
+            <version>${viewer-core.version}</version>
+        </dependency>
+    
         <dependency>
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
@@ -164,150 +172,30 @@
 	</dependencies>
 
 
-	<build>
-		<finalName>M2M</finalName>
+    <build>
         <plugins>
             <!-- used for mvn versions:display-plugin-updates -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.0.0-M3</version>
-				<executions>
-					<execution>
-						<id>enforce-maven</id>
-						<goals>
-							<goal>enforce</goal>
-						</goals>
-						<configuration>
-							<rules>
-								<requireMavenVersion>
-									<version>3.3.9</version>
-								</requireMavenVersion>
-							</rules>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
-				<configuration>
-					<compilerArgument>-Xlint:deprecation</compilerArgument>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-war-plugin</artifactId>
-				<version>3.3.1</version>
-				<configuration>
-					<warName>M2M</warName>
-					<wtpversion>2.0</wtpversion>
-					<wtpContextName>M2M</wtpContextName>
-					<packagingExcludes>**/rebel.xml</packagingExcludes>
-					<archive>
-						<addMavenDescriptor>false</addMavenDescriptor>
-						<manifestEntries>
-							<ApplicationName>Goobi viewer Connector</ApplicationName>
-							<version>${project.version}</version>
-							<Implementation-Version>${buildNumber}</Implementation-Version>
-							<Implementation-Build-Date>${buildDate}</Implementation-Build-Date>
-						</manifestEntries>
-					</archive>
-				</configuration>
-			</plugin>
-			<!-- Maven Surefire Plugin -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0-M4</version>
-				<configuration>
-					<skipTests>${skipTests}</skipTests>
-					<excludes>
-						<exclude>**/Abstract*.java</exclude>
-						<exclude>**/SolrSearchIndexTest.java</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
-			<!-- get git version number -->
-			<plugin>
-				<groupId>pl.project13.maven</groupId>
-				<artifactId>git-commit-id-plugin</artifactId>
-				<version>4.0.1</version>
-				<configuration>
-					<commitIdGenerationMode>flat</commitIdGenerationMode>
-					<gitDescribe>
-						<skip>true</skip>
-					</gitDescribe>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>revision</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>buildnumber-maven-plugin</artifactId>
-				<version>1.4</version>
-				<configuration>
-					<shortRevisionLength>7</shortRevisionLength>
-					<doCheck>false</doCheck>
-				</configuration>
-				<executions>
-					<execution>
-						<phase>validate</phase>
-						<goals>
-							<goal>create</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.2.0</version>
-				<configuration>
-					<doclint>none</doclint>
-					<fixTags>link,throws,return,param</fixTags>
-					<tags>
-						<tag>
-							<name>should</name>
-							<placement>X</placement>
-						</tag>
-					</tags>
-				</configuration>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.0.0-M3</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>3.3.9</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
-            <!-- used for test coverage report in Jenkins -->
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.5</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>report</id>
-						<phase>test</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-				</executions>
-            </plugin>
-            <!-- used for mvn versions:display-dependency-updates -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>versions-maven-plugin</artifactId>
-				<version>2.8.1</version>
-				<configuration>
-					<rulesUri>file://${basedir}/version-number-rules.xml</rulesUri>
-				</configuration>
-            </plugin>
-            <!-- used for mvn verify-->
+            <!-- used for mvn verify -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -321,24 +209,177 @@
                         <configuration>
                             <failOnWarning>true</failOnWarning>
                             <ignoredUnusedDeclaredDependencies>
-                                <!-- commons-beanutils is required since upgrading to org.apache.commons.configuration2 -->
-                                <ignoredUnusedDeclaredDependency>commons-beanutils:commons-beanutils</ignoredUnusedDeclaredDependency>
+                                <!-- JSTL is used within JSF for example c:forEach -->
+                                <ignoredUnusedDeclaredDependency>javax.servlet:jstl</ignoredUnusedDeclaredDependency>
+
+                                <!-- xerces is a dependency from the old Solr version. It can be removed when updating to Solr 8 -->
+                                <ignoredUnusedDeclaredDependency>xerces:xmlParserAPIs</ignoredUnusedDeclaredDependency>
+                                <ignoredUnusedDeclaredDependency>xerces:xercesImpl</ignoredUnusedDeclaredDependency>
+
+                                <!-- The jersey-container-servlet dependency is used for startup during runtime Unit tests run without it though -->
+                                <ignoredUnusedDeclaredDependency>org.glassfish.jersey.containers:jersey-container-servlet</ignoredUnusedDeclaredDependency>
+
                                 <!-- JXPath is used at XPathExpressionEngine from org.apache.commons.configuration2, i.e. LanguageHelper -->
                                 <ignoredUnusedDeclaredDependency>commons-jxpath:commons-jxpath</ignoredUnusedDeclaredDependency>
 
-                                <!-- jaxen is needed by jdom2 -->
-                                <ignoredUnusedDeclaredDependency>jaxen:jaxen</ignoredUnusedDeclaredDependency>
+                                <!-- The MariaDB java client is used for the database connection and configured in the Tomcat -->
+                                <ignoredUnusedDeclaredDependency>org.mariadb.jdbc:mariadb-java-client</ignoredUnusedDeclaredDependency>
 
-                                <!-- this is needed during runtime, otherwise we have no logfiles -->
-                                <ignoredUnusedDeclaredDependency>org.apache.logging.log4j:log4j-slf4j-impl</ignoredUnusedDeclaredDependency>
+                                <!-- EclipseLink Java Persistence API for database management -->
+                                <ignoredUnusedDeclaredDependency>org.eclipse.persistence:org.eclipse.persistence.jpa</ignoredUnusedDeclaredDependency>
 
-                                <!-- this is needed for commons-configuration 1.10. We can remove it when migrating to commons-configuration2-->
-                                <ignoredUnusedDeclaredDependency>commons-collections:commons-collections</ignoredUnusedDeclaredDependency>
+                                <!-- javax.annotation is not part of jdk 11 anymore -->
+                                <ignoredUnusedDeclaredDependency>javax.annotation:javax.annotation-api</ignoredUnusedDeclaredDependency>
+
+                                <!-- org.citationstyles.* are runtime resources for citeproc -->
+                                <ignoredUnusedDeclaredDependency>org.citationstyles:locales</ignoredUnusedDeclaredDependency>
+                                <ignoredUnusedDeclaredDependency>org.citationstyles:styles</ignoredUnusedDeclaredDependency>
+                                
+                                <!-- jersey client is falsely declared as unused blocking maven install (windows developer system only) -->
+                                <ignoredUnusedDeclaredDependency>org.glassfish.jersey.core:jersey-client</ignoredUnusedDeclaredDependency>
+
+                                <!-- jaxb-runtime needs to be available to remove the warning "JAXBContext implementation could not be found. WADL feature is disabled" during tomcat startup -->
+                                <ignoredUnusedDeclaredDependency>org.glassfish.jaxb:jaxb-runtime</ignoredUnusedDeclaredDependency>
                             </ignoredUnusedDeclaredDependencies>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-		</plugins>
-	</build>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <compilerArgument>-Xlint:deprecation</compilerArgument>
+                    <!--compilerArgument>-Xlint:unchecked</compilerArgument -->
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M4</version>
+                <configuration>
+                    <skipTests>${skipTests}</skipTests>
+                    <excludes>
+                        <exclude>**/Abstract*.java</exclude>
+                    </excludes>
+                    <systemProperties>
+                        <property>
+                            <name>java.util.logging.config.file</name>
+                            <value>src/test/resources/log4j2.test.xml</value>
+                        </property>
+                    </systemProperties>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <archive>
+                        <addMavenDescriptor>false</addMavenDescriptor>
+                        <manifestEntries>
+                            <ApplicationName>Goobi viewer Connector</ApplicationName>
+                            <version>${project.version}</version>
+                            <Implementation-Version>${buildNumber}</Implementation-Version>
+                            <Implementation-Build-Date>${buildDate}</Implementation-Build-Date>
+                        </manifestEntries>
+                    </archive>
+                    <excludes>
+                        <exclude>**/log4j2.xml</exclude>
+                        <exclude>**/*.properties</exclude>
+                    </excludes>
+
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- get git version number -->
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>4.0.1</version>
+                <configuration>
+                    <commitIdGenerationMode>flat</commitIdGenerationMode>
+                    <gitDescribe>
+                        <skip>true</skip>
+                    </gitDescribe>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>1.4</version>
+                <configuration>
+                    <shortRevisionLength>7</shortRevisionLength>
+                    <doCheck>false</doCheck>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <doclint>none</doclint>
+                    <fixTags>link,throws,return,param</fixTags>
+                    <tags>
+                        <tag>
+                            <name>should</name>
+                            <placement>X</placement>
+                        </tag>
+                    </tags>
+                </configuration>
+            </plugin>
+            <!-- used for test coverage report in Jenkins -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.5</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- used for mvn versions:display-dependency-updates -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.8.1</version>
+                <configuration>
+                    <rulesUri>file://${basedir}/version-number-rules.xml</rulesUri>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    
 </project>
