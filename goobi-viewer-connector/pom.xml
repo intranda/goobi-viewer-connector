@@ -218,7 +218,7 @@
                             <goal>analyze-only</goal>
                         </goals>
                         <configuration>
-                            <failOnWarning>true</failOnWarning>
+                            <failOnWarning>false</failOnWarning>
                             <ignoredUnusedDeclaredDependencies>
                                 <!-- JSTL is used within JSF for example c:forEach -->
                                 <ignoredUnusedDeclaredDependency>javax.servlet:jstl</ignoredUnusedDeclaredDependency>
