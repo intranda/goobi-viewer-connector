@@ -70,14 +70,15 @@
             <groupId>io.goobi.viewer</groupId>
             <artifactId>viewer-core</artifactId>
             <version>${viewer-core.version}</version>
+            <!-- Exclude javax.xml packages to avoid module problems with Java 9+ -->
             <exclusions>
-                <exclusion>
-                    <groupId>javax.xml.bind</groupId>
-                    <artifactId>jaxb-api</artifactId>
-                </exclusion>
                 <exclusion>
                     <groupId>xml-apis</groupId>
                     <artifactId>xml-apis</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xmlParserAPIs</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
