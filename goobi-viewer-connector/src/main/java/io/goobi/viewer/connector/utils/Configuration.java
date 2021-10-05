@@ -15,6 +15,7 @@
  */
 package io.goobi.viewer.connector.utils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -22,11 +23,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.ConversionException;
-import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.commons.configuration.XMLConfiguration;
-import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.apache.commons.configuration2.XMLConfiguration;
+import org.apache.commons.configuration2.builder.ConfigurationBuilderEvent;
+import org.apache.commons.configuration2.builder.ReloadingFileBasedConfigurationBuilder;
+import org.apache.commons.configuration2.builder.fluent.Parameters;
+import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
+import org.apache.commons.configuration2.event.Event;
+import org.apache.commons.configuration2.event.EventListener;
+import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.configuration2.ex.ConversionException;
+import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.StringUtils;
 import org.jdom2.Namespace;
 import org.slf4j.Logger;
@@ -53,9 +60,9 @@ public final class Configuration {
     public static final String DEFAULT_CONFIG_FILE = "config_oai.xml";
     private static final String DEFAULT_VIEWER_CONFIG_FILE = "config_viewer.xml";
 
-    private XMLConfiguration configLocal = null;
-    private XMLConfiguration configDefault = null;
-    private XMLConfiguration viewerConfig = null;
+    protected ReloadingFileBasedConfigurationBuilder<XMLConfiguration> builder;
+    protected ReloadingFileBasedConfigurationBuilder<XMLConfiguration> builderLocal;
+    protected ReloadingFileBasedConfigurationBuilder<XMLConfiguration> builderViewer;
 
     /**
      * <p>
@@ -64,33 +71,138 @@ public final class Configuration {
      *
      * @param configPath a {@link java.lang.String} object.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public Configuration(String configPath) {
         // Load default configuration
-        try {
-            configDefault = new XMLConfiguration(configPath);
-            configDefault.setReloadingStrategy(new FileChangedReloadingStrategy());
-            logger.info("Loaded default Connector configuration.");
-        } catch (ConfigurationException e) {
-            logger.error(e.getMessage(), e);
+        builder =
+                new ReloadingFileBasedConfigurationBuilder<XMLConfiguration>(XMLConfiguration.class)
+                        .configure(new Parameters().properties()
+                                .setBasePath(Configuration.class.getClassLoader().getResource("").getFile())
+                                .setFileName(configPath)
+                                .setListDelimiterHandler(new DefaultListDelimiterHandler(';'))
+                                .setThrowExceptionOnMissing(false));
+        if (builder.getFileHandler().getFile().exists()) {
+            try {
+                builder.getConfiguration();
+                logger.info("Default Connector configuration file '{}' loaded.", builder.getFileHandler().getFile().getAbsolutePath());
+            } catch (ConfigurationException e) {
+                logger.error(e.getMessage(), e);
+            }
+            builder.addEventListener(ConfigurationBuilderEvent.CONFIGURATION_REQUEST,
+                    new EventListener() {
+
+                        @Override
+                        public void onEvent(Event event) {
+                            if (builder.getReloadingController().checkForReloading(null)) {
+                                //
+                            }
+                        }
+                    });
+        } else {
+            logger.error("Default Connector configuration file not found: {}; Base path is {}",
+                    builder.getFileHandler().getFile().getAbsoluteFile(),
+                    builder.getFileHandler().getBasePath());
         }
-        // Load local configuration
-        try {
-            configLocal = new XMLConfiguration(getViewerConfigFolder() + DEFAULT_CONFIG_FILE);
-            configLocal.setReloadingStrategy(new FileChangedReloadingStrategy());
-            logger.info("Loaded local Connector configuration from '{}'.", configLocal.getFile().getAbsolutePath());
-        } catch (ConfigurationException e) {
-            logger.warn("Local OAI configuration file '{}' could not be read ({}), using default configuration file.", getViewerConfigFolder(),
-                    e.getMessage());
-            configLocal = configDefault;
+
+        // Load local config file
+        File fileLocal = new File(getViewerConfigFolder() + DEFAULT_CONFIG_FILE);
+        builderLocal =
+                new ReloadingFileBasedConfigurationBuilder<XMLConfiguration>(XMLConfiguration.class)
+                        .configure(new Parameters().properties()
+                                .setFileName(fileLocal.getAbsolutePath())
+                                .setListDelimiterHandler(new DefaultListDelimiterHandler(';'))
+                                .setThrowExceptionOnMissing(false));
+        if (builderLocal.getFileHandler().getFile().exists()) {
+            try {
+                builderLocal.getConfiguration();
+                logger.info("Local Connector configuration file '{}' loaded.", fileLocal.getAbsolutePath());
+            } catch (ConfigurationException e) {
+                logger.error(e.getMessage(), e);
+            }
+            builderLocal.addEventListener(ConfigurationBuilderEvent.CONFIGURATION_REQUEST,
+                    new EventListener() {
+
+                        @Override
+                        public void onEvent(Event event) {
+                            if (builderLocal.getReloadingController().checkForReloading(null)) {
+                                //
+                            }
+                        }
+                    });
         }
+
         // Load viewer configuration
-        try {
-            viewerConfig = new XMLConfiguration(getViewerConfigFolder() + DEFAULT_VIEWER_CONFIG_FILE);
-            viewerConfig.setReloadingStrategy(new FileChangedReloadingStrategy());
-            logger.info("Loaded default Goobi viewer configuration for Connector.");
-        } catch (ConfigurationException e) {
-            logger.error(e.getMessage(), e);
+        File fileViewerConfig = new File(getViewerConfigFolder() + DEFAULT_VIEWER_CONFIG_FILE);
+        builderViewer =
+                new ReloadingFileBasedConfigurationBuilder<XMLConfiguration>(XMLConfiguration.class)
+                        .configure(new Parameters().properties()
+                                .setFileName(fileViewerConfig.getAbsolutePath())
+                                .setListDelimiterHandler(new DefaultListDelimiterHandler(';'))
+                                .setThrowExceptionOnMissing(false));
+        if (builderViewer.getFileHandler().getFile().exists()) {
+            try {
+                builderViewer.getConfiguration();
+                logger.info("Local Goobi viewer configuration file '{}' for Connector loaded.", fileViewerConfig.getAbsolutePath());
+            } catch (ConfigurationException e) {
+                logger.error(e.getMessage(), e);
+            }
+            builderViewer.addEventListener(ConfigurationBuilderEvent.CONFIGURATION_REQUEST,
+                    new EventListener() {
+
+                        @Override
+                        public void onEvent(Event event) {
+                            if (builderViewer.getReloadingController().checkForReloading(null)) {
+                                //
+                            }
+                        }
+                    });
         }
+    }
+
+    /**
+     * 
+     * @return {@link XMLConfiguration} that is synced with the current state of the config file
+     */
+    protected XMLConfiguration getConfig() {
+        try {
+            return builder.getConfiguration();
+        } catch (ConfigurationException e) {
+            logger.error(e.getMessage());
+        }
+
+        return new XMLConfiguration();
+    }
+
+    /**
+     * 
+     * @return {@link XMLConfiguration} that is synced with the current state of the config file
+     */
+    protected XMLConfiguration getConfigLocal() {
+        if (builderLocal != null) {
+            try {
+                return builderLocal.getConfiguration();
+            } catch (ConfigurationException e) {
+                // logger.error(e.getMessage());
+            }
+        }
+
+        return new XMLConfiguration();
+    }
+
+    /**
+     * 
+     * @return {@link XMLConfiguration} that is synced with the current state of the config file
+     */
+    protected XMLConfiguration getViewerConfig() {
+        if (builderViewer != null) {
+            try {
+                return builderViewer.getConfiguration();
+            } catch (ConfigurationException e) {
+                // logger.error(e.getMessage());
+            }
+        }
+
+        return new XMLConfiguration();
     }
 
     /**
@@ -100,8 +212,8 @@ public final class Configuration {
      * @return the Standard Namespace for the xml response
      */
     public Namespace getStandardNameSpace() {
-        String xmlns = getOaiIdentifier().get("xmlns");
-        return Namespace.getNamespace(xmlns);
+        String namespace = getOaiIdentifier().get("namespace");
+        return Namespace.getNamespace(namespace);
     }
 
     /**
@@ -109,10 +221,10 @@ public final class Configuration {
      * @param inPath
      * @return
      */
-    private List<HierarchicalConfiguration> getLocalConfigurationsAt(String inPath) {
-        List<HierarchicalConfiguration> ret = configLocal.configurationsAt(inPath);
+    private List<HierarchicalConfiguration<ImmutableNode>> getLocalConfigurationsAt(String inPath) {
+        List<HierarchicalConfiguration<ImmutableNode>> ret = getConfigLocal().configurationsAt(inPath);
         if (ret == null || ret.isEmpty()) {
-            ret = configDefault.configurationsAt(inPath);
+            ret = getConfig().configurationsAt(inPath);
         }
 
         return ret;
@@ -125,7 +237,7 @@ public final class Configuration {
      * @return
      */
     private List<String> getLocalList(String inPath, List<String> defaultList) {
-        return getLocalList(configLocal, configDefault, inPath, defaultList);
+        return getLocalList(getConfigLocal(), getConfig(), inPath, defaultList);
     }
 
     /**
@@ -136,7 +248,7 @@ public final class Configuration {
      */
     private boolean getLocalBoolean(String inPath, boolean inDefault) {
         try {
-            return configLocal.getBoolean(inPath, configDefault.getBoolean(inPath, inDefault));
+            return getConfigLocal().getBoolean(inPath, getConfig().getBoolean(inPath, inDefault));
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return inDefault;
@@ -151,7 +263,7 @@ public final class Configuration {
      */
     private int getLocalInt(String inPath, int inDefault) {
         try {
-            return configLocal.getInt(inPath, configDefault.getInt(inPath, inDefault));
+            return getConfigLocal().getInt(inPath, getConfig().getInt(inPath, inDefault));
         } catch (ConversionException e) {
             logger.error("{}. Using default value {} instead.", e.getMessage(), inDefault);
             return inDefault;
@@ -169,7 +281,7 @@ public final class Configuration {
      */
     private String getLocalString(String inPath, String inDefault) {
         try {
-            return configLocal.getString(inPath, configDefault.getString(inPath, inDefault));
+            return getConfigLocal().getString(inPath, getConfig().getString(inPath, inDefault));
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return inDefault;
@@ -184,7 +296,8 @@ public final class Configuration {
      * @param defaultList List of default values to return if none found in config
      * @return
      */
-    private static List<String> getLocalList(HierarchicalConfiguration config, HierarchicalConfiguration altConfig, String inPath,
+    private static List<String> getLocalList(HierarchicalConfiguration<ImmutableNode> config, HierarchicalConfiguration<ImmutableNode> altConfig,
+            String inPath,
             List<String> defaultList) {
         if (config == null) {
             throw new IllegalArgumentException("config may not be null");
@@ -242,7 +355,7 @@ public final class Configuration {
      */
     public String getViewerConfigFolder() {
 
-        String configLocalPath = configDefault.getString("viewerConfigFolder", "/opt/digiverso/viewer/config/");
+        String configLocalPath = getConfig().getString("viewerConfigFolder", "/opt/digiverso/viewer/config/");
         if (!configLocalPath.endsWith("/")) {
             configLocalPath += "/";
         }
@@ -356,12 +469,11 @@ public final class Configuration {
             throw new IllegalArgumentException("metadataFormat may not be null");
         }
 
-        List<HierarchicalConfiguration> elements = getLocalConfigurationsAt(metadataFormat + ".fields.field");
+        List<HierarchicalConfiguration<ImmutableNode>> elements = getLocalConfigurationsAt(metadataFormat + ".fields.field");
         if (elements != null) {
             List<FieldConfiguration> ret = new ArrayList<>(elements.size());
-            for (Iterator<HierarchicalConfiguration> it = elements.iterator(); it.hasNext();) {
-                HierarchicalConfiguration sub = it.next();
-                Map<String, String> fieldConfig = new HashMap<>();
+            for (Iterator<HierarchicalConfiguration<ImmutableNode>> it = elements.iterator(); it.hasNext();) {
+                HierarchicalConfiguration<ImmutableNode> sub = it.next();
                 String name = sub.getString("[@name]", null);
                 String valueSource = sub.getString("[@valueSource]", null);
                 boolean translate = sub.getBoolean("[@translate]", false);
@@ -417,15 +529,13 @@ public final class Configuration {
             return null;
         }
 
-        List<HierarchicalConfiguration> elements = getLocalConfigurationsAt(metadataFormat + ".accessConditions.mapping");
+        List<HierarchicalConfiguration<ImmutableNode>> elements = getLocalConfigurationsAt(metadataFormat + ".accessConditions.mapping");
         if (elements == null || elements.isEmpty()) {
             return null;
         }
 
-        List<FieldConfiguration> ret = new ArrayList<>(elements.size());
-        for (Iterator<HierarchicalConfiguration> it = elements.iterator(); it.hasNext();) {
-            HierarchicalConfiguration sub = it.next();
-            Map<String, String> fieldConfig = new HashMap<>();
+        for (Iterator<HierarchicalConfiguration<ImmutableNode>> it = elements.iterator(); it.hasNext();) {
+            HierarchicalConfiguration<ImmutableNode> sub = it.next();
             String key = sub.getString("[@accessCondition]", null);
             if (accessCondition.equals(key)) {
                 return sub.getString(".");
@@ -482,7 +592,7 @@ public final class Configuration {
     public Map<String, String> getEseTypes() {
         Map<String, String> ret = new HashMap<>();
 
-        List<HierarchicalConfiguration> types = getLocalConfigurationsAt("ese.types.docstruct");
+        List<HierarchicalConfiguration<ImmutableNode>> types = getLocalConfigurationsAt("ese.types.docstruct");
         if (types != null) {
             for (Iterator it = types.iterator(); it.hasNext();) {
                 HierarchicalConfiguration sub = (HierarchicalConfiguration) it.next();
@@ -551,7 +661,7 @@ public final class Configuration {
     public List<String> getAdditionalDocstructTypes() {
         List<String> ret = new ArrayList<>();
 
-        List<HierarchicalConfiguration> docstructs = getLocalConfigurationsAt("epicur.additionalDocstructTypes.docstruct");
+        List<HierarchicalConfiguration<ImmutableNode>> docstructs = getLocalConfigurationsAt("epicur.additionalDocstructTypes.docstruct");
         if (docstructs != null) {
             for (Iterator it = docstructs.iterator(); it.hasNext();) {
                 HierarchicalConfiguration sub = (HierarchicalConfiguration) it.next();
@@ -644,11 +754,11 @@ public final class Configuration {
      * @return a {@link java.util.List} object.
      */
     public List<Set> getAllValuesSets() {
-        List<HierarchicalConfiguration> types = getLocalConfigurationsAt("sets.allValuesSet");
+        List<HierarchicalConfiguration<ImmutableNode>> types = getLocalConfigurationsAt("sets.allValuesSet");
         if (types != null) {
             List<Set> ret = new ArrayList<>(types.size());
-            for (Iterator<HierarchicalConfiguration> it = types.iterator(); it.hasNext();) {
-                HierarchicalConfiguration sub = it.next();
+            for (Iterator<HierarchicalConfiguration<ImmutableNode>> it = types.iterator(); it.hasNext();) {
+                HierarchicalConfiguration<ImmutableNode> sub = it.next();
                 Set set = new Set(sub.getString("."), null, null);
                 set.setTranslate(sub.getBoolean("[@translate]", false));
                 ret.add(set);
@@ -667,11 +777,11 @@ public final class Configuration {
      * @return a {@link java.util.List} object.
      */
     public List<Set> getAdditionalSets() {
-        List<HierarchicalConfiguration> types = getLocalConfigurationsAt("sets.set");
+        List<HierarchicalConfiguration<ImmutableNode>> types = getLocalConfigurationsAt("sets.set");
         if (types != null) {
             List<Set> ret = new ArrayList<>(types.size());
-            for (Iterator<HierarchicalConfiguration> it = types.iterator(); it.hasNext();) {
-                HierarchicalConfiguration sub = it.next();
+            for (Iterator<HierarchicalConfiguration<ImmutableNode>> it = types.iterator(); it.hasNext();) {
+                HierarchicalConfiguration<ImmutableNode> sub = it.next();
                 Set set = new Set(sub.getString("[@setName]"), sub.getString("[@setSpec]"), sub.getString("[@setQuery]"));
                 ret.add(set);
             }
@@ -724,14 +834,14 @@ public final class Configuration {
      */
     public List<String> getCollectionBlacklist() {
         List<String> ret = new ArrayList<>();
-        if (viewerConfig == null) {
+        if (getViewerConfig() == null) {
             logger.error("Viewer config not loaded, cannot read collection blacklist.");
             return ret;
         }
-        List<HierarchicalConfiguration> templates = viewerConfig.configurationsAt("collections.collection");
+        List<HierarchicalConfiguration<ImmutableNode>> templates = getViewerConfig().configurationsAt("collections.collection");
         if (templates != null && !templates.isEmpty()) {
-            for (Iterator<HierarchicalConfiguration> it = templates.iterator(); it.hasNext();) {
-                HierarchicalConfiguration sub = it.next();
+            for (Iterator<HierarchicalConfiguration<ImmutableNode>> it = templates.iterator(); it.hasNext();) {
+                HierarchicalConfiguration<ImmutableNode> sub = it.next();
                 String field = sub.getString("[@field]");
                 List<Object> collections = sub.getList("blacklist.collection");
                 for (Object o : collections) {
@@ -773,12 +883,11 @@ public final class Configuration {
      * @return a {@link java.util.List} object.
      */
     public List<LicenseType> getRestrictedAccessConditions() {
-        List<HierarchicalConfiguration> elements = getLocalConfigurationsAt("solr.restrictions.restriction");
+        List<HierarchicalConfiguration<ImmutableNode>> elements = getLocalConfigurationsAt("solr.restrictions.restriction");
         if (elements != null) {
             List<LicenseType> ret = new ArrayList<>(elements.size());
-            for (Iterator<HierarchicalConfiguration> it = elements.iterator(); it.hasNext();) {
-                HierarchicalConfiguration sub = it.next();
-                Map<String, String> fieldConfig = new HashMap<>();
+            for (Iterator<HierarchicalConfiguration<ImmutableNode>> it = elements.iterator(); it.hasNext();) {
+                HierarchicalConfiguration<ImmutableNode> sub = it.next();
                 String value = sub.getString(".");
                 String field = sub.getString("[@field]", null);
                 String condition = sub.getString("[@conditions]", null);

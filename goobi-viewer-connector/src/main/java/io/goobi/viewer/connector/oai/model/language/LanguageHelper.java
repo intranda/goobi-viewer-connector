@@ -15,39 +15,65 @@
  */
 package io.goobi.viewer.connector.oai.model.language;
 
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.SubnodeConfiguration;
-import org.apache.commons.configuration.XMLConfiguration;
-import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
-import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.configuration2.SubnodeConfiguration;
+import org.apache.commons.configuration2.XMLConfiguration;
+import org.apache.commons.configuration2.builder.ReloadingFileBasedConfigurationBuilder;
+import org.apache.commons.configuration2.builder.fluent.Parameters;
+import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
+import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.configuration2.reloading.PeriodicReloadingTrigger;
+import org.apache.commons.configuration2.tree.xpath.XPathExpressionEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.goobi.viewer.connector.utils.Configuration;
+
 /**
- * <p>LanguageHelper class.</p>
+ * <p>
+ * LanguageHelper class.
+ * </p>
  *
  */
 public class LanguageHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(LanguageHelper.class);
 
-    private XMLConfiguration config;
+    ReloadingFileBasedConfigurationBuilder<XMLConfiguration> builder;
 
     /**
-     * <p>Constructor for LanguageHelper.</p>
+     * <p>
+     * Constructor for LanguageHelper.
+     * </p>
      *
      * @param configFilePath a {@link java.lang.String} object.
      */
     public LanguageHelper(String configFilePath) {
         try {
-            config = new XMLConfiguration(configFilePath);
+            builder =
+                    new ReloadingFileBasedConfigurationBuilder<XMLConfiguration>(XMLConfiguration.class)
+                            .configure(new Parameters().properties()
+                                    .setFileName(configFilePath)
+                                    .setListDelimiterHandler(new DefaultListDelimiterHandler(';'))
+                                    .setThrowExceptionOnMissing(false));
+            builder.getConfiguration().setExpressionEngine(new XPathExpressionEngine());
+            PeriodicReloadingTrigger trigger = new PeriodicReloadingTrigger(builder.getReloadingController(),
+                    null, 10, TimeUnit.SECONDS);
+            trigger.start();
         } catch (ConfigurationException e) {
-            logger.error("ConfigurationException", e);
-            config = new XMLConfiguration();
+            logger.error(e.getMessage());
         }
-        config.setListDelimiter('&');
-        config.setReloadingStrategy(new FileChangedReloadingStrategy());
-        config.setExpressionEngine(new XPathExpressionEngine());
+    }
+    
+
+    private XMLConfiguration getConfig() {
+        try {
+            return builder.getConfiguration();
+        } catch (ConfigurationException e) {
+            logger.error(e.getMessage());
+            return new XMLConfiguration();
+        }
     }
 
     /**
@@ -60,10 +86,10 @@ public class LanguageHelper {
         SubnodeConfiguration languageConfig = null;
         try {
             if (isoCode.length() == 3) {
-                languageConfig = (SubnodeConfiguration) config.configurationsAt("language[iso_639-2=\"" + isoCode + "\"]")
+                languageConfig = (SubnodeConfiguration) getConfig().configurationsAt("language[iso_639-2=\"" + isoCode + "\"]")
                         .get(0);
             } else if (isoCode.length() == 2) {
-                languageConfig = (SubnodeConfiguration) config.configurationsAt("language[iso_639-1=\"" + isoCode + "\"]")
+                languageConfig = (SubnodeConfiguration) getConfig().configurationsAt("language[iso_639-1=\"" + isoCode + "\"]")
                         .get(0);
             }
         } catch (IndexOutOfBoundsException e) {

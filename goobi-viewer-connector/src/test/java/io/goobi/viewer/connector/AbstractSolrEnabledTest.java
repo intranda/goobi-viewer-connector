@@ -40,13 +40,4 @@ public abstract class AbstractSolrEnabledTest extends AbstractTest {
         HttpSolrClient client = SolrSearchIndex.getNewHttpSolrClient(SOLR_TEST_URL);
         DataManager.getInstance().injectSearchIndex(new SolrSearchIndex(client, true));
     }
-
-    @After
-    public void tearDown() throws Exception {
-    }
-
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-        AbstractTest.tearDownClass();
-    }
 }

@@ -15,27 +15,24 @@
  */
 package io.goobi.viewer.connector;
 
-import org.junit.AfterClass;
+import java.io.File;
+
 import org.junit.BeforeClass;
 
-import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.utils.Configuration;
 
 /**
  * JUnit test classes that extend this class will have test-specific logging and config configurations.
  */
 public abstract class AbstractTest {
+    
+    public static final String TEST_CONFIG_PATH = new File("src/test/resources/config_oai.test.xml").getAbsolutePath();
 
     @BeforeClass
     public static void setUpClass() throws Exception {
         System.setProperty("log4j.configurationFile", "src/test/resources/log4j2.test.xml");
 
         // Initialize the instance with a custom config file
-        DataManager.getInstance().injectConfiguration(new Configuration("src/test/resources/config_oai.test.xml"));
-    }
-
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-
+        DataManager.getInstance().injectConfiguration(new Configuration(TEST_CONFIG_PATH));
     }
 }

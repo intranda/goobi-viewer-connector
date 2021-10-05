@@ -42,7 +42,7 @@
 
 	<!-- List of XML namespaces that are used in the OAI answer -->
 	<oai-identifier>
-		<xmlns>http://www.openarchives.org/OAI/2.0/</xmlns>
+		<namespace>http://www.openarchives.org/OAI/2.0/</namespace>
 		<repositoryIdentifier></repositoryIdentifier>
 	</oai-identifier>
 
@@ -52,11 +52,11 @@
 		<hitsPerToken>100</hitsPerToken>
 
 		<!-- URL to Solr index -->
-        <solrUrl>http://localhost:8983/solr/collection1</solrUrl>
+		<solrUrl>http://localhost:8983/solr/collection1</solrUrl>
 
 		<restrictions>
 			<!-- <restriction field="ACCESSCONDITION">restricted1</restriction> -->
-			<!-- <restriction field="ACCESSCONDITION">conditions="-MDNUM_PUBLICRELEASEYEAR:[* TO NOW/YEAR]">restricted2</licenseType> -->
+			<!-- <restriction field="ACCESSCONDITION" conditions="-MDNUM_PUBLICRELEASEYEAR:[* TO NOW/YEAR]">restricted2</restriction> -->
 		</restrictions>
 
 		<querySuffix></querySuffix>

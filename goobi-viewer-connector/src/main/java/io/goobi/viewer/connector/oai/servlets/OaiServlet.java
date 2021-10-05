@@ -259,7 +259,7 @@ public class OaiServlet extends HttpServlet {
                 try {
                     LocalDateTime.parse(from, Utils.formatterISO8601DateTimeWithOffset);
                 } catch (DateTimeParseException e) {
-                    logger.error(e.getMessage());
+                    logger.warn(e.getMessage());
                     return false;
                 }
             } else {
@@ -267,7 +267,7 @@ public class OaiServlet extends HttpServlet {
                 try {
                     LocalDate.parse(from, Utils.formatterISO8601Date);
                 } catch (DateTimeParseException e) {
-                    logger.error(e.getMessage());
+                    logger.warn(e.getMessage());
                     return false;
                 }
             }
@@ -279,7 +279,7 @@ public class OaiServlet extends HttpServlet {
                 try {
                     LocalDateTime.parse(until, Utils.formatterISO8601DateTimeWithOffset);
                 } catch (DateTimeParseException e) {
-                    logger.error(e.getMessage());
+                    logger.warn(e.getMessage());
                     return false;
                 }
             } else {
@@ -287,7 +287,7 @@ public class OaiServlet extends HttpServlet {
                 try {
                     LocalDate.parse(until, Utils.formatterISO8601Date);
                 } catch (DateTimeParseException e) {
-                    logger.error(e.getMessage());
+                    logger.warn(e.getMessage());
                     return false;
                 }
             }
@@ -300,7 +300,7 @@ public class OaiServlet extends HttpServlet {
                 try {
                     return !ldtFrom.isAfter(ldtUntil);
                 } catch (DateTimeParseException e) {
-                    logger.error(e.getMessage());
+                    logger.warn(e.getMessage());
                     return false;
                 }
             }
@@ -310,7 +310,7 @@ public class OaiServlet extends HttpServlet {
             try {
                 return !ldFrom.isAfter(ldUntil);
             } catch (DateTimeParseException e) {
-                logger.error(e.getMessage());
+                logger.warn(e.getMessage());
                 return false;
             }
         }

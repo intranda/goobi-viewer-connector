@@ -4,9 +4,9 @@ import org.jdom2.Element;
 import org.junit.Assert;
 import org.junit.Test;
 
-import io.goobi.viewer.connector.oai.model.formats.Format;
+import io.goobi.viewer.connector.AbstractTest;
 
-public class FormatTest {
+public class FormatTest extends AbstractTest {
 
     /**
      * @see Format#handleToken(String)
