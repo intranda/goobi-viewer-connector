@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import io.goobi.viewer.connector.messages.MessageResourceBundle;
+import io.goobi.viewer.messages.ViewerResourceBundle;
 
 /**
  * Wrapper class for metadata parameter value groups, so that JSF can iterate through them properly.
@@ -103,7 +103,7 @@ public class MetadataValue implements Serializable {
      */
     public String getParamLabelWithColon(int index) {
         if (paramLabels.size() > index && paramLabels.get(index) != null) {
-            return MessageResourceBundle.getTranslation(paramLabels.get(index), null) + ": ";
+            return ViewerResourceBundle.getTranslation(paramLabels.get(index), null) + ": ";
         }
         return "";
     }

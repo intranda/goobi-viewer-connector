@@ -47,7 +47,6 @@ import com.thoughtworks.xstream.io.StreamException;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import io.goobi.viewer.connector.DataManager;
-import io.goobi.viewer.connector.messages.MessageResourceBundle;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.enums.Verb;
@@ -59,6 +58,7 @@ import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.SolrSearchIndex;
 import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
+import io.goobi.viewer.messages.ViewerResourceBundle;
 
 /**
  * <p>
@@ -232,7 +232,7 @@ public abstract class Format {
                 eleSet.addContent(eleSetSpec);
                 Element name = new Element("setName", xmlns);
                 if (set.isTranslate()) {
-                    name.setText(MessageResourceBundle.getTranslation(value, locale));
+                    name.setText(ViewerResourceBundle.getTranslation(value, locale));
                 } else {
                     name.setText(value);
                 }

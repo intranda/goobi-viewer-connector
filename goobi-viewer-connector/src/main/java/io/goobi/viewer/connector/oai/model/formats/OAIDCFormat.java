@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
 
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.exceptions.HTTPException;
-import io.goobi.viewer.connector.messages.MessageResourceBundle;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.enums.Verb;
@@ -47,6 +46,7 @@ import io.goobi.viewer.connector.oai.model.metadata.MetadataParameter.MetadataPa
 import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
+import io.goobi.viewer.messages.ViewerResourceBundle;
 
 /**
  * oai_dc
@@ -392,14 +392,14 @@ public class OAIDCFormat extends Format {
                                 paramVal = values.size() > i ? values.get(i) : "";
                                 if (StringUtils.isNotEmpty(paramVal)) {
                                     if (MetadataParameterType.TRANSLATEDFIELD.equals(param.getType())) {
-                                        paramVal = MessageResourceBundle.getTranslation(paramVal, null);
+                                        paramVal = ViewerResourceBundle.getTranslation(paramVal, null);
                                     }
                                     if (StringUtils.isNotEmpty(param.getPrefix())) {
-                                        String prefix = MessageResourceBundle.getTranslation(param.getPrefix(), null);
+                                        String prefix = ViewerResourceBundle.getTranslation(param.getPrefix(), null);
                                         paramVal = prefix + paramVal;
                                     }
                                     if (StringUtils.isNotEmpty(param.getSuffix())) {
-                                        String suffix = MessageResourceBundle.getTranslation(param.getSuffix(), null);
+                                        String suffix = ViewerResourceBundle.getTranslation(param.getSuffix(), null);
                                         paramVal += suffix;
                                     }
                                 }
