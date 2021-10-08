@@ -85,7 +85,7 @@ pipeline {
       agent any
       when {
         tag "v*"
-        branch 'master' }
+      }
       steps{
         script {
           docker.withRegistry('https://nexus.intranda.com:4443','jenkins-docker'){
@@ -113,7 +113,6 @@ pipeline {
       agent any
       when {
         tag "v*"
-        branch 'master'
       }
       steps{
         script{
