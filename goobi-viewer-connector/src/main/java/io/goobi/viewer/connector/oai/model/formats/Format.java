@@ -486,6 +486,7 @@ public abstract class Format {
     private static void saveToken(ResumptionToken token) throws IOException {
         File f = new File(DataManager.getInstance().getConfiguration().getResumptionTokenFolder(), token.getTokenName());
         XStream xStream = new XStream(new DomDriver());
+        xStream.allowTypesByWildcard(new String[] { "io.goobi.viewer.**" });
         try (BufferedWriter outfile = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8))) {
             xStream.toXML(token, outfile);
             outfile.flush();
@@ -519,11 +520,12 @@ public abstract class Format {
         try (FileInputStream fis = new FileInputStream(f); InputStreamReader isr = new InputStreamReader(fis);
                 BufferedReader infile = new BufferedReader(isr);) {
             XStream xStream = new XStream(new DomDriver());
+            xStream.allowTypesByWildcard(new String[] { "io.goobi.viewer.**" });
             xStream.processAnnotations(ResumptionToken.class);
             ResumptionToken token = (ResumptionToken) xStream.fromXML(infile);
             Map<String, String> params = Utils.filterDatestampFromRequest(token.getHandler());
 
-            boolean urnOnly = false;
+            //            boolean urnOnly = false;
             long totalHits = 0;
             String versionDiscriminatorField = DataManager.getInstance()
                     .getConfiguration()
@@ -546,7 +548,7 @@ public abstract class Format {
                 return format.createListIdentifiers(token.getHandler(), token.getVirtualCursor(), token.getRawCursor(), hitsPerToken,
                         versionDiscriminatorField);
             } else if (token.getHandler().getVerb().equals(Verb.ListRecords)) {
-                Metadata md = token.getHandler().getMetadataPrefix();
+                //                Metadata md = token.getHandler().getMetadataPrefix();
                 return format.createListRecords(token.getHandler(), token.getVirtualCursor(), token.getRawCursor(), hitsPerToken,
                         versionDiscriminatorField);
             }
@@ -571,6 +573,7 @@ public abstract class Format {
         if (tokenFolder.isDirectory()) {
             int count = 0;
             XStream xStream = new XStream(new DomDriver());
+            xStream.allowTypesByWildcard(new String[] { "io.goobi.viewer.**" });
             for (File tokenFile : tokenFolder.listFiles()) {
                 if (tokenFile.isDirectory()) {
                     continue;
