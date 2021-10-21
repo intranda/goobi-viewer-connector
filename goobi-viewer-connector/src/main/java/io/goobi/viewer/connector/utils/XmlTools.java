@@ -16,11 +16,14 @@
 package io.goobi.viewer.connector.utils;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -54,6 +57,11 @@ import org.jdom2.xpath.XPathExpression;
 import org.jdom2.xpath.XPathFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
 
 /**
  * XML utilities.
@@ -325,4 +333,47 @@ public class XmlTools {
 
         return null;
     }
+    
+    /**
+    *
+    * @param object Object to serialize.
+    * @return
+    */
+   public static String serializeWithXStream(Object object, Converter converter) {
+       XStream xStream = new XStream();
+       xStream.allowTypesByWildcard(new String[] { "io.goobi.viewer.**" });
+       if (converter != null) {
+           xStream.registerConverter(converter);
+       }
+       xStream.autodetectAnnotations(true);
+       HierarchicalStreamWriter xmlWriter = null;
+       try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+               OutputStreamWriter writer = new OutputStreamWriter(baos, Utils.DEFAULT_ENCODING)) {
+           xmlWriter = new PrettyPrintWriter(writer);
+           xStream.marshal(object, xmlWriter);
+           xmlWriter.close();
+           return new String(baos.toByteArray(), Utils.DEFAULT_ENCODING);
+       } catch (UnsupportedEncodingException e) {
+           logger.error(e.getMessage(), e);
+       } catch (IOException e) {
+           logger.error(e.getMessage(), e);
+       }
+
+       return "";
+   }
+
+   /**
+    * @param data
+    * @return
+    */
+   @SuppressWarnings("rawtypes")
+   public static Object deSerializeWithXStream(Reader reader, Class clazz, Converter converter) {
+       XStream xstream = new XStream();
+       xstream.allowTypesByWildcard(new String[] { "io.goobi.viewer.**" });
+       if (converter != null) {
+           xstream.registerConverter(converter);
+       }
+       xstream.processAnnotations(clazz);
+       return xstream.fromXML(reader);
+   }
 }

@@ -362,7 +362,7 @@ public final class Configuration {
         }
         String os = System.getProperty("os.name").toLowerCase();
         if (os.indexOf("win") >= 0 && configLocalPath.startsWith("/opt/")) {
-            configLocalPath = configLocalPath.replace("/opt", "C:");
+            configLocalPath = "C:" + configLocalPath;
         }
         return configLocalPath;
     }
