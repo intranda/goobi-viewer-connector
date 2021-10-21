@@ -212,7 +212,7 @@ public final class Configuration {
      * @return the Standard Namespace for the xml response
      */
     public Namespace getStandardNameSpace() {
-        String namespace = getOaiIdentifier().get("namespace");
+        String namespace = getOaiIdentifier().get("xmlns");
         return Namespace.getNamespace(namespace);
     }
 
@@ -336,10 +336,11 @@ public final class Configuration {
      * This method generates a HashMap with information for oai header
      *
      * @return {@link java.util.HashMap}
+     * @should read config values correctly
      */
     public Map<String, String> getOaiIdentifier() {
         Map<String, String> oaiIdentifier = new HashMap<>();
-        oaiIdentifier.put("xmlns", getLocalString("oai-identifier.xmlns", null));
+        oaiIdentifier.put("xmlns", getLocalString("oai-identifier.namespace", "http://www.openarchives.org/OAI/2.0/"));
         oaiIdentifier.put("repositoryIdentifier", getLocalString("oai-identifier.repositoryIdentifier", null));
 
         return oaiIdentifier;

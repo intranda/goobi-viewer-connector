@@ -454,4 +454,16 @@ public class ConfigurationTest extends AbstractTest {
                         .getConfiguration()
                         .getAccessConditionMappingForMetadataFormat(Metadata.oai_dc.name(), "Rechte vorbehalten - Freier Zugang"));
     }
+
+    /**
+     * @see Configuration#getOaiIdentifier()
+     * @verifies read config values correctly
+     */
+    @Test
+    public void getOaiIdentifier_shouldReadConfigValuesCorrectly() throws Exception {
+        Map<String, String> map = DataManager.getInstance().getConfiguration().getOaiIdentifier();
+        Assert.assertEquals("http://www.openarchives.org/OAI/2.0/", map.get("xmlns"));
+        Assert.assertEquals("repo", map.get("repositoryIdentifier"));
+    }
+
 }
