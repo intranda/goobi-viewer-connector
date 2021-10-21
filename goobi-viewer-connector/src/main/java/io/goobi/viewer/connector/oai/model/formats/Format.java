@@ -497,8 +497,9 @@ public abstract class Format {
      * handle token
      *
      * @param resumptionToken a {@link java.lang.String} object.
-     * @should return error if resumption token name illegal
      * @return a {@link org.jdom2.Element} object.
+     * @should return error if resumption token name illegal
+     * @should not
      */
     public static Element handleToken(String resumptionToken) {
         if (resumptionToken == null) {
@@ -517,12 +518,8 @@ public abstract class Format {
             return new ErrorCode().getBadResumptionToken();
         }
 
-        try (FileInputStream fis = new FileInputStream(f); InputStreamReader isr = new InputStreamReader(fis);
-                BufferedReader infile = new BufferedReader(isr);) {
-            XStream xStream = new XStream(new DomDriver());
-            xStream.allowTypesByWildcard(new String[] { "io.goobi.viewer.**" });
-            xStream.processAnnotations(ResumptionToken.class);
-            ResumptionToken token = (ResumptionToken) xStream.fromXML(infile);
+        try {
+            ResumptionToken token = deserializeResumptionToken(f);
             Map<String, String> params = Utils.filterDatestampFromRequest(token.getHandler());
 
             //            boolean urnOnly = false;
@@ -564,6 +561,24 @@ public abstract class Format {
     }
 
     /**
+     * 
+     * @param tokenFile
+     * @return
+     * @throws FileNotFoundException
+     * @throws IOException
+     * @should deserialize token correctly
+     */
+    static ResumptionToken deserializeResumptionToken(File tokenFile) throws FileNotFoundException, IOException {
+        try (FileInputStream fis = new FileInputStream(tokenFile); InputStreamReader isr = new InputStreamReader(fis);
+                BufferedReader infile = new BufferedReader(isr);) {
+            XStream xStream = new XStream(new DomDriver());
+            xStream.allowTypesByWildcard(new String[] { "io.goobi.viewer.**" });
+            xStream.processAnnotations(ResumptionToken.class);
+            return (ResumptionToken) xStream.fromXML(infile);
+        }
+    }
+
+    /**
      * <p>
      * removeExpiredTokens.
      * </p>
@@ -578,8 +593,8 @@ public abstract class Format {
                 if (tokenFile.isDirectory()) {
                     continue;
                 }
-                try (FileInputStream fis = new FileInputStream(tokenFile)) {
-                    ResumptionToken token = (ResumptionToken) xStream.fromXML(fis);
+                try {
+                    ResumptionToken token = deserializeResumptionToken(tokenFile);
                     if (token.hasExpired() && FileUtils.deleteQuietly(tokenFile)) {
                         count++;
                     }
