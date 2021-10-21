@@ -34,7 +34,7 @@
 		werden -->
 	<oai-identifier>
 		<namespace>http://www.openarchives.org/OAI/2.0/</namespace>
-		<repositoryIdentifier></repositoryIdentifier>
+		<repositoryIdentifier>repo</repositoryIdentifier>
 	</oai-identifier>
 
 	<solr>
