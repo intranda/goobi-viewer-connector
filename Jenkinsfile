@@ -22,7 +22,7 @@ pipeline {
       steps {
         sh 'mvn -f goobi-viewer-connector/pom.xml clean install'
         recordIssues enabledForFailure: true, aggregatingResults: true, tools: [java(), javaDoc()]
-        archiveArtifacts artifacts: '**/target/*.war', fingerprint: true, onlyIfSuccessful: true
+        archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true, onlyIfSuccessful: true
         junit "**/target/surefire-reports/*.xml"
         step([
           $class           : 'JacocoPublisher',
