@@ -3,7 +3,7 @@
 	xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:webfragment="http://java.sun.com/xml/ns/javaee/web-fragment_3_0.xsd"
 	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-fragment_3_1.xsd"
 	id="WebFragment_ID" version="3.1">
-    <display-name>Goobi viewer Connector</display-name>
+    <display-name>goobi-viewer-connector</display-name>
     <listener>
         <listener-class>io.goobi.viewer.connector.ContextListener</listener-class>
     </listener>
@@ -32,12 +32,12 @@
     </servlet-mapping>
     <servlet>
         <description></description>
-        <display-name>ToolServlet</display-name>
-        <servlet-name>ToolServlet</servlet-name>
-        <servlet-class>io.goobi.viewer.connector.ToolServlet</servlet-class>
+        <display-name>ConnectorToolServlet</display-name>
+        <servlet-name>ConnectorToolServlet</servlet-name>
+        <servlet-class>io.goobi.viewer.connector.ConnectorToolServlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>ToolServlet</servlet-name>
+        <servlet-name>ConnectorToolServlet</servlet-name>
         <url-pattern>/oai/tools</url-pattern>
         <url-pattern>/oai/tools/</url-pattern>
     </servlet-mapping>

@@ -41,7 +41,7 @@
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 		<buildDate>${maven.build.timestamp}</buildDate>
         
-        <viewer-core.version>21.09-SNAPSHOT</viewer-core.version>
+        <viewer-core.version>21.10-SNAPSHOT</viewer-core.version>
 
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
 		<commons-cli.version>1.4</commons-cli.version>
