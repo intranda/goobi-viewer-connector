@@ -20,6 +20,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.response.FieldStatsInfo;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -31,8 +33,9 @@ import org.slf4j.LoggerFactory;
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
-import io.goobi.viewer.connector.oai.model.LicenseType;
 import io.goobi.viewer.connector.oai.model.Set;
+import io.goobi.viewer.exceptions.IndexUnreachableException;
+import io.goobi.viewer.model.search.SearchHelper;
 
 /**
  * <p>
@@ -56,19 +59,18 @@ public class SolrSearchTools {
      * @param setSpec
      * @param metadataPrefix
      * @param excludeAnchor
-     * @param querySuffix
+     * @param additionalQuery
      * @return
      */
-    static String buildQueryString(String from, String until, String setSpec, String metadataPrefix, boolean excludeAnchor,
-            String querySuffix) {
+    static String buildQueryString(String from, String until, String setSpec, String metadataPrefix, boolean excludeAnchor, String additionalQuery) {
         StringBuilder sbQuery = new StringBuilder();
         sbQuery.append("+(+(").append(SolrConstants.ISWORK).append(":true");
         if (!excludeAnchor) {
             sbQuery.append(' ').append(SolrConstants.ISANCHOR).append(":true");
         }
         sbQuery.append(' ').append(SolrConstants.DATEDELETED).append(":*)");
-        if (StringUtils.isNotEmpty(querySuffix)) {
-            sbQuery.append(querySuffix);
+        if (StringUtils.isNotEmpty(additionalQuery)) {
+            sbQuery.append(additionalQuery);
         }
         sbQuery.append(')');
         // Solr timestamp range is irrelevant for iv_* formats
@@ -129,55 +131,10 @@ public class SolrSearchTools {
      * Returns the blacklist filter suffix (if enabled), followed by the user-agnostic access condition suffix.
      *
      * @return a {@link java.lang.String} object.
+     * @throws IndexUnreachableException
      */
-    public static String getAllSuffixes() {
-        StringBuilder sb = new StringBuilder();
-        if (DataManager.getInstance().getConfiguration().isUseCollectionBlacklist()) {
-            sb.append(DataManager.getInstance().getConfiguration().getCollectionBlacklistFilterSuffix());
-        }
-        List<LicenseType> restrictedLicenseTypes = DataManager.getInstance().getConfiguration().getRestrictedAccessConditions();
-        if (!restrictedLicenseTypes.isEmpty()) {
-            sb.append(" -(");
-            boolean moreThanOne = false;
-            for (LicenseType licenseType : restrictedLicenseTypes) {
-                if (moreThanOne) {
-                    sb.append(" OR ");
-                }
-                if (StringUtils.isNotEmpty(licenseType.getConditions())) {
-                    if (licenseType.getConditions().charAt(0) == '-') {
-                        // do not wrap the conditions in parentheses if it starts with a negation, otherwise it won't work
-                        sb.append('(')
-                                .append(licenseType.getField())
-                                .append(":\"")
-                                .append(licenseType.getValue())
-                                .append("\" AND ")
-                                .append(licenseType.getProcessedConditions())
-                                .append(')');
-                    } else {
-                        sb.append('(')
-                                .append(licenseType.getField())
-                                .append(":\"")
-                                .append(licenseType.getValue())
-                                .append("\" AND (")
-                                .append(licenseType.getProcessedConditions())
-                                .append("))");
-                    }
-                } else {
-                    sb.append(licenseType.getField()).append(':').append(licenseType.getValue());
-                }
-                moreThanOne = true;
-            }
-            sb.append(')');
-        }
-        String querySuffix = DataManager.getInstance().getConfiguration().getQuerySuffix();
-        if (StringUtils.isNotEmpty(querySuffix)) {
-            if (querySuffix.charAt(0) != ' ') {
-                sb.append(' ');
-            }
-            sb.append(querySuffix);
-        }
-
-        return sb.toString();
+    public static String getAllSuffixes(HttpServletRequest request) throws IndexUnreachableException {
+        return SearchHelper.getAllSuffixes(null, true, true);
     }
 
     /**
@@ -302,31 +259,33 @@ public class SolrSearchTools {
      * getAdditionalDocstructsQuerySuffix.
      * </p>
      *
-     * @should build query suffix correctly
      * @param additionalDocstructTypes a {@link java.util.List} object.
      * @return a {@link java.lang.String} object.
+     * @should build query suffix correctly
      */
     public static String getAdditionalDocstructsQuerySuffix(List<String> additionalDocstructTypes) {
+        if (additionalDocstructTypes == null || additionalDocstructTypes.isEmpty()) {
+            return "";
+        }
+
         StringBuilder sbQuerySuffix = new StringBuilder();
-        if (additionalDocstructTypes != null && !additionalDocstructTypes.isEmpty()) {
-            sbQuerySuffix.append(" OR (").append(SolrConstants.DOCTYPE).append(":DOCSTRCT AND (");
-            int count = 0;
-            for (String docstructType : additionalDocstructTypes) {
-                if (StringUtils.isNotBlank(docstructType)) {
-                    if (count > 0) {
-                        sbQuerySuffix.append(" OR ");
-                    }
-                    sbQuerySuffix.append(SolrConstants.DOCSTRCT).append(':').append(docstructType);
-                    count++;
-                } else {
-                    logger.warn("Empty element found in <additionalDocstructTypes>.");
+        sbQuerySuffix.append(" OR (").append(SolrConstants.DOCTYPE).append(":DOCSTRCT AND (");
+        int count = 0;
+        for (String docstructType : additionalDocstructTypes) {
+            if (StringUtils.isNotBlank(docstructType)) {
+                if (count > 0) {
+                    sbQuerySuffix.append(" OR ");
                 }
+                sbQuerySuffix.append(SolrConstants.DOCSTRCT).append(':').append(docstructType);
+                count++;
+            } else {
+                logger.warn("Empty element found in <additionalDocstructTypes>.");
             }
-            sbQuerySuffix.append("))");
-            // Avoid returning an invalid subquery if all configured values are blank
-            if (count == 0) {
-                return "";
-            }
+        }
+        sbQuerySuffix.append("))");
+        // Avoid returning an invalid subquery if all configured values are blank
+        if (count == 0) {
+            return "";
         }
 
         return sbQuerySuffix.toString();

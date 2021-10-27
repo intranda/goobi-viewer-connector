@@ -95,12 +95,13 @@ public abstract class Format {
      * @param firstRawRow a int.
      * @param numRows a int.
      * @param versionDiscriminatorField a {@link java.lang.String} object.
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @throws org.apache.solr.client.solrj.SolrServerException
      * @return a {@link org.jdom2.Element} object.
      * @throws java.io.IOException if any.
      */
     public abstract Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows,
-            String versionDiscriminatorField) throws IOException, SolrServerException;
+            String versionDiscriminatorField, String filterQuerySuffix) throws IOException, SolrServerException;
 
     /**
      * <p>
@@ -108,9 +109,10 @@ public abstract class Format {
      * </p>
      *
      * @param handler a {@link io.goobi.viewer.connector.oai.RequestHandler} object.
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @return a {@link org.jdom2.Element} object.
      */
-    public abstract Element createGetRecord(RequestHandler handler);
+    public abstract Element createGetRecord(RequestHandler handler, String filterQuerySuffix);
 
     /**
      * <p>
@@ -119,20 +121,23 @@ public abstract class Format {
      *
      * @param params a {@link java.util.Map} object.
      * @param versionDiscriminatorField a {@link java.lang.String} object.
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @throws java.io.IOException
      * @throws org.apache.solr.client.solrj.SolrServerException
      * @return a long.
      */
-    public abstract long getTotalHits(Map<String, String> params, String versionDiscriminatorField) throws IOException, SolrServerException;
+    public abstract long getTotalHits(Map<String, String> params, String versionDiscriminatorField, String filterQuerySuffix)
+            throws IOException, SolrServerException;
 
     /**
      * for the server request ?verb=Identify this method build the xml section in the Identify element
      *
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @return the identify Element for the xml tree
      * @throws org.apache.solr.client.solrj.SolrServerException
      * @throws IOException
      */
-    public static Element getIdentifyXML() throws SolrServerException, IOException {
+    public static Element getIdentifyXML(String filterQuerySuffix) throws SolrServerException, IOException {
         // TODO: optional parameter: compression is not implemented
         // TODO: optional parameter: description is not implemented
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
@@ -151,13 +156,13 @@ public abstract class Format {
         protocolVersion.setText(identifyTags.get("protocolVersion"));
         identify.addContent(protocolVersion);
 
-        // TODO: protocol definition allow more than one email adress, change away from HashMap
+        // TODO: protocol definition allow more than one email address, change away from HashMap
         Element adminEmail = new Element("adminEmail", xmlns);
         adminEmail.setText(identifyTags.get("adminEmail")); //
         identify.addContent(adminEmail);
 
         Element earliestDatestamp = new Element("earliestDatestamp", xmlns);
-        earliestDatestamp.setText(DataManager.getInstance().getSearchIndex().getEarliestRecordDatestamp());
+        earliestDatestamp.setText(DataManager.getInstance().getSearchIndex().getEarliestRecordDatestamp(filterQuerySuffix));
         identify.addContent(earliestDatestamp);
 
         Element deletedRecord = new Element("deletedRecord", xmlns);
@@ -271,12 +276,13 @@ public abstract class Format {
      * @param firstRawRow a int.
      * @param numRows a int.
      * @param versionDiscriminatorField a {@link java.lang.String} object.
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @return a {@link org.jdom2.Element} object.
      * @throws org.apache.solr.client.solrj.SolrServerException
      * @throws IOException
      */
-    public Element createListIdentifiers(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
-            throws SolrServerException, IOException {
+    public Element createListIdentifiers(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField,
+            String filterQuerySuffix) throws SolrServerException, IOException {
         Map<String, String> datestamp = Utils.filterDatestampFromRequest(handler);
 
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
@@ -294,7 +300,7 @@ public abstract class Format {
             qr = DataManager.getInstance()
                     .getSearchIndex()
                     .getListIdentifiers(datestamp, firstRawRow, numRows, " AND " + versionDiscriminatorField + ":*", null,
-                            Collections.singletonList(versionDiscriminatorField));
+                            Collections.singletonList(versionDiscriminatorField), filterQuerySuffix);
             if (qr.getResults().isEmpty()) {
                 return new ErrorCode().getNoRecordsMatch();
             }
@@ -311,20 +317,20 @@ public abstract class Format {
                             iso3code = lang.getIsoCode();
                         }
                     }
-                    Element header = getHeader(doc, null, handler, iso3code, setSpecFields);
+                    Element header = getHeader(doc, null, handler, iso3code, setSpecFields, filterQuerySuffix);
                     xmlListIdentifiers.addContent(header);
                     virtualHitCount++;
                 }
             }
         } else {
             // One OAI record for each record proper
-            qr = DataManager.getInstance().getSearchIndex().getListIdentifiers(datestamp, firstRawRow, numRows, null, null, null);
+            qr = DataManager.getInstance().getSearchIndex().getListIdentifiers(datestamp, firstRawRow, numRows, null, null, null, filterQuerySuffix);
             if (qr.getResults().isEmpty()) {
                 return new ErrorCode().getNoRecordsMatch();
             }
             totalVirtualHits = totalRawHits = qr.getResults().getNumFound();
             for (SolrDocument doc : qr.getResults()) {
-                Element header = getHeader(doc, null, handler, null, setSpecFields);
+                Element header = getHeader(doc, null, handler, null, setSpecFields, filterQuerySuffix);
                 xmlListIdentifiers.addContent(header);
                 virtualHitCount++;
             }
@@ -364,13 +370,14 @@ public abstract class Format {
      * @param handler a {@link io.goobi.viewer.connector.oai.RequestHandler} object.
      * @param requestedVersion a {@link java.lang.String} object.
      * @param setSpecFields
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @return a {@link org.jdom2.Element} object.
      * @throws org.apache.solr.client.solrj.SolrServerException
      * @throws IOException
+     * @throws IndexUnreachableException
      */
     protected static Element getHeader(SolrDocument doc, SolrDocument topstructDoc, RequestHandler handler, String requestedVersion,
-            List<String> setSpecFields)
-            throws SolrServerException, IOException {
+            List<String> setSpecFields, String filterQuerySuffix) throws SolrServerException, IOException {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element header = new Element("header", xmlns);
         // identifier
@@ -395,7 +402,8 @@ public abstract class Format {
         long timestampModified = SolrSearchTools.getLatestValidDateUpdated(topstructDoc != null ? topstructDoc : doc, untilTimestamp);
         datestamp.setText(Utils.parseDate(timestampModified));
         if (StringUtils.isEmpty(datestamp.getText()) && doc.getFieldValue(SolrConstants.ISANCHOR) != null) {
-            datestamp.setText(Utils.parseDate(DataManager.getInstance().getSearchIndex().getLatestVolumeTimestamp(doc, untilTimestamp)));
+            datestamp.setText(
+                    Utils.parseDate(DataManager.getInstance().getSearchIndex().getLatestVolumeTimestamp(doc, untilTimestamp, filterQuerySuffix)));
         }
         header.addContent(datestamp);
         // setSpec
@@ -497,11 +505,11 @@ public abstract class Format {
      * handle token
      *
      * @param resumptionToken a {@link java.lang.String} object.
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @return a {@link org.jdom2.Element} object.
      * @should return error if resumption token name illegal
-     * @should not
      */
-    public static Element handleToken(String resumptionToken) {
+    public static Element handleToken(String resumptionToken, String filterQuerySuffix) {
         if (resumptionToken == null) {
             throw new IllegalArgumentException("resumptionToken may not be null");
         }
@@ -533,7 +541,7 @@ public abstract class Format {
                 logger.error("Bad metadataPrefix: {}", token.getHandler().getMetadataPrefix());
                 return new ErrorCode().getCannotDisseminateFormat();
             }
-            totalHits = format.getTotalHits(params, versionDiscriminatorField);
+            totalHits = format.getTotalHits(params, versionDiscriminatorField, filterQuerySuffix);
             if (token.getHits() != totalHits) {
                 logger.warn("Hits size in the token ({}) does not equal the reported total hits number ({}).", token.getHits(), totalHits);
                 return new ErrorCode().getBadResumptionToken();
@@ -543,11 +551,11 @@ public abstract class Format {
 
             if (token.getHandler().getVerb().equals(Verb.ListIdentifiers)) {
                 return format.createListIdentifiers(token.getHandler(), token.getVirtualCursor(), token.getRawCursor(), hitsPerToken,
-                        versionDiscriminatorField);
+                        versionDiscriminatorField, filterQuerySuffix);
             } else if (token.getHandler().getVerb().equals(Verb.ListRecords)) {
                 //                Metadata md = token.getHandler().getMetadataPrefix();
                 return format.createListRecords(token.getHandler(), token.getVirtualCursor(), token.getRawCursor(), hitsPerToken,
-                        versionDiscriminatorField);
+                        versionDiscriminatorField, filterQuerySuffix);
             }
         } catch (StreamException | ConversionException e) {
             // File cannot be de-serialized, so just delete it

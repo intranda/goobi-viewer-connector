@@ -34,13 +34,11 @@ import org.apache.commons.configuration2.event.EventListener;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.configuration2.ex.ConversionException;
 import org.apache.commons.configuration2.tree.ImmutableNode;
-import org.apache.commons.lang3.StringUtils;
 import org.jdom2.Namespace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.goobi.viewer.connector.oai.model.FieldConfiguration;
-import io.goobi.viewer.connector.oai.model.LicenseType;
 import io.goobi.viewer.connector.oai.model.Set;
 import io.goobi.viewer.connector.oai.model.metadata.Metadata;
 import io.goobi.viewer.connector.oai.model.metadata.MetadataParameter;
@@ -813,103 +811,6 @@ public final class Configuration {
      */
     public boolean isBaseUrlUseInRequestElement() {
         return getLocalBoolean("identifyTags.baseURL[@useInRequestElement]", false);
-    }
-
-    /**
-     * <p>
-     * isUseCollectionBlacklist.
-     * </p>
-     *
-     * @should return correct value
-     * @return a boolean.
-     */
-    public boolean isUseCollectionBlacklist() {
-        return getLocalBoolean("useCollectionBlacklist", true);
-    }
-
-    /**
-     * Returns collection names to be omitted from search results, listings etc. from config_viewer.xml
-     *
-     * @should return all key-value pairs
-     * @return a {@link java.util.List} object.
-     */
-    public List<String> getCollectionBlacklist() {
-        List<String> ret = new ArrayList<>();
-        if (getViewerConfig() == null) {
-            logger.error("Viewer config not loaded, cannot read collection blacklist.");
-            return ret;
-        }
-        List<HierarchicalConfiguration<ImmutableNode>> templates = getViewerConfig().configurationsAt("collections.collection");
-        if (templates != null && !templates.isEmpty()) {
-            for (Iterator<HierarchicalConfiguration<ImmutableNode>> it = templates.iterator(); it.hasNext();) {
-                HierarchicalConfiguration<ImmutableNode> sub = it.next();
-                String field = sub.getString("[@field]");
-                List<Object> collections = sub.getList("blacklist.collection");
-                for (Object o : collections) {
-                    ret.add(field + ":" + (String) o);
-                }
-            }
-        }
-        return ret;
-    }
-
-    /**
-     * <p>
-     * getCollectionBlacklistFilterSuffix.
-     * </p>
-     *
-     * @should construct suffix correctly
-     * @return a {@link java.lang.String} object.
-     */
-    public String getCollectionBlacklistFilterSuffix() {
-        StringBuilder sbQuery = new StringBuilder();
-        List<String> list = getCollectionBlacklist();
-        if (!list.isEmpty()) {
-            for (String s : list) {
-                if (StringUtils.isNotBlank(s)) {
-                    sbQuery.append(" -").append(s.trim());
-                }
-            }
-        }
-
-        return sbQuery.toString();
-    }
-
-    /**
-     * <p>
-     * getRestrictedAccessConditions.
-     * </p>
-     *
-     * @should return all values
-     * @return a {@link java.util.List} object.
-     */
-    public List<LicenseType> getRestrictedAccessConditions() {
-        List<HierarchicalConfiguration<ImmutableNode>> elements = getLocalConfigurationsAt("solr.restrictions.restriction");
-        if (elements != null) {
-            List<LicenseType> ret = new ArrayList<>(elements.size());
-            for (Iterator<HierarchicalConfiguration<ImmutableNode>> it = elements.iterator(); it.hasNext();) {
-                HierarchicalConfiguration<ImmutableNode> sub = it.next();
-                String value = sub.getString(".");
-                String field = sub.getString("[@field]", null);
-                String condition = sub.getString("[@conditions]", null);
-                ret.add(new LicenseType(field, value, condition));
-            }
-            return ret;
-        }
-
-        return new ArrayList<>(0);
-    }
-
-    /**
-     * <p>
-     * getQuerySuffix.
-     * </p>
-     *
-     * @should return correct value
-     * @return a {@link java.lang.String} object.
-     */
-    public String getQuerySuffix() {
-        return getLocalString("solr.querySuffix", "");
     }
 
     /**

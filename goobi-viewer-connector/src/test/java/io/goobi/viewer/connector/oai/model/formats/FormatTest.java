@@ -17,7 +17,7 @@ public class FormatTest extends AbstractTest {
      */
     @Test
     public void handleToken_shouldReturnErrorIfResumptionTokenNameIllegal() throws Exception {
-        Element result = Format.handleToken("foo");
+        Element result = Format.handleToken("foo", "");
         Assert.assertEquals("error", result.getName());
         Assert.assertEquals("badResumptionToken", result.getAttributeValue("code"));
     }
@@ -28,9 +28,9 @@ public class FormatTest extends AbstractTest {
      */
     @Test
     public void deserializeResumptionToken_shouldDeserializeTokenCorrectly() throws Exception {
-        File f= new File("src/test/resources/token/oai_1634822246437");
+        File f = new File("src/test/resources/token/oai_1634822246437");
         Assert.assertTrue(f.isFile());
-        
+
         ResumptionToken token = Format.deserializeResumptionToken(f);
         Assert.assertNotNull(token);
     }

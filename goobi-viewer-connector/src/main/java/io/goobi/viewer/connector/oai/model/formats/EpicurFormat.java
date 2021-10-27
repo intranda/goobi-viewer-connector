@@ -66,19 +66,20 @@ public class EpicurFormat extends Format {
      * @throws IOException
      */
     @Override
-    public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
-            throws SolrServerException, IOException {
+    public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField,
+            String filterQuerySuffix) throws SolrServerException, IOException {
         logger.trace("createListRecords");
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
 
         String urnPrefixBlacklistSuffix =
                 SolrSearchTools.getUrnPrefixBlacklistSuffix(DataManager.getInstance().getConfiguration().getUrnPrefixBlacklist());
-        String querySuffix = urnPrefixBlacklistSuffix
+        String additionalQuery = urnPrefixBlacklistSuffix
                 + SolrSearchTools.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes());
         List<String> fieldList = new ArrayList<>(Arrays.asList(FIELDS));
         fieldList.addAll(setSpecFields);
         QueryResponse qr =
-                solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, true, querySuffix, fieldList, null);
+                solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, true, additionalQuery, filterQuerySuffix,
+                        fieldList, null);
         SolrDocumentList records = qr.getResults();
         if (records.isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
@@ -162,11 +163,11 @@ public class EpicurFormat extends Format {
     }
 
     /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler)
+     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler, java.util.String)
      */
     /** {@inheritDoc} */
     @Override
-    public Element createGetRecord(RequestHandler handler) {
+    public Element createGetRecord(RequestHandler handler, String filterQuerySuffix) {
         logger.trace("createGetRecord");
         if (handler.getIdentifier() == null) {
             return new ErrorCode().getBadArgument();
@@ -174,7 +175,7 @@ public class EpicurFormat extends Format {
         List<String> fieldList = new ArrayList<>(Arrays.asList(FIELDS));
         fieldList.addAll(setSpecFields);
         try {
-            SolrDocument doc = solr.getListRecord(handler.getIdentifier(), fieldList);
+            SolrDocument doc = solr.getListRecord(handler.getIdentifier(), fieldList, filterQuerySuffix);
             if (doc == null) {
                 return new ErrorCode().getIdDoesNotExist();
             }
@@ -437,19 +438,20 @@ public class EpicurFormat extends Format {
     }
 
     /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map, java.lang.String)
+     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map, java.lang.String, java.lang.String)
      */
     /** {@inheritDoc} */
     @Override
-    public long getTotalHits(Map<String, String> params, String versionDiscriminatorField) throws IOException, SolrServerException {
+    public long getTotalHits(Map<String, String> params, String versionDiscriminatorField, String filterQuerySuffix)
+            throws IOException, SolrServerException {
         // Hit count may differ for epicur
-        String querySuffix = SolrSearchTools.getUrnPrefixBlacklistSuffix(DataManager.getInstance().getConfiguration().getUrnPrefixBlacklist());
+        String additionalQuery = SolrSearchTools.getUrnPrefixBlacklistSuffix(DataManager.getInstance().getConfiguration().getUrnPrefixBlacklist());
         if (!Verb.ListIdentifiers.getTitle().equals(params.get("verb"))) {
-            querySuffix +=
+            additionalQuery +=
                     SolrSearchTools.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes());
         }
         // Query Solr index for the total hits number
-        return solr.getTotalHitNumber(params, true, querySuffix, null);
+        return solr.getTotalHitNumber(params, true, additionalQuery, null, filterQuerySuffix);
     }
 
 }

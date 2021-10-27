@@ -47,13 +47,13 @@ public class MARCXMLFormat extends METSFormat {
     static final Namespace nsMods = Namespace.getNamespace("mods", "http://www.loc.gov/mods/v3");
 
     /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String)
+     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String, java.lang.String)
      */
     /** {@inheritDoc} */
     @Override
-    public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
-            throws IOException, SolrServerException {
-        Element mets = super.createListRecords(handler, firstVirtualRow, firstRawRow, numRows, versionDiscriminatorField);
+    public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField,
+            String filterQuerySuffix) throws IOException, SolrServerException {
+        Element mets = super.createListRecords(handler, firstVirtualRow, firstRawRow, numRows, versionDiscriminatorField, filterQuerySuffix);
         if (mets.getName().equals("error")) {
             return mets;
         }
@@ -61,16 +61,17 @@ public class MARCXMLFormat extends METSFormat {
     }
 
     /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler)
+     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler, java.lang.String)
      */
     /** {@inheritDoc} */
     @Override
-    public Element createGetRecord(RequestHandler handler) {
+    public Element createGetRecord(RequestHandler handler, String filterQuerySuffix) {
         logger.trace("createGetRecord");
-        Element mets = super.createGetRecord(handler);
+        Element mets = super.createGetRecord(handler, filterQuerySuffix);
         if (mets.getName().equals("error")) {
             return mets;
         }
+
         return generateMarc(mets, handler.getIdentifier(), "GetRecord");
     }
 

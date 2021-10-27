@@ -42,11 +42,6 @@
 		<hitsPerToken>23</hitsPerToken>
 		<!-- URL zum Index -->
 		<solrUrl>http://localhost:8080/solr</solrUrl>
-		<restrictions>
-            <restriction field="MD_SOMEFIELD">restricted1</restriction>
-            <restriction field="ACCESSCONDITION" conditions="-MDNUM_PUBLICRELEASEYEAR:[* TO NOW/YEAR]">restricted2</restriction>
-        </restrictions>
-        <querySuffix>-PI:PPN123456789</querySuffix>
 	</solr>
 	<oaiFolder>src/test/resources/oai/</oaiFolder>
 	<!-- Verzeichnis in dem die resumtionToken gespeichert werden -->
@@ -180,10 +175,6 @@
 	    <allValuesSet>MD_WISSENSGEBIET</allValuesSet>
 		<set setName="test" setSpec="testspec" setQuery="DC:a.b.c.d" />
 	</sets>
-
-	<!-- useCollectionBlacklist: If true, records from collections blacklisted 
-		in config_viewer.xml will be filtered out. Default is true. -->
-	<useCollectionBlacklist>false</useCollectionBlacklist>
 	
 	<!-- defaultLocale: Locale to be used for value translations. Default is 'en'. -->
 	<defaultLocale>de</defaultLocale>
