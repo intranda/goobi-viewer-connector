@@ -224,7 +224,8 @@ public class METSFormat extends Format {
                     continue;
                 }
             } catch (IOException | JDOMException e) {
-                logger.error("{}:\n{}", e.getMessage(), xml);
+                logger.error("{}", e.getMessage());
+                logger.trace(xml);
                 xmlListRecords.addContent(new ErrorCode().getIdDoesNotExist());
                 continue;
             }
