@@ -234,7 +234,7 @@ public class OAIDCFormat extends Format {
         } else {
             // If child element metadata fields are empty, get certain values from topstruct
             String iddocTopstruct = (String) doc.getFieldValue(SolrConstants.IDDOC_TOPSTRUCT);
-            SolrDocumentList docList = solr.search(SolrConstants.IDDOC + ":" + iddocTopstruct, filterQuerySuffix);
+            SolrDocumentList docList = solr.search("+" + SolrConstants.IDDOC + ":" + iddocTopstruct, filterQuerySuffix);
             if (docList != null && !docList.isEmpty()) {
                 topstructDoc = docList.get(0);
             }
@@ -248,7 +248,7 @@ public class OAIDCFormat extends Format {
             SolrDocument childDoc = topstructDoc != null ? topstructDoc : doc;
             String iddocAnchor = (String) childDoc.getFieldValue(SolrConstants.IDDOC_PARENT);
             if (iddocAnchor != null) {
-                SolrDocumentList docList = solr.search(SolrConstants.IDDOC + ":" + iddocAnchor, filterQuerySuffix);
+                SolrDocumentList docList = solr.search("+" + SolrConstants.IDDOC + ":" + iddocAnchor, filterQuerySuffix);
                 if (docList != null && !docList.isEmpty()) {
                     anchorDoc = docList.get(0);
                 }

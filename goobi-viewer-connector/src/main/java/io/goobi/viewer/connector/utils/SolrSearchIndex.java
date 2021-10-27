@@ -180,8 +180,12 @@ public class SolrSearchIndex {
      * @throws IOException
      */
     public SolrDocumentList search(String query, String filterQuerySuffix) throws SolrServerException, IOException {
-        SolrQuery solrQuery = new SolrQuery(query + filterQuerySuffix);
-        // logger.trace("search: {}", query + filterQuerySuffix);
+        String finalQuery = query + filterQuerySuffix;
+        if(!finalQuery.startsWith("+")) {
+            finalQuery = "+" + finalQuery;
+        }
+        SolrQuery solrQuery = new SolrQuery(finalQuery);
+        // logger.trace("search: {}", finalQuery);
         solrQuery.setRows(MAX_HITS);
 
         return querySolr(solrQuery, RETRY_ATTEMPTS).getResults();

@@ -123,7 +123,7 @@ public class EuropeanaFormat extends OAIDCFormat {
             } else {
                 // If child element metadata fields are empty, get certain values from topstruct
                 String iddocTopstruct = (String) doc.getFieldValue(SolrConstants.IDDOC_TOPSTRUCT);
-                SolrDocumentList docList = solr.search(SolrConstants.IDDOC + ":" + iddocTopstruct, filterQuerySuffix);
+                SolrDocumentList docList = solr.search("+" + SolrConstants.IDDOC + ":" + iddocTopstruct, filterQuerySuffix);
                 if (docList != null && !docList.isEmpty()) {
                     topstructDoc = docList.get(0);
                 }
