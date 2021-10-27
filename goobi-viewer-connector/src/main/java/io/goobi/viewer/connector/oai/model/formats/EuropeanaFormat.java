@@ -27,6 +27,8 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
@@ -40,6 +42,8 @@ import io.goobi.viewer.connector.utils.Utils;
  * ESE
  */
 public class EuropeanaFormat extends OAIDCFormat {
+    
+    private static final Logger logger = LoggerFactory.getLogger(EuropeanaFormat.class);
 
     private List<String> setSpecFields = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.ese.name());
 
@@ -108,6 +112,7 @@ public class EuropeanaFormat extends OAIDCFormat {
             numRows = records.size();
         }
         for (SolrDocument doc : records) {
+            // logger.trace("record: {}", doc.getFieldValue(SolrConstants.PI));
             Element record = new Element("record", xmlns);
 
             boolean isWork = doc.getFieldValue(SolrConstants.ISWORK) != null && (boolean) doc.getFieldValue(SolrConstants.ISWORK);
@@ -128,7 +133,7 @@ public class EuropeanaFormat extends OAIDCFormat {
                 SolrDocument childDoc = topstructDoc != null ? topstructDoc : doc;
                 String iddocAnchor = (String) childDoc.getFieldValue(SolrConstants.IDDOC_PARENT);
                 if (iddocAnchor != null) {
-                    SolrDocumentList docList = solr.search(SolrConstants.IDDOC + ":" + iddocAnchor, filterQuerySuffix);
+                    SolrDocumentList docList = solr.search("+" + SolrConstants.IDDOC + ":" + iddocAnchor, filterQuerySuffix);
                     if (docList != null && !docList.isEmpty()) {
                         anchorDoc = docList.get(0);
                     }
@@ -190,9 +195,14 @@ public class EuropeanaFormat extends OAIDCFormat {
                 }
                 if (isWork && doc.getFieldValue(SolrConstants.IDDOC_PARENT) != null) {
                     // If this is a volume, add anchor title in front
-                    String anchorTitle = getAnchorTitle(doc, filterQuerySuffix);
-                    if (anchorTitle != null) {
-                        title = anchorTitle + "; " + title;
+                    String iddocParent = (String) doc.getFieldValue(SolrConstants.IDDOC_PARENT);
+                    String anchorTitle = anchorTitles.get(iddocParent);
+                    if (anchorTitle == null) {
+                        anchorTitle = getAnchorTitle(iddocParent, filterQuerySuffix);
+                        if (anchorTitle != null) {
+                            title = anchorTitle + "; " + title;
+                            anchorTitles.put(iddocParent, anchorTitle);
+                        }
                     }
                 }
                 dc_title.setText(title);

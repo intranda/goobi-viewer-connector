@@ -181,6 +181,7 @@ public class SolrSearchIndex {
      */
     public SolrDocumentList search(String query, String filterQuerySuffix) throws SolrServerException, IOException {
         SolrQuery solrQuery = new SolrQuery(query + filterQuerySuffix);
+        // logger.trace("search: {}", query + filterQuerySuffix);
         solrQuery.setRows(MAX_HITS);
 
         return querySolr(solrQuery, RETRY_ATTEMPTS).getResults();

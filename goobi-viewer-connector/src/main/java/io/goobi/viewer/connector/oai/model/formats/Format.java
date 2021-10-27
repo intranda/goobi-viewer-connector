@@ -378,6 +378,7 @@ public abstract class Format {
      */
     protected static Element getHeader(SolrDocument doc, SolrDocument topstructDoc, RequestHandler handler, String requestedVersion,
             List<String> setSpecFields, String filterQuerySuffix) throws SolrServerException, IOException {
+        // logger.trace("getHeader: {}", doc.getFieldValue(SolrConstants.PI));
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element header = new Element("header", xmlns);
         // identifier
@@ -435,6 +436,7 @@ public abstract class Format {
             datestamp.setText(Utils.parseDate(doc.getFieldValue(SolrConstants.DATEDELETED)));
         }
 
+        // logger.trace("getHeader END");
         return header;
     }
 

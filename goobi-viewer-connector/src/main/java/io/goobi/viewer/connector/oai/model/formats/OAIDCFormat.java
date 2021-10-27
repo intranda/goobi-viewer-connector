@@ -18,6 +18,7 @@ package io.goobi.viewer.connector.oai.model.formats;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,8 @@ import io.goobi.viewer.messages.ViewerResourceBundle;
 public class OAIDCFormat extends Format {
 
     private static final Logger logger = LoggerFactory.getLogger(OAIDCFormat.class);
+    
+    protected static Map<String, String> anchorTitles = new HashMap<>();
 
     private List<String> setSpecFields = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.oai_dc.name());
 
@@ -420,9 +423,14 @@ public class OAIDCFormat extends Format {
                     String val = md.getMasterValue();
                     if ("title".equals(md.getLabel()) && isWork && doc.getFieldValue(SolrConstants.IDDOC_PARENT) != null) {
                         // If this is a volume, add anchor title in front
-                        String anchorTitle = getAnchorTitle(doc, filterQuerySuffix);
-                        if (anchorTitle != null) {
-                            val = anchorTitle + "; " + val;
+                        String iddocParent = (String) doc.getFieldValue(SolrConstants.IDDOC_PARENT);
+                        String anchorTitle = anchorTitles.get(iddocParent);
+                        if (anchorTitle == null) {
+                            anchorTitle = getAnchorTitle(iddocParent, filterQuerySuffix);
+                            if (anchorTitle != null) {
+                                val = anchorTitle + "; " + val;
+                                anchorTitles.put(iddocParent, anchorTitle);
+                            }
                         }
                     }
                     finishedValues.add(val);
@@ -449,14 +457,14 @@ public class OAIDCFormat extends Format {
      * getAnchorTitle.
      * </p>
      *
-     * @param doc a {@link org.apache.solr.common.SolrDocument} object.
+     * @param iddocParent
      * @param filterQuerySuffix Filter query suffix for the client's session
      * @return a {@link java.lang.String} object.
      */
-    protected String getAnchorTitle(SolrDocument doc, String filterQuerySuffix) {
-        String iddocParent = (String) doc.getFieldValue(SolrConstants.IDDOC_PARENT);
+    protected String getAnchorTitle(String iddocParent, String filterQuerySuffix) {
         try {
-            SolrDocumentList hits = solr.search(SolrConstants.IDDOC + ":" + iddocParent, filterQuerySuffix);
+            logger.trace("anchor title query: {}", SolrConstants.IDDOC + ":" + iddocParent);
+            SolrDocumentList hits = solr.search("+" + SolrConstants.IDDOC + ":" + iddocParent, filterQuerySuffix);
             if (hits != null && !hits.isEmpty()) {
                 return (String) hits.get(0).getFirstValue(SolrConstants.TITLE);
             }
