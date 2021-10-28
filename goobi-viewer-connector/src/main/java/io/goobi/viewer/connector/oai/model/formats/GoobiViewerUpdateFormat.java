@@ -206,7 +206,12 @@ public class GoobiViewerUpdateFormat extends Format {
             header.addContent(eleIdentifier);
 
             // datestamp
-            Long timestamp = (Long) jsonObj.get("du");
+            Long timestamp = null;
+            try {
+                timestamp = (Long) jsonObj.get("du");
+            } catch (ClassCastException e) {
+                timestamp = Long.valueOf((Integer) jsonObj.get("du"));
+            }
             if (timestamp == null) {
                 timestamp = 0L;
             }
