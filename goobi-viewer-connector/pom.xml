@@ -26,6 +26,16 @@
 		</repository>
 	</repositories>
 
+    <distributionManagement>
+        <repository>
+            <id>intranda-releases</id>
+            <url>https://nexus.intranda.com/repository/maven-releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>intranda-snapshots</id>
+            <url>https://nexus.intranda.com/repository/maven-snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
