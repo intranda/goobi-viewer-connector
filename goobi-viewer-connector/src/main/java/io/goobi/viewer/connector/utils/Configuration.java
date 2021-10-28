@@ -56,11 +56,9 @@ public final class Configuration {
 
     /** Constant <code>DEFAULT_CONFIG_FILE="config_oai.xml"</code> */
     public static final String DEFAULT_CONFIG_FILE = "config_oai.xml";
-    private static final String DEFAULT_VIEWER_CONFIG_FILE = "config_viewer.xml";
 
     protected ReloadingFileBasedConfigurationBuilder<XMLConfiguration> builder;
     protected ReloadingFileBasedConfigurationBuilder<XMLConfiguration> builderLocal;
-    protected ReloadingFileBasedConfigurationBuilder<XMLConfiguration> builderViewer;
 
     /**
      * <p>
@@ -128,33 +126,6 @@ public final class Configuration {
                         }
                     });
         }
-
-        // Load viewer configuration
-        File fileViewerConfig = new File(getViewerConfigFolder() + DEFAULT_VIEWER_CONFIG_FILE);
-        builderViewer =
-                new ReloadingFileBasedConfigurationBuilder<XMLConfiguration>(XMLConfiguration.class)
-                        .configure(new Parameters().properties()
-                                .setFileName(fileViewerConfig.getAbsolutePath())
-                                .setListDelimiterHandler(new DefaultListDelimiterHandler(';'))
-                                .setThrowExceptionOnMissing(false));
-        if (builderViewer.getFileHandler().getFile().exists()) {
-            try {
-                builderViewer.getConfiguration();
-                logger.info("Local Goobi viewer configuration file '{}' for Connector loaded.", fileViewerConfig.getAbsolutePath());
-            } catch (ConfigurationException e) {
-                logger.error(e.getMessage(), e);
-            }
-            builderViewer.addEventListener(ConfigurationBuilderEvent.CONFIGURATION_REQUEST,
-                    new EventListener() {
-
-                        @Override
-                        public void onEvent(Event event) {
-                            if (builderViewer.getReloadingController().checkForReloading(null)) {
-                                //
-                            }
-                        }
-                    });
-        }
     }
 
     /**
@@ -179,22 +150,6 @@ public final class Configuration {
         if (builderLocal != null) {
             try {
                 return builderLocal.getConfiguration();
-            } catch (ConfigurationException e) {
-                // logger.error(e.getMessage());
-            }
-        }
-
-        return new XMLConfiguration();
-    }
-
-    /**
-     * 
-     * @return {@link XMLConfiguration} that is synced with the current state of the config file
-     */
-    protected XMLConfiguration getViewerConfig() {
-        if (builderViewer != null) {
-            try {
-                return builderViewer.getConfiguration();
             } catch (ConfigurationException e) {
                 // logger.error(e.getMessage());
             }
