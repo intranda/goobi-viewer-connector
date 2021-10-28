@@ -84,8 +84,8 @@ public class XmlTools {
     public static Document readXmlFile(String filePath) throws FileNotFoundException, IOException, JDOMException {
         try (FileInputStream fis = new FileInputStream(new File(filePath))) {
             SAXBuilder builder = new SAXBuilder();
-            builder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-            builder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+//            builder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+//            builder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
             Document document = builder.build(fis);
             return document;
         }
@@ -104,8 +104,8 @@ public class XmlTools {
     public static Document readXmlFile(URL url) throws FileNotFoundException, IOException, JDOMException {
         try (InputStream is = url.openStream()) {
             SAXBuilder builder = new SAXBuilder();
-            builder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-            builder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+//            builder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+//            builder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
             Document document = builder.build(is);
             return document;
         }
@@ -124,8 +124,8 @@ public class XmlTools {
     public static Document readXmlFile(Path path) throws FileNotFoundException, IOException, JDOMException {
         try (InputStream is = Files.newInputStream(path)) {
             SAXBuilder builder = new SAXBuilder();
-            builder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-            builder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+//            builder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+//            builder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
             Document document = builder.build(is);
             return document;
         }
@@ -156,8 +156,8 @@ public class XmlTools {
 
         // Reader reader = new StringReader(hOCRText);
         SAXBuilder builder = new SAXBuilder();
-        builder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-        builder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        // builder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        // builder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
         Document document = builder.build(baos);
         return document;
     }
