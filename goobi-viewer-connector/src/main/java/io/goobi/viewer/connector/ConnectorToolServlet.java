@@ -34,11 +34,11 @@ import io.goobi.viewer.connector.utils.Utils;
  * <p>ToolServlet class.</p>
  *
  */
-public class ToolServlet extends HttpServlet {
+public class ConnectorToolServlet extends HttpServlet {
 
     private static final long serialVersionUID = -3185526115340932005L;
 
-    private static final Logger logger = LoggerFactory.getLogger(ToolServlet.class);
+    private static final Logger logger = LoggerFactory.getLogger(ConnectorToolServlet.class);
 
     /* (non-Javadoc)
      * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)

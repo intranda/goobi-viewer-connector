@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-fragment xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:webfragment="http://java.sun.com/xml/ns/javaee/web-fragment_3_0.xsd"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-fragment_3_1.xsd"
+	id="WebFragment_ID" version="3.1">
+    <display-name>goobi-viewer-connector</display-name>
+    <listener>
+        <listener-class>io.goobi.viewer.connector.ContextListener</listener-class>
+    </listener>
+
+    <servlet>
+        <description></description>
+        <display-name>OAIServlet</display-name>
+        <servlet-name>OAIServlet</servlet-name>
+        <servlet-class>io.goobi.viewer.connector.oai.servlets.OaiServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>OAIServlet</servlet-name>
+        <url-pattern>/oai</url-pattern>
+        <url-pattern>/oai/</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <description></description>
+        <display-name>SRUServlet</display-name>
+        <servlet-name>SRUServlet</servlet-name>
+        <servlet-class>io.goobi.viewer.connector.sru.SruServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SRUServlet</servlet-name>
+        <url-pattern>/sru</url-pattern>
+        <url-pattern>/sru/</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <description></description>
+        <display-name>ConnectorToolServlet</display-name>
+        <servlet-name>ConnectorToolServlet</servlet-name>
+        <servlet-class>io.goobi.viewer.connector.ConnectorToolServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ConnectorToolServlet</servlet-name>
+        <url-pattern>/oai/tools</url-pattern>
+        <url-pattern>/oai/tools/</url-pattern>
+    </servlet-mapping>
+
+    <mime-mapping>
+        <extension>htc</extension>
+        <mime-type>text/plain</mime-type>
+    </mime-mapping>
+
+    <session-config>
+        <tracking-mode>COOKIE</tracking-mode>
+    </session-config>
+
+    <welcome-file-list>
+        <welcome-file>index.xhtml</welcome-file>
+    </welcome-file-list>
+    
+</web-fragment>

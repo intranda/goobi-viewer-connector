@@ -13,26 +13,15 @@
  *
  * You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package io.goobi.viewer.connector.messages;
+package io.goobi.viewer.connector.exceptions;
 
-import java.util.Locale;
+import java.io.Serializable;
 
-import org.junit.Assert;
-import org.junit.Test;
+public class MissingArgumentException extends Exception implements Serializable {
 
-import io.goobi.viewer.connector.AbstractTest;
-import io.goobi.viewer.connector.messages.MessageResourceBundle;
-
-public class MessageResourceBundleTest extends AbstractTest {
-
-    /**
-     * @see MessageResourceBundle#getTranslation(String,Locale)
-     * @verifies translate text correctly
-     */
-    @Test
-    public void getTranslation_shouldTranslateTextCorrectly() throws Exception {
-        Assert.assertEquals("Table", MessageResourceBundle.getTranslation("table", Locale.ENGLISH));
-        Assert.assertEquals("Tabelle", MessageResourceBundle.getTranslation("table", Locale.GERMAN));
-        Assert.assertEquals("Tabla", MessageResourceBundle.getTranslation("table", Locale.forLanguageTag("es")));
+    private static final long serialVersionUID = 1185460070548382659L;
+    
+    public MissingArgumentException(String message) {
+        super(message);
     }
 }

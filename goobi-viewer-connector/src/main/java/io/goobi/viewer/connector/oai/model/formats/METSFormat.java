@@ -48,17 +48,17 @@ public class METSFormat extends Format {
 
     private static final Logger logger = LoggerFactory.getLogger(METSFormat.class);
 
-    private static final String QUERY_SUFFIX = " +(" + SolrConstants.SOURCEDOCFORMAT + ":METS " + SolrConstants.DATEDELETED + ":*)";
+    private static final String METS_FILTER_QUERY = " +(" + SolrConstants.SOURCEDOCFORMAT + ":METS " + SolrConstants.DATEDELETED + ":*)";
 
     private List<String> setSpecFields = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.mets.name());
 
     /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListIdentifiers(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String)
+     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListIdentifiers(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String, java.lang.String)
      */
     /** {@inheritDoc} */
     @Override
-    public Element createListIdentifiers(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
-            throws SolrServerException, IOException {
+    public Element createListIdentifiers(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField,
+            String filterQuerySuffix) throws SolrServerException, IOException {
         Map<String, String> datestamp = Utils.filterDatestampFromRequest(handler);
 
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
@@ -75,13 +75,13 @@ public class METSFormat extends Format {
         // One OAI record for each record proper
         qr = DataManager.getInstance()
                 .getSearchIndex()
-                .getListIdentifiers(datestamp, firstRawRow, numRows, QUERY_SUFFIX, fieldList, null);
+                .getListIdentifiers(datestamp, firstRawRow, numRows, METS_FILTER_QUERY, fieldList, null, filterQuerySuffix);
         if (qr.getResults().isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
         totalVirtualHits = totalRawHits = qr.getResults().getNumFound();
         for (SolrDocument doc : qr.getResults()) {
-            Element header = getHeader(doc, null, handler, null, setSpecFields);
+            Element header = getHeader(doc, null, handler, null, setSpecFields, filterQuerySuffix);
             xmlListIdentifiers.addContent(header);
             virtualHitCount++;
         }
@@ -97,29 +97,31 @@ public class METSFormat extends Format {
     }
 
     /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String)
+     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String, java.lang.String)
      */
     /** {@inheritDoc} */
     @Override
-    public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
-            throws IOException, SolrServerException {
+    public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField,
+            String filterQuerySuffix) throws IOException, SolrServerException {
         List<String> fieldList = new ArrayList<>(Arrays.asList(IDENTIFIER_FIELDS));
         fieldList.addAll(setSpecFields);
-        QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false, QUERY_SUFFIX,
-                fieldList, null);
+        QueryResponse qr =
+                solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false, METS_FILTER_QUERY, filterQuerySuffix,
+                        fieldList, null);
         if (qr.getResults().isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
 
-        return generateMets(qr.getResults(), qr.getResults().getNumFound(), firstRawRow, numRows, handler, "ListRecords", setSpecFields);
+        return generateMets(qr.getResults(), qr.getResults().getNumFound(), firstRawRow, numRows, handler, "ListRecords", setSpecFields,
+                filterQuerySuffix);
     }
 
     /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler)
+     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler, java.lang.String)
      */
     /** {@inheritDoc} */
     @Override
-    public Element createGetRecord(RequestHandler handler) {
+    public Element createGetRecord(RequestHandler handler, String filterQuerySuffix) {
         logger.trace("createGetRecord");
         if (handler.getIdentifier() == null) {
             return new ErrorCode().getBadArgument();
@@ -127,12 +129,12 @@ public class METSFormat extends Format {
         List<String> fieldList = new ArrayList<>(Arrays.asList(IDENTIFIER_FIELDS));
         fieldList.addAll(setSpecFields);
         try {
-            SolrDocument doc = solr.getListRecord(handler.getIdentifier(), fieldList);
+            SolrDocument doc = solr.getListRecord(handler.getIdentifier(), fieldList, filterQuerySuffix);
             if (doc == null) {
                 logger.debug("Record not found in index: {}", handler.getIdentifier());
                 return new ErrorCode().getIdDoesNotExist();
             }
-            return generateMets(Collections.singletonList(doc), 1L, 0, 1, handler, "GetRecord", setSpecFields);
+            return generateMets(Collections.singletonList(doc), 1L, 0, 1, handler, "GetRecord", setSpecFields, filterQuerySuffix);
         } catch (IOException e) {
             return new ErrorCode().getIdDoesNotExist();
         } catch (SolrServerException e) {
@@ -149,12 +151,13 @@ public class METSFormat extends Format {
      * @param numRows
      * @param handler
      * @param recordType "GetRecord" or "ListRecords"
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @return
      * @throws JDOMException
      * @throws SolrServerException
      */
     private static Element generateMets(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler,
-            String recordType, List<String> setSpecFields) throws SolrServerException {
+            String recordType, List<String> setSpecFields, String filterQuerySuffix) throws SolrServerException {
         logger.trace("generateMets");
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element xmlListRecords = new Element(recordType, xmlns);
@@ -209,7 +212,7 @@ public class METSFormat extends Format {
 
                 Element record = new Element("record", xmlns);
                 try {
-                    Element header = getHeader(doc, null, handler, null, setSpecFields);
+                    Element header = getHeader(doc, null, handler, null, setSpecFields, filterQuerySuffix);
                     record.addContent(header);
                     Element metadata = new Element("metadata", xmlns);
                     metadata.addContent(newMetsRoot);
@@ -221,7 +224,8 @@ public class METSFormat extends Format {
                     continue;
                 }
             } catch (IOException | JDOMException e) {
-                logger.error("{}:\n{}", e.getMessage(), xml);
+                logger.error("{}", e.getMessage());
+                logger.trace(xml);
                 xmlListRecords.addContent(new ErrorCode().getIdDoesNotExist());
                 continue;
             }
@@ -237,12 +241,13 @@ public class METSFormat extends Format {
     }
 
     /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map, java.lang.String)
+     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map, java.lang.String, java.lang.String)
      */
     /** {@inheritDoc} */
     @Override
-    public long getTotalHits(Map<String, String> params, String versionDiscriminatorField) throws IOException, SolrServerException {
-        return solr.getTotalHitNumber(params, false, QUERY_SUFFIX, null);
+    public long getTotalHits(Map<String, String> params, String versionDiscriminatorField, String filterQuerySuffix)
+            throws IOException, SolrServerException {
+        return solr.getTotalHitNumber(params, false, METS_FILTER_QUERY, null, filterQuerySuffix);
     }
 
 }

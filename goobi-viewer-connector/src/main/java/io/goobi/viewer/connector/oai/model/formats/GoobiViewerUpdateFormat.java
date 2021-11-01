@@ -46,12 +46,12 @@ public class GoobiViewerUpdateFormat extends Format {
     private static final Logger logger = LoggerFactory.getLogger(GoobiViewerUpdateFormat.class);
 
     /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String)
+     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String, java.lang.String)
      */
     /** {@inheritDoc} */
     @Override
-    public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
-            throws IOException, SolrServerException {
+    public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField,
+            String filterQuerySuffix) throws IOException, SolrServerException {
         StringBuilder sbUrl = new StringBuilder(100);
         sbUrl.append(DataManager.getInstance().getConfiguration().getHarvestUrl()).append("?action=");
         switch (handler.getMetadataPrefix()) {
@@ -95,11 +95,11 @@ public class GoobiViewerUpdateFormat extends Format {
     }
 
     /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler)
+     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler, java.lang.String)
      */
     /** {@inheritDoc} */
     @Override
-    public Element createGetRecord(RequestHandler handler) {
+    public Element createGetRecord(RequestHandler handler, String filterQuerySuffix) {
         logger.trace("createGetRecord: {}", handler.getIdentifier());
         if (handler.getIdentifier() == null) {
             return new ErrorCode().getBadArgument();
@@ -206,7 +206,12 @@ public class GoobiViewerUpdateFormat extends Format {
             header.addContent(eleIdentifier);
 
             // datestamp
-            Long timestamp = (Long) jsonObj.get("du");
+            Long timestamp = null;
+            try {
+                timestamp = (Long) jsonObj.get("du");
+            } catch (ClassCastException e) {
+                timestamp = Long.valueOf((Integer) jsonObj.get("du"));
+            }
             if (timestamp == null) {
                 timestamp = 0L;
             }
@@ -279,11 +284,12 @@ public class GoobiViewerUpdateFormat extends Format {
     }
 
     /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map, java.lang.String)
+     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map, java.lang.String, java.lang.String)
      */
     /** {@inheritDoc} */
     @Override
-    public long getTotalHits(Map<String, String> params, String versionDiscriminatorField) throws IOException, SolrServerException {
+    public long getTotalHits(Map<String, String> params, String versionDiscriminatorField, String filterQuerySuffix)
+            throws IOException, SolrServerException {
         String url = DataManager.getInstance().getConfiguration().getHarvestUrl() + "?action=getlist_" + params.get("metadataPrefix").substring(3);
         try {
             String rawJSON = Utils.getWebContentGET(url);

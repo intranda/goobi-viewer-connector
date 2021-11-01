@@ -42,7 +42,9 @@ import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.enums.Verb;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
 import io.goobi.viewer.connector.oai.model.formats.Format;
+import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
+import io.goobi.viewer.exceptions.IndexUnreachableException;
 
 /**
  * <p>
@@ -61,6 +63,13 @@ public class OaiServlet extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse res) throws ServletException, IOException {
         String queryString = (request.getQueryString() != null ? "?" + request.getQueryString() : "");
         logger.debug("REQUEST URL: {}{}", request.getRequestURL().toString(), queryString);
+
+        String filterQuerySuffix = "";
+        try {
+            filterQuerySuffix = SolrSearchTools.getAllSuffixes(request);
+        } catch (IndexUnreachableException e) {
+            logger.error(e.getMessage());
+        }
 
         Document doc = new Document();
         ProcessingInstruction pi = new ProcessingInstruction("xml-stylesheet", "type='text/xsl' href='./oai2.xsl'");
@@ -119,13 +128,13 @@ public class OaiServlet extends HttpServlet {
             if (request.getParameter("resumptionToken") != null) {
                 String resumptionToken = request.getParameterValues("resumptionToken")[0];
                 requestType.setAttribute("resumptionToken", resumptionToken);
-                root.addContent(Format.handleToken(resumptionToken));
+                root.addContent(Format.handleToken(resumptionToken, filterQuerySuffix));
                 Format.removeExpiredTokens();
             }
             // Identify
             else if (handler.getVerb().equals(Verb.Identify)) {
                 try {
-                    root.addContent(Format.getIdentifyXML());
+                    root.addContent(Format.getIdentifyXML(filterQuerySuffix));
                 } catch (SolrServerException e) {
                     logger.error(e.getMessage(), e);
                     res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -148,7 +157,7 @@ public class OaiServlet extends HttpServlet {
                                 .getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().name());
                         Format format = Format.getFormatByMetadataPrefix(handler.getMetadataPrefix());
                         if (format != null) {
-                            root.addContent(format.createListIdentifiers(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
+                            root.addContent(format.createListIdentifiers(handler, 0, 0, hitsPerToken, versionDiscriminatorField, filterQuerySuffix));
                         } else {
                             root.addContent(new ErrorCode().getBadArgument());
                         }
@@ -181,7 +190,7 @@ public class OaiServlet extends HttpServlet {
                         logger.trace(handler.getMetadataPrefix().getMetadataPrefix());
                         Format format = Format.getFormatByMetadataPrefix(handler.getMetadataPrefix());
                         if (format != null) {
-                            root.addContent(format.createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField));
+                            root.addContent(format.createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField, filterQuerySuffix));
                         } else {
                             root.addContent(new ErrorCode().getBadArgument());
                         }
@@ -202,7 +211,7 @@ public class OaiServlet extends HttpServlet {
                 } else {
                     Format format = Format.getFormatByMetadataPrefix(handler.getMetadataPrefix());
                     if (format != null) {
-                        root.addContent(format.createGetRecord(handler));
+                        root.addContent(format.createGetRecord(handler, filterQuerySuffix));
                     } else {
                         root.addContent(new ErrorCode().getBadArgument());
                     }

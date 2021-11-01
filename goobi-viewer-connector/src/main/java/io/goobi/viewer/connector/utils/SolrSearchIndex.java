@@ -26,6 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
@@ -44,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.goobi.viewer.connector.DataManager;
+import io.goobi.viewer.model.search.SearchHelper;
 
 /**
  * <p>
@@ -171,12 +174,18 @@ public class SolrSearchIndex {
      * </p>
      *
      * @param query a {@link java.lang.String} object.
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @throws org.apache.solr.client.solrj.SolrServerException
      * @return a {@link org.apache.solr.common.SolrDocumentList} object.
      * @throws IOException
      */
-    public SolrDocumentList search(String query) throws SolrServerException, IOException {
-        SolrQuery solrQuery = new SolrQuery(query + SolrSearchTools.getAllSuffixes());
+    public SolrDocumentList search(String query, String filterQuerySuffix) throws SolrServerException, IOException {
+        String finalQuery = query + filterQuerySuffix;
+        if(!finalQuery.startsWith("+")) {
+            finalQuery = "+" + finalQuery;
+        }
+        SolrQuery solrQuery = new SolrQuery(finalQuery);
+        // logger.trace("search: {}", finalQuery);
         solrQuery.setRows(MAX_HITS);
 
         return querySolr(solrQuery, RETRY_ATTEMPTS).getResults();
@@ -235,20 +244,22 @@ public class SolrSearchIndex {
      * @param firstRow a int.
      * @param numRows a int.
      * @param urnOnly a boolean.
-     * @param querySuffix a {@link java.lang.String} object.
+     * @param additionalQuery a {@link java.lang.String} object.
      * @param fieldList Optional list of fields to return.
      * @param fieldStatistics a {@link java.util.List} object.
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @return list of hits as {@link org.apache.solr.common.SolrDocument}
      * @throws java.io.IOException
      * @throws org.apache.solr.client.solrj.SolrServerException
      */
     public QueryResponse search(String from, String until, String setSpec, String metadataPrefix, int firstRow, int numRows, boolean urnOnly,
-            String querySuffix, List<String> fieldList, List<String> fieldStatistics) throws IOException, SolrServerException {
-        StringBuilder sbQuery = new StringBuilder(SolrSearchTools.buildQueryString(from, until, setSpec, metadataPrefix, urnOnly, querySuffix));
+            String additionalQuery, String filterQuerySuffix, List<String> fieldList, List<String> fieldStatistics)
+            throws IOException, SolrServerException {
+        StringBuilder sbQuery = new StringBuilder(SolrSearchTools.buildQueryString(from, until, setSpec, metadataPrefix, urnOnly, additionalQuery));
         if (urnOnly) {
             sbQuery.append(" +(").append(SolrConstants.URN).append(":* ").append(SolrConstants.IMAGEURN_OAI).append(":*)");
         }
-        sbQuery.append(SolrSearchTools.getAllSuffixes());
+        sbQuery.append(filterQuerySuffix);
         logger.debug("OAI query: {}", sbQuery.toString());
         logger.trace("start: {}, rows: {}", firstRow, numRows);
         SolrQuery solrQuery = new SolrQuery(sbQuery.toString());
@@ -281,17 +292,18 @@ public class SolrSearchIndex {
      * @param params a {@link java.util.Map} object.
      * @param firstRawRow a int.
      * @param numRows a int.
-     * @param querySuffix a {@link java.lang.String} object.
+     * @param additionalQuery a {@link java.lang.String} object.
      * @param fieldList Optional list of fields to return.
      * @param fieldStatistics a {@link java.util.List} object.
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @return a {@link org.apache.solr.client.solrj.response.QueryResponse} object.
      * @throws org.apache.solr.client.solrj.SolrServerException
      */
-    public QueryResponse getListIdentifiers(Map<String, String> params, int firstRawRow, int numRows, String querySuffix, List<String> fieldList,
-            List<String> fieldStatistics) throws SolrServerException {
+    public QueryResponse getListIdentifiers(Map<String, String> params, int firstRawRow, int numRows, String additionalQuery, List<String> fieldList,
+            List<String> fieldStatistics, String filterQuerySuffix) throws SolrServerException {
         try {
             return search(params.get("from"), params.get("until"), params.get("set"), params.get("metadataPrefix"), firstRawRow, numRows, false,
-                    querySuffix, fieldList, fieldStatistics);
+                    additionalQuery, filterQuerySuffix, fieldList, fieldStatistics);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }
@@ -306,18 +318,18 @@ public class SolrSearchIndex {
      * @param firstRow a int.
      * @param numRows a int.
      * @param urnOnly a boolean.
-     * @param querySuffix a {@link java.lang.String} object.
+     * @param additionalQuery a {@link java.lang.String} object.
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @param fieldList Optional list of fields to return.
      * @param fieldStatistics a {@link java.util.List} object.
-     * @throws org.apache.solr.client.solrj.SolrServerException
      * @return a {@link org.apache.solr.client.solrj.response.QueryResponse} object.
+     * @throws org.apache.solr.client.solrj.SolrServerException
      */
-    public QueryResponse getListRecords(Map<String, String> params, int firstRow, int numRows, boolean urnOnly, String querySuffix,
-            List<String> fieldList,
-            List<String> fieldStatistics) throws SolrServerException {
+    public QueryResponse getListRecords(Map<String, String> params, int firstRow, int numRows, boolean urnOnly, String additionalQuery,
+            String filterQuerySuffix, List<String> fieldList, List<String> fieldStatistics) throws SolrServerException {
         try {
             return search(params.get("from"), params.get("until"), params.get("set"), params.get("metadataPrefix"), firstRow, numRows, urnOnly,
-                    querySuffix, fieldList, fieldStatistics);
+                    additionalQuery, filterQuerySuffix, fieldList, fieldStatistics);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }
@@ -330,13 +342,15 @@ public class SolrSearchIndex {
      *
      * @param identifier Identifier to search
      * @param fieldList Optional list of fields to return.
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @return {@link org.apache.solr.common.SolrDocument}
      * @throws java.io.IOException
      * @throws org.apache.solr.client.solrj.SolrServerException
      */
-    public SolrDocument getListRecord(final String identifier, List<String> fieldList) throws IOException, SolrServerException {
+    public SolrDocument getListRecord(final String identifier, List<String> fieldList, String filterQuerySuffix)
+            throws IOException, SolrServerException {
         logger.trace("getListRecord");
-        SolrDocumentList ret = queryForIdentifier(identifier, 1, fieldList);
+        SolrDocumentList ret = queryForIdentifier(identifier, 1, fieldList, filterQuerySuffix);
         if (!ret.isEmpty()) {
             return ret.get(0);
         }
@@ -350,12 +364,13 @@ public class SolrSearchIndex {
      * </p>
      *
      * @param identifier a {@link java.lang.String} object.
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @throws org.apache.solr.client.solrj.SolrServerException
      * @return a boolean.
      * @throws IOException
      */
-    public boolean isRecordExists(final String identifier) throws SolrServerException, IOException {
-        return !queryForIdentifier(identifier, 0, null).isEmpty();
+    public boolean isRecordExists(final String identifier, String filterQuerySuffix) throws SolrServerException, IOException {
+        return !queryForIdentifier(identifier, 0, null, filterQuerySuffix).isEmpty();
     }
 
     /**
@@ -363,11 +378,13 @@ public class SolrSearchIndex {
      * @param identifier Record identifier.
      * @param rows Number of hits to return.
      * @param fieldList Optional list of fields to return.
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @return
      * @throws SolrServerException
      * @throws IOException
      */
-    private SolrDocumentList queryForIdentifier(final String identifier, int rows, List<String> fieldList) throws SolrServerException, IOException {
+    private SolrDocumentList queryForIdentifier(final String identifier, int rows, List<String> fieldList, String filterQuerySuffix)
+            throws SolrServerException, IOException {
         String useIdentifier = ClientUtils.escapeQueryChars(identifier);
 
         StringBuilder sb = new StringBuilder();
@@ -383,8 +400,8 @@ public class SolrSearchIndex {
                 .append(SolrConstants.IMAGEURN)
                 .append(':')
                 .append(useIdentifier)
-                .append(')');
-        sb.append(SolrSearchTools.getAllSuffixes());
+                .append(')')
+                .append(filterQuerySuffix);
         logger.debug(sb.toString());
         SolrQuery solrQuery = new SolrQuery(sb.toString());
         solrQuery.setRows(rows);
@@ -412,7 +429,7 @@ public class SolrSearchIndex {
         List<String> ret = new ArrayList<>();
 
         SolrQuery solrQuery = new SolrQuery();
-        solrQuery.setQuery(field + ":* " + DataManager.getInstance().getConfiguration().getCollectionBlacklistFilterSuffix());
+        solrQuery.setQuery(field + ":* " + SearchHelper.getCollectionBlacklistFilterSuffix(field));
         solrQuery.setStart(0);
         solrQuery.setRows(0);
         solrQuery.addFacetField(field);
@@ -441,20 +458,21 @@ public class SolrSearchIndex {
      *
      * @param params a {@link java.util.Map} object.
      * @param urnOnly a boolean.
-     * @param querySuffix a {@link java.lang.String} object.
+     * @param additionalQuery a {@link java.lang.String} object.
      * @param fieldStatistics a {@link java.util.List} object.
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @return size of search
      * @throws java.io.IOException
      * @throws org.apache.solr.client.solrj.SolrServerException
      */
-    public long getTotalHitNumber(Map<String, String> params, boolean urnOnly, String querySuffix, List<String> fieldStatistics)
-            throws IOException, SolrServerException {
+    public long getTotalHitNumber(Map<String, String> params, boolean urnOnly, String additionalQuery, List<String> fieldStatistics,
+            String filterQuerySuffix) throws IOException, SolrServerException {
         StringBuilder sbQuery = new StringBuilder(SolrSearchTools.buildQueryString(params.get("from"), params.get("until"), params.get("set"),
-                params.get("metadataPrefix"), urnOnly, querySuffix));
+                params.get("metadataPrefix"), urnOnly, additionalQuery));
         if (urnOnly) {
             sbQuery.append(" AND (").append(SolrConstants.URN).append(":* OR ").append(SolrConstants.IMAGEURN_OAI).append(":*)");
         }
-        sbQuery.append(SolrSearchTools.getAllSuffixes());
+        sbQuery.append(filterQuerySuffix);
         logger.debug("OAI query: {}", sbQuery.toString());
         SolrQuery solrQuery = new SolrQuery(sbQuery.toString());
         solrQuery.setStart(0);
@@ -476,13 +494,14 @@ public class SolrSearchIndex {
      * getEarliestRecordDatestamp.
      * </p>
      *
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @return a {@link java.lang.String} object.
      * @throws org.apache.solr.client.solrj.SolrServerException if any.
      * @throws IOException
      */
-    public String getEarliestRecordDatestamp() throws SolrServerException, IOException {
+    public String getEarliestRecordDatestamp(String filterQuerySuffix) throws SolrServerException, IOException {
         try {
-            String searchStr = SolrConstants.ISWORK + ":true" + SolrSearchTools.getAllSuffixes();
+            String searchStr = SolrConstants.ISWORK + ":true" + filterQuerySuffix;
 
             SolrQuery solrQuery = new SolrQuery(searchStr);
             solrQuery.setRows(1);
@@ -512,17 +531,21 @@ public class SolrSearchIndex {
      *
      * @param anchorDoc a {@link org.apache.solr.common.SolrDocument} object.
      * @param untilTimestamp a long.
+     * @param request {@link HttpServletRequest} for filter query suffix generation
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @throws org.apache.solr.client.solrj.SolrServerException
      * @return a long.
      * @throws IOException
      */
-    public long getLatestVolumeTimestamp(SolrDocument anchorDoc, long untilTimestamp) throws SolrServerException, IOException {
+    public long getLatestVolumeTimestamp(SolrDocument anchorDoc, long untilTimestamp, String filterQuerySuffix)
+            throws SolrServerException, IOException {
         if (anchorDoc.getFieldValue(SolrConstants.ISANCHOR) == null || (Boolean) anchorDoc.getFieldValue(SolrConstants.ISANCHOR) == false) {
             return -1;
         }
 
         SolrDocumentList volumes = search(
-                SolrConstants.ISWORK + ":true AND " + SolrConstants.IDDOC_PARENT + ":" + (String) anchorDoc.getFieldValue(SolrConstants.IDDOC));
+                SolrConstants.ISWORK + ":true AND " + SolrConstants.IDDOC_PARENT + ":" + (String) anchorDoc.getFieldValue(SolrConstants.IDDOC),
+                filterQuerySuffix);
         if (volumes == null) {
             return -1;
         }

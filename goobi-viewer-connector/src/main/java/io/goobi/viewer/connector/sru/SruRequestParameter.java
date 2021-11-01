@@ -19,8 +19,7 @@ import java.nio.charset.StandardCharsets;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.cli.MissingArgumentException;
-
+import io.goobi.viewer.connector.exceptions.MissingArgumentException;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 
 /**

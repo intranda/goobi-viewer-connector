@@ -26,7 +26,6 @@ import io.goobi.viewer.connector.AbstractTest;
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.model.FieldConfiguration;
-import io.goobi.viewer.connector.oai.model.LicenseType;
 import io.goobi.viewer.connector.oai.model.Set;
 import io.goobi.viewer.connector.oai.model.formats.Format;
 
@@ -58,31 +57,6 @@ public class ConfigurationTest extends AbstractTest {
         Assert.assertEquals("test", set.getSetName());
         Assert.assertEquals("testspec", set.getSetSpec());
         Assert.assertEquals("DC:a.b.c.d", set.getSetQuery());
-    }
-
-    /**
-     * @see Configuration#getCollectionBlacklist()
-     * @verifies return all key-value pairs
-     */
-    @Test
-    public void getCollectionBlacklist_shouldReturnAllKeyvaluePairs() throws Exception {
-        List<String> values = DataManager.getInstance().getConfiguration().getCollectionBlacklist();
-        Assert.assertNotNull(values);
-        Assert.assertEquals(4, values.size());
-        Assert.assertEquals("DC:collection1", values.get(0));
-        Assert.assertEquals("DC:collection2", values.get(1));
-        Assert.assertEquals("MD_OTHERCOLLECTION:collection3", values.get(2));
-        Assert.assertEquals("MD_OTHERCOLLECTION:collection4", values.get(3));
-    }
-
-    /**
-     * @see Configuration#getCollectionBlacklistFilterSuffix()
-     * @verifies construct suffix correctly
-     */
-    @Test
-    public void getCollectionBlacklistFilterSuffix_shouldConstructSuffixCorrectly() throws Exception {
-        Assert.assertEquals(" -DC:collection1 -DC:collection2 -MD_OTHERCOLLECTION:collection3 -MD_OTHERCOLLECTION:collection4",
-                DataManager.getInstance().getConfiguration().getCollectionBlacklistFilterSuffix());
     }
 
     /**
@@ -179,23 +153,6 @@ public class ConfigurationTest extends AbstractTest {
     }
 
     /**
-     * @see Configuration#getRestrictedAccessConditions()
-     * @verifies return all values
-     */
-    @Test
-    public void getRestrictedAccessConditions_shouldReturnAllValues() throws Exception {
-        List<LicenseType> values = DataManager.getInstance().getConfiguration().getRestrictedAccessConditions();
-        Assert.assertNotNull(values);
-        Assert.assertEquals(2, values.size());
-        Assert.assertEquals("MD_SOMEFIELD", values.get(0).getField());
-        Assert.assertEquals("restricted1", values.get(0).getValue());
-        Assert.assertNull(values.get(0).getConditions());
-        Assert.assertEquals(SolrConstants.ACCESSCONDITION, values.get(1).getField());
-        Assert.assertEquals("restricted2", values.get(1).getValue());
-        Assert.assertEquals("-MDNUM_PUBLICRELEASEYEAR:[* TO NOW/YEAR]", values.get(1).getConditions());
-    }
-
-    /**
      * @see Configuration#getOaiFolder()
      * @verifies return correct value
      */
@@ -229,15 +186,6 @@ public class ConfigurationTest extends AbstractTest {
     @Test
     public void getViewerConfigFolder_shouldReturnCorrectValue() throws Exception {
         Assert.assertEquals("src/test/resources/", DataManager.getInstance().getConfiguration().getViewerConfigFolder());
-    }
-
-    /**
-     * @see Configuration#isUseCollectionBlacklist()
-     * @verifies return correct value
-     */
-    @Test
-    public void isUseCollectionBlacklist_shouldReturnCorrectValue() throws Exception {
-        Assert.assertFalse(DataManager.getInstance().getConfiguration().isUseCollectionBlacklist());
     }
 
     /**
@@ -336,15 +284,6 @@ public class ConfigurationTest extends AbstractTest {
         Assert.assertTrue(values.get(0).isTranslate());
         Assert.assertEquals("MD_WISSENSGEBIET", values.get(1).getSetName());
         Assert.assertFalse(values.get(1).isTranslate());
-    }
-
-    /**
-     * @see Configuration#getQuerySuffix()
-     * @verifies return correct value
-     */
-    @Test
-    public void getQuerySuffix_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals("-PI:PPN123456789", DataManager.getInstance().getConfiguration().getQuerySuffix());
     }
 
     /**

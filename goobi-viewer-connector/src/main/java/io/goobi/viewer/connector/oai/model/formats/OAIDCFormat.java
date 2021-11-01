@@ -18,6 +18,7 @@ package io.goobi.viewer.connector.oai.model.formats;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +37,6 @@ import org.slf4j.LoggerFactory;
 
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.exceptions.HTTPException;
-import io.goobi.viewer.connector.messages.MessageResourceBundle;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.enums.Verb;
@@ -47,6 +47,7 @@ import io.goobi.viewer.connector.oai.model.metadata.MetadataParameter.MetadataPa
 import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
+import io.goobi.viewer.messages.ViewerResourceBundle;
 
 /**
  * oai_dc
@@ -54,16 +55,18 @@ import io.goobi.viewer.connector.utils.Utils;
 public class OAIDCFormat extends Format {
 
     private static final Logger logger = LoggerFactory.getLogger(OAIDCFormat.class);
+    
+    protected static Map<String, String> anchorTitles = new HashMap<>();
 
     private List<String> setSpecFields = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.oai_dc.name());
 
     /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String)
+     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String, java.lang.String)
      */
     /** {@inheritDoc} */
     @Override
-    public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
-            throws SolrServerException, IOException {
+    public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField,
+            String filterQuerySuffix) throws SolrServerException, IOException {
         QueryResponse qr;
         long totalVirtualHits;
         long totalRawHits;
@@ -72,14 +75,14 @@ public class OAIDCFormat extends Format {
             qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false,
                     SolrSearchTools.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes())
                             + " AND " + versionDiscriminatorField + ":*",
-                    null, Collections.singletonList(versionDiscriminatorField));
+                    filterQuerySuffix, null, Collections.singletonList(versionDiscriminatorField));
             totalVirtualHits = SolrSearchTools.getFieldCount(qr, versionDiscriminatorField);
             totalRawHits = qr.getResults().getNumFound();
         } else {
             // One OAI record for each record proper
             qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false,
                     SolrSearchTools.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes()),
-                    null, null);
+                    filterQuerySuffix, null, null);
             totalVirtualHits = totalRawHits = qr.getResults().getNumFound();
 
         }
@@ -89,15 +92,15 @@ public class OAIDCFormat extends Format {
         }
 
         return generateDC(qr.getResults(), totalVirtualHits, totalRawHits, firstVirtualRow, firstRawRow, numRows, handler, "ListRecords",
-                versionDiscriminatorField, null);
+                versionDiscriminatorField, null, filterQuerySuffix);
     }
 
     /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler)
+     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler, java.lang.String)
      */
     /** {@inheritDoc} */
     @Override
-    public Element createGetRecord(RequestHandler handler) {
+    public Element createGetRecord(RequestHandler handler, String filterQuerySuffix) {
         if (handler.getIdentifier() == null) {
             return new ErrorCode().getBadArgument();
         }
@@ -106,12 +109,12 @@ public class OAIDCFormat extends Format {
         if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
             String[] identifierSplit = Utils.splitIdentifierAndLanguageCode(handler.getIdentifier(), 3);
             try {
-                SolrDocument doc = solr.getListRecord(identifierSplit[0], null);
+                SolrDocument doc = solr.getListRecord(identifierSplit[0], null, filterQuerySuffix);
                 if (doc == null) {
                     return new ErrorCode().getIdDoesNotExist();
                 }
                 return generateDC(Collections.singletonList(doc), 1L, 1L, 0, 0, 1, handler, "GetRecord", versionDiscriminatorField,
-                        identifierSplit[1]);
+                        identifierSplit[1], filterQuerySuffix);
             } catch (IOException e) {
                 return new ErrorCode().getNoMetadataFormats();
             } catch (SolrServerException e) {
@@ -119,11 +122,11 @@ public class OAIDCFormat extends Format {
             }
         }
         try {
-            SolrDocument doc = solr.getListRecord(handler.getIdentifier(), null);
+            SolrDocument doc = solr.getListRecord(handler.getIdentifier(), null, filterQuerySuffix);
             if (doc == null) {
                 return new ErrorCode().getIdDoesNotExist();
             }
-            return generateDC(Collections.singletonList(doc), 1L, 1L, 0, 0, 1, handler, "GetRecord", null, null);
+            return generateDC(Collections.singletonList(doc), 1L, 1L, 0, 0, 1, handler, "GetRecord", null, null, filterQuerySuffix);
         } catch (IOException e) {
             return new ErrorCode().getNoMetadataFormats();
         } catch (SolrServerException e) {
@@ -144,13 +147,14 @@ public class OAIDCFormat extends Format {
      * @param recordType
      * @param versionDiscriminatorField
      * @param requestedVersion
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @return
      * @throws SolrServerException
      * @throws IOException
      */
     private Element generateDC(List<SolrDocument> records, long totalVirtualHits, long totalRawHits, int firstVirtualRow, int firstRawRow,
-            int numRows, RequestHandler handler, String recordType, String versionDiscriminatorField, String requestedVersion)
-            throws SolrServerException, IOException {
+            int numRows, RequestHandler handler, String recordType, String versionDiscriminatorField, String requestedVersion,
+            String filterQuerySuffix) throws SolrServerException, IOException {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Namespace nsOaiDoc = Namespace.getNamespace(Metadata.oai_dc.getMetadataNamespacePrefix(), Metadata.oai_dc.getMetadataNamespaceUri());
         Element xmlListRecords = new Element(recordType, xmlns);
@@ -176,12 +180,12 @@ public class OAIDCFormat extends Format {
                             iso3code = lang.getIsoCode();
                         }
                     }
-                    xmlListRecords.addContent(generateSingleDCRecord(doc, handler, iso3code, xmlns, nsOaiDoc, setSpecFields));
+                    xmlListRecords.addContent(generateSingleDCRecord(doc, handler, iso3code, xmlns, nsOaiDoc, setSpecFields, filterQuerySuffix));
                 }
             }
         } else {
             for (SolrDocument doc : records) {
-                xmlListRecords.addContent(generateSingleDCRecord(doc, handler, null, xmlns, nsOaiDoc, setSpecFields));
+                xmlListRecords.addContent(generateSingleDCRecord(doc, handler, null, xmlns, nsOaiDoc, setSpecFields, filterQuerySuffix));
                 virtualHitCount++;
             }
         }
@@ -204,13 +208,13 @@ public class OAIDCFormat extends Format {
      * @param xmlns
      * @param nsOaiDoc
      * @param setSpecFields
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @return
      * @throws SolrServerException
      * @throws IOException
      */
     private Element generateSingleDCRecord(SolrDocument doc, RequestHandler handler, String requestedVersion, Namespace xmlns, Namespace nsOaiDoc,
-            List<String> setSpecFields)
-            throws SolrServerException, IOException {
+            List<String> setSpecFields, String filterQuerySuffix) throws SolrServerException, IOException {
         Element record = new Element("record", xmlns);
         boolean isWork = doc.getFieldValue(SolrConstants.ISWORK) != null && (boolean) doc.getFieldValue(SolrConstants.ISWORK);
         boolean isAnchor = doc.getFieldValue(SolrConstants.ISANCHOR) != null && (boolean) doc.getFieldValue(SolrConstants.ISANCHOR);
@@ -230,7 +234,7 @@ public class OAIDCFormat extends Format {
         } else {
             // If child element metadata fields are empty, get certain values from topstruct
             String iddocTopstruct = (String) doc.getFieldValue(SolrConstants.IDDOC_TOPSTRUCT);
-            SolrDocumentList docList = solr.search(SolrConstants.IDDOC + ":" + iddocTopstruct);
+            SolrDocumentList docList = solr.search("+" + SolrConstants.IDDOC + ":" + iddocTopstruct, filterQuerySuffix);
             if (docList != null && !docList.isEmpty()) {
                 topstructDoc = docList.get(0);
             }
@@ -244,7 +248,7 @@ public class OAIDCFormat extends Format {
             SolrDocument childDoc = topstructDoc != null ? topstructDoc : doc;
             String iddocAnchor = (String) childDoc.getFieldValue(SolrConstants.IDDOC_PARENT);
             if (iddocAnchor != null) {
-                SolrDocumentList docList = solr.search(SolrConstants.IDDOC + ":" + iddocAnchor);
+                SolrDocumentList docList = solr.search("+" + SolrConstants.IDDOC + ":" + iddocAnchor, filterQuerySuffix);
                 if (docList != null && !docList.isEmpty()) {
                     anchorDoc = docList.get(0);
                 }
@@ -252,7 +256,7 @@ public class OAIDCFormat extends Format {
         }
         String docstruct = (String) doc.getFieldValue(SolrConstants.DOCSTRCT);
 
-        Element header = getHeader(doc, topstructDoc, handler, requestedVersion, setSpecFields);
+        Element header = getHeader(doc, topstructDoc, handler, requestedVersion, setSpecFields, filterQuerySuffix);
         record.addContent(header);
 
         if ("deleted".equals(header.getAttributeValue("status"))) {
@@ -392,14 +396,14 @@ public class OAIDCFormat extends Format {
                                 paramVal = values.size() > i ? values.get(i) : "";
                                 if (StringUtils.isNotEmpty(paramVal)) {
                                     if (MetadataParameterType.TRANSLATEDFIELD.equals(param.getType())) {
-                                        paramVal = MessageResourceBundle.getTranslation(paramVal, null);
+                                        paramVal = ViewerResourceBundle.getTranslation(paramVal, null);
                                     }
                                     if (StringUtils.isNotEmpty(param.getPrefix())) {
-                                        String prefix = MessageResourceBundle.getTranslation(param.getPrefix(), null);
+                                        String prefix = ViewerResourceBundle.getTranslation(param.getPrefix(), null);
                                         paramVal = prefix + paramVal;
                                     }
                                     if (StringUtils.isNotEmpty(param.getSuffix())) {
-                                        String suffix = MessageResourceBundle.getTranslation(param.getSuffix(), null);
+                                        String suffix = ViewerResourceBundle.getTranslation(param.getSuffix(), null);
                                         paramVal += suffix;
                                     }
                                 }
@@ -419,9 +423,14 @@ public class OAIDCFormat extends Format {
                     String val = md.getMasterValue();
                     if ("title".equals(md.getLabel()) && isWork && doc.getFieldValue(SolrConstants.IDDOC_PARENT) != null) {
                         // If this is a volume, add anchor title in front
-                        String anchorTitle = getAnchorTitle(doc);
-                        if (anchorTitle != null) {
-                            val = anchorTitle + "; " + val;
+                        String iddocParent = (String) doc.getFieldValue(SolrConstants.IDDOC_PARENT);
+                        String anchorTitle = anchorTitles.get(iddocParent);
+                        if (anchorTitle == null) {
+                            anchorTitle = getAnchorTitle(iddocParent, filterQuerySuffix);
+                            if (anchorTitle != null) {
+                                val = anchorTitle + "; " + val;
+                                anchorTitles.put(iddocParent, anchorTitle);
+                            }
                         }
                     }
                     finishedValues.add(val);
@@ -448,13 +457,14 @@ public class OAIDCFormat extends Format {
      * getAnchorTitle.
      * </p>
      *
-     * @param doc a {@link org.apache.solr.common.SolrDocument} object.
+     * @param iddocParent
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @return a {@link java.lang.String} object.
      */
-    protected String getAnchorTitle(SolrDocument doc) {
-        String iddocParent = (String) doc.getFieldValue(SolrConstants.IDDOC_PARENT);
+    protected String getAnchorTitle(String iddocParent, String filterQuerySuffix) {
         try {
-            SolrDocumentList hits = solr.search(SolrConstants.IDDOC + ":" + iddocParent);
+            logger.trace("anchor title query: {}", SolrConstants.IDDOC + ":" + iddocParent);
+            SolrDocumentList hits = solr.search("+" + SolrConstants.IDDOC + ":" + iddocParent, filterQuerySuffix);
             if (hits != null && !hits.isEmpty()) {
                 return (String) hits.get(0).getFirstValue(SolrConstants.TITLE);
             }
@@ -609,14 +619,15 @@ public class OAIDCFormat extends Format {
     }
 
     /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map, java.util.String)
+     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map, java.util.String, java.util.String)
      */
     /** {@inheritDoc} */
     @Override
-    public long getTotalHits(Map<String, String> params, String versionDiscriminatorField) throws IOException, SolrServerException {
-        String querySuffix = "";
+    public long getTotalHits(Map<String, String> params, String versionDiscriminatorField, String filterQuerySuffix)
+            throws IOException, SolrServerException {
+        String additionalQuery = "";
         if (!Verb.ListIdentifiers.getTitle().equals(params.get("verb"))) {
-            querySuffix +=
+            additionalQuery +=
                     SolrSearchTools.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes());
         }
         // Query Solr index for the total hits number
@@ -624,10 +635,11 @@ public class OAIDCFormat extends Format {
         if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
             // Query Solr index for the count of the discriminator field
             QueryResponse qr = solr.search(params.get("from"), params.get("until"), params.get("set"), params.get("metadataPrefix"), 0, 0, false,
-                    querySuffix + " AND " + versionDiscriminatorField + ":*", null, Collections.singletonList(versionDiscriminatorField));
+                    additionalQuery + " AND " + versionDiscriminatorField + ":*", filterQuerySuffix, null,
+                    Collections.singletonList(versionDiscriminatorField));
             return SolrSearchTools.getFieldCount(qr, versionDiscriminatorField);
         }
-        return solr.getTotalHitNumber(params, false, querySuffix, null);
+        return solr.getTotalHitNumber(params, false, additionalQuery, null, filterQuerySuffix);
     }
 
 }

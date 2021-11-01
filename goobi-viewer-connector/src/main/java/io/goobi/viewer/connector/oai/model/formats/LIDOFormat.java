@@ -49,47 +49,49 @@ public class LIDOFormat extends Format {
 
     private static final Logger logger = LoggerFactory.getLogger(LIDOFormat.class);
 
-    private static final String QUERY_SUFFIX = " +" + SolrConstants.SOURCEDOCFORMAT + ":LIDO";
+    private static final String LIDO_FILTER_QUERY = " +" + SolrConstants.SOURCEDOCFORMAT + ":LIDO";
 
     private List<String> setSpecFields = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.lido.name());
 
     /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String)
+     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String, java.lang.String)
      */
     /** {@inheritDoc} */
     @Override
-    public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
-            throws IOException, SolrServerException {
+    public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField,
+            String filterQuerySuffix) throws IOException, SolrServerException {
         List<String> fieldList = new ArrayList<>(Arrays.asList(IDENTIFIER_FIELDS));
         fieldList.addAll(setSpecFields);
-        QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false, QUERY_SUFFIX,
-                fieldList, null);
+        QueryResponse qr =
+                solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false, LIDO_FILTER_QUERY, filterQuerySuffix,
+                        fieldList, null);
         if (qr.getResults().isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
 
         Element xmlListRecords =
-                generateLido(qr.getResults(), qr.getResults().getNumFound(), firstRawRow, numRows, handler, "ListRecords", setSpecFields);
+                generateLido(qr.getResults(), qr.getResults().getNumFound(), firstRawRow, numRows, handler, "ListRecords", setSpecFields,
+                        filterQuerySuffix);
         return xmlListRecords;
     }
 
     /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler)
+     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler, java.lang.String)
      */
     /** {@inheritDoc} */
     @Override
-    public Element createGetRecord(RequestHandler handler) {
+    public Element createGetRecord(RequestHandler handler, String filterQuerySuffix) {
         if (handler.getIdentifier() == null) {
             return new ErrorCode().getBadArgument();
         }
         List<String> fieldList = new ArrayList<>(Arrays.asList(IDENTIFIER_FIELDS));
         fieldList.addAll(setSpecFields);
         try {
-            SolrDocument doc = solr.getListRecord(handler.getIdentifier(), fieldList);
+            SolrDocument doc = solr.getListRecord(handler.getIdentifier(), fieldList, filterQuerySuffix);
             if (doc == null) {
                 return new ErrorCode().getIdDoesNotExist();
             }
-            Element record = generateLido(Collections.singletonList(doc), 1L, 0, 1, handler, "GetRecord", setSpecFields);
+            Element record = generateLido(Collections.singletonList(doc), 1L, 0, 1, handler, "GetRecord", setSpecFields, filterQuerySuffix);
             return record;
         } catch (IOException e) {
             return new ErrorCode().getIdDoesNotExist();
@@ -107,6 +109,7 @@ public class LIDOFormat extends Format {
      * @param numRows
      * @param handler
      * @param recordType "GetRecord" or "ListRecords"
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @return
      * @throws IOException
      * @throws JDOMException
@@ -114,7 +117,7 @@ public class LIDOFormat extends Format {
      * @throws HTTPException
      */
     private static Element generateLido(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler,
-            String recordType, List<String> setSpecFields) throws SolrServerException {
+            String recordType, List<String> setSpecFields, String filterQuerySuffix) throws SolrServerException {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element xmlListRecords = new Element(recordType, xmlns);
 
@@ -159,7 +162,7 @@ public class LIDOFormat extends Format {
 
                 Element record = new Element("record", xmlns);
                 try {
-                    Element header = getHeader(doc, null, handler, null, setSpecFields);
+                    Element header = getHeader(doc, null, handler, null, setSpecFields, filterQuerySuffix);
                     record.addContent(header);
                     Element metadata = new Element("metadata", xmlns);
                     metadata.addContent(newLido);
@@ -189,12 +192,13 @@ public class LIDOFormat extends Format {
     }
 
     /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map, java.lang.String)
+     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map, java.lang.String, java.lang.String)
      */
     /** {@inheritDoc} */
     @Override
-    public long getTotalHits(Map<String, String> params, String versionDiscriminatorField) throws IOException, SolrServerException {
-        return solr.getTotalHitNumber(params, false, QUERY_SUFFIX, null);
+    public long getTotalHits(Map<String, String> params, String versionDiscriminatorField, String filterQuerySuffix)
+            throws IOException, SolrServerException {
+        return solr.getTotalHitNumber(params, false, LIDO_FILTER_QUERY, null, filterQuerySuffix);
     }
 
 }

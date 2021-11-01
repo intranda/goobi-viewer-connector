@@ -53,12 +53,12 @@ public class TEIFormat extends Format {
     static final Namespace COMPONENTS = Namespace.getNamespace("cmdp", "http://www.clarin.eu/cmd/1/profiles/clarin.eu:cr1:p_1380106710826");
 
     /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String)
+     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String, java.lang.String)
      */
     /** {@inheritDoc} */
     @Override
-    public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
-            throws SolrServerException {
+    public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField,
+            String filterQuerySuffix) throws SolrServerException {
         // &stats=true&stats.field=LANGUAGE
         QueryResponse qr;
         long totalVirtualHits;
@@ -66,14 +66,14 @@ public class TEIFormat extends Format {
         if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
             // One OAI record for each record version
             qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false,
-                    " AND " + versionDiscriminatorField + ":*", Arrays.asList(IDENTIFIER_FIELDS),
+                    " AND " + versionDiscriminatorField + ":*", filterQuerySuffix, Arrays.asList(IDENTIFIER_FIELDS),
                     Collections.singletonList(versionDiscriminatorField));
             totalVirtualHits = SolrSearchTools.getFieldCount(qr, versionDiscriminatorField);
             totalRawHits = qr.getResults().getNumFound();
         } else {
             // One OAI record for each record proper
-            qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false, null, Arrays.asList(IDENTIFIER_FIELDS),
-                    null);
+            qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false, null, filterQuerySuffix,
+                    Arrays.asList(IDENTIFIER_FIELDS), null);
             totalVirtualHits = totalRawHits = qr.getResults().getNumFound();
         }
         if (qr.getResults().isEmpty()) {
@@ -81,7 +81,7 @@ public class TEIFormat extends Format {
         }
         try {
             Element xmlListRecords = generateTeiCmdi(qr.getResults(), totalVirtualHits, totalRawHits, firstVirtualRow, firstRawRow, numRows, handler,
-                    "ListRecords", versionDiscriminatorField, null);
+                    "ListRecords", versionDiscriminatorField, null, filterQuerySuffix);
             return xmlListRecords;
         } catch (IOException e) {
             logger.error(e.getMessage());
@@ -94,29 +94,29 @@ public class TEIFormat extends Format {
     }
 
     /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler)
+     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler, java.lang.String)
      */
     /** {@inheritDoc} */
     @Override
-    public Element createGetRecord(RequestHandler handler) {
+    public Element createGetRecord(RequestHandler handler, String filterQuerySuffix) {
         if (handler.getIdentifier() == null) {
             return new ErrorCode().getBadArgument();
         }
-        
-        List<String> setSpecFields =
-                DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix().name());
+
+        //        List<String> setSpecFields =
+        //                DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix().name());
 
         String versionDiscriminatorField =
                 DataManager.getInstance().getConfiguration().getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().name());
         if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
             String[] identifierSplit = Utils.splitIdentifierAndLanguageCode(handler.getIdentifier(), 3);
             try {
-                SolrDocument doc = solr.getListRecord(identifierSplit[0], null);
+                SolrDocument doc = solr.getListRecord(identifierSplit[0], null, filterQuerySuffix);
                 if (doc == null) {
                     return new ErrorCode().getIdDoesNotExist();
                 }
                 Element record = generateTeiCmdi(Collections.singletonList(doc), 1L, 1L, 0, 0, 1, handler, "GetRecord", versionDiscriminatorField,
-                        identifierSplit[1]);
+                        identifierSplit[1], filterQuerySuffix);
                 return record;
             } catch (IOException e) {
                 return new ErrorCode().getIdDoesNotExist();
@@ -129,7 +129,7 @@ public class TEIFormat extends Format {
             }
         }
         try {
-            SolrDocument doc = solr.getListRecord(handler.getIdentifier(), null);
+            SolrDocument doc = solr.getListRecord(handler.getIdentifier(), null, filterQuerySuffix);
             if (doc == null) {
                 return new ErrorCode().getIdDoesNotExist();
             }
@@ -137,7 +137,7 @@ public class TEIFormat extends Format {
                     DataManager.getInstance()
                             .getConfiguration()
                             .getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().getMetadataPrefix()),
-                    null);
+                    null, filterQuerySuffix);
             return record;
         } catch (IOException e) {
             return new ErrorCode().getIdDoesNotExist();
@@ -163,6 +163,7 @@ public class TEIFormat extends Format {
      * @param recordType "GetRecord" or "ListRecords"
      * @param versionDiscriminatorField If not null, each value of this field will be created as an individual record
      * @param requestedVersion If not null, only the record with the exact value will be added
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @return
      * @throws IOException
      * @throws JDOMException
@@ -170,7 +171,8 @@ public class TEIFormat extends Format {
      * @throws HTTPException
      */
     private static Element generateTeiCmdi(List<SolrDocument> records, long totalVirtualHits, long totalRawHits, int firstVirtualRow, int firstRawRow,
-            int numRows, RequestHandler handler, String recordType, String versionDiscriminatorField, String requestedVersion)
+            int numRows, RequestHandler handler, String recordType, String versionDiscriminatorField, String requestedVersion,
+            String filterQuerySuffix)
             throws JDOMException, IOException, SolrServerException, HTTPException {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element xmlListRecords = new Element(recordType, xmlns);
@@ -257,7 +259,7 @@ public class TEIFormat extends Format {
                         }
                     }
                     Element record = new Element("record", xmlns);
-                    Element header = getHeader(doc, null, handler, iso3code, setSpecFields);
+                    Element header = getHeader(doc, null, handler, iso3code, setSpecFields, filterQuerySuffix);
                     record.addContent(header);
                     Element metadata = new Element("metadata", xmlns);
                     metadata.addContent(newDoc);
@@ -287,7 +289,7 @@ public class TEIFormat extends Format {
      * Modified header generation where identifiers also contain the language code.
      */
     protected static Element getHeader(SolrDocument doc, SolrDocument topstructDoc, RequestHandler handler, String requestedVersion,
-            List<String> setSpecFields)
+            List<String> setSpecFields, String filterQuerySuffix)
             throws SolrServerException, IOException {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element header = new Element("header", xmlns);
@@ -302,7 +304,8 @@ public class TEIFormat extends Format {
         long timestampModified = SolrSearchTools.getLatestValidDateUpdated(topstructDoc != null ? topstructDoc : doc, untilTimestamp);
         datestamp.setText(Utils.parseDate(timestampModified));
         if (StringUtils.isEmpty(datestamp.getText()) && doc.getFieldValue(SolrConstants.ISANCHOR) != null) {
-            datestamp.setText(Utils.parseDate(DataManager.getInstance().getSearchIndex().getLatestVolumeTimestamp(doc, untilTimestamp)));
+            datestamp.setText(
+                    Utils.parseDate(DataManager.getInstance().getSearchIndex().getLatestVolumeTimestamp(doc, untilTimestamp, filterQuerySuffix)));
         }
         header.addContent(datestamp);
         // setSpec
@@ -329,17 +332,19 @@ public class TEIFormat extends Format {
     }
 
     /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map, java.lang.String)
+     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map, java.lang.String, java.lang.String)
      */
     /** {@inheritDoc} */
     @Override
-    public long getTotalHits(Map<String, String> params, String versionDiscriminatorField) throws IOException, SolrServerException {
+    public long getTotalHits(Map<String, String> params, String versionDiscriminatorField, String filterQuerySuffix)
+            throws IOException, SolrServerException {
         if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
             // Query Solr index for the count of the discriminator field
             QueryResponse qr = solr.search(params.get("from"), params.get("until"), params.get("set"), params.get("metadataPrefix"), 0, 0, false,
-                    " AND " + versionDiscriminatorField + ":*", null, Collections.singletonList(versionDiscriminatorField));
+                    " AND " + versionDiscriminatorField + ":*", filterQuerySuffix, null, Collections.singletonList(versionDiscriminatorField));
             return SolrSearchTools.getFieldCount(qr, versionDiscriminatorField);
         }
-        return solr.getTotalHitNumber(params, false, null, null);
+
+        return solr.getTotalHitNumber(params, false, null, null, filterQuerySuffix);
     }
 }

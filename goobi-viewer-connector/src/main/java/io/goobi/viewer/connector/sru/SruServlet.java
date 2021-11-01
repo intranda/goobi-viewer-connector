@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -47,12 +46,14 @@ import org.slf4j.LoggerFactory;
 
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.exceptions.HTTPException;
+import io.goobi.viewer.connector.exceptions.MissingArgumentException;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.SolrSearchIndex;
 import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
 import io.goobi.viewer.connector.utils.XmlTools;
+import io.goobi.viewer.exceptions.IndexUnreachableException;
 
 /**
  * <p>
@@ -121,12 +122,15 @@ public class SruServlet extends HttpServlet {
                     return;
                 }
                 try {
-                    Element searchRetrieve = generateSearchRetrieve(parameter, request, DataManager.getInstance().getSearchIndex());
+                    String filterQuerySuffix = SolrSearchTools.getAllSuffixes(request);
+                    Element searchRetrieve = generateSearchRetrieve(parameter, DataManager.getInstance().getSearchIndex(), filterQuerySuffix);
                     doc.setRootElement(searchRetrieve);
                 } catch (SolrServerException e) {
                     logger.error(e.getMessage(), e);
                     response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Index unreachable");
                     return;
+                } catch (IndexUnreachableException e) {
+                    logger.error(e.getMessage());
                 }
                 break;
             case EXPLAIN:
@@ -156,7 +160,7 @@ public class SruServlet extends HttpServlet {
         Format format = Format.getPrettyFormat();
         format.setEncoding("utf-8");
         XMLOutputter xmlOut = new XMLOutputter(format);
-            xmlOut.output(doc, response.getOutputStream());
+        xmlOut.output(doc, response.getOutputStream());
 
     }
 
@@ -197,20 +201,20 @@ public class SruServlet extends HttpServlet {
     /**
      * 
      * @param parameter
-     * @param request
      * @param solr
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @return
      * @throws SolrServerException
      * @throws IOException
      */
-    private static Element generateSearchRetrieve(SruRequestParameter parameter, HttpServletRequest request, SolrSearchIndex solr)
+    private static Element generateSearchRetrieve(SruRequestParameter parameter, SolrSearchIndex solr, String filterQuerySuffix)
             throws SolrServerException, IOException {
         Element root = new Element("searchRetrieveResponse", SRU_NAMESPACE);
         Element version = new Element("version", SRU_NAMESPACE);
         version.setText(parameter.getVersion());
         root.addContent(version);
 
-        String query = generateSearchQuery(parameter, request);
+        String query = generateSearchQuery(parameter, filterQuerySuffix);
         QueryResponse queryResponse =
                 solr.search(query, parameter.getStartRecord() - 1, parameter.getStartRecord() - 1 + parameter.getMaximumRecords(), null, null, null);
         SolrDocumentList solrDocuments = queryResponse.getResults();
@@ -227,12 +231,18 @@ public class SruServlet extends HttpServlet {
         Element records = new Element("records", SRU_NAMESPACE);
         root.addContent(records);
 
-        generateRecords(records, solrDocuments, parameter, request, solr);
+        generateRecords(records, solrDocuments, parameter, solr, filterQuerySuffix);
         generateEchoedSearchRetrieveRequest(root, solrDocuments, parameter);
 
         return root;
     }
 
+    /**
+     * 
+     * @param response
+     * @param parameter
+     * @throws IOException
+     */
     private static void missingArgument(HttpServletResponse response, String parameter) throws IOException {
         Element searchRetrieveResponse = new Element("searchRetrieveResponse", SRU_NAMESPACE);
         Element version = new Element("version", SRU_NAMESPACE);
@@ -261,6 +271,12 @@ public class SruServlet extends HttpServlet {
         xmlOut.output(doc, response.getOutputStream());
     }
 
+    /**
+     * 
+     * @param response
+     * @param parameter
+     * @throws IOException
+     */
     private static void unsupportedOperation(HttpServletResponse response, String parameter) throws IOException {
         Element searchRetrieveResponse = new Element("searchRetrieveResponse", SRU_NAMESPACE);
         Element version = new Element("version", SRU_NAMESPACE);
@@ -290,10 +306,11 @@ public class SruServlet extends HttpServlet {
     }
 
     /**
-     * @param query
+     * @param parameter
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @return
      */
-    private static String generateSearchQuery(SruRequestParameter parameter, HttpServletRequest request) {
+    private static String generateSearchQuery(SruRequestParameter parameter, String filterQuerySuffix) {
         // map dc queries to solr queries
         StringBuilder sbValue = new StringBuilder();
         String initValue = parameter.getQuery();
@@ -335,8 +352,12 @@ public class SruServlet extends HttpServlet {
             default:
                 break;
         }
-        sbValue.append(" AND (").append(SolrConstants.ISWORK).append(":true OR ").append(SolrConstants.ISANCHOR).append(":true)");
-        sbValue.append(SolrSearchTools.getAllSuffixes());
+        sbValue.append(" AND (")
+                .append(SolrConstants.ISWORK)
+                .append(":true OR ")
+                .append(SolrConstants.ISANCHOR)
+                .append(":true)")
+                .append(filterQuerySuffix);
         logger.trace(sbValue.toString());
         return sbValue.toString();
     }
@@ -380,11 +401,13 @@ public class SruServlet extends HttpServlet {
      * @param records
      * @param solrDocuments
      * @param parameter
+     * @param solr
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @throws SolrServerException
      * @throws IOException
      */
-    private static void generateRecords(Element records, List<SolrDocument> solrDocuments, SruRequestParameter parameter, HttpServletRequest request,
-            SolrSearchIndex solr) throws SolrServerException, IOException {
+    private static void generateRecords(Element records, List<SolrDocument> solrDocuments, SruRequestParameter parameter,
+            SolrSearchIndex solr, String filterQuerySuffix) throws SolrServerException, IOException {
         if (solrDocuments == null || solrDocuments.isEmpty()) {
             return;
         }
@@ -415,10 +438,10 @@ public class SruServlet extends HttpServlet {
                     generateModsRecord(document, recordData);
                     break;
                 case marcxml:
-                    generateMarcxmlRecord(document, recordData, request);
+                    generateMarcxmlRecord(document, recordData);
                     break;
                 case dc:
-                    generateDcRecord(document, recordData, solr);
+                    generateDcRecord(document, recordData, solr, filterQuerySuffix);
                     break;
                 case lido:
                     generateLidoRecord(document, recordData);
@@ -463,10 +486,12 @@ public class SruServlet extends HttpServlet {
     /**
      * @param document
      * @param recordData
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @throws SolrServerException
      * @throws IOException
      */
-    private static void generateDcRecord(SolrDocument doc, Element recordData, SolrSearchIndex solr) throws SolrServerException, IOException {
+    private static void generateDcRecord(SolrDocument doc, Element recordData, SolrSearchIndex solr, String filterQuerySuffix)
+            throws SolrServerException, IOException {
         Element dc = new Element("record", DC_NAMEPSACE);
 
         String title = null;
@@ -484,7 +509,7 @@ public class SruServlet extends HttpServlet {
         }
         if (doc.getFieldValue("IDDOC_PARENT") != null) {
             // If this is a volume, add anchor title in front
-            String anchorTitle = getAnchorTitle(doc, solr);
+            String anchorTitle = getAnchorTitle(doc, solr, filterQuerySuffix);
             if (anchorTitle != null) {
                 title = anchorTitle + "; " + title;
             }
@@ -597,9 +622,18 @@ public class SruServlet extends HttpServlet {
         recordData.addContent(dc);
     }
 
-    private static String getAnchorTitle(SolrDocument doc, SolrSearchIndex solr) throws SolrServerException, IOException {
+    /**
+     * 
+     * @param doc
+     * @param solr
+     * @param filterQuerySuffix
+     * @return
+     * @throws SolrServerException
+     * @throws IOException
+     */
+    private static String getAnchorTitle(SolrDocument doc, SolrSearchIndex solr, String filterQuerySuffix) throws SolrServerException, IOException {
         String iddocParent = (String) doc.getFieldValue(SolrConstants.IDDOC_PARENT);
-        SolrDocumentList hits = solr.search(SolrConstants.IDDOC + ":" + iddocParent);
+        SolrDocumentList hits = solr.search(SolrConstants.IDDOC + ":" + iddocParent, filterQuerySuffix);
         if (hits != null && !hits.isEmpty()) {
             return (String) hits.get(0).getFirstValue("MD_TITLE");
         }
@@ -611,7 +645,7 @@ public class SruServlet extends HttpServlet {
      * @param document
      * @param recordData
      */
-    private static void generateMarcxmlRecord(SolrDocument document, Element recordData, HttpServletRequest request) {
+    private static void generateMarcxmlRecord(SolrDocument document, Element recordData) {
         String pi = (String) document.getFieldValue(SolrConstants.PI_TOPSTRUCT);
         String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl()).append(pi).toString();
         try {
@@ -651,8 +685,8 @@ public class SruServlet extends HttpServlet {
                     root.setAttribute("schemaLocation", "http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd",
                             XSI_NAMESPACE);
                     recordData.addContent(root.cloneContent());
-
                 } catch (XSLTransformException e) {
+                    logger.warn(e.getMessage());
                 }
 
                 // Add PURL for this record as 856$u
@@ -1155,6 +1189,6 @@ public class SruServlet extends HttpServlet {
     /** {@inheritDoc} */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-            doGet(req, resp);
+        doGet(req, resp);
     }
 }

@@ -27,6 +27,8 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
@@ -40,40 +42,42 @@ import io.goobi.viewer.connector.utils.Utils;
  * ESE
  */
 public class EuropeanaFormat extends OAIDCFormat {
+    
+    private static final Logger logger = LoggerFactory.getLogger(EuropeanaFormat.class);
 
     private List<String> setSpecFields = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.ese.name());
 
     /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String)
+     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String, java.lang.String)
      */
     /** {@inheritDoc} */
     @Override
-    public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField)
-            throws SolrServerException, IOException {
+    public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField,
+            String filterQuerySuffix) throws SolrServerException, IOException {
         QueryResponse qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false,
                 SolrSearchTools.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes()),
-                null, null);
+                filterQuerySuffix, null, null);
         if (qr.getResults().isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
-        return generateESE(qr.getResults(), qr.getResults().getNumFound(), firstRawRow, numRows, handler, "ListRecords");
+        return generateESE(qr.getResults(), qr.getResults().getNumFound(), firstRawRow, numRows, handler, "ListRecords", filterQuerySuffix);
     }
 
     /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler)
+     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler, java.lang.String)
      */
     /** {@inheritDoc} */
     @Override
-    public Element createGetRecord(RequestHandler handler) {
+    public Element createGetRecord(RequestHandler handler, String filterQuerySuffix) {
         if (handler.getIdentifier() == null) {
             return new ErrorCode().getBadArgument();
         }
         try {
-            SolrDocument doc = solr.getListRecord(handler.getIdentifier(), null);
+            SolrDocument doc = solr.getListRecord(handler.getIdentifier(), null, filterQuerySuffix);
             if (doc == null) {
                 return new ErrorCode().getIdDoesNotExist();
             }
-            return generateESE(Collections.singletonList(doc), 1L, 0, 1, handler, "GetRecord");
+            return generateESE(Collections.singletonList(doc), 1L, 0, 1, handler, "GetRecord", filterQuerySuffix);
         } catch (IOException e) {
             return new ErrorCode().getNoMetadataFormats();
         } catch (SolrServerException e) {
@@ -90,12 +94,13 @@ public class EuropeanaFormat extends OAIDCFormat {
      * @param numRows
      * @param handler
      * @param recordType
+     * @param filterQuerySuffix Filter query suffix for the client's session
      * @return
      * @throws SolrServerException
      * @throws IOException
      */
-    private Element generateESE(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler, String recordType)
-            throws SolrServerException, IOException {
+    private Element generateESE(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler, String recordType,
+            String filterQuerySuffix) throws SolrServerException, IOException {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Namespace nsDc = Namespace.getNamespace(Metadata.dc.getMetadataNamespacePrefix(), Metadata.dc.getMetadataNamespaceUri());
         Namespace nsDcTerms = Namespace.getNamespace("dcterms", "http://purl.org/dc/terms/");
@@ -107,6 +112,7 @@ public class EuropeanaFormat extends OAIDCFormat {
             numRows = records.size();
         }
         for (SolrDocument doc : records) {
+            // logger.trace("record: {}", doc.getFieldValue(SolrConstants.PI));
             Element record = new Element("record", xmlns);
 
             boolean isWork = doc.getFieldValue(SolrConstants.ISWORK) != null && (boolean) doc.getFieldValue(SolrConstants.ISWORK);
@@ -117,7 +123,7 @@ public class EuropeanaFormat extends OAIDCFormat {
             } else {
                 // If child element metadata fields are empty, get certain values from topstruct
                 String iddocTopstruct = (String) doc.getFieldValue(SolrConstants.IDDOC_TOPSTRUCT);
-                SolrDocumentList docList = solr.search(SolrConstants.IDDOC + ":" + iddocTopstruct);
+                SolrDocumentList docList = solr.search("+" + SolrConstants.IDDOC + ":" + iddocTopstruct, filterQuerySuffix);
                 if (docList != null && !docList.isEmpty()) {
                     topstructDoc = docList.get(0);
                 }
@@ -127,14 +133,14 @@ public class EuropeanaFormat extends OAIDCFormat {
                 SolrDocument childDoc = topstructDoc != null ? topstructDoc : doc;
                 String iddocAnchor = (String) childDoc.getFieldValue(SolrConstants.IDDOC_PARENT);
                 if (iddocAnchor != null) {
-                    SolrDocumentList docList = solr.search(SolrConstants.IDDOC + ":" + iddocAnchor);
+                    SolrDocumentList docList = solr.search("+" + SolrConstants.IDDOC + ":" + iddocAnchor, filterQuerySuffix);
                     if (docList != null && !docList.isEmpty()) {
                         anchorDoc = docList.get(0);
                     }
                 }
             }
 
-            Element header = getHeader(doc, topstructDoc, handler, null, setSpecFields);
+            Element header = getHeader(doc, topstructDoc, handler, null, setSpecFields, filterQuerySuffix);
             record.addContent(header);
 
             String identifier = null;
@@ -189,9 +195,14 @@ public class EuropeanaFormat extends OAIDCFormat {
                 }
                 if (isWork && doc.getFieldValue(SolrConstants.IDDOC_PARENT) != null) {
                     // If this is a volume, add anchor title in front
-                    String anchorTitle = getAnchorTitle(doc);
-                    if (anchorTitle != null) {
-                        title = anchorTitle + "; " + title;
+                    String iddocParent = (String) doc.getFieldValue(SolrConstants.IDDOC_PARENT);
+                    String anchorTitle = anchorTitles.get(iddocParent);
+                    if (anchorTitle == null) {
+                        anchorTitle = getAnchorTitle(iddocParent, filterQuerySuffix);
+                        if (anchorTitle != null) {
+                            title = anchorTitle + "; " + title;
+                            anchorTitles.put(iddocParent, anchorTitle);
+                        }
                     }
                 }
                 dc_title.setText(title);
