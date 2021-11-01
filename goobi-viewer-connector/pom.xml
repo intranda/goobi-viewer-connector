@@ -81,10 +81,10 @@
             <version>${viewer-core.version}</version>
             <!-- Exclude javax.xml packages to avoid module problems with Java 9+ -->
             <exclusions>
-                <exclusion>
-                    <groupId>de.intranda.contentserver</groupId>
-                    <artifactId>ics</artifactId>
-                </exclusion>
+<!--                 <exclusion> -->
+<!--                     <groupId>de.intranda.contentserver</groupId> -->
+<!--                     <artifactId>ics</artifactId> -->
+<!--                 </exclusion> -->
                 <exclusion>
                     <groupId>xml-apis</groupId>
                     <artifactId>xml-apis</artifactId>
