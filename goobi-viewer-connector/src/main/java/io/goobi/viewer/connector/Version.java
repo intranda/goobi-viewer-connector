@@ -54,12 +54,10 @@ public class Version {
         String classPath = clazz.getResource(className).toString();
         String value = null;
         String manifestPath;
-        if (classPath.contains("WEB-INF")) {
-            // Server
-            manifestPath = classPath.substring(0, classPath.lastIndexOf("/WEB-INF/")) + "/META-INF/MANIFEST.MF";
+        if (classPath.startsWith("jar")) {
+            manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF";
         } else {
-            // Eclipse WTP
-            manifestPath = classPath.substring(0, classPath.lastIndexOf("/classes/")) + "/m2e-wtp/web-resources/META-INF/MANIFEST.MF";
+            manifestPath = classPath.substring(0, classPath.lastIndexOf("classes") + 7) + "/META-INF/MANIFEST.MF";
         }
         try (InputStream inputStream = new URL(manifestPath).openStream()) {
             StringWriter writer = new StringWriter();
