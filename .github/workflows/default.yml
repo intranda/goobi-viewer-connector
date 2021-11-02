@@ -29,5 +29,5 @@ jobs:
         java-version: '11'
 
     - name: Compile Goobi viewer Connector
-      run: mvn -f goobi-viewer-connector/pom.xml clean package -U -B
+      run: mvn -f goobi-viewer-connector/pom.xml -DskipTests=true clean package -U -B
 
