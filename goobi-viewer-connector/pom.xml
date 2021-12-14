@@ -63,7 +63,7 @@
 		<httpcore.version>4.4.15</httpcore.version>
 		<jaxen.version>1.2.0</jaxen.version>
 		<jdom2.version>2.0.6.1</jdom2.version>
-		<json.version>20210307</json.version>
+		<json.version>20211205</json.version>
 		<junit.version>4.13.2</junit.version>
 		<log4j.version>2.16.0</log4j.version>
 		<slf4j.version>1.7.32</slf4j.version>
