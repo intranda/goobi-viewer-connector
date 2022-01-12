@@ -16,6 +16,7 @@
 package io.goobi.viewer.connector.oai.model.formats;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -63,17 +64,20 @@ public class TEIFormat extends Format {
         QueryResponse qr;
         long totalVirtualHits;
         long totalRawHits;
+        List<String> fieldList = new ArrayList<>(Arrays.asList(IDENTIFIER_FIELDS));
+        fieldList.addAll(Arrays.asList(DATE_FIELDS));
+
         if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
             // One OAI record for each record version
             qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false,
-                    " AND " + versionDiscriminatorField + ":*", filterQuerySuffix, Arrays.asList(IDENTIFIER_FIELDS),
+                    " AND " + versionDiscriminatorField + ":*", filterQuerySuffix, fieldList,
                     Collections.singletonList(versionDiscriminatorField));
             totalVirtualHits = SolrSearchTools.getFieldCount(qr, versionDiscriminatorField);
             totalRawHits = qr.getResults().getNumFound();
         } else {
             // One OAI record for each record proper
-            qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false, null, filterQuerySuffix,
-                    Arrays.asList(IDENTIFIER_FIELDS), null);
+            qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false, null, filterQuerySuffix, fieldList,
+                    null);
             totalVirtualHits = totalRawHits = qr.getResults().getNumFound();
         }
         if (qr.getResults().isEmpty()) {
