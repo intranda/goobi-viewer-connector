@@ -36,6 +36,7 @@ import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.model.Set;
 import io.goobi.viewer.exceptions.IndexUnreachableException;
 import io.goobi.viewer.model.search.SearchHelper;
+import io.goobi.viewer.model.security.IPrivilegeHolder;
 
 /**
  * <p>
@@ -128,13 +129,14 @@ public class SolrSearchTools {
     }
 
     /**
-     * Returns the blacklist filter suffix (if enabled), followed by the user-agnostic access condition suffix.
+     * Returns the blacklist filter suffix (if enabled), followed by the user-agnostic access condition suffix. For the purposes of OAI, the privilege
+     * to download metadata is checked rather than the privilege to list a record.
      *
      * @return a {@link java.lang.String} object.
      * @throws IndexUnreachableException
      */
     public static String getAllSuffixes(HttpServletRequest request) throws IndexUnreachableException {
-        return SearchHelper.getAllSuffixes(request, true, true);
+        return SearchHelper.getAllSuffixes(request, true, true, IPrivilegeHolder.PRIV_DOWNLOAD_METADATA);
     }
 
     /**
@@ -177,7 +179,7 @@ public class SolrSearchTools {
      * @should ignore untilTimestamp if zero
      */
     public static Long getLatestValidDateUpdated(SolrDocument doc, long untilTimestamp) {
-        logger.trace(""+ untilTimestamp);
+        logger.trace("" + untilTimestamp);
         long ret = 0;
         Collection<Object> dateUpdatedValues = doc.getFieldValues(SolrConstants.DATEUPDATED);
         if (dateUpdatedValues != null && !dateUpdatedValues.isEmpty()) {
