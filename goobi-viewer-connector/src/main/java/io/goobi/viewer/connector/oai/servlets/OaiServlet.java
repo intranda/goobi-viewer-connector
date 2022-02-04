@@ -67,8 +67,10 @@ public class OaiServlet extends HttpServlet {
         String filterQuerySuffix = "";
         try {
             filterQuerySuffix = SolrSearchTools.getAllSuffixes(request);
+            // logger.trace("filterQuerySuffix: {}",filterQuerySuffix);
         } catch (IndexUnreachableException e) {
             logger.error(e.getMessage());
+            throw new IOException(e.getMessage());
         }
 
         Document doc = new Document();

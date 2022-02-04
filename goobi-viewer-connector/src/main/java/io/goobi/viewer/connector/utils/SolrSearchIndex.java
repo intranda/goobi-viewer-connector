@@ -46,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.goobi.viewer.connector.DataManager;
+import io.goobi.viewer.exceptions.IndexUnreachableException;
 import io.goobi.viewer.model.search.SearchHelper;
 
 /**
@@ -181,7 +182,7 @@ public class SolrSearchIndex {
      */
     public SolrDocumentList search(String query, String filterQuerySuffix) throws SolrServerException, IOException {
         String finalQuery = query + filterQuerySuffix;
-        if(!finalQuery.startsWith("+")) {
+        if (!finalQuery.startsWith("+")) {
             finalQuery = "+" + finalQuery;
         }
         SolrQuery solrQuery = new SolrQuery(finalQuery);
@@ -346,10 +347,11 @@ public class SolrSearchIndex {
      * @return {@link org.apache.solr.common.SolrDocument}
      * @throws java.io.IOException
      * @throws org.apache.solr.client.solrj.SolrServerException
+     * @throws IndexUnreachableException 
      */
     public SolrDocument getListRecord(final String identifier, List<String> fieldList, String filterQuerySuffix)
             throws IOException, SolrServerException {
-        logger.trace("getListRecord");
+        logger.trace("getListRecord: {}", identifier);
         SolrDocumentList ret = queryForIdentifier(identifier, 1, fieldList, filterQuerySuffix);
         if (!ret.isEmpty()) {
             return ret.get(0);
@@ -368,8 +370,9 @@ public class SolrSearchIndex {
      * @throws org.apache.solr.client.solrj.SolrServerException
      * @return a boolean.
      * @throws IOException
+     * @throws IndexUnreachableException 
      */
-    public boolean isRecordExists(final String identifier, String filterQuerySuffix) throws SolrServerException, IOException {
+    public boolean isRecordExists(final String identifier, String filterQuerySuffix) throws SolrServerException, IOException, IndexUnreachableException {
         return !queryForIdentifier(identifier, 0, null, filterQuerySuffix).isEmpty();
     }
 
@@ -382,13 +385,14 @@ public class SolrSearchIndex {
      * @return
      * @throws SolrServerException
      * @throws IOException
+     * @throws IndexUnreachableException 
      */
     private SolrDocumentList queryForIdentifier(final String identifier, int rows, List<String> fieldList, String filterQuerySuffix)
             throws SolrServerException, IOException {
         String useIdentifier = ClientUtils.escapeQueryChars(identifier);
 
         StringBuilder sb = new StringBuilder();
-        sb.append('(')
+        sb.append("+(")
                 .append(SolrConstants.PI)
                 .append(':')
                 .append(useIdentifier)
