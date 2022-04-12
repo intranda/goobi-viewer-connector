@@ -65,6 +65,7 @@ public class METSFormat extends Format {
         Element xmlListIdentifiers = new Element("ListIdentifiers", xmlns);
 
         List<String> fieldList = new ArrayList<>(Arrays.asList(IDENTIFIER_FIELDS));
+        fieldList.addAll(Arrays.asList(DATE_FIELDS));
         fieldList.addAll(setSpecFields);
 
         QueryResponse qr;
@@ -104,6 +105,7 @@ public class METSFormat extends Format {
     public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField,
             String filterQuerySuffix) throws IOException, SolrServerException {
         List<String> fieldList = new ArrayList<>(Arrays.asList(IDENTIFIER_FIELDS));
+        fieldList.addAll(Arrays.asList(DATE_FIELDS));
         fieldList.addAll(setSpecFields);
         QueryResponse qr =
                 solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false, METS_FILTER_QUERY, filterQuerySuffix,
@@ -127,6 +129,7 @@ public class METSFormat extends Format {
             return new ErrorCode().getBadArgument();
         }
         List<String> fieldList = new ArrayList<>(Arrays.asList(IDENTIFIER_FIELDS));
+        fieldList.addAll(Arrays.asList(DATE_FIELDS));
         fieldList.addAll(setSpecFields);
         try {
             SolrDocument doc = solr.getListRecord(handler.getIdentifier(), fieldList, filterQuerySuffix);

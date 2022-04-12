@@ -78,6 +78,7 @@ public abstract class Format {
     public static final String ACCESSCONDITION_OPENACCESS = "info:eu-repo/semantics/openAccess";
     public static final String ACCESSCONDITION_CLOSEDACCESS = "info:eu-repo/semantics/closedAccess";
 
+    protected final String[] DATE_FIELDS = { SolrConstants.DATECREATED, SolrConstants.DATEUPDATED };
     protected final String[] IDENTIFIER_FIELDS = { SolrConstants.PI, SolrConstants.PI_TOPSTRUCT };
 
     /** Constant <code>expiration=259200000L</code> */
@@ -400,13 +401,16 @@ public abstract class Format {
         // datestamp
         Element datestamp = new Element("datestamp", xmlns);
         long untilTimestamp = RequestHandler.getUntilTimestamp(handler.getUntil());
+        logger.trace("untilTimestamp: {}", untilTimestamp);
         long timestampModified = SolrSearchTools.getLatestValidDateUpdated(topstructDoc != null ? topstructDoc : doc, untilTimestamp);
+        logger.trace("timestampModified: {}", timestampModified);
         datestamp.setText(Utils.parseDate(timestampModified));
         if (StringUtils.isEmpty(datestamp.getText()) && doc.getFieldValue(SolrConstants.ISANCHOR) != null) {
             datestamp.setText(
                     Utils.parseDate(DataManager.getInstance().getSearchIndex().getLatestVolumeTimestamp(doc, untilTimestamp, filterQuerySuffix)));
         }
         header.addContent(datestamp);
+        logger.trace("datestamp: {}", datestamp.getText());
         // setSpec
         if (StringUtils.isNotEmpty(handler.getSet())) {
             // setSpec from handler

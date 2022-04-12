@@ -183,11 +183,12 @@ public class EpicurFormat extends Format {
             Element getRecord = new Element("GetRecord", xmlns);
             Element record = new Element("record", xmlns);
             long dateupdated = SolrSearchTools.getLatestValidDateUpdated(doc, RequestHandler.getUntilTimestamp(handler.getUntil()));
-            Element header = generateEpicurPageHeader(doc, handler.getIdentifier(), dateupdated, setSpecFields);
+            String urn = doc.getFieldValue(SolrConstants.URN) != null ? (String) doc.getFieldValue(SolrConstants.URN) : handler.getIdentifier();
+            Element header = generateEpicurPageHeader(doc, urn, dateupdated, setSpecFields);
             record.addContent(header);
             Element metadata = new Element("metadata", xmlns);
             record.addContent(metadata);
-            metadata.addContent(generateEpicurPageElement(handler.getIdentifier(), (Long) doc.getFieldValue(SolrConstants.DATECREATED), dateupdated,
+            metadata.addContent(generateEpicurPageElement(urn, (Long) doc.getFieldValue(SolrConstants.DATECREATED), dateupdated,
                     (Long) doc.getFieldValue(SolrConstants.DATEDELETED)));
             getRecord.addContent(record);
 
@@ -213,7 +214,8 @@ public class EpicurFormat extends Format {
         Element header = new Element("header", xmlns);
         Element identifier = new Element("identifier", xmlns);
         identifier.setText(
-                DataManager.getInstance().getConfiguration().getOaiIdentifier().get("repositoryIdentifier") + (String) doc.getFieldValue("URN"));
+                DataManager.getInstance().getConfiguration().getOaiIdentifier().get("repositoryIdentifier")
+                        + (String) doc.getFieldValue(SolrConstants.URN));
         header.addContent(identifier);
 
         Element datestamp = new Element("datestamp", xmlns);
