@@ -228,7 +228,6 @@ public class Utils {
                 .build();
         try (CloseableHttpClient httpClient = HttpClients.custom().setDefaultRequestConfig(defaultRequestConfig).build()) {
             HttpGet get = new HttpGet(url);
-            Charset chars = Charset.forName(DEFAULT_ENCODING);
             try (CloseableHttpResponse response = httpClient.execute(get)) {
                 return response.getStatusLine().getStatusCode();
             }
