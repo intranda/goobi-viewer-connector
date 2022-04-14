@@ -360,8 +360,6 @@ public class Utils {
      * @should format string correctly
      */
     public static String formatVersionString(String json) {
-        final String notAvailableKey = "admin__dashboard_versions_not_available";
-
         if (StringUtils.isEmpty(json)) {
             return "NOT AVAILABLE";
         }
