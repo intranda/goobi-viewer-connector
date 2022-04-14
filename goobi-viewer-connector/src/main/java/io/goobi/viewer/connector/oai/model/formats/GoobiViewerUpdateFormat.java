@@ -78,7 +78,7 @@ public class GoobiViewerUpdateFormat extends Format {
             long totalHits = 0;
             if (StringUtils.isNotEmpty(rawJSON)) {
                 jsonArray = new JSONArray(rawJSON);
-                totalHits = Long.valueOf(((int) jsonArray.get(0)));
+                totalHits = (int) jsonArray.get(0);
                 jsonArray.remove(0);
             }
             if (totalHits == 0) {

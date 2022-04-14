@@ -70,8 +70,20 @@ public class XmlTools {
 
     private static final Logger logger = LoggerFactory.getLogger(XmlTools.class);
 
+    public static SAXBuilder getSAXBuilder() {
+        SAXBuilder builder = new SAXBuilder();
+        // Disable access to external entities
+        builder.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        builder.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        builder.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+
+        return builder;
+    }
+
     /**
-     * <p>readXmlFile.</p>
+     * <p>
+     * readXmlFile.
+     * </p>
      *
      * @param filePath a {@link java.lang.String} object.
      * @throws java.io.FileNotFoundException if file not found
@@ -83,11 +95,7 @@ public class XmlTools {
      */
     public static Document readXmlFile(String filePath) throws FileNotFoundException, IOException, JDOMException {
         try (FileInputStream fis = new FileInputStream(new File(filePath))) {
-            SAXBuilder builder = new SAXBuilder();
-//            builder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-//            builder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-            Document document = builder.build(fis);
-            return document;
+            return getSAXBuilder().build(fis);
         }
     }
 
@@ -103,16 +111,14 @@ public class XmlTools {
      */
     public static Document readXmlFile(URL url) throws FileNotFoundException, IOException, JDOMException {
         try (InputStream is = url.openStream()) {
-            SAXBuilder builder = new SAXBuilder();
-//            builder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-//            builder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-            Document document = builder.build(is);
-            return document;
+            return getSAXBuilder().build(is);
         }
     }
 
     /**
-     * <p>readXmlFile.</p>
+     * <p>
+     * readXmlFile.
+     * </p>
      *
      * @param path a {@link java.nio.file.Path} object.
      * @throws java.io.FileNotFoundException
@@ -123,11 +129,7 @@ public class XmlTools {
      */
     public static Document readXmlFile(Path path) throws FileNotFoundException, IOException, JDOMException {
         try (InputStream is = Files.newInputStream(path)) {
-            SAXBuilder builder = new SAXBuilder();
-//            builder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-//            builder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-            Document document = builder.build(is);
-            return document;
+            return getSAXBuilder().build(is);
         }
     }
 
@@ -152,18 +154,16 @@ public class XmlTools {
         } catch (UnsupportedEncodingException e) {
             logger.error(e.getMessage(), e);
         }
-        ByteArrayInputStream baos = new ByteArrayInputStream(byteArray);
 
-        // Reader reader = new StringReader(hOCRText);
-        SAXBuilder builder = new SAXBuilder();
-        // builder.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-        // builder.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-        Document document = builder.build(baos);
-        return document;
+        try (ByteArrayInputStream baos = new ByteArrayInputStream(byteArray)) {
+            return getSAXBuilder().build(baos);
+        }
     }
 
     /**
-     * <p>getStringFromElement.</p>
+     * <p>
+     * getStringFromElement.
+     * </p>
      *
      * @param element a {@link java.lang.Object} object.
      * @param encoding a {@link java.lang.String} object.
@@ -244,7 +244,9 @@ public class XmlTools {
     }
 
     /**
-     * <p>determineFileFormat.</p>
+     * <p>
+     * determineFileFormat.
+     * </p>
      *
      * @param xml a {@link java.lang.String} object.
      * @param encoding a {@link java.lang.String} object.
@@ -311,7 +313,6 @@ public class XmlTools {
             JDOMSource docFrom = new JDOMSource(doc);
             JDOMResult docTo = new JDOMResult();
 
-
             TransformerFactory transformerFactory = javax.xml.transform.TransformerFactory.newInstance();
             transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
             transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
@@ -333,47 +334,47 @@ public class XmlTools {
 
         return null;
     }
-    
+
     /**
-    *
-    * @param object Object to serialize.
-    * @return
-    */
-   public static String serializeWithXStream(Object object, Converter converter) {
-       XStream xStream = new XStream();
-       xStream.allowTypesByWildcard(new String[] { "io.goobi.viewer.**" });
-       if (converter != null) {
-           xStream.registerConverter(converter);
-       }
-       xStream.autodetectAnnotations(true);
-       HierarchicalStreamWriter xmlWriter = null;
-       try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-               OutputStreamWriter writer = new OutputStreamWriter(baos, Utils.DEFAULT_ENCODING)) {
-           xmlWriter = new PrettyPrintWriter(writer);
-           xStream.marshal(object, xmlWriter);
-           xmlWriter.close();
-           return new String(baos.toByteArray(), Utils.DEFAULT_ENCODING);
-       } catch (UnsupportedEncodingException e) {
-           logger.error(e.getMessage(), e);
-       } catch (IOException e) {
-           logger.error(e.getMessage(), e);
-       }
+     *
+     * @param object Object to serialize.
+     * @return
+     */
+    public static String serializeWithXStream(Object object, Converter converter) {
+        XStream xStream = new XStream();
+        xStream.allowTypesByWildcard(new String[] { "io.goobi.viewer.**" });
+        if (converter != null) {
+            xStream.registerConverter(converter);
+        }
+        xStream.autodetectAnnotations(true);
+        HierarchicalStreamWriter xmlWriter = null;
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                OutputStreamWriter writer = new OutputStreamWriter(baos, Utils.DEFAULT_ENCODING)) {
+            xmlWriter = new PrettyPrintWriter(writer);
+            xStream.marshal(object, xmlWriter);
+            xmlWriter.close();
+            return new String(baos.toByteArray(), Utils.DEFAULT_ENCODING);
+        } catch (UnsupportedEncodingException e) {
+            logger.error(e.getMessage(), e);
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+        }
 
-       return "";
-   }
+        return "";
+    }
 
-   /**
-    * @param data
-    * @return
-    */
-   @SuppressWarnings("rawtypes")
-   public static Object deSerializeWithXStream(Reader reader, Class clazz, Converter converter) {
-       XStream xstream = new XStream();
-       xstream.allowTypesByWildcard(new String[] { "io.goobi.viewer.**" });
-       if (converter != null) {
-           xstream.registerConverter(converter);
-       }
-       xstream.processAnnotations(clazz);
-       return xstream.fromXML(reader);
-   }
+    /**
+     * @param data
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public static Object deSerializeWithXStream(Reader reader, Class clazz, Converter converter) {
+        XStream xstream = new XStream();
+        xstream.allowTypesByWildcard(new String[] { "io.goobi.viewer.**" });
+        if (converter != null) {
+            xstream.registerConverter(converter);
+        }
+        xstream.processAnnotations(clazz);
+        return xstream.fromXML(reader);
+    }
 }

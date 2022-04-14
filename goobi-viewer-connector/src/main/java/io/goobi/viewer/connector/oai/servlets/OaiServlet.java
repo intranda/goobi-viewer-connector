@@ -70,7 +70,8 @@ public class OaiServlet extends HttpServlet {
             // logger.trace("filterQuerySuffix: {}",filterQuerySuffix);
         } catch (IndexUnreachableException e) {
             logger.error(e.getMessage());
-            throw new IOException(e.getMessage());
+            res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            return;
         }
 
         Document doc = new Document();
