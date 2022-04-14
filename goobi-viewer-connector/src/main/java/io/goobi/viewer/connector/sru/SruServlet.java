@@ -88,14 +88,21 @@ public class SruServlet extends HttpServlet {
         SruRequestParameter parameter = null;
         try {
             parameter = new SruRequestParameter(request);
-            logger.debug(parameter.toString());
         } catch (MissingArgumentException e) {
-            if (e.getMessage().contains("version")) {
-                missingArgument(response, "version");
-            } else if (e.getMessage().contains("operation")) {
-                missingArgument(response, "operation");
-            } else {
-                missingArgument(response, "");
+            try {
+                if (e.getMessage().contains("version")) {
+                    missingArgument(response, "version");
+                } else if (e.getMessage().contains("operation")) {
+                    missingArgument(response, "operation");
+                } else {
+                    missingArgument(response, "");
+                }
+            } catch (IOException e1) {
+                try {
+                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e1.getMessage());
+                } catch (IOException e2) {
+                    logger.error(e2.getMessage());
+                }
             }
             logger.error(e.getMessage(), e);
             return;
@@ -105,43 +112,69 @@ public class SruServlet extends HttpServlet {
         if (parameter.getStylesheet() != null && !parameter.getStylesheet().isEmpty()) {
             ProcessingInstruction pi = new ProcessingInstruction("xml-stylesheet", "type='text/xsl' href='" + parameter.getStylesheet() + "'");
             doc.addContent(pi);
-            logger.debug("added stylesheet " + parameter.getStylesheet() + " to sru output.");
+            // logger.trace("Added stylesheet '{}' to SRU output.", parameter.getStylesheet());
         }
 
         switch (parameter.getOperation()) {
             case SEARCHRETRIEVE:
-                logger.debug("operation is searchRetrieve");
+                logger.trace("operation is searchRetrieve");
                 if (parameter.getQuery() == null || parameter.getQuery().isEmpty()) {
-                    missingArgument(response, "query");
+                    try {
+                        missingArgument(response, "query");
+                    } catch (IOException e) {
+                        try {
+                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                        } catch (IOException e1) {
+                            logger.error(e1.getMessage());
+                        }
+                    }
                     logger.info("cannot process request {}, parameter 'query' is missing.", request.getQueryString());
                     return;
                 }
 
                 if (parameter.getRecordSchema() == null) {
-                    wrongSchema(response, request.getParameter("recordSchema"));
+                    try {
+                        wrongSchema(response, request.getParameter("recordSchema"));
+                    } catch (IOException e) {
+                        try {
+                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                        } catch (IOException e1) {
+                            logger.error(e1.getMessage());
+                        }
+                    }
                     return;
                 }
                 try {
                     String filterQuerySuffix = SolrSearchTools.getAllSuffixes(request);
                     Element searchRetrieve = generateSearchRetrieve(parameter, DataManager.getInstance().getSearchIndex(), filterQuerySuffix);
                     doc.setRootElement(searchRetrieve);
-                } catch (SolrServerException e) {
-                    logger.error(e.getMessage(), e);
-                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Index unreachable");
-                    return;
-                } catch (IndexUnreachableException e) {
+                } catch (IndexUnreachableException | IOException | SolrServerException e) {
                     logger.error(e.getMessage());
+                    try {
+                        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                    } catch (IOException e1) {
+                        logger.error(e1.getMessage());
+                    }
+                    return;
                 }
                 break;
             case EXPLAIN:
-                logger.debug("operation is explain");
+                logger.trace("operation is explain");
                 Element rootElement = getExplain(request, parameter);
                 doc.setRootElement(rootElement);
                 break;
             case SCAN:
-                logger.debug("operation is scan");
+                logger.trace("operation is scan");
                 if (parameter.getScanClause() == null || parameter.getScanClause().isEmpty()) {
-                    missingArgument(response, "scanClause");
+                    try {
+                        missingArgument(response, "scanClause");
+                    } catch (IOException e) {
+                        try {
+                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                        } catch (IOException e1) {
+                            logger.error(e1.getMessage());
+                        }
+                    }
                     logger.info("Cannot process request {}, parameter 'scanClause' is missing.", request.getQueryString());
                     return;
                 }
@@ -153,7 +186,16 @@ public class SruServlet extends HttpServlet {
                 return;
             case UNSUPPORTETPARAMETER:
             default:
-                unsupportedOperation(response, request.getParameter("operation"));
+                try {
+                    unsupportedOperation(response, request.getParameter("operation"));
+                } catch (IOException e) {
+                    logger.error(e.getMessage());
+                    try {
+                        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                    } catch (IOException e1) {
+                        logger.error(e1.getMessage());
+                    }
+                }
                 return;
         }
 

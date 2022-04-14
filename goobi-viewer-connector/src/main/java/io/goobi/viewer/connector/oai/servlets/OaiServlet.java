@@ -70,7 +70,11 @@ public class OaiServlet extends HttpServlet {
             // logger.trace("filterQuerySuffix: {}",filterQuerySuffix);
         } catch (IndexUnreachableException e) {
             logger.error(e.getMessage());
-            res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            try {
+                res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            } catch (IOException e1) {
+                logger.error(e.getMessage());
+            }
             return;
         }
 
@@ -138,9 +142,13 @@ public class OaiServlet extends HttpServlet {
             else if (handler.getVerb().equals(Verb.Identify)) {
                 try {
                     root.addContent(Format.getIdentifyXML(filterQuerySuffix));
-                } catch (SolrServerException e) {
+                } catch (IOException | SolrServerException e) {
                     logger.error(e.getMessage(), e);
-                    res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                    try {
+                        res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                    } catch (IOException e1) {
+                        logger.error(e1.getMessage());
+                    }
                     return;
                 }
             }
@@ -164,9 +172,13 @@ public class OaiServlet extends HttpServlet {
                         } else {
                             root.addContent(new ErrorCode().getBadArgument());
                         }
-                    } catch (SolrServerException e) {
+                    } catch (IOException | SolrServerException e) {
                         logger.error(e.getMessage(), e);
-                        res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                        try {
+                            res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                        } catch (IOException e1) {
+                            logger.error(e1.getMessage());
+                        }
                         return;
                     }
                 }
@@ -197,9 +209,13 @@ public class OaiServlet extends HttpServlet {
                         } else {
                             root.addContent(new ErrorCode().getBadArgument());
                         }
-                    } catch (SolrServerException e) {
+                    } catch (IOException | SolrServerException e) {
                         logger.error(e.getMessage(), e);
-                        res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                        try {
+                            res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                        } catch (IOException e1) {
+                            logger.error(e1.getMessage());
+                        }
                         return;
                     }
                 }
@@ -224,9 +240,13 @@ public class OaiServlet extends HttpServlet {
             } else if (handler.getVerb().equals(Verb.ListSets)) {
                 try {
                     root.addContent(Format.createListSets(DataManager.getInstance().getConfiguration().getDefaultLocale())); // TODO
-                } catch (SolrServerException e) {
+                } catch (IOException | SolrServerException e) {
                     logger.error(e.getMessage(), e);
-                    res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                    try {
+                        res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                    } catch (IOException e1) {
+                        logger.error(e1.getMessage());
+                    }
                     return;
                 }
             } else {

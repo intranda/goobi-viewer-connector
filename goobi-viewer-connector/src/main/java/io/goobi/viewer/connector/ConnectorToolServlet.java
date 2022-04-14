@@ -31,7 +31,9 @@ import org.slf4j.LoggerFactory;
 import io.goobi.viewer.connector.utils.Utils;
 
 /**
- * <p>ToolServlet class.</p>
+ * <p>
+ * ToolServlet class.
+ * </p>
  *
  */
 public class ConnectorToolServlet extends HttpServlet {
@@ -63,17 +65,22 @@ public class ConnectorToolServlet extends HttpServlet {
                 }
             }
         }
-        
+
         if (action == null) {
             return;
         }
-        
+
         switch (action) {
             case "getVersion":
                 response.setContentType("text/html"); {
+                try {
                     ServletOutputStream output = response.getOutputStream();
                     output.write(Utils.getVersion().getBytes(StandardCharsets.UTF_8));
+                } catch (IOException e) {
+                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                    return;
                 }
+            }
                 break;
         }
     }
@@ -84,6 +91,6 @@ public class ConnectorToolServlet extends HttpServlet {
     /** {@inheritDoc} */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-            doGet(req, resp);
-        }
+        doGet(req, resp);
+    }
 }
