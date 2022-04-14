@@ -203,8 +203,8 @@ public class Utils {
                     IOUtils.copy(response.getEntity().getContent(), writer, DEFAULT_ENCODING);
                     return writer.toString();
                 }
-                logger.trace("{}: {}\n{}", code, response.getStatusLine().getReasonPhrase(),
-                        IOUtils.toString(response.getEntity().getContent(), DEFAULT_ENCODING));
+//                logger.trace("{}: {}\n{}", code, response.getstatusline().getreasonphrase(),
+//                        ioutils.tostring(response.getentity().getcontent(), default_encoding));
                 throw new HTTPException(code, response.getStatusLine().getReasonPhrase());
             }
         }

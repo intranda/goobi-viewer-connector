@@ -182,7 +182,16 @@ public class SruServlet extends HttpServlet {
                 // http://services.dnb.de/sru/authorities?operation=scan&version=1.1&scanClause=Maximilian
                 // http://s2w.visuallibrary.net/dps/sru/?operation=scan&version=1.1&scanClause=Augsburg
                 // http://sru.gbv.de/opac-de-27?version=1.2&operation=scan&scanClause=Augsburg
-                unsupportedOperation(response, "scan");
+                try {
+                    unsupportedOperation(response, "scan");
+                } catch (IOException e) {
+                    logger.error(e.getMessage());
+                    try {
+                        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                    } catch (IOException e1) {
+                        logger.error(e1.getMessage());
+                    }
+                }
                 return;
             case UNSUPPORTETPARAMETER:
             default:
@@ -202,7 +211,16 @@ public class SruServlet extends HttpServlet {
         Format format = Format.getPrettyFormat();
         format.setEncoding("utf-8");
         XMLOutputter xmlOut = new XMLOutputter(format);
-        xmlOut.output(doc, response.getOutputStream());
+        try {
+            xmlOut.output(doc, response.getOutputStream());
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+            try {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            } catch (IOException e1) {
+                logger.error(e1.getMessage());
+            }
+        }
 
     }
 
@@ -1230,7 +1248,15 @@ public class SruServlet extends HttpServlet {
      */
     /** {@inheritDoc} */
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doGet(req, resp);
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            doGet(request, response);
+        } catch (IOException | ServletException e) {
+            try {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            } catch (IOException e1) {
+                logger.error(e1.getMessage());
+            }
+        }
     }
 }
