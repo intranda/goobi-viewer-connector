@@ -390,7 +390,7 @@ public class SruServlet extends HttpServlet {
             }
         }
         // map cql fields to solr queries
-        for (Matcher m = Pattern.compile("\\w+\\s*=").matcher(initValue); m.find();) {
+        for (Matcher m = Pattern.compile("\\w+\\s?=").matcher(initValue); m.find();) {
             String searchParameter = m.toMatchResult().group();
             String param = searchParameter.replace("=", "").trim();
             SearchField sf = SearchField.getFieldByCqlName(param);
