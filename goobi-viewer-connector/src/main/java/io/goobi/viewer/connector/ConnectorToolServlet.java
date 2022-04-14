@@ -77,7 +77,11 @@ public class ConnectorToolServlet extends HttpServlet {
                     ServletOutputStream output = response.getOutputStream();
                     output.write(Utils.getVersion().getBytes(StandardCharsets.UTF_8));
                 } catch (IOException e) {
-                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                    try {
+                        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                    } catch (IOException e1) {
+                        logger.error(e1.getMessage());
+                    }
                     return;
                 }
             }
@@ -90,7 +94,15 @@ public class ConnectorToolServlet extends HttpServlet {
      */
     /** {@inheritDoc} */
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doGet(req, resp);
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            doGet(request, response);
+        } catch (IOException | ServletException e) {
+            try {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            } catch (IOException e1) {
+                logger.error(e1.getMessage());
+            }
+        }
     }
 }

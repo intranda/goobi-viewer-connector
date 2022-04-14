@@ -520,7 +520,7 @@ public abstract class Format {
             throw new IllegalArgumentException("resumptionToken may not be null");
         }
 
-        logger.debug("Loading resumption token {}", resumptionToken);
+        logger.debug("Loading resumption token {}", resumptionToken.replaceAll("[\n\r\t]", "_"));
         Matcher m = ResumptionToken.TOKEN_NAME_PATTERN.matcher(resumptionToken);
         if (!m.find()) {
             logger.warn("Illegal resumption token name: {}", resumptionToken);
