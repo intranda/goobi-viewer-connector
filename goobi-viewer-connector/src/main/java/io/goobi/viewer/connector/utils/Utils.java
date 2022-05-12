@@ -203,8 +203,8 @@ public class Utils {
                     IOUtils.copy(response.getEntity().getContent(), writer, DEFAULT_ENCODING);
                     return writer.toString();
                 }
-                logger.trace("{}: {}\n{}", code, response.getStatusLine().getReasonPhrase(),
-                        IOUtils.toString(response.getEntity().getContent(), DEFAULT_ENCODING));
+//                logger.trace("{}: {}\n{}", code, response.getstatusline().getreasonphrase(),
+//                        ioutils.tostring(response.getentity().getcontent(), default_encoding));
                 throw new HTTPException(code, response.getStatusLine().getReasonPhrase());
             }
         }
@@ -228,7 +228,6 @@ public class Utils {
                 .build();
         try (CloseableHttpClient httpClient = HttpClients.custom().setDefaultRequestConfig(defaultRequestConfig).build()) {
             HttpGet get = new HttpGet(url);
-            Charset chars = Charset.forName(DEFAULT_ENCODING);
             try (CloseableHttpResponse response = httpClient.execute(get)) {
                 return response.getStatusLine().getStatusCode();
             }
@@ -360,8 +359,6 @@ public class Utils {
      * @should format string correctly
      */
     public static String formatVersionString(String json) {
-        final String notAvailableKey = "admin__dashboard_versions_not_available";
-
         if (StringUtils.isEmpty(json)) {
             return "NOT AVAILABLE";
         }

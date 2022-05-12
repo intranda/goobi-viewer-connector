@@ -179,7 +179,7 @@ public class SolrSearchTools {
      * @should ignore untilTimestamp if zero
      */
     public static Long getLatestValidDateUpdated(SolrDocument doc, long untilTimestamp) {
-        logger.trace("" + untilTimestamp);
+        logger.trace("getLatestValidDateUpdated: {}", untilTimestamp);
         long ret = 0;
         Collection<Object> dateUpdatedValues = doc.getFieldValues(SolrConstants.DATEUPDATED);
         if (dateUpdatedValues != null && !dateUpdatedValues.isEmpty()) {

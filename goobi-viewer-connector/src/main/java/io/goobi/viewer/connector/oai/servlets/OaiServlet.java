@@ -60,7 +60,7 @@ public class OaiServlet extends HttpServlet {
 
     /** {@inheritDoc} */
     @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse res) throws ServletException, IOException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String queryString = (request.getQueryString() != null ? "?" + request.getQueryString() : "");
         logger.debug("REQUEST URL: {}{}", request.getRequestURL().toString(), queryString);
 
@@ -70,7 +70,12 @@ public class OaiServlet extends HttpServlet {
             // logger.trace("filterQuerySuffix: {}",filterQuerySuffix);
         } catch (IndexUnreachableException e) {
             logger.error(e.getMessage());
-            throw new IOException(e.getMessage());
+            try {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            } catch (IOException e1) {
+                logger.error(e.getMessage());
+            }
+            return;
         }
 
         Document doc = new Document();
@@ -137,9 +142,13 @@ public class OaiServlet extends HttpServlet {
             else if (handler.getVerb().equals(Verb.Identify)) {
                 try {
                     root.addContent(Format.getIdentifyXML(filterQuerySuffix));
-                } catch (SolrServerException e) {
+                } catch (IOException | SolrServerException e) {
                     logger.error(e.getMessage(), e);
-                    res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                    try {
+                        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                    } catch (IOException e1) {
+                        logger.error(e1.getMessage());
+                    }
                     return;
                 }
             }
@@ -163,9 +172,13 @@ public class OaiServlet extends HttpServlet {
                         } else {
                             root.addContent(new ErrorCode().getBadArgument());
                         }
-                    } catch (SolrServerException e) {
+                    } catch (IOException | SolrServerException e) {
                         logger.error(e.getMessage(), e);
-                        res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                        try {
+                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                        } catch (IOException e1) {
+                            logger.error(e1.getMessage());
+                        }
                         return;
                     }
                 }
@@ -196,9 +209,13 @@ public class OaiServlet extends HttpServlet {
                         } else {
                             root.addContent(new ErrorCode().getBadArgument());
                         }
-                    } catch (SolrServerException e) {
+                    } catch (IOException | SolrServerException e) {
                         logger.error(e.getMessage(), e);
-                        res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                        try {
+                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                        } catch (IOException e1) {
+                            logger.error(e1.getMessage());
+                        }
                         return;
                     }
                 }
@@ -223,9 +240,13 @@ public class OaiServlet extends HttpServlet {
             } else if (handler.getVerb().equals(Verb.ListSets)) {
                 try {
                     root.addContent(Format.createListSets(DataManager.getInstance().getConfiguration().getDefaultLocale())); // TODO
-                } catch (SolrServerException e) {
+                } catch (IOException | SolrServerException e) {
                     logger.error(e.getMessage(), e);
-                    res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                    try {
+                        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                    } catch (IOException e1) {
+                        logger.error(e1.getMessage());
+                    }
                     return;
                 }
             } else {
@@ -236,14 +257,24 @@ public class OaiServlet extends HttpServlet {
         org.jdom2.output.Format format = org.jdom2.output.Format.getPrettyFormat();
         format.setEncoding("utf-8");
         XMLOutputter xmlOut = new XMLOutputter(format);
-        if (handler.getMetadataPrefix() != null && handler.getMetadataPrefix().equals(Metadata.epicur)) {
-            String ueblerhack = xmlOut.outputString(doc);
-            ueblerhack = ueblerhack.replace("<epicur", "<epicur xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
-            res.setCharacterEncoding("utf-8");
-            ServletOutputStream out = res.getOutputStream();
-            out.print(ueblerhack);
-        } else {
-            xmlOut.output(doc, res.getOutputStream());
+        try {
+            if (handler.getMetadataPrefix() != null && handler.getMetadataPrefix().equals(Metadata.epicur)) {
+                String ueblerhack = xmlOut.outputString(doc);
+                ueblerhack = ueblerhack.replace("<epicur", "<epicur xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
+                response.setCharacterEncoding("utf-8");
+                ServletOutputStream out = response.getOutputStream();
+                out.print(ueblerhack);
+            } else {
+                xmlOut.output(doc, response.getOutputStream());
+            }
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+            try {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            } catch (IOException e1) {
+                logger.error(e1.getMessage());
+            }
+            return;
         }
 
     }
@@ -331,7 +362,15 @@ public class OaiServlet extends HttpServlet {
 
     /** {@inheritDoc} */
     @Override
-    public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-        doGet(req, res);
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            doGet(request, response);
+        } catch (IOException | ServletException e) {
+            try {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            } catch (IOException e1) {
+                logger.error(e1.getMessage());
+            }
+        }
     }
 }
