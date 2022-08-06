@@ -6,6 +6,9 @@
 
 <config>
 
+    <!-- stopwordsFile: location of the stopword.txt file used in Solr -->
+    <stopwordsFile>src/test/resources/stopwords.txt</stopwordsFile>
+
 	<!-- ##### COLLECTION CONFIGURATION ##### -->
 	<collections>
 		<collection field="DC">

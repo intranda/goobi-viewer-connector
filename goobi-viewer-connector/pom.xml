@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.goobi.viewer</groupId>
 	<artifactId>viewer-connector</artifactId>
-	<version>22.06</version>
+	<version>22.07-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 
@@ -53,7 +53,7 @@
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 		<buildDate>${maven.build.timestamp}</buildDate>
         
-        <viewer-core.version>22.06.1</viewer-core.version>
+        <viewer-core.version>22.07-SNAPSHOT</viewer-core.version>
 
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
 		<commons-collections.version>3.2.2</commons-collections.version>
@@ -70,7 +70,7 @@
 		<log4j.version>2.18.0</log4j.version>
 		<slf4j.version>1.7.36</slf4j.version>
 		<solr.version>8.11.1</solr.version>
-		<tomcat.version>9.0.64</tomcat.version>
+		<tomcat.version>9.0.65</tomcat.version>
 		<xstream.version>1.4.19</xstream.version>
 	</properties>
 

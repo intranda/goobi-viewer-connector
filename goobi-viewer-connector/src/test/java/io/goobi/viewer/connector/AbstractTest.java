@@ -27,6 +27,7 @@ import io.goobi.viewer.connector.utils.Configuration;
 public abstract class AbstractTest {
     
     public static final String TEST_CONFIG_PATH = new File("src/test/resources/config_oai.test.xml").getAbsolutePath();
+    public static final String TEST_CONFIG_PATH_CORE = new File("src/test/resources/config_viewer.test.xml").getAbsolutePath();
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -34,5 +35,7 @@ public abstract class AbstractTest {
 
         // Initialize the instance with a custom config file
         DataManager.getInstance().injectConfiguration(new Configuration(TEST_CONFIG_PATH));
+        io.goobi.viewer.controller.DataManager.getInstance().injectConfiguration(new io.goobi.viewer.controller.Configuration(TEST_CONFIG_PATH_CORE));
+        
     }
 }
