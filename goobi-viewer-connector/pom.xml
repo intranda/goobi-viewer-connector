@@ -40,7 +40,8 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.release>11</maven.compiler.release>
-		<skipTests>false</skipTests>
+        <skipTests>true</skipTests>
+        <skipDependencyCheck>true</skipDependencyCheck>
 
         <!-- Sonar -->
         <sonar.projectKey>intranda_goobi-viewer-connector</sonar.projectKey>
@@ -409,6 +410,7 @@
                     <skipProvidedScope>true</skipProvidedScope>
                     <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
                     <skipTestScope>true</skipTestScope>
+                    <skip>${skipDependencyCheck}</skip>
                     <suppressionFiles>
                         <suppressionFile>file://${basedir}/dependency-suppression.xml</suppressionFile>
                     </suppressionFiles>
