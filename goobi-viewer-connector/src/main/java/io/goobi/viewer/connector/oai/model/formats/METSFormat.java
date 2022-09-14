@@ -29,8 +29,8 @@ import org.apache.solr.common.SolrDocument;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.exceptions.HTTPException;
@@ -46,7 +46,7 @@ import io.goobi.viewer.connector.utils.XmlTools;
  */
 public class METSFormat extends Format {
 
-    private static final Logger logger = LoggerFactory.getLogger(METSFormat.class);
+    private static final Logger logger = LogManager.getLogger(METSFormat.class);
 
     private static final String METS_FILTER_QUERY = " +(" + SolrConstants.SOURCEDOCFORMAT + ":METS " + SolrConstants.DATEDELETED + ":*)";
 

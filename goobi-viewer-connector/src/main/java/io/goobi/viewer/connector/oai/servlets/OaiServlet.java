@@ -33,8 +33,8 @@ import org.jdom2.Element;
 import org.jdom2.Namespace;
 import org.jdom2.ProcessingInstruction;
 import org.jdom2.output.XMLOutputter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
@@ -56,7 +56,7 @@ public class OaiServlet extends HttpServlet {
 
     private static final long serialVersionUID = -2357047964682340928L;
 
-    private static final Logger logger = LoggerFactory.getLogger(OaiServlet.class);
+    private static final Logger logger = LogManager.getLogger(OaiServlet.class);
 
     /** {@inheritDoc} */
     @Override

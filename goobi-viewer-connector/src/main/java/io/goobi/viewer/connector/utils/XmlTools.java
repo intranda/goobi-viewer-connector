@@ -55,8 +55,8 @@ import org.jdom2.transform.JDOMSource;
 import org.jdom2.xpath.XPathBuilder;
 import org.jdom2.xpath.XPathExpression;
 import org.jdom2.xpath.XPathFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.Converter;
@@ -68,7 +68,7 @@ import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
  */
 public class XmlTools {
 
-    private static final Logger logger = LoggerFactory.getLogger(XmlTools.class);
+    private static final Logger logger = LogManager.getLogger(XmlTools.class);
 
     public static SAXBuilder getSAXBuilder() {
         SAXBuilder builder = new SAXBuilder();

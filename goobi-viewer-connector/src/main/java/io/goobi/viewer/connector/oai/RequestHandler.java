@@ -21,8 +21,8 @@ import java.time.temporal.ChronoUnit;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
@@ -38,7 +38,7 @@ import io.goobi.viewer.connector.utils.Utils;
  */
 public class RequestHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
+    private static final Logger logger = LogManager.getLogger(RequestHandler.class);
 
     @XStreamAlias("verb")
     private Verb verb = null;

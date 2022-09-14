@@ -25,8 +25,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import io.goobi.viewer.connector.utils.Utils;
 
@@ -40,7 +40,7 @@ public class ConnectorToolServlet extends HttpServlet {
 
     private static final long serialVersionUID = -3185526115340932005L;
 
-    private static final Logger logger = LoggerFactory.getLogger(ConnectorToolServlet.class);
+    private static final Logger logger = LogManager.getLogger(ConnectorToolServlet.class);
 
     /* (non-Javadoc)
      * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
