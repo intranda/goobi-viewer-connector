@@ -35,8 +35,8 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.configuration2.ex.ConversionException;
 import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.jdom2.Namespace;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import io.goobi.viewer.connector.oai.model.FieldConfiguration;
 import io.goobi.viewer.connector.oai.model.Set;
@@ -52,7 +52,7 @@ import io.goobi.viewer.connector.oai.model.metadata.MetadataParameter.MetadataPa
  */
 public final class Configuration {
 
-    private static final Logger logger = LoggerFactory.getLogger(Configuration.class);
+    private static final Logger logger = LogManager.getLogger(Configuration.class);
 
     /** Constant <code>DEFAULT_CONFIG_FILE="config_oai.xml"</code> */
     public static final String DEFAULT_CONFIG_FILE = "config_oai.xml";

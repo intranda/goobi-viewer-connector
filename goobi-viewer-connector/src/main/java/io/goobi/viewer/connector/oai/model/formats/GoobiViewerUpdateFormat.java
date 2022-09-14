@@ -27,8 +27,8 @@ import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.exceptions.HTTPException;
@@ -43,7 +43,7 @@ import io.goobi.viewer.connector.utils.Utils;
  */
 public class GoobiViewerUpdateFormat extends Format {
 
-    private static final Logger logger = LoggerFactory.getLogger(GoobiViewerUpdateFormat.class);
+    private static final Logger logger = LogManager.getLogger(GoobiViewerUpdateFormat.class);
 
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String, java.lang.String)

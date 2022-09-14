@@ -27,8 +27,8 @@ import org.apache.solr.client.solrj.response.FieldStatsInfo;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
@@ -47,7 +47,7 @@ import io.goobi.viewer.model.security.IPrivilegeHolder;
 public class SolrSearchTools {
 
     /** Logger for this class. */
-    final static Logger logger = LoggerFactory.getLogger(SolrSearchTools.class);
+    final static Logger logger = LogManager.getLogger(SolrSearchTools.class);
 
     /** Constant <code>MAX_HITS=Integer.MAX_VALUE</code> */
     public static final int MAX_HITS = Integer.MAX_VALUE;

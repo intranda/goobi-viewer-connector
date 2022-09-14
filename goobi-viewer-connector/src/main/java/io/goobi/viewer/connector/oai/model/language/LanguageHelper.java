@@ -25,8 +25,8 @@ import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.configuration2.reloading.PeriodicReloadingTrigger;
 import org.apache.commons.configuration2.tree.xpath.XPathExpressionEngine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import io.goobi.viewer.connector.utils.Configuration;
 
@@ -38,7 +38,7 @@ import io.goobi.viewer.connector.utils.Configuration;
  */
 public class LanguageHelper {
 
-    private static final Logger logger = LoggerFactory.getLogger(LanguageHelper.class);
+    private static final Logger logger = LogManager.getLogger(LanguageHelper.class);
 
     ReloadingFileBasedConfigurationBuilder<XMLConfiguration> builder;
 

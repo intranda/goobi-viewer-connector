@@ -32,8 +32,8 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.exceptions.HTTPException;
@@ -54,7 +54,7 @@ import io.goobi.viewer.messages.ViewerResourceBundle;
  */
 public class OAIDCFormat extends Format {
 
-    private static final Logger logger = LoggerFactory.getLogger(OAIDCFormat.class);
+    private static final Logger logger = LogManager.getLogger(OAIDCFormat.class);
     
     protected static Map<String, String> anchorTitles = new HashMap<>();
 
