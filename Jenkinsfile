@@ -29,6 +29,7 @@ pipeline {
     stage('sonarcloud') {
       when {
         anyOf {
+          tag "v*"
           branch 'sonar_*'
         }
       }
