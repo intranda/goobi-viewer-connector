@@ -48,8 +48,8 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import io.goobi.viewer.connector.Version;
 import io.goobi.viewer.connector.exceptions.HTTPException;
@@ -63,7 +63,7 @@ import io.goobi.viewer.connector.oai.RequestHandler;
  */
 public class Utils {
 
-    private static final Logger logger = LoggerFactory.getLogger(Utils.class);
+    private static final Logger logger = LogManager.getLogger(Utils.class);
 
     private static final int HTTP_TIMEOUT = 10000;
     /** Constant <code>DEFAULT_ENCODING="UTF-8"</code> */

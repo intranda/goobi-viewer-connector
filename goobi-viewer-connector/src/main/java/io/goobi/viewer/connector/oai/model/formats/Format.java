@@ -38,8 +38,8 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.ConversionException;
@@ -68,7 +68,7 @@ import io.goobi.viewer.messages.ViewerResourceBundle;
  */
 public abstract class Format {
 
-    private static final Logger logger = LoggerFactory.getLogger(Format.class);
+    private static final Logger logger = LogManager.getLogger(Format.class);
 
     /** Constant <code>XML</code> */
     protected static final Namespace XML = Namespace.getNamespace("xml", "http://www.w3.org/XML/1998/namespace");

@@ -23,8 +23,8 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.junit.Assert;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import io.goobi.viewer.connector.AbstractSolrEnabledTest;
 import io.goobi.viewer.connector.DataManager;
@@ -33,7 +33,7 @@ import io.goobi.viewer.connector.oai.enums.Metadata;
 public class SolrSearchIndexTest extends AbstractSolrEnabledTest {
 
     /** Logger for this class. */
-    private static final Logger logger = LoggerFactory.getLogger(SolrSearchIndexTest.class);
+    private static final Logger logger = LogManager.getLogger(SolrSearchIndexTest.class);
 
     /**
      * @see SolrSearchIndex#getSets(String)

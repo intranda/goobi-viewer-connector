@@ -17,8 +17,8 @@ package io.goobi.viewer.connector.oai.model.metadata;
 
 import java.io.Serializable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * <p>MetadataParameter class.</p>
@@ -45,7 +45,7 @@ public class MetadataParameter implements Serializable {
          */
         MULTILANGUAGEFIELD("multilanguagefield");
 
-        private static final Logger logger = LoggerFactory.getLogger(MetadataParameterType.class);
+        private static final Logger logger = LogManager.getLogger(MetadataParameterType.class);
 
         private final String key;
 

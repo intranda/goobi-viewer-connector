@@ -26,8 +26,8 @@ import org.jdom2.Element;
 import org.jdom2.Namespace;
 import org.jdom2.transform.XSLTransformException;
 import org.jdom2.transform.XSLTransformer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
@@ -39,7 +39,7 @@ import io.goobi.viewer.connector.utils.XmlTools;
  */
 public class MARCXMLFormat extends METSFormat {
 
-    private static final Logger logger = LoggerFactory.getLogger(MARCXMLFormat.class);
+    private static final Logger logger = LogManager.getLogger(MARCXMLFormat.class);
 
     static final Namespace xmlns = Namespace.getNamespace("http://www.openarchives.org/OAI/2.0/");
     static final Namespace nsMets = Namespace.getNamespace("mets", "http://www.loc.gov/METS/");

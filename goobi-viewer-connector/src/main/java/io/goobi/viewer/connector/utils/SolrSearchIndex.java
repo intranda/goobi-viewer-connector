@@ -42,8 +42,8 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.exceptions.IndexUnreachableException;
@@ -58,7 +58,7 @@ import io.goobi.viewer.model.search.SearchHelper;
 public class SolrSearchIndex {
 
     /** Logger for this class. */
-    final static Logger logger = LoggerFactory.getLogger(SolrSearchIndex.class);
+    final static Logger logger = LogManager.getLogger(SolrSearchIndex.class);
 
     /** Constant <code>MAX_HITS=Integer.MAX_VALUE</code> */
     public static final int MAX_HITS = Integer.MAX_VALUE;

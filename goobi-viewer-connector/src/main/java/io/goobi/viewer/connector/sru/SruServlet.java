@@ -41,8 +41,8 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import org.jdom2.transform.XSLTransformException;
 import org.jdom2.transform.XSLTransformer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.exceptions.HTTPException;
@@ -64,7 +64,7 @@ import io.goobi.viewer.exceptions.IndexUnreachableException;
 public class SruServlet extends HttpServlet {
 
     private static final long serialVersionUID = -6396567784411891113L;
-    private static final Logger logger = LoggerFactory.getLogger(SruServlet.class);
+    private static final Logger logger = LogManager.getLogger(SruServlet.class);
 
     private static final Namespace SRU_NAMESPACE = Namespace.getNamespace("srw", "http://www.loc.gov/zing/srw/");
     private static final Namespace EXPLAIN_NAMESPACE = Namespace.getNamespace("ns", "http://explain.z3950.org/dtd/2.0/");

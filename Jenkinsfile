@@ -21,7 +21,7 @@ pipeline {
     }
     stage('build') {
       steps {
-              sh 'mvn -f goobi-viewer-connector/pom.xml -DskipTests=false clean verify -U'
+              sh 'mvn -f goobi-viewer-connector/pom.xml -DskipTests=false -DskipDependencyCheck=false clean verify -U'
               recordIssues enabledForFailure: true, aggregatingResults: true, tools: [java(), javaDoc()]
               dependencyCheckPublisher pattern: '**/target/dependency-check-report.xml'
       }
@@ -29,6 +29,7 @@ pipeline {
     stage('sonarcloud') {
       when {
         anyOf {
+          tag "v*"
           branch 'sonar_*'
         }
       }
