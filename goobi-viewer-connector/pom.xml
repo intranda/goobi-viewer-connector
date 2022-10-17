@@ -82,17 +82,9 @@
             <version>${viewer-core.version}</version>
             <!-- Exclude javax.xml packages to avoid module problems with Java 9+ -->
             <exclusions>
-<!--                 <exclusion> -->
-<!--                     <groupId>de.intranda.contentserver</groupId> -->
-<!--                     <artifactId>ics</artifactId> -->
-<!--                 </exclusion> -->
                 <exclusion>
                     <groupId>xml-apis</groupId>
                     <artifactId>xml-apis</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>xerces</groupId>
-                    <artifactId>xmlParserAPIs</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -216,10 +208,6 @@
                             <ignoredUnusedDeclaredDependencies>
                                 <!-- JSTL is used within JSF for example c:forEach -->
                                 <ignoredUnusedDeclaredDependency>javax.servlet:jstl</ignoredUnusedDeclaredDependency>
-
-                                <!-- xerces is a dependency from the old Solr version. It can be removed when updating to Solr 8 -->
-                                <ignoredUnusedDeclaredDependency>xerces:xmlParserAPIs</ignoredUnusedDeclaredDependency>
-                                <ignoredUnusedDeclaredDependency>xerces:xercesImpl</ignoredUnusedDeclaredDependency>
 
                                 <!-- The jersey-container-servlet dependency is used for startup during runtime Unit tests run without it though -->
                                 <ignoredUnusedDeclaredDependency>org.glassfish.jersey.containers:jersey-container-servlet</ignoredUnusedDeclaredDependency>
