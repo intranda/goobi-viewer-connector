@@ -138,9 +138,8 @@ public class METSFormat extends Format {
                 return new ErrorCode().getIdDoesNotExist();
             }
             return generateMets(Collections.singletonList(doc), 1L, 0, 1, handler, "GetRecord", setSpecFields, filterQuerySuffix);
-        } catch (IOException e) {
-            return new ErrorCode().getIdDoesNotExist();
-        } catch (SolrServerException e) {
+        } catch (IOException | SolrServerException e) {
+            logger.error(e.getMessage());
             return new ErrorCode().getIdDoesNotExist();
         }
     }
@@ -193,6 +192,7 @@ public class METSFormat extends Format {
             }
 
             if (StringUtils.isEmpty(xml)) {
+                logger.error("METS document is empty: {}", url);
                 xmlListRecords.addContent(new ErrorCode().getIdDoesNotExist());
                 continue;
             }
@@ -224,13 +224,11 @@ public class METSFormat extends Format {
                 } catch (IOException e) {
                     logger.error("Could not generate header: {}", e.getMessage());
                     xmlListRecords.addContent(new ErrorCode().getIdDoesNotExist());
-                    continue;
                 }
             } catch (IOException | JDOMException e) {
                 logger.error("{}", e.getMessage());
                 logger.trace(xml);
                 xmlListRecords.addContent(new ErrorCode().getIdDoesNotExist());
-                continue;
             }
         }
 

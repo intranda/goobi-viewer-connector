@@ -47,10 +47,13 @@ import io.goobi.viewer.model.security.IPrivilegeHolder;
 public class SolrSearchTools {
 
     /** Logger for this class. */
-    final static Logger logger = LogManager.getLogger(SolrSearchTools.class);
+    private static final Logger logger = LogManager.getLogger(SolrSearchTools.class);
 
     /** Constant <code>MAX_HITS=Integer.MAX_VALUE</code> */
     public static final int MAX_HITS = Integer.MAX_VALUE;
+
+    private SolrSearchTools() {
+    }
 
     /**
      * build the query String depending on the variables
@@ -62,6 +65,7 @@ public class SolrSearchTools {
      * @param excludeAnchor
      * @param additionalQuery
      * @return
+     * @should add from until to setSpec queries
      */
     static String buildQueryString(String from, String until, String setSpec, String metadataPrefix, boolean excludeAnchor, String additionalQuery) {
         StringBuilder sbQuery = new StringBuilder();
@@ -74,6 +78,41 @@ public class SolrSearchTools {
             sbQuery.append(additionalQuery);
         }
         sbQuery.append(')');
+
+        // setSpec
+        if (setSpec != null) {
+            boolean defaultSet = true;
+            // Use DC as the set field by default 
+            String setQuery = SolrConstants.DC + ":" + setSpec;
+
+            // Check whether this is an additional set and if so, use its custom query
+
+            List<Set> additionalSetList = DataManager.getInstance().getConfiguration().getAdditionalSets();
+            for (Set s : additionalSetList) {
+                if (s.getSetSpec().equals(setSpec)) {
+                    defaultSet = false;
+                    sbQuery = new StringBuilder(); // Replace query
+                    setQuery = s.getSetQuery();
+                    break;
+                }
+            }
+
+            // Check whether this is an all-values set and if so, use its field
+            if (defaultSet && setSpec.contains(":")) {
+                List<Set> allValuesSetList = DataManager.getInstance().getConfiguration().getAllValuesSets();
+                for (Set s : allValuesSetList) {
+                    if (s.getSetName().equals(setSpec.substring(0, setSpec.indexOf(":")))) {
+                        setQuery = setSpec;
+                        break;
+                    }
+                }
+            }
+            if (sbQuery.length() > 0) {
+                sbQuery.append(" +");
+            }
+            sbQuery.append(setQuery);
+        }
+
         // Solr timestamp range is irrelevant for iv_* formats
         if (!Metadata.iv_overviewpage.name().equals(metadataPrefix) && !Metadata.iv_crowdsourcing.name().equals(metadataPrefix)
                 && (from != null || until != null)) {
@@ -91,39 +130,6 @@ public class SolrSearchTools {
                     .append(']');
 
         }
-        if (setSpec != null) {
-            boolean defaultSet = true;
-            // Use DC as the set field by default 
-            String setQuery = SolrConstants.DC + ":" + setSpec;
-
-            // Check whether this is an additional set and if so, use its custom query
-            {
-                List<Set> additionalSetList = DataManager.getInstance().getConfiguration().getAdditionalSets();
-                for (Set s : additionalSetList) {
-                    if (s.getSetSpec().equals(setSpec)) {
-                        defaultSet = false;
-                        sbQuery = new StringBuilder(); // Replace query
-                        setQuery = s.getSetQuery();
-                        break;
-                    }
-                }
-            }
-            // Check whether this is an all-values set and if so, use its field
-            if (defaultSet && setSpec.contains(":")) {
-                List<Set> allValuesSetList = DataManager.getInstance().getConfiguration().getAllValuesSets();
-                for (Set s : allValuesSetList) {
-                    if (s.getSetName().equals(setSpec.substring(0, setSpec.indexOf(":")))) {
-                        defaultSet = false;
-                        setQuery = setSpec;
-                        break;
-                    }
-                }
-            }
-            if (sbQuery.length() > 0) {
-                sbQuery.append(" +");
-            }
-            sbQuery.append(setQuery);
-        }
 
         return sbQuery.toString();
     }
@@ -135,7 +141,7 @@ public class SolrSearchTools {
      * @return a {@link java.lang.String} object.
      * @throws IndexUnreachableException
      */
-    public static String getAllSuffixes(HttpServletRequest request) throws IndexUnreachableException {
+    public static String getAllSuffixes(HttpServletRequest request) {
         return SearchHelper.getAllSuffixes(request, true, true, IPrivilegeHolder.PRIV_DOWNLOAD_METADATA);
     }
 

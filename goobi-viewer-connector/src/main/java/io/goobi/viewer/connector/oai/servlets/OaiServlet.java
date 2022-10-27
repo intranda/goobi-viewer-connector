@@ -65,18 +65,8 @@ public class OaiServlet extends HttpServlet {
         logger.debug("REQUEST URL: {}{}", request.getRequestURL().toString(), queryString);
 
         String filterQuerySuffix = "";
-        try {
-            filterQuerySuffix = SolrSearchTools.getAllSuffixes(request);
-            // logger.trace("filterQuerySuffix: {}",filterQuerySuffix);
-        } catch (IndexUnreachableException e) {
-            logger.error(e.getMessage());
-            try {
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-            } catch (IOException e1) {
-                logger.error(e.getMessage());
-            }
-            return;
-        }
+        filterQuerySuffix = SolrSearchTools.getAllSuffixes(request);
+        // logger.trace("filterQuerySuffix: {}",filterQuerySuffix);
 
         Document doc = new Document();
         ProcessingInstruction pi = new ProcessingInstruction("xml-stylesheet", "type='text/xsl' href='./oai2.xsl'");

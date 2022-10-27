@@ -148,7 +148,7 @@ public class SruServlet extends HttpServlet {
                     String filterQuerySuffix = SolrSearchTools.getAllSuffixes(request);
                     Element searchRetrieve = generateSearchRetrieve(parameter, DataManager.getInstance().getSearchIndex(), filterQuerySuffix);
                     doc.setRootElement(searchRetrieve);
-                } catch (IndexUnreachableException | IOException | SolrServerException e) {
+                } catch (IOException | SolrServerException e) {
                     logger.error(e.getMessage());
                     try {
                         response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());

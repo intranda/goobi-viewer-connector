@@ -261,7 +261,7 @@ public class SolrSearchIndex {
             sbQuery.append(" +(").append(SolrConstants.URN).append(":* ").append(SolrConstants.IMAGEURN_OAI).append(":*)");
         }
         sbQuery.append(filterQuerySuffix);
-        logger.debug("OAI query: {}", sbQuery.toString());
+        logger.debug("OAI query: {}", sbQuery);
         logger.trace("start: {}, rows: {}", firstRow, numRows);
         SolrQuery solrQuery = new SolrQuery(sbQuery.toString());
         solrQuery.setStart(firstRow);

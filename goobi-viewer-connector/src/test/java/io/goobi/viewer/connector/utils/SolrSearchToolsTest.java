@@ -58,7 +58,6 @@ public class SolrSearchToolsTest {
         doc.addField(SolrConstants.DATEUPDATED, 4L);
         Assert.assertEquals(Long.valueOf(3), SolrSearchTools.getLatestValidDateUpdated(doc, 3));
     }
-    
 
     /**
      * @see SolrSearchTools#getLatestValidDateUpdated(SolrDocument,long)
@@ -100,5 +99,15 @@ public class SolrSearchToolsTest {
         Assert.assertEquals(
                 " -URN_UNTOKENIZED:urn\\:nbn\\:de\\:test\\-1* -IMAGEURN_UNTOKENIZED:urn\\:nbn\\:de\\:test\\-1* -IMAGEURN_OAI_UNTOKENIZED:urn\\:nbn\\:de\\:test\\-1* -URN_UNTOKENIZED:urn\\:nbn\\:de\\:hidden\\-1* -IMAGEURN_UNTOKENIZED:urn\\:nbn\\:de\\:hidden\\-1* -IMAGEURN_OAI_UNTOKENIZED:urn\\:nbn\\:de\\:hidden\\-1*",
                 SolrSearchTools.getUrnPrefixBlacklistSuffix(prefixes));
+    }
+
+    /**
+     * @see SolrSearchTools#buildQueryString(String,String,String,String,boolean,String)
+     * @verifies add from until to setSpec queries
+     */
+    @Test
+    public void buildQueryString_shouldAddFromUntilToSetSpecQueries() throws Exception {
+        String query = SolrSearchTools.buildQueryString("2022-10-27T16:00:00Z", "2022-10-27T16:15:00Z", "goobi", "oai_dc", false, null);
+        Assert.assertTrue(query.contains(" +DATEUPDATED:[1666886400000 TO 1666887300999]"));
     }
 }
