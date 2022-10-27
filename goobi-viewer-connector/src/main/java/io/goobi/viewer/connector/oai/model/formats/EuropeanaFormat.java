@@ -37,6 +37,7 @@ import io.goobi.viewer.connector.oai.model.ErrorCode;
 import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
+import io.goobi.viewer.connector.utils.XmlConstants;
 
 /**
  * ESE
@@ -112,8 +113,6 @@ public class EuropeanaFormat extends OAIDCFormat {
         }
         for (SolrDocument doc : records) {
             // logger.trace("record: {}", doc.getFieldValue(SolrConstants.PI));
-            Element record = new Element("record", xmlns);
-
             boolean isWork = doc.getFieldValue(SolrConstants.ISWORK) != null && (boolean) doc.getFieldValue(SolrConstants.ISWORK);
             boolean isAnchor = doc.getFieldValue(SolrConstants.ISANCHOR) != null && (boolean) doc.getFieldValue(SolrConstants.ISANCHOR);
             SolrDocument topstructDoc = null;
@@ -139,8 +138,9 @@ public class EuropeanaFormat extends OAIDCFormat {
                 }
             }
 
+            Element eleRecord = new Element("record", xmlns);
             Element header = getHeader(doc, topstructDoc, handler, null, setSpecFields, filterQuerySuffix);
-            record.addContent(header);
+            eleRecord.addContent(header);
 
             String identifier = null;
             String urn = null;
@@ -156,17 +156,17 @@ public class EuropeanaFormat extends OAIDCFormat {
 
             // <dc:identifier>
             if (StringUtils.isNotEmpty((String) doc.getFieldValue(SolrConstants.URN))) {
-                Element eleDcIdentifier = new Element("identifier", nsDc);
+                Element eleDcIdentifier = new Element(XmlConstants.ELE_NAME_IDENTIFIER, nsDc);
                 urn = (String) doc.getFieldValue(SolrConstants.URN);
                 eleDcIdentifier.setText(DataManager.getInstance().getConfiguration().getUrnResolverUrl() + urn);
                 eleEuropeanaRecord.addContent(eleDcIdentifier);
             } else if (StringUtils.isNotEmpty((String) doc.getFieldValue(SolrConstants.PI))) {
-                Element eleDcIdentifier = new Element("identifier", nsDc);
+                Element eleDcIdentifier = new Element(XmlConstants.ELE_NAME_IDENTIFIER, nsDc);
                 identifier = (String) doc.getFieldValue(SolrConstants.PI);
                 eleDcIdentifier.setText(DataManager.getInstance().getConfiguration().getPiResolverUrl() + identifier);
                 eleEuropeanaRecord.addContent(eleDcIdentifier);
             } else if (StringUtils.isNotEmpty((String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))) {
-                Element eleDcIdentifier = new Element("identifier", nsDc);
+                Element eleDcIdentifier = new Element(XmlConstants.ELE_NAME_IDENTIFIER, nsDc);
                 identifier = (String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT);
                 eleDcIdentifier.setText(DataManager.getInstance().getConfiguration().getPiResolverUrl() + identifier);
                 eleEuropeanaRecord.addContent(eleDcIdentifier);
@@ -179,7 +179,7 @@ public class EuropeanaFormat extends OAIDCFormat {
                 eleDcLanguage.setText(language);
                 eleEuropeanaRecord.addContent(eleDcLanguage);
             }
-            
+
             // MANDATORY: <dc:title>
             String title = null;
             if (doc.getFieldValues(SolrConstants.TITLE) != null) {
@@ -200,7 +200,7 @@ public class EuropeanaFormat extends OAIDCFormat {
             Element eleDcTitle = new Element("title", nsDc);
             eleDcTitle.setText(title);
             eleEuropeanaRecord.addContent(eleDcTitle);
-            
+
             // <dc:description>
             String desc = null;
             if (doc.getFieldValues("MD_INFORMATION") != null) {
@@ -214,7 +214,7 @@ public class EuropeanaFormat extends OAIDCFormat {
                 eleDcDescription.setText(desc);
                 eleEuropeanaRecord.addContent(eleDcDescription);
             }
-            
+
             // <dc:date>
             String date = null;
             if (doc.getFieldValues("MD_YEARPUBLISH") != null) {
@@ -232,7 +232,7 @@ public class EuropeanaFormat extends OAIDCFormat {
                 eleDcDate.setText(date);
                 eleEuropeanaRecord.addContent(eleDcDate);
             }
-            
+
             // <dc:creator>
             if (doc.getFieldValues("MD_CREATOR") != null) {
                 for (Object fieldValue : doc.getFieldValues("MD_CREATOR")) {
@@ -283,12 +283,12 @@ public class EuropeanaFormat extends OAIDCFormat {
             }
 
             // <dc:type>
-                Element eleDcType = new Element("type", nsDc);
-                if (doc.getFieldValue(SolrConstants.DOCSTRCT) != null) {
-                    type = (String) doc.getFieldValue(SolrConstants.DOCSTRCT);
-                    eleDcType.setText(type);
-                    eleEuropeanaRecord.addContent(eleDcType);
-                }
+            Element eleDcType = new Element("type", nsDc);
+            if (doc.getFieldValue(SolrConstants.DOCSTRCT) != null) {
+                type = (String) doc.getFieldValue(SolrConstants.DOCSTRCT);
+                eleDcType.setText(type);
+                eleEuropeanaRecord.addContent(eleDcType);
+            }
 
             // <dc:format>
             // <dc:format> second one appears always
@@ -314,7 +314,7 @@ public class EuropeanaFormat extends OAIDCFormat {
             }
             eleEuropeanaProvider.setText(provider);
             eleEuropeanaRecord.addContent(eleEuropeanaProvider);
-            
+
             // MANDATORY: <europeana:type>
             Element eleEuropeanaType = new Element("type", nsEuropeana);
             String europeanaType = "TEXT";
@@ -327,7 +327,7 @@ public class EuropeanaFormat extends OAIDCFormat {
             }
             eleEuropeanaType.setText(europeanaType);
             eleEuropeanaRecord.addContent(eleEuropeanaType);
-           
+
             // MANDATORY: <europeana:rights>
             Element eleEuropeanaRights = new Element("rights", nsEuropeana);
             String rights = DataManager.getInstance().getConfiguration().getEseDefaultRightsUrl();
@@ -337,7 +337,7 @@ public class EuropeanaFormat extends OAIDCFormat {
             }
             eleEuropeanaRights.setText(rights);
             eleEuropeanaRecord.addContent(eleEuropeanaRights);
-            
+
             // MANDATORY: <europeana:dataProvider>
             Element eleEuropeanaDataProvider = new Element("dataProvider", nsEuropeana);
             String dataProvider = DataManager.getInstance().getConfiguration().getEseDefaultProvider();
@@ -347,7 +347,7 @@ public class EuropeanaFormat extends OAIDCFormat {
             }
             eleEuropeanaDataProvider.setText(dataProvider);
             eleEuropeanaRecord.addContent(eleEuropeanaDataProvider);
-            
+
             // MANDATORY: <europeana:isShownBy> or <europeana:isShownAt>
             Element eleEuropeanaIsShownAt = new Element("isShownAt", nsEuropeana);
             String isShownAt = "";
@@ -360,8 +360,8 @@ public class EuropeanaFormat extends OAIDCFormat {
             eleEuropeanaRecord.addContent(eleEuropeanaIsShownAt);
 
             eleMetadata.addContent(eleEuropeanaRecord);
-            record.addContent(eleMetadata);
-            xmlListRecords.addContent(record);
+            eleRecord.addContent(eleMetadata);
+            xmlListRecords.addContent(eleRecord);
         }
 
         // Create resumption token

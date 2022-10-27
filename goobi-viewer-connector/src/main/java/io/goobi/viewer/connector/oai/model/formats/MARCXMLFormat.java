@@ -32,6 +32,7 @@ import org.apache.logging.log4j.LogManager;
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
+import io.goobi.viewer.connector.utils.XmlConstants;
 import io.goobi.viewer.connector.utils.XmlTools;
 
 /**
@@ -54,7 +55,7 @@ public class MARCXMLFormat extends METSFormat {
     public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField,
             String filterQuerySuffix) throws IOException, SolrServerException {
         Element mets = super.createListRecords(handler, firstVirtualRow, firstRawRow, numRows, versionDiscriminatorField, filterQuerySuffix);
-        if (mets.getName().equals("error")) {
+        if (mets.getName().equals(XmlConstants.ELE_NAME_ERROR)) {
             return mets;
         }
         return generateMarc(mets, null, "ListRecords");
@@ -68,7 +69,7 @@ public class MARCXMLFormat extends METSFormat {
     public Element createGetRecord(RequestHandler handler, String filterQuerySuffix) {
         logger.trace("createGetRecord");
         Element mets = super.createGetRecord(handler, filterQuerySuffix);
-        if (mets.getName().equals("error")) {
+        if (mets.getName().equals(XmlConstants.ELE_NAME_ERROR)) {
             return mets;
         }
 
@@ -86,12 +87,11 @@ public class MARCXMLFormat extends METSFormat {
         logger.trace("generateMarc");
         Element xmlListRecords = new Element(recordType, xmlns);
         Element token = mets.getChild("resumptionToken", xmlns);
-        List<Element> records = mets.getChildren("record", xmlns);
+        List<Element> records = mets.getChildren(XmlConstants.ELE_NAME_RECORD, xmlns);
 
         for (Element rec : records) {
-            // logger.trace(new XMLOutputter().outputString(rec));
-            Element header = rec.getChild("header", xmlns);
-            Element rootMets = rec.getChild("metadata", null).getChild("mets", nsMets);
+            Element header = rec.getChild(XmlConstants.ELE_NAME_HEADER, xmlns);
+            Element rootMets = rec.getChild(XmlConstants.ELE_NAME_METADATA, null).getChild("mets", nsMets);
             Element rootMarc = null;
             Element rootMods = null;
             Element subMods = null;
@@ -131,20 +131,20 @@ public class MARCXMLFormat extends METSFormat {
             } else if (rootMarc != null) {
                 // Native root MARC
                 logger.trace("root MARC");
-                Element record = new Element("record", xmlns);
-                Element newheader = new Element("header", xmlns);
+                Element eleRecord = new Element(XmlConstants.ELE_NAME_RECORD, xmlns);
+                Element newheader = new Element(XmlConstants.ELE_NAME_HEADER, xmlns);
                 newheader.addContent(header.cloneContent());
-                record.addContent(newheader);
+                eleRecord.addContent(newheader);
 
-                Element metadata = new Element("metadata", xmlns);
-                Element answer = new Element("record", nsMarc);
+                Element metadata = new Element(XmlConstants.ELE_NAME_METADATA, xmlns);
+                Element answer = new Element(XmlConstants.ELE_NAME_RECORD, nsMarc);
                 answer.addNamespaceDeclaration(XSI);
                 answer.setAttribute("schemaLocation", "http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd",
                         XSI);
                 answer.addContent(rootMarc.cloneContent());
                 metadata.addContent(answer);
-                record.addContent(metadata);
-                xmlListRecords.addContent(record);
+                eleRecord.addContent(metadata);
+                xmlListRecords.addContent(eleRecord);
             } else if (rootMods != null) {
                 // Root MODS to MARC
                 logger.trace("root MODS");
@@ -182,26 +182,23 @@ public class MARCXMLFormat extends METSFormat {
             org.jdom2.Document docTrans = transformer.transform(marcDoc);
             Element root = docTrans.getRootElement();
 
-            Element record = new Element("record", xmlns);
-            Element newheader = new Element("header", xmlns);
+            Element eleRecord = new Element(XmlConstants.ELE_NAME_RECORD, xmlns);
+            Element newheader = new Element(XmlConstants.ELE_NAME_HEADER, xmlns);
             newheader.addContent(header.cloneContent());
-            record.addContent(newheader);
+            eleRecord.addContent(newheader);
 
-            Element metadata = new Element("metadata", xmlns);
-            Element answer = new Element("record", nsMarc);
+            Element metadata = new Element(XmlConstants.ELE_NAME_METADATA, xmlns);
+            Element answer = new Element(XmlConstants.ELE_NAME_RECORD, nsMarc);
             answer.addNamespaceDeclaration(XSI);
             answer.setAttribute("schemaLocation", "http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd", XSI);
             answer.addContent(root.cloneContent());
             metadata.addContent(answer);
-            record.addContent(metadata);
-            return record;
-        } catch (XSLTransformException e) {
-            logger.error(e.getMessage(), e);
-            return new ErrorCode().getCannotDisseminateFormat();
+            eleRecord.addContent(metadata);
+            return eleRecord;
         } catch (FileNotFoundException e) {
             logger.error(e.getMessage());
             return new ErrorCode().getCannotDisseminateFormat();
-        } catch (IOException e) {
+        } catch (IOException | XSLTransformException e) {
             logger.error(e.getMessage(), e);
             return new ErrorCode().getCannotDisseminateFormat();
         }

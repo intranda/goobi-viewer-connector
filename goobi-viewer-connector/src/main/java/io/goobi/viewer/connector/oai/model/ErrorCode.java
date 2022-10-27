@@ -19,113 +19,119 @@ import org.jdom2.Element;
 import org.jdom2.Namespace;
 
 import io.goobi.viewer.connector.DataManager;
+import io.goobi.viewer.connector.utils.XmlConstants;
 
 /**
  * This class provides all error codes for the OAI protocol.
  */
 public class ErrorCode {
-	private Namespace xmlns = null;
 
-	/**
-	 * <p>Constructor for ErrorCode.</p>
-	 */
-	public ErrorCode() {
-		xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
-	}
+    private Namespace xmlns = null;
 
-	/**
-	 * required argument is missing, argument has wrong syntax or argument has invalid value
-	 *
-	 * @return a {@link org.jdom2.Element} object.
-	 */
-	public Element getBadArgument() {
-		Element error = new Element("error", xmlns);
-		error.setAttribute("code", "badArgument");
-		error.setText("The request includes illegal arguments, is missing required arguments, includes a repeated argument, or values for arguments have an illegal syntax.");
-		return error;
-	}
+    /**
+     * <p>
+     * Constructor for ErrorCode.
+     * </p>
+     */
+    public ErrorCode() {
+        xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
+    }
 
-	/**
-	 * resumptionToken is expired, invalid, not found
-	 *
-	 * @return a {@link org.jdom2.Element} object.
-	 */
-	public Element getBadResumptionToken() {
-		Element error = new Element("error", xmlns);
-		error.setAttribute("code", "badResumptionToken");
-		error.setText("The value of the resumptionToken argument is invalid or expired.");
-		return error;
-	}
+    /**
+     * required argument is missing, argument has wrong syntax or argument has invalid value
+     *
+     * @return a {@link org.jdom2.Element} object.
+     */
+    public Element getBadArgument() {
+        Element error = new Element(XmlConstants.ELE_NAME_ERROR, xmlns);
+        error.setAttribute("code", "badArgument");
+        error.setText(
+                "The request includes illegal arguments, is missing required arguments, includes a repeated argument, or values for arguments have an illegal syntax.");
+        return error;
+    }
 
-	/**
-	 * the verb argument is missing or has invalid value
-	 *
-	 * @return a {@link org.jdom2.Element} object.
-	 */
-	public Element getBadVerb() {
-		Element error = new Element("error", xmlns);
-		error.setAttribute("code", "badVerb");
-		error.setText("Value of the verb argument is not a legal OAI-PMH verb, the verb argument is missing, or the verb argument is repeated. ");
-		return error;
-	}
+    /**
+     * resumptionToken is expired, invalid, not found
+     *
+     * @return a {@link org.jdom2.Element} object.
+     */
+    public Element getBadResumptionToken() {
+        Element error = new Element(XmlConstants.ELE_NAME_ERROR, xmlns);
+        error.setAttribute("code", "badResumptionToken");
+        error.setText("The value of the resumptionToken argument is invalid or expired.");
+        return error;
+    }
 
-	/**
-	 * The metadataPrefix argument has invalid value
-	 *
-	 * @return a {@link org.jdom2.Element} object.
-	 */
-	public Element getCannotDisseminateFormat() {
-		Element error = new Element("error", xmlns);
-		error.setAttribute("code", "cannotDisseminateFormat");
-		error.setText("The metadata format identified by the value given for the metadataPrefix argument is not supported by the item or by the repository.");
-		return error;
-	}
+    /**
+     * the verb argument is missing or has invalid value
+     *
+     * @return a {@link org.jdom2.Element} object.
+     */
+    public Element getBadVerb() {
+        Element error = new Element(XmlConstants.ELE_NAME_ERROR, xmlns);
+        error.setAttribute("code", "badVerb");
+        error.setText("Value of the verb argument is not a legal OAI-PMH verb, the verb argument is missing, or the verb argument is repeated. ");
+        return error;
+    }
 
-	/**
-	 * identifier does not exist
-	 *
-	 * @return a {@link org.jdom2.Element} object.
-	 */
-	public Element getIdDoesNotExist() {
-		Element error = new Element("error", xmlns);
-		error.setAttribute("code", "idDoesNotExist");
-		error.setText("The value of the identifier argument is unknown or illegal in this repository.");
-		return error;
-	}
+    /**
+     * The metadataPrefix argument has invalid value
+     *
+     * @return a {@link org.jdom2.Element} object.
+     */
+    public Element getCannotDisseminateFormat() {
+        Element error = new Element(XmlConstants.ELE_NAME_ERROR, xmlns);
+        error.setAttribute("code", "cannotDisseminateFormat");
+        error.setText(
+                "The metadata format identified by the value given for the metadataPrefix argument is not supported by the item or by the repository.");
+        return error;
+    }
 
-	/**
-	 * query returns no hits
-	 *
-	 * @return a {@link org.jdom2.Element} object.
-	 */
-	public Element getNoRecordsMatch() {
-		Element error = new Element("error", xmlns);
-		error.setAttribute("code", "noRecordsMatch");
-		error.setText("The combination of the values of the from, until, set and metadataPrefix arguments results in an empty list.");
-		return error;
-	}
+    /**
+     * identifier does not exist
+     *
+     * @return a {@link org.jdom2.Element} object.
+     */
+    public Element getIdDoesNotExist() {
+        Element error = new Element(XmlConstants.ELE_NAME_ERROR, xmlns);
+        error.setAttribute("code", "idDoesNotExist");
+        error.setText("The value of the identifier argument is unknown or illegal in this repository.");
+        return error;
+    }
 
-	/**
-	 * for given identifier the metadata format used in metadataPrefix is not provided
-	 *
-	 * @return a {@link org.jdom2.Element} object.
-	 */
-	public Element getNoMetadataFormats() {
-		Element error = new Element("error", xmlns);
-		error.setAttribute("code", "noMetadataFormats");
-		error.setText("There are no metadata formats available for the specified item.");
-		return error;
-	}
+    /**
+     * query returns no hits
+     *
+     * @return a {@link org.jdom2.Element} object.
+     */
+    public Element getNoRecordsMatch() {
+        Element error = new Element(XmlConstants.ELE_NAME_ERROR, xmlns);
+        error.setAttribute("code", "noRecordsMatch");
+        error.setText("The combination of the values of the from, until, set and metadataPrefix arguments results in an empty list.");
+        return error;
+    }
 
-	/**
-	 * there are no sets in repository
-	 *
-	 * @return a {@link org.jdom2.Element} object.
-	 */
-	public Element getNoSetHierarchy() {
-		Element error = new Element("error", xmlns);
-		error.setAttribute("code", "noSetHierarchy");
-		error.setText("The repository does not support sets.");
-		return error;
-	}
+    /**
+     * for given identifier the metadata format used in metadataPrefix is not provided
+     *
+     * @return a {@link org.jdom2.Element} object.
+     */
+    public Element getNoMetadataFormats() {
+        Element error = new Element(XmlConstants.ELE_NAME_ERROR, xmlns);
+        error.setAttribute("code", "noMetadataFormats");
+        error.setText("There are no metadata formats available for the specified item.");
+        return error;
+    }
+
+    /**
+     * there are no sets in repository
+     *
+     * @return a {@link org.jdom2.Element} object.
+     */
+    public Element getNoSetHierarchy() {
+        Element error = new Element(XmlConstants.ELE_NAME_ERROR, xmlns);
+        error.setAttribute("code", "noSetHierarchy");
+        error.setText("The repository does not support sets.");
+        return error;
+    }
 }
