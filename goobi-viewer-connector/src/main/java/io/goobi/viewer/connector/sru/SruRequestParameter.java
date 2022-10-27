@@ -47,7 +47,7 @@ public class SruRequestParameter {
     private String recordPacking = "xml";
 
     // optional     The schema in which the records MUST be returned. The value is the URI identifier for the schema or the short name for it published by the server. The default value if not supplied is determined by the server. See http://www.loc.gov/standards/sru/resources/schemas.html.
-    private Metadata recordSchema = Metadata.mets;
+    private Metadata recordSchema = Metadata.METS;
 
     // (version 1.1 only)  optional  An XPath expression, to be applied to the records before returning them. It is to be applied relative to the schema supplied in the recordSchema parameter, and response records should assume the SRU XPath schema. 
     private String recordXPath = "";

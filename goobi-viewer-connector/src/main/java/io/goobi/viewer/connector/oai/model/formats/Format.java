@@ -78,8 +78,8 @@ public abstract class Format {
     public static final String ACCESSCONDITION_OPENACCESS = "info:eu-repo/semantics/openAccess";
     public static final String ACCESSCONDITION_CLOSEDACCESS = "info:eu-repo/semantics/closedAccess";
 
-    protected final String[] DATE_FIELDS = { SolrConstants.DATECREATED, SolrConstants.DATEUPDATED };
-    protected final String[] IDENTIFIER_FIELDS = { SolrConstants.PI, SolrConstants.PI_TOPSTRUCT };
+    protected static final String[] DATE_FIELDS = { SolrConstants.DATECREATED, SolrConstants.DATEUPDATED };
+    protected static final String[] IDENTIFIER_FIELDS = { SolrConstants.PI, SolrConstants.PI_TOPSTRUCT };
 
     /** Constant <code>expiration=259200000L</code> */
     protected static long expiration = 259200000L; // 3 days
@@ -189,8 +189,8 @@ public abstract class Format {
         }
         Element listMetadataFormats = new Element("ListMetadataFormats", xmlns);
         for (Metadata m : Metadata.values()) {
-            // logger.trace("{}: {}", m.getMetadataPrefix(), DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(m.name()));
-            if (m.isOaiSet() && DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(m.name())) {
+            // logger.trace("{}: {}", m.getMetadataPrefix(), DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(m.getMetadataPrefix()));
+            if (m.isOaiSet() && DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(m.getMetadataPrefix())) {
                 Element metadataFormat = new Element("metadataFormat", xmlns);
                 Element metadataPrefix = new Element("metadataPrefix", xmlns);
                 metadataPrefix.setText(m.getMetadataPrefix());
@@ -290,7 +290,7 @@ public abstract class Format {
         Element xmlListIdentifiers = new Element("ListIdentifiers", xmlns);
 
         List<String> setSpecFields =
-                DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix().name());
+                DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix().getMetadataPrefix());
 
         QueryResponse qr;
         long totalVirtualHits;
@@ -540,7 +540,7 @@ public abstract class Format {
             long totalHits = 0;
             String versionDiscriminatorField = DataManager.getInstance()
                     .getConfiguration()
-                    .getVersionDisriminatorFieldForMetadataFormat(token.getHandler().getMetadataPrefix().name());
+                    .getVersionDisriminatorFieldForMetadataFormat(token.getHandler().getMetadataPrefix().getMetadataPrefix());
 
             Format format = Format.getFormatByMetadataPrefix(token.getHandler().getMetadataPrefix());
             if (format == null) {
@@ -553,12 +553,12 @@ public abstract class Format {
                 return new ErrorCode().getBadResumptionToken();
             }
             int hitsPerToken =
-                    DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(token.getHandler().getMetadataPrefix().name());
+                    DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(token.getHandler().getMetadataPrefix().getMetadataPrefix());
 
-            if (token.getHandler().getVerb().equals(Verb.ListIdentifiers)) {
+            if (token.getHandler().getVerb().equals(Verb.LISTIDENTIFIERS)) {
                 return format.createListIdentifiers(token.getHandler(), token.getVirtualCursor(), token.getRawCursor(), hitsPerToken,
                         versionDiscriminatorField, filterQuerySuffix);
-            } else if (token.getHandler().getVerb().equals(Verb.ListRecords)) {
+            } else if (token.getHandler().getVerb().equals(Verb.LISTRECORDS)) {
                 //                Metadata md = token.getHandler().getMetadataPrefix();
                 return format.createListRecords(token.getHandler(), token.getVirtualCursor(), token.getRawCursor(), hitsPerToken,
                         versionDiscriminatorField, filterQuerySuffix);
@@ -642,23 +642,23 @@ public abstract class Format {
         }
 
         switch (metadataPrefix) {
-            case oai_dc:
+            case OAI_DC:
                 return new OAIDCFormat();
-            case ese:
+            case ESE:
                 return new EuropeanaFormat();
-            case mets:
+            case METS:
                 return new METSFormat();
-            case marcxml:
+            case MARCXML:
                 return new MARCXMLFormat();
-            case epicur:
+            case EPICUR:
                 return new EpicurFormat();
-            case lido:
+            case LIDO:
                 return new LIDOFormat();
-            case iv_overviewpage:
-            case iv_crowdsourcing:
+            case IV_OVERVIEWPAGE:
+            case IV_CROWDSOURCING:
                 return new GoobiViewerUpdateFormat();
-            case tei:
-            case cmdi:
+            case TEI:
+            case CMDI:
                 return new TEIFormat();
             default:
                 return null;

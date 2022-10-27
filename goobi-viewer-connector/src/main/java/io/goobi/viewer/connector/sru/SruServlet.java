@@ -27,6 +27,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
@@ -41,8 +43,6 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import org.jdom2.transform.XSLTransformException;
 import org.jdom2.transform.XSLTransformer;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.exceptions.HTTPException;
@@ -53,7 +53,6 @@ import io.goobi.viewer.connector.utils.SolrSearchIndex;
 import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
 import io.goobi.viewer.connector.utils.XmlTools;
-import io.goobi.viewer.exceptions.IndexUnreachableException;
 
 /**
  * <p>
@@ -401,12 +400,12 @@ public class SruServlet extends HttpServlet {
         sbValue.append(initValue);
 
         switch (parameter.getRecordSchema()) {
-            case lido:
+            case LIDO:
                 sbValue.append(" AND ").append(SolrConstants.SOURCEDOCFORMAT).append(":LIDO");
                 break;
-            case marcxml:
-            case mods:
-            case mets:
+            case MARCXML:
+            case MODS:
+            case METS:
                 sbValue.append(" AND ").append(SolrConstants.SOURCEDOCFORMAT).append(":METS");
                 break;
             default:
@@ -418,7 +417,7 @@ public class SruServlet extends HttpServlet {
                 .append(SolrConstants.ISANCHOR)
                 .append(":true)")
                 .append(filterQuerySuffix);
-        logger.trace(sbValue.toString());
+        logger.trace(sbValue);
         return sbValue.toString();
     }
 
@@ -488,22 +487,22 @@ public class SruServlet extends HttpServlet {
             record.addContent(recordData);
 
             switch (parameter.getRecordSchema()) {
-                case solr:
+                case SOLR:
                     generateSolrRecord(document, recordData);
                     break;
-                case mets:
+                case METS:
                     generateMetsRecord(document, recordData);
                     break;
-                case mods:
+                case MODS:
                     generateModsRecord(document, recordData);
                     break;
-                case marcxml:
+                case MARCXML:
                     generateMarcxmlRecord(document, recordData);
                     break;
-                case dc:
+                case DC:
                     generateDcRecord(document, recordData, solr, filterQuerySuffix);
                     break;
-                case lido:
+                case LIDO:
                     generateLidoRecord(document, recordData);
                     break;
                 default:
@@ -527,19 +526,17 @@ public class SruServlet extends HttpServlet {
             }
             org.jdom2.Document xmlDoc = XmlTools.getDocumentFromString(xml, null);
             Element xmlRoot = xmlDoc.getRootElement();
-            Element newLido = new Element(Metadata.lido.getMetadataPrefix(), LIDO_NAMESPACE);
+            Element newLido = new Element(Metadata.LIDO.getMetadataPrefix(), LIDO_NAMESPACE);
             newLido.addNamespaceDeclaration(XSI_NAMESPACE);
             newLido.setAttribute(new Attribute("schemaLocation", "http://www.lido-schema.org http://www.lido-schema.org/schema/v1.0/lido-v1.0.xsd",
                     XSI_NAMESPACE));
 
             newLido.addContent(xmlRoot.cloneContent());
             recordData.addContent(newLido);
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-        } catch (JDOMException e) {
+        } catch (IOException | JDOMException e) {
             logger.error(e.getMessage(), e);
         } catch (HTTPException e) {
-            logger.error(e.getCode() + ": " + e.getMessage());
+            logger.error("{}: {}", e.getCode(), e.getMessage());
         }
     }
 
@@ -562,7 +559,7 @@ public class SruServlet extends HttpServlet {
 
         // creating Element <dc:title />
         Element dc_title = new Element("title", DC_NAMEPSACE);
-        if (doc.getFieldValues("MD_TITLE") != null) {
+        if (doc.getFieldValues(SolrConstants.TITLE) != null) {
             title = (String) doc.getFieldValues("MD_TITLE").iterator().next();
         } else {
             title = "";
@@ -761,12 +758,10 @@ public class SruServlet extends HttpServlet {
                 eleUrlSubfield.setText(sbUrl.toString());
                 eleUrl.addContent(eleUrlSubfield);
             }
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-        } catch (JDOMException e) {
+        } catch (IOException | JDOMException e) {
             logger.error(e.getMessage(), e);
         } catch (HTTPException e) {
-            logger.error(e.getCode() + ": " + e.getMessage());
+            logger.error("{}: {}", e.getCode(), e.getMessage());
         }
     }
 
@@ -800,12 +795,10 @@ public class SruServlet extends HttpServlet {
                 newMods.addContent(modsElement.cloneContent());
                 recordData.addContent(newMods);
             }
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-        } catch (JDOMException e) {
+        } catch (IOException | JDOMException e) {
             logger.error(e.getMessage(), e);
         } catch (HTTPException e) {
-            logger.error(e.getCode() + ": " + e.getMessage());
+            logger.error("{}: {}", e.getCode(), e.getMessage());
         }
     }
 
@@ -825,7 +818,7 @@ public class SruServlet extends HttpServlet {
             }
             org.jdom2.Document xmlDoc = XmlTools.getDocumentFromString(xml, null);
             Element xmlRoot = xmlDoc.getRootElement();
-            Element newMets = new Element(Metadata.mets.getMetadataPrefix(), METS_NAMESPACE);
+            Element newMets = new Element(Metadata.METS.getMetadataPrefix(), METS_NAMESPACE);
             newMets.addNamespaceDeclaration(XSI_NAMESPACE);
             newMets.addNamespaceDeclaration(XSI_NAMESPACE);
             newMets.addNamespaceDeclaration(MODS_NAMESPACE);
@@ -837,12 +830,10 @@ public class SruServlet extends HttpServlet {
 
             newMets.addContent(xmlRoot.cloneContent());
             recordData.addContent(newMets);
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-        } catch (JDOMException e) {
+        } catch (IOException | JDOMException e) {
             logger.error(e.getMessage(), e);
         } catch (HTTPException e) {
-            logger.error(e.getCode() + ": " + e.getMessage());
+            logger.error("{}: {}", e.getCode(), e.getMessage());
         }
     }
 

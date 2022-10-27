@@ -25,15 +25,14 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.ClientProtocolException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.exceptions.HTTPException;
@@ -55,10 +54,11 @@ import io.goobi.viewer.messages.ViewerResourceBundle;
 public class OAIDCFormat extends Format {
 
     private static final Logger logger = LogManager.getLogger(OAIDCFormat.class);
-    
+
     protected static Map<String, String> anchorTitles = new HashMap<>();
 
-    private List<String> setSpecFields = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.oai_dc.name());
+    private List<String> setSpecFields =
+            DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.OAI_DC.getMetadataPrefix());
 
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String, java.lang.String)
@@ -105,7 +105,7 @@ public class OAIDCFormat extends Format {
             return new ErrorCode().getBadArgument();
         }
         String versionDiscriminatorField =
-                DataManager.getInstance().getConfiguration().getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().name());
+                DataManager.getInstance().getConfiguration().getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().getMetadataPrefix());
         if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
             String[] identifierSplit = Utils.splitIdentifierAndLanguageCode(handler.getIdentifier(), 3);
             try {
@@ -115,9 +115,7 @@ public class OAIDCFormat extends Format {
                 }
                 return generateDC(Collections.singletonList(doc), 1L, 1L, 0, 0, 1, handler, "GetRecord", versionDiscriminatorField,
                         identifierSplit[1], filterQuerySuffix);
-            } catch (IOException e) {
-                return new ErrorCode().getNoMetadataFormats();
-            } catch (SolrServerException e) {
+            } catch (IOException | SolrServerException e) {
                 return new ErrorCode().getNoMetadataFormats();
             }
         }
@@ -127,9 +125,7 @@ public class OAIDCFormat extends Format {
                 return new ErrorCode().getIdDoesNotExist();
             }
             return generateDC(Collections.singletonList(doc), 1L, 1L, 0, 0, 1, handler, "GetRecord", null, null, filterQuerySuffix);
-        } catch (IOException e) {
-            return new ErrorCode().getNoMetadataFormats();
-        } catch (SolrServerException e) {
+        } catch (IOException | SolrServerException e) {
             return new ErrorCode().getNoMetadataFormats();
         }
     }
@@ -156,7 +152,7 @@ public class OAIDCFormat extends Format {
             int numRows, RequestHandler handler, String recordType, String versionDiscriminatorField, String requestedVersion,
             String filterQuerySuffix) throws SolrServerException, IOException {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
-        Namespace nsOaiDoc = Namespace.getNamespace(Metadata.oai_dc.getMetadataNamespacePrefix(), Metadata.oai_dc.getMetadataNamespaceUri());
+        Namespace nsOaiDoc = Namespace.getNamespace(Metadata.OAI_DC.getMetadataNamespacePrefix(), Metadata.OAI_DC.getMetadataNamespaceUri());
         Element xmlListRecords = new Element(recordType, xmlns);
 
         if (records.size() < numRows) {
@@ -215,7 +211,6 @@ public class OAIDCFormat extends Format {
      */
     private Element generateSingleDCRecord(SolrDocument doc, RequestHandler handler, String requestedVersion, Namespace xmlns, Namespace nsOaiDoc,
             List<String> setSpecFields, String filterQuerySuffix) throws SolrServerException, IOException {
-        Element record = new Element("record", xmlns);
         boolean isWork = doc.getFieldValue(SolrConstants.ISWORK) != null && (boolean) doc.getFieldValue(SolrConstants.ISWORK);
         boolean isAnchor = doc.getFieldValue(SolrConstants.ISANCHOR) != null && (boolean) doc.getFieldValue(SolrConstants.ISANCHOR);
         boolean openAccess = true;
@@ -256,28 +251,27 @@ public class OAIDCFormat extends Format {
         }
         String docstruct = (String) doc.getFieldValue(SolrConstants.DOCSTRCT);
 
+        Element eleRecord = new Element("record", xmlns);
         Element header = getHeader(doc, topstructDoc, handler, requestedVersion, setSpecFields, filterQuerySuffix);
-        record.addContent(header);
+        eleRecord.addContent(header);
 
         if ("deleted".equals(header.getAttributeValue("status"))) {
-            return record;
+            return eleRecord;
         }
-
-        //            Map<String, String> collectedValues = new HashMap<>();
 
         // create the metadata element, special for dc
         Element metadata = new Element("metadata", xmlns);
 
         // creating Element <oai_dc:dc ....> </oai_dc:dc>
-        Element oai_dc = new Element("dc", nsOaiDoc);
-        Namespace nsDc = Namespace.getNamespace(Metadata.dc.getMetadataNamespacePrefix(), Metadata.dc.getMetadataNamespaceUri());
-        oai_dc.addNamespaceDeclaration(nsDc);
-        oai_dc.addNamespaceDeclaration(XSI);
-        oai_dc.setAttribute("schemaLocation", "http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd", XSI);
+        Element eleOaiDc = new Element("dc", nsOaiDoc);
+        Namespace nsDc = Namespace.getNamespace(Metadata.DC.getMetadataNamespacePrefix(), Metadata.DC.getMetadataNamespaceUri());
+        eleOaiDc.addNamespaceDeclaration(nsDc);
+        eleOaiDc.addNamespaceDeclaration(XSI);
+        eleOaiDc.setAttribute("schemaLocation", "http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd", XSI);
 
         // Configured fields
         List<io.goobi.viewer.connector.oai.model.metadata.Metadata> metadataList =
-                DataManager.getInstance().getConfiguration().getMetadataConfiguration(Metadata.oai_dc.name(), docstruct);
+                DataManager.getInstance().getConfiguration().getMetadataConfiguration(Metadata.OAI_DC.getMetadataPrefix(), docstruct);
         if (metadataList != null && !metadataList.isEmpty()) {
             for (io.goobi.viewer.connector.oai.model.metadata.Metadata md : metadataList) {
                 boolean restrictedContent = false;
@@ -307,7 +301,7 @@ public class OAIDCFormat extends Format {
                                 for (String accessCondition : accessConditions) {
                                     val = DataManager.getInstance()
                                             .getConfiguration()
-                                            .getAccessConditionMappingForMetadataFormat(Metadata.oai_dc.name(), accessCondition);
+                                            .getAccessConditionMappingForMetadataFormat(Metadata.OAI_DC.getMetadataPrefix(), accessCondition);
                                 }
                                 if (StringUtils.isEmpty(val)) {
                                     val = ACCESSCONDITION_CLOSEDACCESS;
@@ -321,7 +315,7 @@ public class OAIDCFormat extends Format {
                                         doc.getFieldValue(SolrConstants.IDDOC));
                                 continue;
                             }
-                            oai_dc.addContent(generateDcSource(doc, topstructDoc, anchorDoc, nsDc));
+                            eleOaiDc.addContent(generateDcSource(doc, topstructDoc, anchorDoc, nsDc));
                             break;
                         case "fulltext":
                             if (topstructDoc == null) {
@@ -331,7 +325,7 @@ public class OAIDCFormat extends Format {
                             }
                             for (Element oai_fulltext : generateFulltextUrls((String) topstructDoc.getFieldValue(SolrConstants.PI_TOPSTRUCT),
                                     nsDc)) {
-                                oai_dc.addContent(oai_fulltext);
+                                eleOaiDc.addContent(oai_fulltext);
                             }
                             break;
                         default:
@@ -341,10 +335,6 @@ public class OAIDCFormat extends Format {
                     }
                 } else if ("#TOC#".equals(md.getMasterValue())) {
                     // Generated TOC as plain text
-                    //                    if (!openAccess) {
-                    //                        continue;
-                    //                    }
-
                     String url = DataManager.getInstance().getConfiguration().getRestApiUrl() + "records/"
                             + (String) doc.getFieldValue(SolrConstants.PI) + "/toc/";
                     try {
@@ -367,12 +357,10 @@ public class OAIDCFormat extends Format {
                         if (StringUtils.isNotEmpty(val)) {
                             finishedValues.add(val);
                         }
-                    } catch (ClientProtocolException e) {
-                        logger.error(e.getMessage(), e);
                     } catch (IOException e) {
                         logger.error(e.getMessage(), e);
                     } catch (HTTPException e) {
-                        logger.error(e.getCode() + ": " + url);
+                        logger.error("{}: {}", e.getCode(), url);
                     }
                 } else if (!md.getParams().isEmpty()) {
                     // Parameter configuration
@@ -414,9 +402,6 @@ public class OAIDCFormat extends Format {
                         if (openAccess || !restrictedContent) {
                             finishedValues.add(val);
                         }
-                        if (!md.isMultivalued()) {
-                            continue;
-                        }
                     }
                 } else if (StringUtils.isNotEmpty(md.getMasterValue())) {
                     // Default value
@@ -440,15 +425,15 @@ public class OAIDCFormat extends Format {
                 for (String val : finishedValues) {
                     Element eleField = new Element(md.getLabel(), nsDc);
                     eleField.setText(val);
-                    oai_dc.addContent(eleField);
+                    eleOaiDc.addContent(eleField);
                 }
             }
         }
 
-        metadata.addContent(oai_dc);
-        record.addContent(metadata);
+        metadata.addContent(eleOaiDc);
+        eleRecord.addContent(metadata);
 
-        return record;
+        return eleRecord;
 
     }
 
@@ -463,14 +448,12 @@ public class OAIDCFormat extends Format {
      */
     protected String getAnchorTitle(String iddocParent, String filterQuerySuffix) {
         try {
-            logger.trace("anchor title query: {}", SolrConstants.IDDOC + ":" + iddocParent);
+            logger.trace("anchor title query: {}:{}", SolrConstants.IDDOC, iddocParent);
             SolrDocumentList hits = solr.search("+" + SolrConstants.IDDOC + ":" + iddocParent, filterQuerySuffix);
             if (hits != null && !hits.isEmpty()) {
                 return (String) hits.get(0).getFirstValue(SolrConstants.TITLE);
             }
-        } catch (SolrServerException e) {
-            logger.error(e.getMessage(), e);
-        } catch (IOException e) {
+        } catch (IOException | SolrServerException e) {
             logger.error(e.getMessage(), e);
         }
 
@@ -494,8 +477,6 @@ public class OAIDCFormat extends Format {
             throw new IllegalArgumentException("topstructDoc may not be null");
         }
 
-        Element dc_source = new Element("source", namespace);
-
         StringBuilder sbSourceCreators = new StringBuilder();
         if (doc != null && doc.getFieldValues("MD_CREATOR") != null) {
             for (Object fieldValue : doc.getFieldValues("MD_CREATOR")) {
@@ -517,23 +498,23 @@ public class OAIDCFormat extends Format {
         }
 
         StringBuilder sbSourceTitle = new StringBuilder();
-        if (doc != null && doc.getFirstValue("MD_TITLE") != null) {
-            sbSourceTitle.append((String) doc.getFirstValue("MD_TITLE"));
+        if (doc != null && doc.getFirstValue(SolrConstants.TITLE) != null) {
+            sbSourceTitle.append((String) doc.getFirstValue(SolrConstants.TITLE));
         }
-        if (anchorDoc != null && anchorDoc.getFirstValue("MD_TITLE") != null) {
+        if (anchorDoc != null && anchorDoc.getFirstValue(SolrConstants.TITLE) != null) {
             if (sbSourceTitle.length() > 0) {
                 sbSourceTitle.append("; ");
             }
-            sbSourceTitle.append((String) anchorDoc.getFirstValue("MD_TITLE"));
+            sbSourceTitle.append((String) anchorDoc.getFirstValue(SolrConstants.TITLE));
         }
         if (sbSourceTitle.length() == 0) {
             sbSourceTitle.append('-');
         }
-        if (topstructDoc != doc && topstructDoc.getFirstValue("MD_TITLE") != null) {
+        if (topstructDoc != doc && topstructDoc.getFirstValue(SolrConstants.TITLE) != null) {
             if (sbSourceTitle.length() > 0) {
                 sbSourceTitle.append("; ");
             }
-            sbSourceTitle.append((String) topstructDoc.getFirstValue("MD_TITLE"));
+            sbSourceTitle.append((String) topstructDoc.getFirstValue(SolrConstants.TITLE));
         }
 
         // Publisher info
@@ -564,16 +545,17 @@ public class OAIDCFormat extends Format {
         if (doc == topstructDoc || doc == anchorDoc) {
             // Only top level docs should display publisher information
             sbSourceString.append(", ").append(sourcePlacepublish).append(": ").append(sourcePublisher).append(' ').append(sourceYearpublish);
-            // sbSourceString.append('.');
         } else if (orderLabelFirst != null && orderLabelLast != null && !"-".equals(orderLabelFirst.trim()) && !"-".equals(orderLabelLast.trim())) {
             // Add page range for lower level docstructs, if available
             sbSourceString.append(", P ").append(orderLabelFirst).append(" - ").append(orderLabelLast);
         }
 
         sbSourceString.append('.');
-        dc_source.setText(sbSourceString.toString());
 
-        return dc_source;
+        Element eleDcSource = new Element("source", namespace);
+        eleDcSource.setText(sbSourceString.toString());
+
+        return eleDcSource;
     }
 
     /**
@@ -610,9 +592,9 @@ public class OAIDCFormat extends Format {
             }
             String fileName = filePath.substring(filePath.lastIndexOf('/') + 1); // pure file name
             String url = urlTemplate.replace("{page}", String.valueOf(i)).replace("{fileName}", fileName);
-            Element dc_fulltext = new Element("source", namespace);
-            dc_fulltext.setText(url);
-            ret.add(dc_fulltext);
+            Element eleDcFulltext = new Element("source", namespace);
+            eleDcFulltext.setText(url);
+            ret.add(eleDcFulltext);
         }
 
         return ret;
@@ -626,7 +608,7 @@ public class OAIDCFormat extends Format {
     public long getTotalHits(Map<String, String> params, String versionDiscriminatorField, String filterQuerySuffix)
             throws IOException, SolrServerException {
         String additionalQuery = "";
-        if (!Verb.ListIdentifiers.getTitle().equals(params.get("verb"))) {
+        if (!Verb.LISTIDENTIFIERS.getTitle().equals(params.get("verb"))) {
             additionalQuery +=
                     SolrSearchTools.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes());
         }

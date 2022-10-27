@@ -114,7 +114,8 @@ public class SolrSearchTools {
         }
 
         // Solr timestamp range is irrelevant for iv_* formats
-        if (!Metadata.iv_overviewpage.name().equals(metadataPrefix) && !Metadata.iv_crowdsourcing.name().equals(metadataPrefix)
+        if (!Metadata.IV_OVERVIEWPAGE.getMetadataPrefix().equals(metadataPrefix)
+                && !Metadata.IV_CROWDSOURCING.getMetadataPrefix().equals(metadataPrefix)
                 && (from != null || until != null)) {
             long fromTimestamp = RequestHandler.getFromTimestamp(from);
             long untilTimestamp = RequestHandler.getUntilTimestamp(until);

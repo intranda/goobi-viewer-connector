@@ -16,42 +16,52 @@
 package io.goobi.viewer.connector.oai.enums;
 
 /**
- * <p>Verb class.</p>
+ * <p>
+ * Verb class.
+ * </p>
  *
  */
 public enum Verb {
 
-	GetRecord("GetRecord"), Identify("Identify"), ListIdentifiers("ListIdentifiers"), ListMetadataFormats("ListMetadataFormats"), ListRecords(
-			"ListRecords"), ListSets("ListSets");
+    GETRECORD("GetRecord"),
+    IDENTIFY("Identify"),
+    LISTIDENTIFIERS("ListIdentifiers"),
+    LISTMETADATAFORMATS("ListMetadataFormats"),
+    LISTRECORDS("ListRecords"),
+    LISTSETS("ListSets");
 
-	private String title;
+    private String title;
 
-	private Verb(String title) {
-		this.title = title;
-	}
+    private Verb(String title) {
+        this.title = title;
+    }
 
-	/**
-	 * <p>Getter for the field <code>title</code>.</p>
-	 *
-	 * @return a {@link java.lang.String} object.
-	 */
-	public String getTitle() {
-		return title;
-	}
+    /**
+     * <p>
+     * Getter for the field <code>title</code>.
+     * </p>
+     *
+     * @return a {@link java.lang.String} object.
+     */
+    public String getTitle() {
+        return title;
+    }
 
-	/**
-	 * <p>getByTitle.</p>
-	 *
-	 * @param title a {@link java.lang.String} object.
-	 * @return a {@link io.goobi.viewer.connector.oai.enums.Verb} object.
-	 */
-	public static Verb getByTitle(String title) {
-		for (Verb v : Verb.values()) {
-			if (v.getTitle().equals(title)) {
-				return v;
-			}
-		}
-		return null;
-	}
+    /**
+     * <p>
+     * getByTitle.
+     * </p>
+     *
+     * @param title a {@link java.lang.String} object.
+     * @return a {@link io.goobi.viewer.connector.oai.enums.Verb} object.
+     */
+    public static Verb getByTitle(String title) {
+        for (Verb v : Verb.values()) {
+            if (v.getTitle().equals(title)) {
+                return v;
+            }
+        }
+        return null;
+    }
 
 }

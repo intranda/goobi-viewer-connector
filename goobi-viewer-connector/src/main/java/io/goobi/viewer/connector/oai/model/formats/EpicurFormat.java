@@ -49,13 +49,14 @@ public class EpicurFormat extends Format {
 
     private static final Logger logger = LogManager.getLogger(EpicurFormat.class);
 
-    private static Namespace EPICUR = Namespace.getNamespace("epicur", "urn:nbn:de:1111-2004033116");
+    private static final Namespace EPICUR = Namespace.getNamespace("epicur", "urn:nbn:de:1111-2004033116");
 
-    private static String[] FIELDS =
+    private static final String[] FIELDS =
             { SolrConstants.DATECREATED, SolrConstants.DATEUPDATED, SolrConstants.DATEDELETED, SolrConstants.PI, SolrConstants.PI_TOPSTRUCT,
                     SolrConstants.URN };
 
-    private List<String> setSpecFields = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.epicur.name());
+    private List<String> setSpecFields =
+            DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.EPICUR.getMetadataPrefix());
 
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String)
@@ -448,7 +449,7 @@ public class EpicurFormat extends Format {
             throws IOException, SolrServerException {
         // Hit count may differ for epicur
         String additionalQuery = SolrSearchTools.getUrnPrefixBlacklistSuffix(DataManager.getInstance().getConfiguration().getUrnPrefixBlacklist());
-        if (!Verb.ListIdentifiers.getTitle().equals(params.get("verb"))) {
+        if (!Verb.LISTIDENTIFIERS.getTitle().equals(params.get("verb"))) {
             additionalQuery +=
                     SolrSearchTools.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes());
         }

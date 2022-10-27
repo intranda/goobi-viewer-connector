@@ -21,14 +21,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
@@ -42,10 +42,11 @@ import io.goobi.viewer.connector.utils.Utils;
  * ESE
  */
 public class EuropeanaFormat extends OAIDCFormat {
-    
+
     private static final Logger logger = LogManager.getLogger(EuropeanaFormat.class);
 
-    private List<String> setSpecFields = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.ese.name());
+    private List<String> setSpecFields =
+            DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.ESE.getMetadataPrefix());
 
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String, java.lang.String)
@@ -78,9 +79,7 @@ public class EuropeanaFormat extends OAIDCFormat {
                 return new ErrorCode().getIdDoesNotExist();
             }
             return generateESE(Collections.singletonList(doc), 1L, 0, 1, handler, "GetRecord", filterQuerySuffix);
-        } catch (IOException e) {
-            return new ErrorCode().getNoMetadataFormats();
-        } catch (SolrServerException e) {
+        } catch (IOException | SolrServerException e) {
             return new ErrorCode().getNoMetadataFormats();
         }
     }
@@ -102,9 +101,9 @@ public class EuropeanaFormat extends OAIDCFormat {
     private Element generateESE(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler, String recordType,
             String filterQuerySuffix) throws SolrServerException, IOException {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
-        Namespace nsDc = Namespace.getNamespace(Metadata.dc.getMetadataNamespacePrefix(), Metadata.dc.getMetadataNamespaceUri());
+        Namespace nsDc = Namespace.getNamespace(Metadata.DC.getMetadataNamespacePrefix(), Metadata.DC.getMetadataNamespaceUri());
         Namespace nsDcTerms = Namespace.getNamespace("dcterms", "http://purl.org/dc/terms/");
-        Namespace nsEuropeana = Namespace.getNamespace(Metadata.ese.getMetadataNamespacePrefix(), Metadata.ese.getMetadataNamespaceUri());
+        Namespace nsEuropeana = Namespace.getNamespace(Metadata.ESE.getMetadataNamespacePrefix(), Metadata.ESE.getMetadataNamespaceUri());
 
         Element xmlListRecords = new Element(recordType, xmlns);
 
@@ -145,11 +144,6 @@ public class EuropeanaFormat extends OAIDCFormat {
 
             String identifier = null;
             String urn = null;
-            String title = null;
-            String creators = null;
-            String publisher = null;
-            String yearpublish = null;
-            String placepublish = null;
             String type = null;
 
             // create the metadata element, special for dc
@@ -178,155 +172,133 @@ public class EuropeanaFormat extends OAIDCFormat {
                 eleEuropeanaRecord.addContent(eleDcIdentifier);
             }
             // <dc:language>
-            {
-                Element eleDcLanguage = new Element("language", nsDc);
-                String language = "";
-                if (doc.getFieldValues("MD_LANGUAGE") != null) {
-                    language = (String) doc.getFieldValues("MD_LANGUAGE").iterator().next();
-                    eleDcLanguage.setText(language);
-                    eleEuropeanaRecord.addContent(eleDcLanguage);
-                }
+            Element eleDcLanguage = new Element("language", nsDc);
+            String language = "";
+            if (doc.getFieldValues("MD_LANGUAGE") != null) {
+                language = (String) doc.getFieldValues("MD_LANGUAGE").iterator().next();
+                eleDcLanguage.setText(language);
+                eleEuropeanaRecord.addContent(eleDcLanguage);
             }
+            
             // MANDATORY: <dc:title>
-            {
-                Element dc_title = new Element("title", nsDc);
-                if (doc.getFieldValues(SolrConstants.TITLE) != null) {
-                    title = (String) doc.getFieldValues(SolrConstants.TITLE).iterator().next();
-                }
-                if (isWork && doc.getFieldValue(SolrConstants.IDDOC_PARENT) != null) {
-                    // If this is a volume, add anchor title in front
-                    String iddocParent = (String) doc.getFieldValue(SolrConstants.IDDOC_PARENT);
-                    String anchorTitle = anchorTitles.get(iddocParent);
-                    if (anchorTitle == null) {
-                        anchorTitle = getAnchorTitle(iddocParent, filterQuerySuffix);
-                        if (anchorTitle != null) {
-                            title = anchorTitle + "; " + title;
-                            anchorTitles.put(iddocParent, anchorTitle);
-                        }
+            String title = null;
+            if (doc.getFieldValues(SolrConstants.TITLE) != null) {
+                title = (String) doc.getFieldValues(SolrConstants.TITLE).iterator().next();
+            }
+            if (isWork && doc.getFieldValue(SolrConstants.IDDOC_PARENT) != null) {
+                // If this is a volume, add anchor title in front
+                String iddocParent = (String) doc.getFieldValue(SolrConstants.IDDOC_PARENT);
+                String anchorTitle = anchorTitles.get(iddocParent);
+                if (anchorTitle == null) {
+                    anchorTitle = getAnchorTitle(iddocParent, filterQuerySuffix);
+                    if (anchorTitle != null) {
+                        title = anchorTitle + "; " + title;
+                        anchorTitles.put(iddocParent, anchorTitle);
                     }
                 }
-                dc_title.setText(title);
-                eleEuropeanaRecord.addContent(dc_title);
             }
+            Element eleDcTitle = new Element("title", nsDc);
+            eleDcTitle.setText(title);
+            eleEuropeanaRecord.addContent(eleDcTitle);
+            
             // <dc:description>
-            {
-                String value = null;
-                if (doc.getFieldValues("MD_INFORMATION") != null) {
-                    value = (String) doc.getFieldValues("MD_INFORMATION").iterator().next();
+            String desc = null;
+            if (doc.getFieldValues("MD_INFORMATION") != null) {
+                desc = (String) doc.getFieldValues("MD_INFORMATION").iterator().next();
 
-                } else if (doc.getFieldValues("MD_DATECREATED") != null) {
-                    value = (String) doc.getFieldValues("MD_DATECREATED").iterator().next();
-
-                }
-                if (value != null) {
-                    Element eleDcDescription = new Element("description", nsDc);
-                    eleDcDescription.setText(value);
-                    eleEuropeanaRecord.addContent(eleDcDescription);
-                }
+            } else if (doc.getFieldValues("MD_DATECREATED") != null) {
+                desc = (String) doc.getFieldValues("MD_DATECREATED").iterator().next();
             }
+            if (desc != null) {
+                Element eleDcDescription = new Element("description", nsDc);
+                eleDcDescription.setText(desc);
+                eleEuropeanaRecord.addContent(eleDcDescription);
+            }
+            
             // <dc:date>
-            {
-                if (doc.getFieldValues("MD_YEARPUBLISH") != null) {
-                    yearpublish = (String) doc.getFieldValues("MD_YEARPUBLISH").iterator().next();
-                } else if (doc.getFieldValues("MD_DATECREATED") != null) {
-                    yearpublish = (String) doc.getFieldValues("MD_DATECREATED").iterator().next();
-                } else if (topstructDoc != null && topstructDoc.getFieldValues("MD_YEARPUBLISH") != null) {
-                    yearpublish = (String) topstructDoc.getFieldValues("MD_YEARPUBLISH").iterator().next();
-                } else if (topstructDoc != null && topstructDoc.getFieldValues("MD_DATECREATED") != null) {
-                    yearpublish = (String) topstructDoc.getFieldValues("MD_DATECREATED").iterator().next();
-                }
-
-                if (yearpublish != null) {
-                    Element eleDcDate = new Element("date", nsDc);
-                    eleDcDate.setText(yearpublish);
-                    eleEuropeanaRecord.addContent(eleDcDate);
-                }
+            String date = null;
+            if (doc.getFieldValues("MD_YEARPUBLISH") != null) {
+                date = (String) doc.getFieldValues("MD_YEARPUBLISH").iterator().next();
+            } else if (doc.getFieldValues("MD_DATECREATED") != null) {
+                date = (String) doc.getFieldValues("MD_DATECREATED").iterator().next();
+            } else if (topstructDoc != null && topstructDoc.getFieldValues("MD_YEARPUBLISH") != null) {
+                date = (String) topstructDoc.getFieldValues("MD_YEARPUBLISH").iterator().next();
+            } else if (topstructDoc != null && topstructDoc.getFieldValues("MD_DATECREATED") != null) {
+                date = (String) topstructDoc.getFieldValues("MD_DATECREATED").iterator().next();
             }
+
+            if (date != null) {
+                Element eleDcDate = new Element("date", nsDc);
+                eleDcDate.setText(date);
+                eleEuropeanaRecord.addContent(eleDcDate);
+            }
+            
             // <dc:creator>
-            {
-                if (doc.getFieldValues("MD_CREATOR") != null) {
-                    for (Object fieldValue : doc.getFieldValues("MD_CREATOR")) {
-                        String value = (String) fieldValue;
-                        if (StringUtils.isBlank(value)) {
-                            continue;
-                        }
-                        if (StringUtils.isEmpty(creators)) {
-                            creators = value;
-                        } else {
-                            creators += ", " + value;
-                        }
-                        Element dc_creator = new Element("creator", nsDc);
-                        dc_creator.setText(value);
-                        eleEuropeanaRecord.addContent(dc_creator);
+            if (doc.getFieldValues("MD_CREATOR") != null) {
+                for (Object fieldValue : doc.getFieldValues("MD_CREATOR")) {
+                    String creator = (String) fieldValue;
+                    if (StringUtils.isNotBlank(creator)) {
+                        Element eleDcCreator = new Element("creator", nsDc);
+                        eleDcCreator.setText(creator);
+                        eleEuropeanaRecord.addContent(eleDcCreator);
                     }
                 }
             }
             // <dc:created>
-            {
-                if (doc.getFieldValues("MD_DATECREATED") != null) {
-                    String created = (String) doc.getFieldValues("MD_DATECREATED").iterator().next();
-                    Element eleDcCreated = new Element("created", nsDc);
-                    eleDcCreated.setText(created);
-                    eleEuropeanaRecord.addContent(eleDcCreated);
-                }
+            if (doc.getFieldValues("MD_DATECREATED") != null) {
+                String created = (String) doc.getFieldValues("MD_DATECREATED").iterator().next();
+                Element eleDcCreated = new Element("created", nsDc);
+                eleDcCreated.setText(created);
+                eleEuropeanaRecord.addContent(eleDcCreated);
             }
             // <dc:issued>
-            {
-                if (doc.getFieldValues("MD_DATEISSUED") != null) {
-                    String created = (String) doc.getFieldValues("MD_DATEISSUED").iterator().next();
-                    Element eleDcCreated = new Element("created", nsDc);
-                    eleDcCreated.setText(created);
-                    eleEuropeanaRecord.addContent(eleDcCreated);
-                }
+            if (doc.getFieldValues("MD_DATEISSUED") != null) {
+                String created = (String) doc.getFieldValues("MD_DATEISSUED").iterator().next();
+                Element eleDcCreated = new Element("created", nsDc);
+                eleDcCreated.setText(created);
+                eleEuropeanaRecord.addContent(eleDcCreated);
             }
             // creating <dc:subject>
             if (doc.getFieldValues(SolrConstants.DC) != null) {
                 for (Object fieldValue : doc.getFieldValues(SolrConstants.DC)) {
-                    Element dc_type = new Element("subject", nsDc);
+                    Element eleDcType = new Element("subject", nsDc);
                     if (((String) fieldValue).equals("")) {
-                        dc_type.setText((String) fieldValue);
-                        eleEuropeanaRecord.addContent(dc_type);
+                        eleDcType.setText((String) fieldValue);
+                        eleEuropeanaRecord.addContent(eleDcType);
                     }
                 }
             }
 
             // <dc:publisher>
+            String publisher = null;
             if (doc.getFieldValues("MD_PUBLISHER") != null) {
                 publisher = (String) doc.getFieldValues("MD_PUBLISHER").iterator().next();
             } else if (topstructDoc != null && topstructDoc.getFieldValues("MD_PUBLISHER") != null) {
                 publisher = (String) topstructDoc.getFieldValues("MD_PUBLISHER").iterator().next();
             }
             if (publisher != null) {
-                Element dc_publisher = new Element("publisher", nsDc);
-                dc_publisher.setText(publisher);
-                eleEuropeanaRecord.addContent(dc_publisher);
-            }
-
-            if (doc.getFieldValues("MD_PLACEPUBLISH") != null) {
-                placepublish = (String) doc.getFieldValues("MD_PLACEPUBLISH").iterator().next();
-            } else if (topstructDoc != null && topstructDoc.getFieldValues("MD_PLACEPUBLISH") != null) {
-                placepublish = (String) topstructDoc.getFieldValues("MD_PLACEPUBLISH").iterator().next();
+                Element eleDcPublisher = new Element("publisher", nsDc);
+                eleDcPublisher.setText(publisher);
+                eleEuropeanaRecord.addContent(eleDcPublisher);
             }
 
             // <dc:type>
-            {
                 Element eleDcType = new Element("type", nsDc);
                 if (doc.getFieldValue(SolrConstants.DOCSTRCT) != null) {
                     type = (String) doc.getFieldValue(SolrConstants.DOCSTRCT);
                     eleDcType.setText(type);
                     eleEuropeanaRecord.addContent(eleDcType);
                 }
-            }
 
             // <dc:format>
             // <dc:format> second one appears always
-            Element dc_format = new Element("format", nsDc);
-            dc_format.setText("image/jpeg");
-            eleEuropeanaRecord.addContent(dc_format);
+            Element eleDcFormat = new Element("format", nsDc);
+            eleDcFormat.setText("image/jpeg");
+            eleEuropeanaRecord.addContent(eleDcFormat);
 
-            dc_format = new Element("format", nsDc);
-            dc_format.setText("application/pdf");
-            eleEuropeanaRecord.addContent(dc_format);
+            eleDcFormat = new Element("format", nsDc);
+            eleDcFormat.setText("application/pdf");
+            eleEuropeanaRecord.addContent(eleDcFormat);
 
             // <dc:source>
             eleEuropeanaRecord.addContent(generateDcSource(doc, topstructDoc, anchorDoc, nsDc));
@@ -334,64 +306,59 @@ public class EuropeanaFormat extends OAIDCFormat {
             // ESE elements have a mandatory order
 
             // MANDATORY: <europeana:provider>
-            {
-                Element eleEuropeanaProvider = new Element("provider", nsEuropeana);
-                String value = DataManager.getInstance().getConfiguration().getEseDefaultProvider();
-                String field = DataManager.getInstance().getConfiguration().getEseProviderField();
-                if (doc.getFieldValues(field) != null) {
-                    value = (String) doc.getFieldValues(field).iterator().next();
-                }
-                eleEuropeanaProvider.setText(value);
-                eleEuropeanaRecord.addContent(eleEuropeanaProvider);
+            Element eleEuropeanaProvider = new Element("provider", nsEuropeana);
+            String provider = DataManager.getInstance().getConfiguration().getEseDefaultProvider();
+            String field = DataManager.getInstance().getConfiguration().getEseProviderField();
+            if (doc.getFieldValues(field) != null) {
+                provider = (String) doc.getFieldValues(field).iterator().next();
             }
+            eleEuropeanaProvider.setText(provider);
+            eleEuropeanaRecord.addContent(eleEuropeanaProvider);
+            
             // MANDATORY: <europeana:type>
-            {
-                Element eleEuropeanaType = new Element("type", nsEuropeana);
-                String europeanaType = "TEXT";
-                if (type != null) {
-                    // Retrieve coded ESE type, if available
-                    Map<String, String> eseTypes = DataManager.getInstance().getConfiguration().getEseTypes();
-                    if (eseTypes.get(type) != null) {
-                        europeanaType = eseTypes.get(type);
-                    }
+            Element eleEuropeanaType = new Element("type", nsEuropeana);
+            String europeanaType = "TEXT";
+            if (type != null) {
+                // Retrieve coded ESE type, if available
+                Map<String, String> eseTypes = DataManager.getInstance().getConfiguration().getEseTypes();
+                if (eseTypes.get(type) != null) {
+                    europeanaType = eseTypes.get(type);
                 }
-                eleEuropeanaType.setText(europeanaType);
-                eleEuropeanaRecord.addContent(eleEuropeanaType);
             }
+            eleEuropeanaType.setText(europeanaType);
+            eleEuropeanaRecord.addContent(eleEuropeanaType);
+           
             // MANDATORY: <europeana:rights>
-            {
-                Element eleEuropeanaRights = new Element("rights", nsEuropeana);
-                String value = DataManager.getInstance().getConfiguration().getEseDefaultRightsUrl();
-                String field = DataManager.getInstance().getConfiguration().getEseRightsField();
-                if (doc.getFieldValues(field) != null) {
-                    value = (String) doc.getFieldValues(field).iterator().next();
-                }
-                eleEuropeanaRights.setText(value);
-                eleEuropeanaRecord.addContent(eleEuropeanaRights);
+            Element eleEuropeanaRights = new Element("rights", nsEuropeana);
+            String rights = DataManager.getInstance().getConfiguration().getEseDefaultRightsUrl();
+            String rightsField = DataManager.getInstance().getConfiguration().getEseRightsField();
+            if (doc.getFieldValues(rightsField) != null) {
+                rights = (String) doc.getFieldValues(rightsField).iterator().next();
             }
+            eleEuropeanaRights.setText(rights);
+            eleEuropeanaRecord.addContent(eleEuropeanaRights);
+            
             // MANDATORY: <europeana:dataProvider>
-            {
-                Element eleEuropeanaDataProvider = new Element("dataProvider", nsEuropeana);
-                String value = DataManager.getInstance().getConfiguration().getEseDefaultProvider();
-                String field = DataManager.getInstance().getConfiguration().getEseDataProviderField();
-                if (doc.getFieldValues(field) != null) {
-                    value = (String) doc.getFieldValues(field).iterator().next();
-                }
-                eleEuropeanaDataProvider.setText(value);
-                eleEuropeanaRecord.addContent(eleEuropeanaDataProvider);
+            Element eleEuropeanaDataProvider = new Element("dataProvider", nsEuropeana);
+            String dataProvider = DataManager.getInstance().getConfiguration().getEseDefaultProvider();
+            String dataProviderField = DataManager.getInstance().getConfiguration().getEseDataProviderField();
+            if (doc.getFieldValues(dataProviderField) != null) {
+                dataProvider = (String) doc.getFieldValues(dataProviderField).iterator().next();
             }
+            eleEuropeanaDataProvider.setText(dataProvider);
+            eleEuropeanaRecord.addContent(eleEuropeanaDataProvider);
+            
             // MANDATORY: <europeana:isShownBy> or <europeana:isShownAt>
-            {
-                Element eleEuropeanaIsShownAt = new Element("isShownAt", nsEuropeana);
-                String isShownAt = "";
-                if (urn != null) {
-                    isShownAt = DataManager.getInstance().getConfiguration().getUrnResolverUrl() + urn;
-                } else if (identifier != null) {
-                    isShownAt = DataManager.getInstance().getConfiguration().getPiResolverUrl() + identifier;
-                }
-                eleEuropeanaIsShownAt.setText(isShownAt);
-                eleEuropeanaRecord.addContent(eleEuropeanaIsShownAt);
+            Element eleEuropeanaIsShownAt = new Element("isShownAt", nsEuropeana);
+            String isShownAt = "";
+            if (urn != null) {
+                isShownAt = DataManager.getInstance().getConfiguration().getUrnResolverUrl() + urn;
+            } else if (identifier != null) {
+                isShownAt = DataManager.getInstance().getConfiguration().getPiResolverUrl() + identifier;
             }
+            eleEuropeanaIsShownAt.setText(isShownAt);
+            eleEuropeanaRecord.addContent(eleEuropeanaIsShownAt);
+
             eleMetadata.addContent(eleEuropeanaRecord);
             record.addContent(eleMetadata);
             xmlListRecords.addContent(record);

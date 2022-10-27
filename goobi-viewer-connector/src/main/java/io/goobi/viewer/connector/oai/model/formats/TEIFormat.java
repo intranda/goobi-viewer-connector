@@ -84,9 +84,8 @@ public class TEIFormat extends Format {
             return new ErrorCode().getNoRecordsMatch();
         }
         try {
-            Element xmlListRecords = generateTeiCmdi(qr.getResults(), totalVirtualHits, totalRawHits, firstVirtualRow, firstRawRow, numRows, handler,
+            return generateTeiCmdi(qr.getResults(), totalVirtualHits, totalRawHits, firstVirtualRow, firstRawRow, numRows, handler,
                     "ListRecords", versionDiscriminatorField, null, filterQuerySuffix);
-            return xmlListRecords;
         } catch (IOException e) {
             logger.error(e.getMessage());
             return new ErrorCode().getIdDoesNotExist();
@@ -108,10 +107,10 @@ public class TEIFormat extends Format {
         }
 
         //        List<String> setSpecFields =
-        //                DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix().name());
+        //                DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix().getMetadataPrefix());
 
         String versionDiscriminatorField =
-                DataManager.getInstance().getConfiguration().getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().name());
+                DataManager.getInstance().getConfiguration().getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().getMetadataPrefix());
         if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
             String[] identifierSplit = Utils.splitIdentifierAndLanguageCode(handler.getIdentifier(), 3);
             try {
@@ -119,9 +118,8 @@ public class TEIFormat extends Format {
                 if (doc == null) {
                     return new ErrorCode().getIdDoesNotExist();
                 }
-                Element record = generateTeiCmdi(Collections.singletonList(doc), 1L, 1L, 0, 0, 1, handler, "GetRecord", versionDiscriminatorField,
+                return generateTeiCmdi(Collections.singletonList(doc), 1L, 1L, 0, 0, 1, handler, "GetRecord", versionDiscriminatorField,
                         identifierSplit[1], filterQuerySuffix);
-                return record;
             } catch (IOException e) {
                 return new ErrorCode().getIdDoesNotExist();
             } catch (JDOMException e) {
@@ -137,12 +135,11 @@ public class TEIFormat extends Format {
             if (doc == null) {
                 return new ErrorCode().getIdDoesNotExist();
             }
-            Element record = generateTeiCmdi(Collections.singletonList(doc), 1L, 1L, 0, 0, 1, handler, "GetRecord",
+            return generateTeiCmdi(Collections.singletonList(doc), 1L, 1L, 0, 0, 1, handler, "GetRecord",
                     DataManager.getInstance()
                             .getConfiguration()
                             .getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().getMetadataPrefix()),
                     null, filterQuerySuffix);
-            return record;
         } catch (IOException e) {
             return new ErrorCode().getIdDoesNotExist();
         } catch (JDOMException e) {
@@ -185,7 +182,7 @@ public class TEIFormat extends Format {
                 handler.getMetadataPrefix().getMetadataNamespaceUri());
 
         List<String> setSpecFields =
-                DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix().name());
+                DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix().getMetadataPrefix());
 
         if (records.size() < numRows) {
             numRows = records.size();
@@ -233,12 +230,12 @@ public class TEIFormat extends Format {
                     Element teiRoot = xmlDoc.getRootElement();
                     Element newDoc;
                     switch (handler.getMetadataPrefix()) {
-                        case tei:
+                        case TEI:
                             newDoc = new Element("tei", namespace);
                             newDoc.addNamespaceDeclaration(XSI);
                             newDoc.setAttribute(new Attribute("schemaLocation", handler.getMetadataPrefix().getSchema(), XSI));
                             break;
-                        case cmdi:
+                        case CMDI:
                             newDoc = new Element("CMD", CMDI);
                             newDoc.addNamespaceDeclaration(XSI);
                             newDoc.addNamespaceDeclaration(COMPONENTS);
@@ -267,7 +264,6 @@ public class TEIFormat extends Format {
                     record.addContent(header);
                     Element metadata = new Element("metadata", xmlns);
                     metadata.addContent(newDoc);
-                    // metadata.addContent(mets_root.cloneContent());
                     record.addContent(metadata);
                     xmlListRecords.addContent(record);
                 }

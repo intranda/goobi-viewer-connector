@@ -27,24 +27,22 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 import org.jdom2.ProcessingInstruction;
 import org.jdom2.output.XMLOutputter;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
-import io.goobi.viewer.connector.oai.enums.Verb;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
 import io.goobi.viewer.connector.oai.model.formats.Format;
 import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
-import io.goobi.viewer.exceptions.IndexUnreachableException;
 
 /**
  * <p>
@@ -127,120 +125,127 @@ public class OaiServlet extends HttpServlet {
                 requestType.setAttribute("resumptionToken", resumptionToken);
                 root.addContent(Format.handleToken(resumptionToken, filterQuerySuffix));
                 Format.removeExpiredTokens();
-            }
-            // Identify
-            else if (handler.getVerb().equals(Verb.Identify)) {
-                try {
-                    root.addContent(Format.getIdentifyXML(filterQuerySuffix));
-                } catch (IOException | SolrServerException e) {
-                    logger.error(e.getMessage(), e);
-                    try {
-                        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-                    } catch (IOException e1) {
-                        logger.error(e1.getMessage());
-                    }
-                    return;
-                }
-            }
-            // ListIdentifiers
-            else if (handler.getVerb().equals(Verb.ListIdentifiers)) {
-                if (handler.getMetadataPrefix() == null) {
-                    root.addContent(new ErrorCode().getBadArgument());
-                } else if (!DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(handler.getMetadataPrefix().name())) {
-                    // Deny access to disabled formats
-                    root.addContent(new ErrorCode().getCannotDisseminateFormat());
-                } else {
-                    try {
-                        int hitsPerToken =
-                                DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(handler.getMetadataPrefix().name());
-                        String versionDiscriminatorField = DataManager.getInstance()
-                                .getConfiguration()
-                                .getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().name());
-                        Format format = Format.getFormatByMetadataPrefix(handler.getMetadataPrefix());
-                        if (format != null) {
-                            root.addContent(format.createListIdentifiers(handler, 0, 0, hitsPerToken, versionDiscriminatorField, filterQuerySuffix));
-                        } else {
-                            root.addContent(new ErrorCode().getBadArgument());
-                        }
-                    } catch (IOException | SolrServerException e) {
-                        logger.error(e.getMessage(), e);
-                        try {
-                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-                        } catch (IOException e1) {
-                            logger.error(e1.getMessage());
-                        }
-                        return;
-                    }
-                }
-            }
-            // ListRecords
-            else if (handler.getVerb().equals(Verb.ListRecords)) {
-                if (handler.getMetadataPrefix() == null) {
-                    root.addContent(new ErrorCode().getBadArgument());
-                } else if (!DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(handler.getMetadataPrefix().name())) {
-                    // Deny access to disabled formats
-                    root.addContent(new ErrorCode().getCannotDisseminateFormat());
-                } else {
-                    if (handler.getUntil() == null) {
-                        String until = Utils.convertDate(System.currentTimeMillis());
-                        handler.setUntil(until);
-                        logger.debug("No 'until' parameter, setting 'now' ({})", until);
-                    }
-                    try {
-                        int hitsPerToken =
-                                DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(handler.getMetadataPrefix().name());
-                        String versionDiscriminatorField = DataManager.getInstance()
-                                .getConfiguration()
-                                .getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().name());
-                        logger.trace(handler.getMetadataPrefix().getMetadataPrefix());
-                        Format format = Format.getFormatByMetadataPrefix(handler.getMetadataPrefix());
-                        if (format != null) {
-                            root.addContent(format.createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField, filterQuerySuffix));
-                        } else {
-                            root.addContent(new ErrorCode().getBadArgument());
-                        }
-                    } catch (IOException | SolrServerException e) {
-                        logger.error(e.getMessage(), e);
-                        try {
-                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-                        } catch (IOException e1) {
-                            logger.error(e1.getMessage());
-                        }
-                        return;
-                    }
-                }
-            }
-            // GetRecord
-            else if (handler.getVerb().equals(Verb.GetRecord)) {
-                if (handler.getMetadataPrefix() == null) {
-                    root.addContent(new ErrorCode().getBadArgument());
-                } else if (!DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(handler.getMetadataPrefix().name())) {
-                    // Deny access to disabled formats
-                    root.addContent(new ErrorCode().getCannotDisseminateFormat());
-                } else {
-                    Format format = Format.getFormatByMetadataPrefix(handler.getMetadataPrefix());
-                    if (format != null) {
-                        root.addContent(format.createGetRecord(handler, filterQuerySuffix));
-                    } else {
-                        root.addContent(new ErrorCode().getBadArgument());
-                    }
-                }
-            } else if (handler.getVerb().equals(Verb.ListMetadataFormats)) {
-                root.addContent(Format.createMetadataFormats());
-            } else if (handler.getVerb().equals(Verb.ListSets)) {
-                try {
-                    root.addContent(Format.createListSets(DataManager.getInstance().getConfiguration().getDefaultLocale())); // TODO
-                } catch (IOException | SolrServerException e) {
-                    logger.error(e.getMessage(), e);
-                    try {
-                        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-                    } catch (IOException e1) {
-                        logger.error(e1.getMessage());
-                    }
-                    return;
-                }
             } else {
-                root.addContent(new ErrorCode().getBadArgument());
+                switch (handler.getVerb()) {
+                    case IDENTIFY:
+                        try {
+                            root.addContent(Format.getIdentifyXML(filterQuerySuffix));
+                        } catch (IOException | SolrServerException e) {
+                            logger.error(e.getMessage(), e);
+                            try {
+                                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                            } catch (IOException e1) {
+                                logger.error(e1.getMessage());
+                            }
+                            return;
+                        }
+                        break;
+                    case LISTIDENTIFIERS:
+                        if (handler.getMetadataPrefix() == null) {
+                            root.addContent(new ErrorCode().getBadArgument());
+                        } else if (!DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(handler.getMetadataPrefix().getMetadataPrefix())) {
+                            // Deny access to disabled formats
+                            root.addContent(new ErrorCode().getCannotDisseminateFormat());
+                        } else {
+                            try {
+                                int hitsPerToken =
+                                        DataManager.getInstance()
+                                                .getConfiguration()
+                                                .getHitsPerTokenForMetadataFormat(handler.getMetadataPrefix().getMetadataPrefix());
+                                String versionDiscriminatorField = DataManager.getInstance()
+                                        .getConfiguration()
+                                        .getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().getMetadataPrefix());
+                                Format format = Format.getFormatByMetadataPrefix(handler.getMetadataPrefix());
+                                if (format != null) {
+                                    root.addContent(
+                                            format.createListIdentifiers(handler, 0, 0, hitsPerToken, versionDiscriminatorField, filterQuerySuffix));
+                                } else {
+                                    root.addContent(new ErrorCode().getBadArgument());
+                                }
+                            } catch (IOException | SolrServerException e) {
+                                logger.error(e.getMessage(), e);
+                                try {
+                                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                                } catch (IOException e1) {
+                                    logger.error(e1.getMessage());
+                                }
+                                return;
+                            }
+                        }
+                        break;
+                    case LISTRECORDS:
+                        if (handler.getMetadataPrefix() == null) {
+                            root.addContent(new ErrorCode().getBadArgument());
+                        } else if (!DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(handler.getMetadataPrefix().getMetadataPrefix())) {
+                            // Deny access to disabled formats
+                            root.addContent(new ErrorCode().getCannotDisseminateFormat());
+                        } else {
+                            if (handler.getUntil() == null) {
+                                String until = Utils.convertDate(System.currentTimeMillis());
+                                handler.setUntil(until);
+                                logger.debug("No 'until' parameter, setting 'now' ({})", until);
+                            }
+                            try {
+                                int hitsPerToken =
+                                        DataManager.getInstance()
+                                                .getConfiguration()
+                                                .getHitsPerTokenForMetadataFormat(handler.getMetadataPrefix().getMetadataPrefix());
+                                String versionDiscriminatorField = DataManager.getInstance()
+                                        .getConfiguration()
+                                        .getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().getMetadataPrefix());
+                                logger.trace(handler.getMetadataPrefix().getMetadataPrefix());
+                                Format format = Format.getFormatByMetadataPrefix(handler.getMetadataPrefix());
+                                if (format != null) {
+                                    root.addContent(
+                                            format.createListRecords(handler, 0, 0, hitsPerToken, versionDiscriminatorField, filterQuerySuffix));
+                                } else {
+                                    root.addContent(new ErrorCode().getBadArgument());
+                                }
+                            } catch (IOException | SolrServerException e) {
+                                logger.error(e.getMessage(), e);
+                                try {
+                                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                                } catch (IOException e1) {
+                                    logger.error(e1.getMessage());
+                                }
+                                return;
+                            }
+                        }
+                        break;
+                    case GETRECORD:
+                        if (handler.getMetadataPrefix() == null) {
+                            root.addContent(new ErrorCode().getBadArgument());
+                        } else if (!DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(handler.getMetadataPrefix().getMetadataPrefix())) {
+                            // Deny access to disabled formats
+                            root.addContent(new ErrorCode().getCannotDisseminateFormat());
+                        } else {
+                            Format format = Format.getFormatByMetadataPrefix(handler.getMetadataPrefix());
+                            if (format != null) {
+                                root.addContent(format.createGetRecord(handler, filterQuerySuffix));
+                            } else {
+                                root.addContent(new ErrorCode().getBadArgument());
+                            }
+                        }
+                        break;
+                    case LISTMETADATAFORMATS:
+                        root.addContent(Format.createMetadataFormats());
+                        break;
+                    case LISTSETS:
+                        try {
+                            root.addContent(Format.createListSets(DataManager.getInstance().getConfiguration().getDefaultLocale()));
+                        } catch (IOException | SolrServerException e) {
+                            logger.error(e.getMessage(), e);
+                            try {
+                                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                            } catch (IOException e1) {
+                                logger.error(e1.getMessage());
+                            }
+                            return;
+                        }
+                        break;
+                    default:
+                        root.addContent(new ErrorCode().getBadArgument());
+                }
             }
         }
         doc.setRootElement(root);
@@ -248,7 +253,7 @@ public class OaiServlet extends HttpServlet {
         format.setEncoding("utf-8");
         XMLOutputter xmlOut = new XMLOutputter(format);
         try {
-            if (handler.getMetadataPrefix() != null && handler.getMetadataPrefix().equals(Metadata.epicur)) {
+            if (handler.getMetadataPrefix() != null && handler.getMetadataPrefix().equals(Metadata.EPICUR)) {
                 String ueblerhack = xmlOut.outputString(doc);
                 ueblerhack = ueblerhack.replace("<epicur", "<epicur xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
                 response.setCharacterEncoding("utf-8");
@@ -264,9 +269,7 @@ public class OaiServlet extends HttpServlet {
             } catch (IOException e1) {
                 logger.error(e1.getMessage());
             }
-            return;
         }
-
     }
 
     /**

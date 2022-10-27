@@ -89,7 +89,7 @@ public class ErrorCode {
 	public Element getIdDoesNotExist() {
 		Element error = new Element("error", xmlns);
 		error.setAttribute("code", "idDoesNotExist");
-		error.setText(" 	The value of the identifier argument is unknown or illegal in this repository.");
+		error.setText("The value of the identifier argument is unknown or illegal in this repository.");
 		return error;
 	}
 

@@ -16,26 +16,27 @@
 package io.goobi.viewer.connector.oai.enums;
 
 /**
- * <p>Metadata class.</p>
+ * <p>
+ * Metadata class.
+ * </p>
  *
  */
 public enum Metadata {
-    mets("mets", "http://www.loc.gov/mets/mets.xsd", "mets", "http://www.loc.gov/METS/", true, true),
-    mods("mods", "http://www.loc.gov/standards/mods/v3/mods-3-3.xsd", "mods", "http://www.loc.gov/mods/v3", false, true),
-    solr("solr", "TODO", "TODO", "TODO", false, true),
-    marcxml("marcxml", "http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd", "marcxml", "http://www.loc.gov/MARC21/slim", true, true),
-    oai_dc("oai_dc", "http://www.openarchives.org/OAI/2.0/oai_dc.xsd", "oai_dc", "http://www.openarchives.org/OAI/2.0/oai_dc/", true, false),
-    dc("dc", "http://www.openarchives.org/OAI/2.0/oai_dc.xsd", "dc", "http://purl.org/dc/elements/1.1/", false, true),
-    epicur("epicur", "http://nbn-resolving.de/urn/resolver.pl?urn=urn:nbn:de:1111-2004033116", "epicur", "urn:nbn:de:1111-2004033116", true, false),
-    lido("lido", "http://www.lido-schema.org/schema/v1.0/lido-v1.0.xsd", "lido", "http://www.lido-schema.org", true, true),
-    ese("europeana", "http://www.europeana.eu/schemas/ese/ESE-V3.4.xsd", "europeana", "http://www.europeana.eu/schemas/ese/", true, false),
-    // TODO final namespaces
-    iv_overviewpage("iv_overviewpage", "http://www.intranda.com/intrandaviewer_overviewpage.xsd", "iv_overviewpage",
+    METS("mets", "http://www.loc.gov/mets/mets.xsd", "mets", "http://www.loc.gov/METS/", true, true),
+    MODS("mods", "http://www.loc.gov/standards/mods/v3/mods-3-3.xsd", "mods", "http://www.loc.gov/mods/v3", false, true),
+    SOLR("solr", "TODO", "TODO", "TODO", false, true),
+    MARCXML("marcxml", "http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd", "marcxml", "http://www.loc.gov/MARC21/slim", true, true),
+    OAI_DC("oai_dc", "http://www.openarchives.org/OAI/2.0/oai_dc.xsd", "oai_dc", "http://www.openarchives.org/OAI/2.0/oai_dc/", true, false),
+    DC("dc", "http://www.openarchives.org/OAI/2.0/oai_dc.xsd", "dc", "http://purl.org/dc/elements/1.1/", false, true),
+    EPICUR("epicur", "http://nbn-resolving.de/urn/resolver.pl?urn=urn:nbn:de:1111-2004033116", "epicur", "urn:nbn:de:1111-2004033116", true, false),
+    LIDO("lido", "http://www.lido-schema.org/schema/v1.0/lido-v1.0.xsd", "lido", "http://www.lido-schema.org", true, true),
+    ESE("europeana", "http://www.europeana.eu/schemas/ese/ESE-V3.4.xsd", "europeana", "http://www.europeana.eu/schemas/ese/", true, false),
+    IV_OVERVIEWPAGE("iv_overviewpage", "http://www.intranda.com/intrandaviewer_overviewpage.xsd", "iv_overviewpage",
             "http://www.intranda.com/digiverso/intrandaviewer/overviewpage", true, false),
-    iv_crowdsourcing("iv_crowdsourcing", "http://www.intranda.com/intrandaviewer_overviewpage.xsd", "iv_crowdsourcing",
+    IV_CROWDSOURCING("iv_crowdsourcing", "http://www.intranda.com/intrandaviewer_overviewpage.xsd", "iv_crowdsourcing",
             "http://www.intranda.com/digiverso/intrandaviewer/crowdsourcing", true, false),
-    tei("tei", "https://www.tei-c.org/release/xml/tei/custom/schema/xsd/tei_all.xsd", "tei", "http://www.tei-c.org/ns/1.0", true, false),
-    cmdi("cmdi",
+    TEI("tei", "https://www.tei-c.org/release/xml/tei/custom/schema/xsd/tei_all.xsd", "tei", "http://www.tei-c.org/ns/1.0", true, false),
+    CMDI("cmdi",
             "http://www.clarin.eu/cmd/1 https://infra.clarin.eu/CMDI/1.x/xsd/cmd-envelop.xsd http://www.clarin.eu/cmd/1/profiles/clarin.eu:cr1:p_1380106710826 https://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/1.x/profiles/clarin.eu:cr1:p_1380106710826/xsd",
             "cmd", "http://www.clarin.eu/cmd/1", true, false);
 
@@ -68,7 +69,9 @@ public enum Metadata {
     }
 
     /**
-     * <p>Getter for the field <code>metadataPrefix</code>.</p>
+     * <p>
+     * Getter for the field <code>metadataPrefix</code>.
+     * </p>
      *
      * @return a {@link java.lang.String} object.
      */
@@ -77,7 +80,9 @@ public enum Metadata {
     }
 
     /**
-     * <p>Getter for the field <code>schema</code>.</p>
+     * <p>
+     * Getter for the field <code>schema</code>.
+     * </p>
      *
      * @return a {@link java.lang.String} object.
      */
@@ -86,7 +91,9 @@ public enum Metadata {
     }
 
     /**
-     * <p>Getter for the field <code>metadataNamespacePrefix</code>.</p>
+     * <p>
+     * Getter for the field <code>metadataNamespacePrefix</code>.
+     * </p>
      *
      * @return the metadataNamespacePrefix
      */
@@ -95,7 +102,9 @@ public enum Metadata {
     }
 
     /**
-     * <p>Getter for the field <code>metadataNamespaceUri</code>.</p>
+     * <p>
+     * Getter for the field <code>metadataNamespaceUri</code>.
+     * </p>
      *
      * @return a {@link java.lang.String} object.
      */
@@ -104,7 +113,9 @@ public enum Metadata {
     }
 
     /**
-     * <p>isSruSet.</p>
+     * <p>
+     * isSruSet.
+     * </p>
      *
      * @return the sruSet
      */
@@ -113,7 +124,9 @@ public enum Metadata {
     }
 
     /**
-     * <p>isOaiSet.</p>
+     * <p>
+     * isOaiSet.
+     * </p>
      *
      * @return the oaiSet
      */
@@ -122,7 +135,9 @@ public enum Metadata {
     }
 
     /**
-     * <p>getByMetadataPrefix.</p>
+     * <p>
+     * getByMetadataPrefix.
+     * </p>
      *
      * @param metadataPrefix a {@link java.lang.String} object.
      * @return a {@link io.goobi.viewer.connector.oai.enums.Metadata} object.

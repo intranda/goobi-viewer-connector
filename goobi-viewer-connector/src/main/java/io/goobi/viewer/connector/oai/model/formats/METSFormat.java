@@ -50,7 +50,7 @@ public class METSFormat extends Format {
 
     private static final String METS_FILTER_QUERY = " +(" + SolrConstants.SOURCEDOCFORMAT + ":METS " + SolrConstants.DATEDELETED + ":*)";
 
-    private List<String> setSpecFields = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.mets.name());
+    private List<String> setSpecFields = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.METS.getMetadataPrefix());
 
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListIdentifiers(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String, java.lang.String)
@@ -164,7 +164,7 @@ public class METSFormat extends Format {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element xmlListRecords = new Element(recordType, xmlns);
 
-        Namespace mets = Namespace.getNamespace(Metadata.mets.getMetadataNamespacePrefix(), Metadata.mets.getMetadataNamespaceUri());
+        Namespace mets = Namespace.getNamespace(Metadata.METS.getMetadataNamespacePrefix(), Metadata.METS.getMetadataNamespaceUri());
         Namespace mods = Namespace.getNamespace("mods", "http://www.loc.gov/mods/v3");
         Namespace dv = Namespace.getNamespace("dv", "http://dfg-viewer.de/");
         Namespace xlink = Namespace.getNamespace("xlink", "http://www.w3.org/1999/xlink");
@@ -200,7 +200,7 @@ public class METSFormat extends Format {
             try {
                 org.jdom2.Document metsFile = XmlTools.getDocumentFromString(xml, null);
                 Element metsRoot = metsFile.getRootElement();
-                Element newMetsRoot = new Element(Metadata.mets.getMetadataPrefix(), mets);
+                Element newMetsRoot = new Element(Metadata.METS.getMetadataPrefix(), mets);
                 newMetsRoot.addNamespaceDeclaration(XSI);
                 newMetsRoot.addNamespaceDeclaration(mods);
                 newMetsRoot.addNamespaceDeclaration(dv);

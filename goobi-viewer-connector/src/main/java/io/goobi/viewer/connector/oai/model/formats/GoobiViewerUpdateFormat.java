@@ -55,10 +55,10 @@ public class GoobiViewerUpdateFormat extends Format {
         StringBuilder sbUrl = new StringBuilder(100);
         sbUrl.append(DataManager.getInstance().getConfiguration().getHarvestUrl()).append("?action=");
         switch (handler.getMetadataPrefix()) {
-            case iv_overviewpage:
+            case IV_OVERVIEWPAGE:
                 sbUrl.append("getlist_overviewpage");
                 break;
-            case iv_crowdsourcing:
+            case IV_CROWDSOURCING:
                 sbUrl.append("getlist_crowdsourcing");
                 break;
             default:
@@ -115,7 +115,7 @@ public class GoobiViewerUpdateFormat extends Format {
             sbUrlRoot.append("&identifier=").append(handler.getIdentifier()).append("&action=");
             String urlRoot = sbUrlRoot.toString();
             switch (handler.getMetadataPrefix()) {
-                case iv_overviewpage: {
+                case IV_OVERVIEWPAGE: {
                     int status = Utils.getHttpResponseStatus(urlRoot + "snoop_overviewpage");
                     if (status != 200) {
                         logger.trace("Overview page not found for {}", handler.getIdentifier());
@@ -123,7 +123,7 @@ public class GoobiViewerUpdateFormat extends Format {
                     }
                 }
                     break;
-                case iv_crowdsourcing: {
+                case IV_CROWDSOURCING: {
                     int status = Utils.getHttpResponseStatus(urlRoot + "snoop_cs");
                     if (status != 200) {
                         logger.trace("Crowdsourcing not found for {}", handler.getIdentifier());
@@ -173,9 +173,9 @@ public class GoobiViewerUpdateFormat extends Format {
 
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Namespace nsOverviewPage =
-                Namespace.getNamespace(Metadata.iv_overviewpage.getMetadataNamespacePrefix(), Metadata.iv_overviewpage.getMetadataNamespaceUri());
+                Namespace.getNamespace(Metadata.IV_OVERVIEWPAGE.getMetadataNamespacePrefix(), Metadata.IV_OVERVIEWPAGE.getMetadataNamespaceUri());
         Namespace nsCrowdsourcingUpdates =
-                Namespace.getNamespace(Metadata.iv_crowdsourcing.getMetadataNamespacePrefix(), Metadata.iv_crowdsourcing.getMetadataNamespaceUri());
+                Namespace.getNamespace(Metadata.IV_CROWDSOURCING.getMetadataNamespacePrefix(), Metadata.IV_CROWDSOURCING.getMetadataNamespaceUri());
         Element xmlListRecords = new Element(recordType, xmlns);
 
         int useNumRows = numRows;
@@ -195,8 +195,8 @@ public class GoobiViewerUpdateFormat extends Format {
             JSONObject jsonObj = (JSONObject) jsonArray.get(i);
             String identifier = (String) jsonObj.get("id");
 
-            Element record = new Element("record", xmlns);
-            xmlListRecords.addContent(record);
+            Element eleRecord = new Element("record", xmlns);
+            xmlListRecords.addContent(eleRecord);
 
             // Header
             Element header = new Element("header", xmlns);
@@ -220,15 +220,9 @@ public class GoobiViewerUpdateFormat extends Format {
             eleDatestamp.setText(Utils.parseDate(timestamp));
             header.addContent(eleDatestamp);
 
-            record.addContent(header);
+            eleRecord.addContent(header);
 
             Element metadata = new Element("metadata", xmlns);
-            //            if (doc.getFieldValues(SolrConstants.TITLE) != null) {
-            //            Element eleTitle = new Element("title", nsOverviewPage);
-            //                eleTitle.setText((String) doc.getFieldValues(SolrConstants.TITLE).iterator().next());
-            //                metadata.addContent(eleTitle);
-            //            }
-
             try {
                 // Add process ID, if available
                 String processId = null;
@@ -251,13 +245,13 @@ public class GoobiViewerUpdateFormat extends Format {
                 // Add dataset URL
                 String url = urlRoot + identifier + "&action=";
                 switch (handler.getMetadataPrefix()) {
-                    case iv_overviewpage: {
+                    case IV_OVERVIEWPAGE: {
                         Element eleUrl = new Element("url", nsOverviewPage);
                         eleUrl.setText(url + "get_overviewpage");
                         metadata.addContent(eleUrl);
                     }
                         break;
-                    case iv_crowdsourcing: {
+                    case IV_CROWDSOURCING: {
                         Element eleUrl = new Element("url", nsCrowdsourcingUpdates);
                         eleUrl.setText(url + "get_cs");
                         metadata.addContent(eleUrl);
@@ -266,11 +260,10 @@ public class GoobiViewerUpdateFormat extends Format {
                     default:
                         break;
                 }
-                record.addContent(metadata);
+                eleRecord.addContent(metadata);
             } catch (UnsupportedOperationException e) {
                 logger.error(e.getMessage(), e);
                 xmlListRecords.addContent(new ErrorCode().getCannotDisseminateFormat());
-                continue;
             }
         }
 
