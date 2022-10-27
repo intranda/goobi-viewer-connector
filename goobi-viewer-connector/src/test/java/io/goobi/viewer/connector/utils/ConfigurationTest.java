@@ -216,14 +216,16 @@ public class ConfigurationTest extends AbstractTest {
      */
     @Test
     public void getHitsPerTokenForMetadataFormat_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals(11, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.oai_dc.name()));
-        Assert.assertEquals(12, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.ese.name()));
-        Assert.assertEquals(13, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.mets.name()));
-        Assert.assertEquals(14, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.lido.name()));
-        Assert.assertEquals(15, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.marcxml.name()));
-        Assert.assertEquals(16, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.epicur.name()));
-        Assert.assertEquals(17, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.iv_overviewpage.name()));
-        Assert.assertEquals(18, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.iv_crowdsourcing.name()));
+        Assert.assertEquals(11, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.OAI_DC.getMetadataPrefix()));
+        Assert.assertEquals(12, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.ESE.name().toLowerCase()));
+        Assert.assertEquals(13, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.METS.getMetadataPrefix()));
+        Assert.assertEquals(14, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.LIDO.getMetadataPrefix()));
+        Assert.assertEquals(15, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.MARCXML.getMetadataPrefix()));
+        Assert.assertEquals(16, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.EPICUR.getMetadataPrefix()));
+        Assert.assertEquals(17,
+                DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.IV_OVERVIEWPAGE.getMetadataPrefix()));
+        Assert.assertEquals(18,
+                DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.IV_CROWDSOURCING.getMetadataPrefix()));
     }
 
     /**
@@ -250,16 +252,16 @@ public class ConfigurationTest extends AbstractTest {
      */
     @Test
     public void isMetadataFormatEnabled_shouldReturnCorrectValue() throws Exception {
-        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.oai_dc.name()));
-        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.ese.name()));
-        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.mets.name()));
-        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.lido.name()));
-        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.marcxml.name()));
-        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.epicur.name()));
-        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.iv_overviewpage.name()));
-        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.iv_crowdsourcing.name()));
-        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.tei.name()));
-        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.cmdi.name()));
+        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.OAI_DC.getMetadataPrefix()));
+        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.ESE.name().toLowerCase()));
+        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.METS.getMetadataPrefix()));
+        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.LIDO.getMetadataPrefix()));
+        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.MARCXML.getMetadataPrefix()));
+        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.EPICUR.getMetadataPrefix()));
+        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.IV_OVERVIEWPAGE.getMetadataPrefix()));
+        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.IV_CROWDSOURCING.getMetadataPrefix()));
+        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.TEI.getMetadataPrefix()));
+        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.CMDI.getMetadataPrefix()));
     }
 
     /**
@@ -292,7 +294,7 @@ public class ConfigurationTest extends AbstractTest {
      */
     @Test
     public void getFieldForMetadataFormat_shouldReturnAllValues() throws Exception {
-        List<FieldConfiguration> values = DataManager.getInstance().getConfiguration().getFieldForMetadataFormat(Metadata.oai_dc.name());
+        List<FieldConfiguration> values = DataManager.getInstance().getConfiguration().getFieldForMetadataFormat(Metadata.OAI_DC.getMetadataPrefix());
         Assert.assertNotNull(values);
         Assert.assertEquals(2, values.size());
 
@@ -343,7 +345,7 @@ public class ConfigurationTest extends AbstractTest {
      */
     @Test
     public void getSetSpecFieldsForMetadataFormat_shouldReturnAllValues() throws Exception {
-        List<String> values = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.oai_dc.name());
+        List<String> values = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.OAI_DC.getMetadataPrefix());
         Assert.assertNotNull(values);
         Assert.assertEquals(2, values.size());
         Assert.assertEquals(SolrConstants.DC, values.get(0));
@@ -387,11 +389,11 @@ public class ConfigurationTest extends AbstractTest {
         Assert.assertEquals(Format.ACCESSCONDITION_OPENACCESS,
                 DataManager.getInstance()
                         .getConfiguration()
-                        .getAccessConditionMappingForMetadataFormat(Metadata.oai_dc.name(), "Public Domain Mark 1.0"));
+                        .getAccessConditionMappingForMetadataFormat(Metadata.OAI_DC.getMetadataPrefix(), "Public Domain Mark 1.0"));
         Assert.assertEquals(Format.ACCESSCONDITION_OPENACCESS,
                 DataManager.getInstance()
                         .getConfiguration()
-                        .getAccessConditionMappingForMetadataFormat(Metadata.oai_dc.name(), "Rechte vorbehalten - Freier Zugang"));
+                        .getAccessConditionMappingForMetadataFormat(Metadata.OAI_DC.getMetadataPrefix(), "Rechte vorbehalten - Freier Zugang"));
     }
 
     /**

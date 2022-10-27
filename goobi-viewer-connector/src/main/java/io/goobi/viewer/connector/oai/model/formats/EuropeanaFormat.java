@@ -46,7 +46,7 @@ public class EuropeanaFormat extends OAIDCFormat {
     private static final Logger logger = LogManager.getLogger(EuropeanaFormat.class);
 
     private List<String> setSpecFields =
-            DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.ESE.getMetadataPrefix());
+            DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.ESE.name().toLowerCase());
 
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String, java.lang.String)
