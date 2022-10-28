@@ -33,13 +33,13 @@ import java.util.regex.Matcher;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.ConversionException;
@@ -58,6 +58,8 @@ import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.SolrSearchIndex;
 import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
+import io.goobi.viewer.connector.utils.XmlConstants;
+import io.goobi.viewer.exceptions.IndexUnreachableException;
 import io.goobi.viewer.messages.ViewerResourceBundle;
 
 /**
@@ -195,13 +197,13 @@ public abstract class Format {
             if (m.isOaiSet() && DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(m.getMetadataPrefix())) {
                 Element metadataPrefix = new Element("metadataPrefix", xmlns);
                 metadataPrefix.setText(m.getMetadataPrefix());
-                
+
                 Element schema = new Element("schema", xmlns);
                 schema.setText(m.getSchema());
-                
+
                 Element metadataNamespace = new Element("metadataNamespace", xmlns);
                 metadataNamespace.setText(m.getMetadataNamespaceUri());
-                
+
                 Element metadataFormat = new Element("metadataFormat", xmlns);
                 metadataFormat.addContent(metadataPrefix);
                 metadataFormat.addContent(schema);
@@ -219,6 +221,7 @@ public abstract class Format {
      * @return a {@link org.jdom2.Element} object.
      * @throws org.apache.solr.client.solrj.SolrServerException
      * @throws IOException
+     * @should construct element correctly
      */
     public static Element createListSets(Locale locale) throws SolrServerException, IOException {
         // Add all values sets (a set for each existing field value)
@@ -238,7 +241,7 @@ public abstract class Format {
             }
             for (String value : set.getValues()) {
                 Element eleSet = new Element("set", xmlns);
-                Element eleSetSpec = new Element("setSpec", xmlns);
+                Element eleSetSpec = new Element(XmlConstants.ELE_NAME_SETSPEC, xmlns);
                 eleSetSpec.setText(set.getSetName() + ":" + value);
                 eleSet.addContent(eleSetSpec);
                 Element name = new Element("setName", xmlns);
@@ -257,7 +260,7 @@ public abstract class Format {
             for (Set additionalSet : additionalSets) {
                 Element set = new Element("set", xmlns);
                 // TODO
-                Element setSpec = new Element("setSpec", xmlns);
+                Element setSpec = new Element(XmlConstants.ELE_NAME_SETSPEC, xmlns);
                 setSpec.setText(additionalSet.getSetSpec());
                 set.addContent(setSpec);
                 Element name = new Element("setName", xmlns);
@@ -420,7 +423,7 @@ public abstract class Format {
         // setSpec
         if (StringUtils.isNotEmpty(handler.getSet())) {
             // setSpec from handler
-            Element setSpec = new Element("setSpec", xmlns);
+            Element setSpec = new Element(XmlConstants.ELE_NAME_SETSPEC, xmlns);
             setSpec.setText(handler.getSet());
             header.addContent(setSpec);
         } else if (handler.getMetadataPrefix() != null) {
@@ -432,7 +435,7 @@ public abstract class Format {
                     }
                     for (Object fieldValue : doc.getFieldValues(setSpecField)) {
                         // TODO translation
-                        Element setSpec = new Element("setSpec", xmlns);
+                        Element setSpec = new Element(XmlConstants.ELE_NAME_SETSPEC, xmlns);
                         setSpec.setText((String) fieldValue);
                         header.addContent(setSpec);
                     }
@@ -477,6 +480,7 @@ public abstract class Format {
      * @param xmlns a {@link org.jdom2.Namespace} object.
      * @param handler a {@link io.goobi.viewer.connector.oai.RequestHandler} object.
      * @return a {@link org.jdom2.Element} object.
+     * @should construct element correctly
      */
     protected static Element createResumptionTokenAndElement(long virtualHits, long rawHits, int virtualCursor, int rawCursor, Namespace xmlns,
             RequestHandler handler) {
@@ -486,16 +490,18 @@ public abstract class Format {
                 virtualCursor, rawCursor, time, handler);
         try {
             saveToken(token);
+
+            Element eleResumptionToken = new Element("resumptionToken", xmlns);
+            eleResumptionToken.setAttribute("expirationDate", Utils.convertDate(time));
+            eleResumptionToken.setAttribute("completeListSize", String.valueOf(virtualHits));
+            eleResumptionToken.setAttribute("cursor", String.valueOf(virtualCursor));
+            eleResumptionToken.setText(token.getTokenName());
+
+            return eleResumptionToken;
         } catch (IOException e) {
             logger.error(e.getMessage());
+            return null;
         }
-        Element eleResumptionToken = new Element("resumptionToken", xmlns);
-        eleResumptionToken.setAttribute("expirationDate", Utils.convertDate(time));
-        eleResumptionToken.setAttribute("completeListSize", String.valueOf(virtualHits));
-        eleResumptionToken.setAttribute("cursor", String.valueOf(virtualCursor));
-        eleResumptionToken.setText(token.getTokenName());
-
-        return eleResumptionToken;
     }
 
     /**
@@ -559,7 +565,9 @@ public abstract class Format {
                 return new ErrorCode().getBadResumptionToken();
             }
             int hitsPerToken =
-                    DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(token.getHandler().getMetadataPrefix().getMetadataPrefix());
+                    DataManager.getInstance()
+                            .getConfiguration()
+                            .getHitsPerTokenForMetadataFormat(token.getHandler().getMetadataPrefix().getMetadataPrefix());
 
             if (token.getHandler().getVerb().equals(Verb.LISTIDENTIFIERS)) {
                 return format.createListIdentifiers(token.getHandler(), token.getVirtualCursor(), token.getRawCursor(), hitsPerToken,

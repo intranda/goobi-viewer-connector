@@ -17,14 +17,19 @@ package io.goobi.viewer.connector.oai.model.formats;
 
 import java.io.File;
 import java.util.List;
+import java.util.Locale;
 
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 import org.junit.Assert;
 import org.junit.Test;
 
 import io.goobi.viewer.connector.AbstractSolrEnabledTest;
+import io.goobi.viewer.connector.DataManager;
+import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.model.ResumptionToken;
+import io.goobi.viewer.connector.utils.Utils;
 
 public class FormatTest extends AbstractSolrEnabledTest {
 
@@ -66,6 +71,20 @@ public class FormatTest extends AbstractSolrEnabledTest {
     }
 
     /**
+     * @see Format#createListSets(Locale)
+     * @verifies construct element correctly
+     */
+    @Test
+    public void createListSets_shouldConstructElementCorrectly() throws Exception {
+        Element eleListSets = Format.createListSets(Locale.ENGLISH);
+        Assert.assertNotNull(eleListSets);
+        Assert.assertEquals("ListSets", eleListSets.getName());
+        List<Element> eleListSet = eleListSets.getChildren("set", null);
+        Assert.assertNotNull(eleListSet);
+        Assert.assertEquals(44, eleListSet.size());
+    }
+
+    /**
      * @see Format#getOaiPmhElement(String)
      * @verifies construct element correctly
      */
@@ -76,6 +95,32 @@ public class FormatTest extends AbstractSolrEnabledTest {
         Assert.assertEquals("oai", ele.getName());
         Assert.assertEquals("http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd",
                 ele.getAttributeValue("schemaLocation", Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance")));
+    }
+
+    /**
+     * @see Format#createResumptionTokenAndElement(long,long,int,int,Namespace,RequestHandler)
+     * @verifies construct element correctly
+     */
+    @Test
+    public void createResumptionTokenAndElement_shouldConstructElementCorrectly() throws Exception {
+        File tokenFolder = new File(DataManager.getInstance().getConfiguration().getResumptionTokenFolder());
+        try {
+            if (!tokenFolder.exists()) {
+                tokenFolder.mkdirs();
+            }
+
+            Element ele = Format.createResumptionTokenAndElement(100, 100, 10, 10, null, new RequestHandler());
+            Assert.assertNotNull(ele);
+            Assert.assertEquals("resumptionToken", ele.getName());
+            Assert.assertNotNull(ele.getAttributeValue("expirationDate"));
+            Assert.assertEquals("100", ele.getAttributeValue("completeListSize"));
+            Assert.assertEquals("10", ele.getAttributeValue("cursor"));
+            
+        } finally {
+            if (tokenFolder.isDirectory()) {
+                FileUtils.deleteDirectory(tokenFolder);
+            }
+        }
     }
 
     /**

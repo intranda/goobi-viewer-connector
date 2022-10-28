@@ -171,7 +171,7 @@
     </cmdi>
 
 	<sets>
-	    <allValuesSet translate="true">DC</allValuesSet>
+	    <allValuesSet translate="false">DC</allValuesSet>
 	    <allValuesSet>MD_WISSENSGEBIET</allValuesSet>
 		<set setName="test" setSpec="testspec" setQuery="DC:a.b.c.d" />
 	</sets>

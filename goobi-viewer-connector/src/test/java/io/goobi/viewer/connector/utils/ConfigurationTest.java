@@ -283,7 +283,7 @@ public class ConfigurationTest extends AbstractTest {
         Assert.assertNotNull(values);
         Assert.assertEquals(2, values.size());
         Assert.assertEquals("DC", values.get(0).getSetName());
-        Assert.assertTrue(values.get(0).isTranslate());
+        Assert.assertFalse(values.get(0).isTranslate());
         Assert.assertEquals("MD_WISSENSGEBIET", values.get(1).getSetName());
         Assert.assertFalse(values.get(1).isTranslate());
     }

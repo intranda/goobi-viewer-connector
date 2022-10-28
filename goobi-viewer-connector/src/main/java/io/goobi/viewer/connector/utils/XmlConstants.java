@@ -31,4 +31,5 @@ public class XmlConstants {
     public static final String ELE_NAME_IDENTIFIER = "identifier";
     public static final String ELE_NAME_METADATA = "metadata";
     public static final String ELE_NAME_RECORD = "record";
+    public static final String ELE_NAME_SETSPEC = "setSpec";
 }
