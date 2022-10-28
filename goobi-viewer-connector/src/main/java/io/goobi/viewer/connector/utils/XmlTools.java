@@ -16,31 +16,22 @@
 package io.goobi.viewer.connector.utils;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import javax.xml.XMLConstants;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -50,18 +41,9 @@ import org.jdom2.filter.Filters;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
-import org.jdom2.transform.JDOMResult;
-import org.jdom2.transform.JDOMSource;
 import org.jdom2.xpath.XPathBuilder;
 import org.jdom2.xpath.XPathExpression;
 import org.jdom2.xpath.XPathFactory;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
-
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
 
 /**
  * XML utilities.
@@ -145,7 +127,7 @@ public class XmlTools {
      */
     public static Document getDocumentFromString(String string, String encoding) throws JDOMException, IOException {
         if (encoding == null) {
-            encoding = Utils.DEFAULT_ENCODING;
+            encoding = StandardCharsets.UTF_8.name();
         }
 
         byte[] byteArray = null;
@@ -176,7 +158,7 @@ public class XmlTools {
             throw new IllegalArgumentException("element may not be null");
         }
         if (encoding == null) {
-            encoding = Utils.DEFAULT_ENCODING;
+            encoding = StandardCharsets.UTF_8.name();
         }
         Format format = Format.getRawFormat();
         XMLOutputter outputter = new XMLOutputter(format);
@@ -291,90 +273,5 @@ public class XmlTools {
         }
 
         return null;
-    }
-
-    /**
-     * Transforms the given JDOM document via the given XSLT stylesheet.
-     *
-     * @param doc JDOM document to transform
-     * @param stylesheetPath Absolute path to the XSLT stylesheet file
-     * @param params Optional transformer parameters
-     * @return Transformed document; null in case of errors
-     */
-    public static Document transformViaXSLT(Document doc, String stylesheetPath, Map<String, String> params) {
-        if (doc == null) {
-            throw new IllegalArgumentException("doc may not be null");
-        }
-        if (stylesheetPath == null) {
-            throw new IllegalArgumentException("stylesheetPath may not be null");
-        }
-
-        try {
-            JDOMSource docFrom = new JDOMSource(doc);
-            JDOMResult docTo = new JDOMResult();
-
-            TransformerFactory transformerFactory = javax.xml.transform.TransformerFactory.newInstance();
-            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
-            Transformer transformer = transformerFactory.newTransformer(new StreamSource(stylesheetPath));
-            if (params != null && !params.isEmpty()) {
-                for (String param : params.keySet()) {
-                    transformer.setParameter(param, params.get(param));
-                }
-            }
-            transformer.transform(docFrom, docTo);
-            return docTo.getDocument();
-        } catch (TransformerConfigurationException e) {
-            logger.error(e.getMessage(), e);
-        } catch (TransformerFactoryConfigurationError e) {
-            logger.error(e.getMessage(), e);
-        } catch (TransformerException e) {
-            logger.error(e.getMessage(), e);
-        }
-
-        return null;
-    }
-
-    /**
-     *
-     * @param object Object to serialize.
-     * @return
-     */
-    public static String serializeWithXStream(Object object, Converter converter) {
-        XStream xStream = new XStream();
-        xStream.allowTypesByWildcard(new String[] { "io.goobi.viewer.**" });
-        if (converter != null) {
-            xStream.registerConverter(converter);
-        }
-        xStream.autodetectAnnotations(true);
-        HierarchicalStreamWriter xmlWriter = null;
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                OutputStreamWriter writer = new OutputStreamWriter(baos, Utils.DEFAULT_ENCODING)) {
-            xmlWriter = new PrettyPrintWriter(writer);
-            xStream.marshal(object, xmlWriter);
-            xmlWriter.close();
-            return new String(baos.toByteArray(), Utils.DEFAULT_ENCODING);
-        } catch (UnsupportedEncodingException e) {
-            logger.error(e.getMessage(), e);
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-        }
-
-        return "";
-    }
-
-    /**
-     * @param data
-     * @return
-     */
-    @SuppressWarnings("rawtypes")
-    public static Object deSerializeWithXStream(Reader reader, Class clazz, Converter converter) {
-        XStream xstream = new XStream();
-        xstream.allowTypesByWildcard(new String[] { "io.goobi.viewer.**" });
-        if (converter != null) {
-            xstream.registerConverter(converter);
-        }
-        xstream.processAnnotations(clazz);
-        return xstream.fromXML(reader);
     }
 }
