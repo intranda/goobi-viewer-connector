@@ -29,7 +29,6 @@ import io.goobi.viewer.connector.AbstractSolrEnabledTest;
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.model.ResumptionToken;
-import io.goobi.viewer.connector.utils.Utils;
 
 public class FormatTest extends AbstractSolrEnabledTest {
 
