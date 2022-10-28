@@ -13,7 +13,7 @@
 		<!-- OAI Version -->
 		<protocolVersion> 2.0</protocolVersion>
 		<!-- E-Mail Adresse des Ansprechpartners -->
-		<adminEmail>support@intranda.com</adminEmail>
+		<adminEmail>admin@example.com</adminEmail>
 		<!-- Angabe wie mit gelöschten Datensätzen umgegangen wird, erlaubt sind: 
 			no - the repository does not maintain information about deletions. A repository 
 			that indicates this level of support must not reveal a deleted status in 

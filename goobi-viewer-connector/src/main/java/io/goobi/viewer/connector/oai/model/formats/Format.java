@@ -137,6 +137,7 @@ public abstract class Format {
      * @return the identify Element for the xml tree
      * @throws org.apache.solr.client.solrj.SolrServerException
      * @throws IOException
+     * @should construct element correctly
      */
     public static Element getIdentifyXML(String filterQuerySuffix) throws SolrServerException, IOException {
         // TODO: optional parameter: compression is not implemented
@@ -181,6 +182,7 @@ public abstract class Format {
      * for the server request ?verb=ListMetadataFormats this method build the xml section
      *
      * @return a {@link org.jdom2.Element} object.
+     * @should construct element correctly
      */
     public static Element createMetadataFormats() {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
@@ -191,13 +193,16 @@ public abstract class Format {
         for (Metadata m : Metadata.values()) {
             // logger.trace("{}: {}", m.getMetadataPrefix(), DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(m.getMetadataPrefix()));
             if (m.isOaiSet() && DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(m.getMetadataPrefix())) {
-                Element metadataFormat = new Element("metadataFormat", xmlns);
                 Element metadataPrefix = new Element("metadataPrefix", xmlns);
                 metadataPrefix.setText(m.getMetadataPrefix());
+                
                 Element schema = new Element("schema", xmlns);
                 schema.setText(m.getSchema());
+                
                 Element metadataNamespace = new Element("metadataNamespace", xmlns);
                 metadataNamespace.setText(m.getMetadataNamespaceUri());
+                
+                Element metadataFormat = new Element("metadataFormat", xmlns);
                 metadataFormat.addContent(metadataPrefix);
                 metadataFormat.addContent(schema);
                 metadataFormat.addContent(metadataNamespace);
@@ -352,6 +357,7 @@ public abstract class Format {
      *
      * @param elementName a {@link java.lang.String} object.
      * @return a {@link org.jdom2.Element} object.
+     * @should construct element correctly
      */
     public static Element getOaiPmhElement(String elementName) {
         Element oaiPmh = new Element(elementName);
@@ -582,7 +588,7 @@ public abstract class Format {
      * @throws IOException
      * @should deserialize token correctly
      */
-    static ResumptionToken deserializeResumptionToken(File tokenFile) throws FileNotFoundException, IOException {
+    static ResumptionToken deserializeResumptionToken(File tokenFile) throws IOException {
         try (FileInputStream fis = new FileInputStream(tokenFile); InputStreamReader isr = new InputStreamReader(fis);
                 BufferedReader infile = new BufferedReader(isr);) {
             XStream xStream = new XStream(new DomDriver());
