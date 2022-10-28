@@ -35,7 +35,6 @@ import org.jdom2.Element;
 import org.jdom2.Namespace;
 
 import io.goobi.viewer.connector.DataManager;
-import io.goobi.viewer.connector.exceptions.HTTPException;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.enums.Verb;
@@ -46,6 +45,8 @@ import io.goobi.viewer.connector.oai.model.metadata.MetadataParameter.MetadataPa
 import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
+import io.goobi.viewer.controller.NetTools;
+import io.goobi.viewer.exceptions.HTTPException;
 import io.goobi.viewer.messages.ViewerResourceBundle;
 
 /**
@@ -340,7 +341,7 @@ public class OAIDCFormat extends Format {
                     try {
                         String val = null;
                         try {
-                            val = Utils.getWebContentGET(url);
+                            val = NetTools.getWebContentGET(url);
                         } catch (HTTPException e) {
                             // If the API end point was not found, try the fallback, otherwise re-throw the exception
                             if (e.getCode() != 404) {
@@ -351,7 +352,7 @@ public class OAIDCFormat extends Format {
                             // Old API fallback
                             url = DataManager.getInstance().getConfiguration().getRestApiUrl() + "records/toc/"
                                     + (String) doc.getFieldValue(SolrConstants.PI) + "/";
-                            val = Utils.getWebContentGET(url);
+                            val = NetTools.getWebContentGET(url);
                         }
 
                         if (StringUtils.isNotEmpty(val)) {

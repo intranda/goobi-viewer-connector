@@ -16,43 +16,26 @@
 package io.goobi.viewer.connector.utils;
 
 import java.io.IOException;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.cookie.BasicClientCookie;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import io.goobi.viewer.connector.Version;
-import io.goobi.viewer.connector.exceptions.HTTPException;
 import io.goobi.viewer.connector.oai.RequestHandler;
 
 /**
@@ -115,101 +98,6 @@ public class Utils {
 
     /**
      * <p>
-     * getWebContentGET.
-     * </p>
-     *
-     * @param urlString a {@link java.lang.String} object.
-     * @return a {@link java.lang.String} object.
-     * @throws org.apache.http.client.ClientProtocolException if any.
-     * @throws java.io.IOException if any.
-     * @throws io.goobi.viewer.exceptions.HTTPException if any.
-     */
-    public static String getWebContentGET(String urlString) throws IOException, HTTPException {
-        RequestConfig defaultRequestConfig = RequestConfig.custom()
-                .setSocketTimeout(HTTP_TIMEOUT)
-                .setConnectTimeout(HTTP_TIMEOUT)
-                .setConnectionRequestTimeout(HTTP_TIMEOUT)
-                .build();
-        try (CloseableHttpClient httpClient = HttpClients.custom().setDefaultRequestConfig(defaultRequestConfig).build()) {
-            HttpGet get = new HttpGet(urlString);
-            try (CloseableHttpResponse response = httpClient.execute(get); StringWriter writer = new StringWriter()) {
-                int code = response.getStatusLine().getStatusCode();
-                if (code == HttpStatus.SC_OK) {
-                    return EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-                }
-                logger.trace("{}: {}; URL: {}", code, response.getStatusLine().getReasonPhrase(), urlString);
-                throw new HTTPException(code, response.getStatusLine().getReasonPhrase());
-            }
-        }
-    }
-
-    /**
-     * <p>
-     * getWebContentPOST.
-     * </p>
-     *
-     * @param url a {@link java.lang.String} object.
-     * @param params a {@link java.util.Map} object.
-     * @param cookies a {@link java.util.Map} object.
-     * @return a {@link java.lang.String} object.
-     * @throws org.apache.http.client.ClientProtocolException if any.
-     * @throws java.io.IOException if any.
-     * @throws io.goobi.viewer.exceptions.HTTPException if any.
-     */
-    public static String getWebContentPOST(String url, Map<String, String> params, Map<String, String> cookies)
-            throws IOException, HTTPException {
-        if (url == null) {
-            throw new IllegalArgumentException("url may not be null");
-        }
-
-        logger.trace("url: {}", url);
-        List<NameValuePair> nameValuePairs = null;
-        if (params == null) {
-            nameValuePairs = new ArrayList<>(0);
-        } else {
-            nameValuePairs = new ArrayList<>(params.size());
-            for (Entry<String, String> entry : params.entrySet()) {
-                nameValuePairs.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
-            }
-        }
-        HttpClientContext context = null;
-        CookieStore cookieStore = new BasicCookieStore();
-        if (cookies != null && !cookies.isEmpty()) {
-            context = HttpClientContext.create();
-            for (Entry<String, String> entry : cookies.entrySet()) {
-                BasicClientCookie cookie = new BasicClientCookie(entry.getKey(), entry.getValue());
-                cookie.setPath("/");
-                cookie.setDomain("0.0.0.0");
-                cookieStore.addCookie(cookie);
-            }
-            context.setCookieStore(cookieStore);
-        }
-
-        RequestConfig defaultRequestConfig = RequestConfig.custom()
-                .setSocketTimeout(HTTP_TIMEOUT)
-                .setConnectTimeout(HTTP_TIMEOUT)
-                .setConnectionRequestTimeout(HTTP_TIMEOUT)
-                .build();
-        try (CloseableHttpClient httpClient = HttpClients.custom().setDefaultRequestConfig(defaultRequestConfig).build()) {
-            HttpPost post = new HttpPost(url);
-            post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-            try (CloseableHttpResponse response = (context == null ? httpClient.execute(post) : httpClient.execute(post, context));
-                    StringWriter writer = new StringWriter()) {
-                int code = response.getStatusLine().getStatusCode();
-                if (code == HttpStatus.SC_OK) {
-                    logger.trace("{}: {}", code, response.getStatusLine().getReasonPhrase());
-                    IOUtils.copy(response.getEntity().getContent(), writer, StandardCharsets.UTF_8);
-                    return writer.toString();
-                }
-                //                logger.trace("{}: {}\n{}", code, response.getstatusline().getreasonphrase(),
-                //                        ioutils.tostring(response.getentity().getcontent(), default_encoding));
-                throw new HTTPException(code, response.getStatusLine().getReasonPhrase());
-            }
-        }
-    }
-
-    /**
-     * <p>
      * getHttpResponseStatus.
      * </p>
      *
@@ -248,8 +136,8 @@ public class Utils {
      *
      * @param identifier a {@link java.lang.String} object.
      * @param languageCodeLength a int.
-     * @should split identifier correctly
      * @return an array of {@link java.lang.String} objects.
+     * @should split identifier correctly
      */
     public static String[] splitIdentifierAndLanguageCode(String identifier, int languageCodeLength) {
         if (identifier == null) {

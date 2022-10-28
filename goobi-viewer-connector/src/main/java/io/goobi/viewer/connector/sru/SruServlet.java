@@ -45,14 +45,14 @@ import org.jdom2.transform.XSLTransformException;
 import org.jdom2.transform.XSLTransformer;
 
 import io.goobi.viewer.connector.DataManager;
-import io.goobi.viewer.connector.exceptions.HTTPException;
 import io.goobi.viewer.connector.exceptions.MissingArgumentException;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.SolrSearchIndex;
 import io.goobi.viewer.connector.utils.SolrSearchTools;
-import io.goobi.viewer.connector.utils.Utils;
+import io.goobi.viewer.controller.NetTools;
 import io.goobi.viewer.controller.XmlTools;
+import io.goobi.viewer.exceptions.HTTPException;
 
 /**
  * <p>
@@ -520,7 +520,7 @@ public class SruServlet extends HttpServlet {
                 .append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))
                 .toString();
         try {
-            String xml = Utils.getWebContentGET(url);
+            String xml = NetTools.getWebContentGET(url);
             if (StringUtils.isEmpty(xml)) {
                 return;
             }
@@ -706,7 +706,7 @@ public class SruServlet extends HttpServlet {
         String pi = (String) document.getFieldValue(SolrConstants.PI_TOPSTRUCT);
         String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl()).append(pi).toString();
         try {
-            String xml = Utils.getWebContentGET(url);
+            String xml = NetTools.getWebContentGET(url);
             if (StringUtils.isEmpty(xml)) {
                 return;
             }
@@ -774,7 +774,7 @@ public class SruServlet extends HttpServlet {
                 .append(doc.getFieldValue(SolrConstants.PI_TOPSTRUCT))
                 .toString();
         try {
-            String xml = Utils.getWebContentGET(url);
+            String xml = NetTools.getWebContentGET(url);
             if (StringUtils.isEmpty(xml)) {
                 return;
             }
@@ -812,7 +812,7 @@ public class SruServlet extends HttpServlet {
                 .toString();
         logger.trace("generateMetsRecord");
         try {
-            String xml = Utils.getWebContentGET(url);
+            String xml = NetTools.getWebContentGET(url);
             if (StringUtils.isEmpty(xml)) {
                 return;
             }

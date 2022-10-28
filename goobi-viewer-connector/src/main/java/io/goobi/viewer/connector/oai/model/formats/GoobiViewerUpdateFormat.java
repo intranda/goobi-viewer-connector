@@ -20,6 +20,8 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrDocument;
 import org.jdom2.Element;
@@ -27,16 +29,15 @@ import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import io.goobi.viewer.connector.DataManager;
-import io.goobi.viewer.connector.exceptions.HTTPException;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
 import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.Utils;
+import io.goobi.viewer.controller.NetTools;
+import io.goobi.viewer.exceptions.HTTPException;
 
 /**
  * Crowdsourcing and overview page data.
@@ -73,7 +74,7 @@ public class GoobiViewerUpdateFormat extends Format {
         sbUrl.append("&first=").append(firstVirtualRow).append("&pageSize=").append(numRows);
 
         try {
-            String rawJSON = Utils.getWebContentGET(sbUrl.toString());
+            String rawJSON = NetTools.getWebContentGET(sbUrl.toString());
             JSONArray jsonArray = null;
             long totalHits = 0;
             if (StringUtils.isNotEmpty(rawJSON)) {
@@ -285,7 +286,7 @@ public class GoobiViewerUpdateFormat extends Format {
             throws IOException, SolrServerException {
         String url = DataManager.getInstance().getConfiguration().getHarvestUrl() + "?action=getlist_" + params.get("metadataPrefix").substring(3);
         try {
-            String rawJSON = Utils.getWebContentGET(url);
+            String rawJSON = NetTools.getWebContentGET(url);
             if (StringUtils.isNotEmpty(rawJSON)) {
                 JSONArray jsonArray = new JSONArray(rawJSON);
                 return Long.valueOf((int) jsonArray.get(0));

@@ -33,14 +33,15 @@ import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 
 import io.goobi.viewer.connector.DataManager;
-import io.goobi.viewer.connector.exceptions.HTTPException;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
 import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.Utils;
 import io.goobi.viewer.connector.utils.XmlConstants;
+import io.goobi.viewer.controller.NetTools;
 import io.goobi.viewer.controller.XmlTools;
+import io.goobi.viewer.exceptions.HTTPException;
 
 /**
  * METS
@@ -186,7 +187,7 @@ public class METSFormat extends Format {
             String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl()).append(pi).toString();
             String xml = null;
             try {
-                xml = Utils.getWebContentGET(url);
+                xml = NetTools.getWebContentGET(url);
             } catch (HTTPException | IOException e) {
                 logger.error("Could not retrieve METS: {}", url);
                 xmlListRecords.addContent(new ErrorCode().getIdDoesNotExist());

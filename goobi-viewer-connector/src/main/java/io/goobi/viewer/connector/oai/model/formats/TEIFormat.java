@@ -34,14 +34,15 @@ import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 
 import io.goobi.viewer.connector.DataManager;
-import io.goobi.viewer.connector.exceptions.HTTPException;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
 import io.goobi.viewer.connector.oai.model.language.Language;
 import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
+import io.goobi.viewer.controller.NetTools;
 import io.goobi.viewer.controller.XmlTools;
+import io.goobi.viewer.exceptions.HTTPException;
 
 /**
  * Format for TEI and CMDI records.
@@ -206,7 +207,7 @@ public class TEIFormat extends Format {
                             .append('/')
                             .toString();
                     logger.trace("api url: {}", url);
-                    String xml = Utils.getWebContentGET(url);
+                    String xml = NetTools.getWebContentGET(url);
                     if (StringUtils.isEmpty(xml)) {
                         // Old API fallback
                         url = new StringBuilder(DataManager.getInstance().getConfiguration().getRestApiUrl())
@@ -219,7 +220,7 @@ public class TEIFormat extends Format {
                                 .append('/')
                                 .toString();
                         logger.trace("old url: {}", url);
-                        xml = Utils.getWebContentGET(url);
+                        xml = NetTools.getWebContentGET(url);
                     }
                     if (StringUtils.isEmpty(xml)) {
                         xmlListRecords.addContent(new ErrorCode().getCannotDisseminateFormat());
