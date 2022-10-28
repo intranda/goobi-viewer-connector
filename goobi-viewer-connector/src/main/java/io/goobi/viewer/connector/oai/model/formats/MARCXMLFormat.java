@@ -21,19 +21,19 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 import org.jdom2.transform.XSLTransformException;
 import org.jdom2.transform.XSLTransformer;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
 import io.goobi.viewer.connector.utils.XmlConstants;
-import io.goobi.viewer.connector.utils.XmlTools;
+import io.goobi.viewer.controller.XmlTools;
 
 /**
  * MARCXML
@@ -99,7 +99,7 @@ public class MARCXMLFormat extends METSFormat {
                 // Look up DMDID via CONTENTIDS, then look up MODS element
                 List<Element> eleListDmdid = XmlTools.evaluateToElements(
                         "mets:structMap[@TYPE='LOGICAL']/mets:div/mets:div[@CONTENTIDS='" + identifier + "']", rootMets, Arrays.asList(nsMets));
-                if (eleListDmdid != null && !eleListDmdid.isEmpty()) {
+                if (!eleListDmdid.isEmpty()) {
                     String dmdid = eleListDmdid.get(0).getAttributeValue("DMDID");
                     List<Element> eleListMods =
                             XmlTools.evaluateToElements("mets:dmdSec[@ID='" + dmdid + "']/mets:mdWrap[@MDTYPE='MODS']/mets:xmlData/mods:mods",

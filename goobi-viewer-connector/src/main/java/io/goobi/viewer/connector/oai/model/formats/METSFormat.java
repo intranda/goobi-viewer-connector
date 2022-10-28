@@ -40,7 +40,7 @@ import io.goobi.viewer.connector.oai.model.ErrorCode;
 import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.Utils;
 import io.goobi.viewer.connector.utils.XmlConstants;
-import io.goobi.viewer.connector.utils.XmlTools;
+import io.goobi.viewer.controller.XmlTools;
 
 /**
  * METS

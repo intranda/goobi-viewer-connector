@@ -52,7 +52,7 @@ import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.SolrSearchIndex;
 import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
-import io.goobi.viewer.connector.utils.XmlTools;
+import io.goobi.viewer.controller.XmlTools;
 
 /**
  * <p>
