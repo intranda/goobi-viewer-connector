@@ -19,7 +19,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.apache.commons.io.FileUtils;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 import org.junit.Assert;
