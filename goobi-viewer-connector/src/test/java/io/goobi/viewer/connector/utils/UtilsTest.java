@@ -53,6 +53,15 @@ public class UtilsTest extends AbstractTest {
     public void convertDate_shouldConvertTimeCorrectly() throws Exception {
         Assert.assertEquals("2016-05-23T10:40:00Z", Utils.convertDate(1464000000000L));
     }
+    
+    /**
+     * @see Utils#parseDate(Object)
+     * @verifies parse dates correctly
+     */
+    @Test
+    public void parseDate_shouldParseDatesCorrectly() throws Exception {
+        Assert.assertEquals("2016-05-23T10:40:00Z", Utils.parseDate(1464000000000L));
+    }
 
     /**
      * @see Utils#getCurrentUTCTime(long)

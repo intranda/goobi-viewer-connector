@@ -33,13 +33,13 @@ import java.util.regex.Matcher;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.ConversionException;
@@ -58,6 +58,8 @@ import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.SolrSearchIndex;
 import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
+import io.goobi.viewer.connector.utils.XmlConstants;
+import io.goobi.viewer.exceptions.IndexUnreachableException;
 import io.goobi.viewer.messages.ViewerResourceBundle;
 
 /**
@@ -78,8 +80,8 @@ public abstract class Format {
     public static final String ACCESSCONDITION_OPENACCESS = "info:eu-repo/semantics/openAccess";
     public static final String ACCESSCONDITION_CLOSEDACCESS = "info:eu-repo/semantics/closedAccess";
 
-    protected final String[] DATE_FIELDS = { SolrConstants.DATECREATED, SolrConstants.DATEUPDATED };
-    protected final String[] IDENTIFIER_FIELDS = { SolrConstants.PI, SolrConstants.PI_TOPSTRUCT };
+    protected static final String[] DATE_FIELDS = { SolrConstants.DATECREATED, SolrConstants.DATEUPDATED };
+    protected static final String[] IDENTIFIER_FIELDS = { SolrConstants.PI, SolrConstants.PI_TOPSTRUCT };
 
     /** Constant <code>expiration=259200000L</code> */
     protected static long expiration = 259200000L; // 3 days
@@ -137,6 +139,7 @@ public abstract class Format {
      * @return the identify Element for the xml tree
      * @throws org.apache.solr.client.solrj.SolrServerException
      * @throws IOException
+     * @should construct element correctly
      */
     public static Element getIdentifyXML(String filterQuerySuffix) throws SolrServerException, IOException {
         // TODO: optional parameter: compression is not implemented
@@ -181,6 +184,7 @@ public abstract class Format {
      * for the server request ?verb=ListMetadataFormats this method build the xml section
      *
      * @return a {@link org.jdom2.Element} object.
+     * @should construct element correctly
      */
     public static Element createMetadataFormats() {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
@@ -189,15 +193,18 @@ public abstract class Format {
         }
         Element listMetadataFormats = new Element("ListMetadataFormats", xmlns);
         for (Metadata m : Metadata.values()) {
-            // logger.trace("{}: {}", m.getMetadataPrefix(), DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(m.name()));
-            if (m.isOaiSet() && DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(m.name())) {
-                Element metadataFormat = new Element("metadataFormat", xmlns);
+            // logger.trace("{}: {}", m.getMetadataPrefix(), DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(m.getMetadataPrefix()));
+            if (m.isOaiSet() && DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(m.getMetadataPrefix())) {
                 Element metadataPrefix = new Element("metadataPrefix", xmlns);
                 metadataPrefix.setText(m.getMetadataPrefix());
+
                 Element schema = new Element("schema", xmlns);
                 schema.setText(m.getSchema());
+
                 Element metadataNamespace = new Element("metadataNamespace", xmlns);
                 metadataNamespace.setText(m.getMetadataNamespaceUri());
+
+                Element metadataFormat = new Element("metadataFormat", xmlns);
                 metadataFormat.addContent(metadataPrefix);
                 metadataFormat.addContent(schema);
                 metadataFormat.addContent(metadataNamespace);
@@ -214,6 +221,7 @@ public abstract class Format {
      * @return a {@link org.jdom2.Element} object.
      * @throws org.apache.solr.client.solrj.SolrServerException
      * @throws IOException
+     * @should construct element correctly
      */
     public static Element createListSets(Locale locale) throws SolrServerException, IOException {
         // Add all values sets (a set for each existing field value)
@@ -233,7 +241,7 @@ public abstract class Format {
             }
             for (String value : set.getValues()) {
                 Element eleSet = new Element("set", xmlns);
-                Element eleSetSpec = new Element("setSpec", xmlns);
+                Element eleSetSpec = new Element(XmlConstants.ELE_NAME_SETSPEC, xmlns);
                 eleSetSpec.setText(set.getSetName() + ":" + value);
                 eleSet.addContent(eleSetSpec);
                 Element name = new Element("setName", xmlns);
@@ -252,7 +260,7 @@ public abstract class Format {
             for (Set additionalSet : additionalSets) {
                 Element set = new Element("set", xmlns);
                 // TODO
-                Element setSpec = new Element("setSpec", xmlns);
+                Element setSpec = new Element(XmlConstants.ELE_NAME_SETSPEC, xmlns);
                 setSpec.setText(additionalSet.getSetSpec());
                 set.addContent(setSpec);
                 Element name = new Element("setName", xmlns);
@@ -290,7 +298,7 @@ public abstract class Format {
         Element xmlListIdentifiers = new Element("ListIdentifiers", xmlns);
 
         List<String> setSpecFields =
-                DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix().name());
+                DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix().getMetadataPrefix());
 
         QueryResponse qr;
         long totalVirtualHits;
@@ -352,6 +360,7 @@ public abstract class Format {
      *
      * @param elementName a {@link java.lang.String} object.
      * @return a {@link org.jdom2.Element} object.
+     * @should construct element correctly
      */
     public static Element getOaiPmhElement(String elementName) {
         Element oaiPmh = new Element(elementName);
@@ -414,7 +423,7 @@ public abstract class Format {
         // setSpec
         if (StringUtils.isNotEmpty(handler.getSet())) {
             // setSpec from handler
-            Element setSpec = new Element("setSpec", xmlns);
+            Element setSpec = new Element(XmlConstants.ELE_NAME_SETSPEC, xmlns);
             setSpec.setText(handler.getSet());
             header.addContent(setSpec);
         } else if (handler.getMetadataPrefix() != null) {
@@ -426,7 +435,7 @@ public abstract class Format {
                     }
                     for (Object fieldValue : doc.getFieldValues(setSpecField)) {
                         // TODO translation
-                        Element setSpec = new Element("setSpec", xmlns);
+                        Element setSpec = new Element(XmlConstants.ELE_NAME_SETSPEC, xmlns);
                         setSpec.setText((String) fieldValue);
                         header.addContent(setSpec);
                     }
@@ -471,6 +480,7 @@ public abstract class Format {
      * @param xmlns a {@link org.jdom2.Namespace} object.
      * @param handler a {@link io.goobi.viewer.connector.oai.RequestHandler} object.
      * @return a {@link org.jdom2.Element} object.
+     * @should construct element correctly
      */
     protected static Element createResumptionTokenAndElement(long virtualHits, long rawHits, int virtualCursor, int rawCursor, Namespace xmlns,
             RequestHandler handler) {
@@ -480,16 +490,18 @@ public abstract class Format {
                 virtualCursor, rawCursor, time, handler);
         try {
             saveToken(token);
+
+            Element eleResumptionToken = new Element("resumptionToken", xmlns);
+            eleResumptionToken.setAttribute("expirationDate", Utils.convertDate(time));
+            eleResumptionToken.setAttribute("completeListSize", String.valueOf(virtualHits));
+            eleResumptionToken.setAttribute("cursor", String.valueOf(virtualCursor));
+            eleResumptionToken.setText(token.getTokenName());
+
+            return eleResumptionToken;
         } catch (IOException e) {
             logger.error(e.getMessage());
+            return null;
         }
-        Element eleResumptionToken = new Element("resumptionToken", xmlns);
-        eleResumptionToken.setAttribute("expirationDate", Utils.convertDate(time));
-        eleResumptionToken.setAttribute("completeListSize", String.valueOf(virtualHits));
-        eleResumptionToken.setAttribute("cursor", String.valueOf(virtualCursor));
-        eleResumptionToken.setText(token.getTokenName());
-
-        return eleResumptionToken;
     }
 
     /**
@@ -540,7 +552,7 @@ public abstract class Format {
             long totalHits = 0;
             String versionDiscriminatorField = DataManager.getInstance()
                     .getConfiguration()
-                    .getVersionDisriminatorFieldForMetadataFormat(token.getHandler().getMetadataPrefix().name());
+                    .getVersionDisriminatorFieldForMetadataFormat(token.getHandler().getMetadataPrefix().getMetadataPrefix());
 
             Format format = Format.getFormatByMetadataPrefix(token.getHandler().getMetadataPrefix());
             if (format == null) {
@@ -553,12 +565,14 @@ public abstract class Format {
                 return new ErrorCode().getBadResumptionToken();
             }
             int hitsPerToken =
-                    DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(token.getHandler().getMetadataPrefix().name());
+                    DataManager.getInstance()
+                            .getConfiguration()
+                            .getHitsPerTokenForMetadataFormat(token.getHandler().getMetadataPrefix().getMetadataPrefix());
 
-            if (token.getHandler().getVerb().equals(Verb.ListIdentifiers)) {
+            if (token.getHandler().getVerb().equals(Verb.LISTIDENTIFIERS)) {
                 return format.createListIdentifiers(token.getHandler(), token.getVirtualCursor(), token.getRawCursor(), hitsPerToken,
                         versionDiscriminatorField, filterQuerySuffix);
-            } else if (token.getHandler().getVerb().equals(Verb.ListRecords)) {
+            } else if (token.getHandler().getVerb().equals(Verb.LISTRECORDS)) {
                 //                Metadata md = token.getHandler().getMetadataPrefix();
                 return format.createListRecords(token.getHandler(), token.getVirtualCursor(), token.getRawCursor(), hitsPerToken,
                         versionDiscriminatorField, filterQuerySuffix);
@@ -582,7 +596,7 @@ public abstract class Format {
      * @throws IOException
      * @should deserialize token correctly
      */
-    static ResumptionToken deserializeResumptionToken(File tokenFile) throws FileNotFoundException, IOException {
+    static ResumptionToken deserializeResumptionToken(File tokenFile) throws IOException {
         try (FileInputStream fis = new FileInputStream(tokenFile); InputStreamReader isr = new InputStreamReader(fis);
                 BufferedReader infile = new BufferedReader(isr);) {
             XStream xStream = new XStream(new DomDriver());
@@ -642,23 +656,23 @@ public abstract class Format {
         }
 
         switch (metadataPrefix) {
-            case oai_dc:
+            case OAI_DC:
                 return new OAIDCFormat();
-            case ese:
+            case ESE:
                 return new EuropeanaFormat();
-            case mets:
+            case METS:
                 return new METSFormat();
-            case marcxml:
+            case MARCXML:
                 return new MARCXMLFormat();
-            case epicur:
+            case EPICUR:
                 return new EpicurFormat();
-            case lido:
+            case LIDO:
                 return new LIDOFormat();
-            case iv_overviewpage:
-            case iv_crowdsourcing:
+            case IV_OVERVIEWPAGE:
+            case IV_CROWDSOURCING:
                 return new GoobiViewerUpdateFormat();
-            case tei:
-            case cmdi:
+            case TEI:
+            case CMDI:
                 return new TEIFormat();
             default:
                 return null;

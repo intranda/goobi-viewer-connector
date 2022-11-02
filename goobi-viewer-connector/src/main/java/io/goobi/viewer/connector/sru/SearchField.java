@@ -23,16 +23,16 @@ import io.goobi.viewer.connector.utils.SolrConstants;
  */
 public enum SearchField {
 
-    anywhere("any", null, "anywhere", "*", true, false, false),
-    title("title", "dc.title", "title", SolrConstants.TITLE, true, false, true),
-    creator("creator", "dc.creator", "per", SolrConstants.PERSON_ONEFIELD, true, false, false),
-    collection("collection", "dc.subject", "collection", SolrConstants.DC, true, false, false),
-    publisher("publisher", "dc.publisher", "publisher", SolrConstants.PUBLISHER, true, false, true),
-    year("year", "dc.date", "year", SolrConstants.YEARPUBLISH, true, false, true),
-    documentType("documentType", "dc.type", "type", SolrConstants.DOCSTRCT, true, false, false),
-    format("format", "dc.format", null, null, false, false, false),
+    ANYWHERE("any", null, "anywhere", "*", true, false, false),
+    TITLE("title", "dc.title", "title", SolrConstants.TITLE, true, false, true),
+    CREATOR("creator", "dc.creator", "per", SolrConstants.PERSON_ONEFIELD, true, false, false),
+    COLLECTION("collection", "dc.subject", "collection", SolrConstants.DC, true, false, false),
+    PUBLISHER("publisher", "dc.publisher", "publisher", SolrConstants.PUBLISHER, true, false, true),
+    YEAR("year", "dc.date", "year", SolrConstants.YEARPUBLISH, true, false, true),
+    DOCUMENTTYPE("documentType", "dc.type", "type", SolrConstants.DOCSTRCT, true, false, false),
+    FORMAT("format", "dc.format", null, null, false, false, false),
     URN("urn", "dc.identifier", "urn", SolrConstants.URN, true, false, true),
-    identifier("identifier", "dc.identifier", "identifier", SolrConstants.PI, true, false, true);
+    IDENTIFIER("identifier", "dc.identifier", "identifier", SolrConstants.PI, true, false, true);
 
     private String internalName;
     private String dcName;

@@ -20,6 +20,8 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrDocument;
 import org.jdom2.Element;
@@ -27,16 +29,15 @@ import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import io.goobi.viewer.connector.DataManager;
-import io.goobi.viewer.connector.exceptions.HTTPException;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
 import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.Utils;
+import io.goobi.viewer.controller.NetTools;
+import io.goobi.viewer.exceptions.HTTPException;
 
 /**
  * Crowdsourcing and overview page data.
@@ -55,10 +56,10 @@ public class GoobiViewerUpdateFormat extends Format {
         StringBuilder sbUrl = new StringBuilder(100);
         sbUrl.append(DataManager.getInstance().getConfiguration().getHarvestUrl()).append("?action=");
         switch (handler.getMetadataPrefix()) {
-            case iv_overviewpage:
+            case IV_OVERVIEWPAGE:
                 sbUrl.append("getlist_overviewpage");
                 break;
-            case iv_crowdsourcing:
+            case IV_CROWDSOURCING:
                 sbUrl.append("getlist_crowdsourcing");
                 break;
             default:
@@ -73,7 +74,7 @@ public class GoobiViewerUpdateFormat extends Format {
         sbUrl.append("&first=").append(firstVirtualRow).append("&pageSize=").append(numRows);
 
         try {
-            String rawJSON = Utils.getWebContentGET(sbUrl.toString());
+            String rawJSON = NetTools.getWebContentGET(sbUrl.toString());
             JSONArray jsonArray = null;
             long totalHits = 0;
             if (StringUtils.isNotEmpty(rawJSON)) {
@@ -115,7 +116,7 @@ public class GoobiViewerUpdateFormat extends Format {
             sbUrlRoot.append("&identifier=").append(handler.getIdentifier()).append("&action=");
             String urlRoot = sbUrlRoot.toString();
             switch (handler.getMetadataPrefix()) {
-                case iv_overviewpage: {
+                case IV_OVERVIEWPAGE: {
                     int status = Utils.getHttpResponseStatus(urlRoot + "snoop_overviewpage");
                     if (status != 200) {
                         logger.trace("Overview page not found for {}", handler.getIdentifier());
@@ -123,7 +124,7 @@ public class GoobiViewerUpdateFormat extends Format {
                     }
                 }
                     break;
-                case iv_crowdsourcing: {
+                case IV_CROWDSOURCING: {
                     int status = Utils.getHttpResponseStatus(urlRoot + "snoop_cs");
                     if (status != 200) {
                         logger.trace("Crowdsourcing not found for {}", handler.getIdentifier());
@@ -173,9 +174,9 @@ public class GoobiViewerUpdateFormat extends Format {
 
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Namespace nsOverviewPage =
-                Namespace.getNamespace(Metadata.iv_overviewpage.getMetadataNamespacePrefix(), Metadata.iv_overviewpage.getMetadataNamespaceUri());
+                Namespace.getNamespace(Metadata.IV_OVERVIEWPAGE.getMetadataNamespacePrefix(), Metadata.IV_OVERVIEWPAGE.getMetadataNamespaceUri());
         Namespace nsCrowdsourcingUpdates =
-                Namespace.getNamespace(Metadata.iv_crowdsourcing.getMetadataNamespacePrefix(), Metadata.iv_crowdsourcing.getMetadataNamespaceUri());
+                Namespace.getNamespace(Metadata.IV_CROWDSOURCING.getMetadataNamespacePrefix(), Metadata.IV_CROWDSOURCING.getMetadataNamespaceUri());
         Element xmlListRecords = new Element(recordType, xmlns);
 
         int useNumRows = numRows;
@@ -195,8 +196,8 @@ public class GoobiViewerUpdateFormat extends Format {
             JSONObject jsonObj = (JSONObject) jsonArray.get(i);
             String identifier = (String) jsonObj.get("id");
 
-            Element record = new Element("record", xmlns);
-            xmlListRecords.addContent(record);
+            Element eleRecord = new Element("record", xmlns);
+            xmlListRecords.addContent(eleRecord);
 
             // Header
             Element header = new Element("header", xmlns);
@@ -220,15 +221,9 @@ public class GoobiViewerUpdateFormat extends Format {
             eleDatestamp.setText(Utils.parseDate(timestamp));
             header.addContent(eleDatestamp);
 
-            record.addContent(header);
+            eleRecord.addContent(header);
 
             Element metadata = new Element("metadata", xmlns);
-            //            if (doc.getFieldValues(SolrConstants.TITLE) != null) {
-            //            Element eleTitle = new Element("title", nsOverviewPage);
-            //                eleTitle.setText((String) doc.getFieldValues(SolrConstants.TITLE).iterator().next());
-            //                metadata.addContent(eleTitle);
-            //            }
-
             try {
                 // Add process ID, if available
                 String processId = null;
@@ -251,13 +246,13 @@ public class GoobiViewerUpdateFormat extends Format {
                 // Add dataset URL
                 String url = urlRoot + identifier + "&action=";
                 switch (handler.getMetadataPrefix()) {
-                    case iv_overviewpage: {
+                    case IV_OVERVIEWPAGE: {
                         Element eleUrl = new Element("url", nsOverviewPage);
                         eleUrl.setText(url + "get_overviewpage");
                         metadata.addContent(eleUrl);
                     }
                         break;
-                    case iv_crowdsourcing: {
+                    case IV_CROWDSOURCING: {
                         Element eleUrl = new Element("url", nsCrowdsourcingUpdates);
                         eleUrl.setText(url + "get_cs");
                         metadata.addContent(eleUrl);
@@ -266,11 +261,10 @@ public class GoobiViewerUpdateFormat extends Format {
                     default:
                         break;
                 }
-                record.addContent(metadata);
+                eleRecord.addContent(metadata);
             } catch (UnsupportedOperationException e) {
                 logger.error(e.getMessage(), e);
                 xmlListRecords.addContent(new ErrorCode().getCannotDisseminateFormat());
-                continue;
             }
         }
 
@@ -292,7 +286,7 @@ public class GoobiViewerUpdateFormat extends Format {
             throws IOException, SolrServerException {
         String url = DataManager.getInstance().getConfiguration().getHarvestUrl() + "?action=getlist_" + params.get("metadataPrefix").substring(3);
         try {
-            String rawJSON = Utils.getWebContentGET(url);
+            String rawJSON = NetTools.getWebContentGET(url);
             if (StringUtils.isNotEmpty(rawJSON)) {
                 JSONArray jsonArray = new JSONArray(rawJSON);
                 return Long.valueOf((int) jsonArray.get(0));

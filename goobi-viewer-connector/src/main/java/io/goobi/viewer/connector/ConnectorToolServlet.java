@@ -55,13 +55,8 @@ public class ConnectorToolServlet extends HttpServlet {
             Set<String> keys = request.getParameterMap().keySet();
             for (String s : keys) {
                 String[] values = request.getParameterMap().get(s);
-                if (values[0] != null) {
-                    switch (s) {
-                        case "action":
-                            action = values[0];
-                            break;
-                        default: // nothing
-                    }
+                if (values[0] != null && "action".equals(s)) {
+                    action = values[0];
                 }
             }
         }
@@ -72,7 +67,7 @@ public class ConnectorToolServlet extends HttpServlet {
 
         switch (action) {
             case "getVersion":
-                response.setContentType("text/html"); {
+                response.setContentType("text/html");
                 try {
                     ServletOutputStream output = response.getOutputStream();
                     output.write(Utils.getVersion().getBytes(StandardCharsets.UTF_8));
@@ -82,9 +77,14 @@ public class ConnectorToolServlet extends HttpServlet {
                     } catch (IOException e1) {
                         logger.error(e1.getMessage());
                     }
-                    return;
                 }
-            }
+                break;
+            default:
+                try {
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action: " + action);
+                } catch (IOException e1) {
+                    logger.error(e1.getMessage());
+                }
                 break;
         }
     }

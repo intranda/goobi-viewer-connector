@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
@@ -30,17 +32,16 @@ import org.jdom2.Attribute;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import io.goobi.viewer.connector.DataManager;
-import io.goobi.viewer.connector.exceptions.HTTPException;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
 import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.Utils;
-import io.goobi.viewer.connector.utils.XmlTools;
+import io.goobi.viewer.controller.NetTools;
+import io.goobi.viewer.controller.XmlTools;
+import io.goobi.viewer.exceptions.HTTPException;
 
 /**
  * LIDO
@@ -51,7 +52,8 @@ public class LIDOFormat extends Format {
 
     private static final String LIDO_FILTER_QUERY = " +" + SolrConstants.SOURCEDOCFORMAT + ":LIDO";
 
-    private List<String> setSpecFields = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.lido.name());
+    private List<String> setSpecFields =
+            DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.LIDO.getMetadataPrefix());
 
     /* (non-Javadoc)
      * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String, java.lang.String)
@@ -70,10 +72,8 @@ public class LIDOFormat extends Format {
             return new ErrorCode().getNoRecordsMatch();
         }
 
-        Element xmlListRecords =
-                generateLido(qr.getResults(), qr.getResults().getNumFound(), firstRawRow, numRows, handler, "ListRecords", setSpecFields,
-                        filterQuerySuffix);
-        return xmlListRecords;
+        return generateLido(qr.getResults(), qr.getResults().getNumFound(), firstRawRow, numRows, handler, "ListRecords", setSpecFields,
+                filterQuerySuffix);
     }
 
     /* (non-Javadoc)
@@ -93,11 +93,8 @@ public class LIDOFormat extends Format {
             if (doc == null) {
                 return new ErrorCode().getIdDoesNotExist();
             }
-            Element record = generateLido(Collections.singletonList(doc), 1L, 0, 1, handler, "GetRecord", setSpecFields, filterQuerySuffix);
-            return record;
-        } catch (IOException e) {
-            return new ErrorCode().getIdDoesNotExist();
-        } catch (SolrServerException e) {
+            return generateLido(Collections.singletonList(doc), 1L, 0, 1, handler, "GetRecord", setSpecFields, filterQuerySuffix);
+        } catch (IOException | SolrServerException e) {
             return new ErrorCode().getIdDoesNotExist();
         }
     }
@@ -123,7 +120,7 @@ public class LIDOFormat extends Format {
         Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Element xmlListRecords = new Element(recordType, xmlns);
 
-        Namespace lido = Namespace.getNamespace(Metadata.lido.getMetadataNamespacePrefix(), Metadata.lido.getMetadataNamespaceUri());
+        Namespace lido = Namespace.getNamespace(Metadata.LIDO.getMetadataNamespacePrefix(), Metadata.LIDO.getMetadataNamespaceUri());
 
         if (records.size() < numRows) {
             numRows = records.size();
@@ -141,7 +138,7 @@ public class LIDOFormat extends Format {
             String url = new StringBuilder(DataManager.getInstance().getConfiguration().getDocumentResolverUrl()).append(pi).toString();
             String xml = null;
             try {
-                xml = Utils.getWebContentGET(url);
+                xml = NetTools.getWebContentGET(url);
             } catch (HTTPException | IOException e) {
                 logger.error("Could not retriee LIDO: {}", url);
                 xmlListRecords.addContent(new ErrorCode().getIdDoesNotExist());
@@ -156,30 +153,27 @@ public class LIDOFormat extends Format {
             try {
                 org.jdom2.Document xmlDoc = XmlTools.getDocumentFromString(xml, null);
                 Element xmlRoot = xmlDoc.getRootElement();
-                Element newLido = new Element(Metadata.lido.getMetadataPrefix(), lido);
+                Element newLido = new Element(Metadata.LIDO.getMetadataPrefix(), lido);
                 newLido.addNamespaceDeclaration(XSI);
                 newLido.setAttribute(
                         new Attribute("schemaLocation", "http://www.lido-schema.org http://www.lido-schema.org/schema/v1.0/lido-v1.0.xsd", XSI));
                 newLido.addContent(xmlRoot.cloneContent());
 
-                Element record = new Element("record", xmlns);
+                Element eleRecord = new Element("record", xmlns);
                 try {
                     Element header = getHeader(doc, null, handler, null, setSpecFields, filterQuerySuffix);
-                    record.addContent(header);
+                    eleRecord.addContent(header);
                     Element metadata = new Element("metadata", xmlns);
                     metadata.addContent(newLido);
-                    // metadata.addContent(mets_root.cloneContent());
-                    record.addContent(metadata);
-                    xmlListRecords.addContent(record);
+                    eleRecord.addContent(metadata);
+                    xmlListRecords.addContent(eleRecord);
                 } catch (IOException e) {
                     logger.error("Could not generate header: {}", e.getMessage());
                     xmlListRecords.addContent(new ErrorCode().getIdDoesNotExist());
-                    continue;
                 }
             } catch (IOException | JDOMException e) {
                 logger.error("{}:\n{}", e.getMessage(), xml);
                 xmlListRecords.addContent(new ErrorCode().getIdDoesNotExist());
-                continue;
             }
 
         }

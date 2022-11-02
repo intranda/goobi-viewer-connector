@@ -465,7 +465,7 @@ public final class Configuration {
             throw new IllegalArgumentException("metadataFormat may not be null");
         }
 
-        return getLocalList(metadataFormat + ".setSpec.field", new ArrayList<String>(0));
+        return getLocalList(metadataFormat + ".setSpec.field", new ArrayList<>(0));
     }
 
     /**
@@ -636,7 +636,7 @@ public final class Configuration {
      * @return a {@link java.util.List} object.
      */
     public List<String> getUrnPrefixBlacklist() {
-        return getLocalList("epicur.blacklist.urnPrefix", new ArrayList<String>(0));
+        return getLocalList("epicur.blacklist.urnPrefix", new ArrayList<>(0));
     }
 
     /**

@@ -16,43 +16,26 @@
 package io.goobi.viewer.connector.utils;
 
 import java.io.IOException;
-import java.io.StringWriter;
-import java.nio.charset.Charset;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.cookie.BasicClientCookie;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import io.goobi.viewer.connector.Version;
-import io.goobi.viewer.connector.exceptions.HTTPException;
 import io.goobi.viewer.connector.oai.RequestHandler;
 
 /**
@@ -66,19 +49,20 @@ public class Utils {
     private static final Logger logger = LogManager.getLogger(Utils.class);
 
     private static final int HTTP_TIMEOUT = 10000;
-    /** Constant <code>DEFAULT_ENCODING="UTF-8"</code> */
-    public static final String DEFAULT_ENCODING = "UTF-8";
 
     /** Constant <code>formatterISO8601DateTimeWithOffset</code> */
-    public static DateTimeFormatter formatterISO8601DateTimeWithOffset = DateTimeFormatter.ISO_OFFSET_DATE_TIME; // yyyy-MM-dd'T'HH:mm:ss+01:00
+    public static final DateTimeFormatter formatterISO8601DateTimeWithOffset = DateTimeFormatter.ISO_OFFSET_DATE_TIME; // yyyy-MM-dd'T'HH:mm:ss+01:00
     /** Constant <code>formatterISO8601Date</code> */
-    public static java.time.format.DateTimeFormatter formatterISO8601Date = DateTimeFormatter.ISO_LOCAL_DATE; // yyyy-MM-dd
+    public static final DateTimeFormatter formatterISO8601Date = DateTimeFormatter.ISO_LOCAL_DATE; // yyyy-MM-dd
     /** Constant <code>formatterISO8601Date</code> */
-    public static java.time.format.DateTimeFormatter formatterISO8601Time = DateTimeFormatter.ISO_LOCAL_TIME; // HH:mm:ss
+    public static final DateTimeFormatter formatterISO8601Time = DateTimeFormatter.ISO_LOCAL_TIME; // HH:mm:ss
     /** Constant <code>formatterBasicDateTime</code> */
-    public static DateTimeFormatter formatterISO8601BasicDateTime = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+    public static final DateTimeFormatter formatterISO8601BasicDateTime = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
     /** Constant <code>formatterISO8601DateTimeNoSeconds</code> */
-    public static DateTimeFormatter formatterISO8601DateTimeNoSeconds = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    public static final DateTimeFormatter formatterISO8601DateTimeNoSeconds = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+    private Utils() {
+    }
 
     /**
      * insert some chars in the time string
@@ -103,111 +87,13 @@ public class Utils {
      * </p>
      *
      * @param milliSeconds a long.
-     * @should convert time correctly
      * @return a {@link java.lang.String} object.
+     * @should convert time correctly
      */
     public static String convertDate(long milliSeconds) {
         return Instant.ofEpochMilli(milliSeconds)
                 .atOffset(ZoneOffset.UTC)
                 .format(formatterISO8601DateTimeWithOffset);
-    }
-
-    /**
-     * <p>
-     * getWebContentGET.
-     * </p>
-     *
-     * @param urlString a {@link java.lang.String} object.
-     * @return a {@link java.lang.String} object.
-     * @throws org.apache.http.client.ClientProtocolException if any.
-     * @throws java.io.IOException if any.
-     * @throws io.goobi.viewer.exceptions.HTTPException if any.
-     */
-    public static String getWebContentGET(String urlString) throws ClientProtocolException, IOException, HTTPException {
-        RequestConfig defaultRequestConfig = RequestConfig.custom()
-                .setSocketTimeout(HTTP_TIMEOUT)
-                .setConnectTimeout(HTTP_TIMEOUT)
-                .setConnectionRequestTimeout(HTTP_TIMEOUT)
-                .build();
-        try (CloseableHttpClient httpClient = HttpClients.custom().setDefaultRequestConfig(defaultRequestConfig).build()) {
-            HttpGet get = new HttpGet(urlString);
-            try (CloseableHttpResponse response = httpClient.execute(get); StringWriter writer = new StringWriter()) {
-                int code = response.getStatusLine().getStatusCode();
-                if (code == HttpStatus.SC_OK) {
-                    return EntityUtils.toString(response.getEntity(), DEFAULT_ENCODING);
-                }
-                logger.trace("{}: {}; URL: {}", code, response.getStatusLine().getReasonPhrase(), urlString);
-                throw new HTTPException(code, response.getStatusLine().getReasonPhrase());
-            }
-        }
-    }
-
-    /**
-     * <p>
-     * getWebContentPOST.
-     * </p>
-     *
-     * @param url a {@link java.lang.String} object.
-     * @param params a {@link java.util.Map} object.
-     * @param cookies a {@link java.util.Map} object.
-     * @return a {@link java.lang.String} object.
-     * @throws org.apache.http.client.ClientProtocolException if any.
-     * @throws java.io.IOException if any.
-     * @throws io.goobi.viewer.exceptions.HTTPException if any.
-     */
-    public static String getWebContentPOST(String url, Map<String, String> params, Map<String, String> cookies)
-            throws ClientProtocolException, IOException, HTTPException {
-        if (url == null) {
-            throw new IllegalArgumentException("url may not be null");
-        }
-
-        logger.trace("url: {}", url);
-        List<NameValuePair> nameValuePairs = null;
-        if (params == null) {
-            nameValuePairs = new ArrayList<>(0);
-        } else {
-            nameValuePairs = new ArrayList<>(params.size());
-            for (String key : params.keySet()) {
-                // logger.trace("param: {}:{}", key, params.get(key)); // TODO do not log passwords!
-                nameValuePairs.add(new BasicNameValuePair(key, params.get(key)));
-            }
-        }
-        HttpClientContext context = null;
-        CookieStore cookieStore = new BasicCookieStore();
-        if (cookies != null && !cookies.isEmpty()) {
-            context = HttpClientContext.create();
-            for (String key : cookies.keySet()) {
-                // logger.trace("cookie: {}:{}", key, cookies.get(key)); // TODO do not log passwords!
-                BasicClientCookie cookie = new BasicClientCookie(key, cookies.get(key));
-                cookie.setPath("/");
-                cookie.setDomain("0.0.0.0");
-                cookieStore.addCookie(cookie);
-            }
-            context.setCookieStore(cookieStore);
-        }
-
-        RequestConfig defaultRequestConfig = RequestConfig.custom()
-                .setSocketTimeout(HTTP_TIMEOUT)
-                .setConnectTimeout(HTTP_TIMEOUT)
-                .setConnectionRequestTimeout(HTTP_TIMEOUT)
-                .build();
-        try (CloseableHttpClient httpClient = HttpClients.custom().setDefaultRequestConfig(defaultRequestConfig).build()) {
-            HttpPost post = new HttpPost(url);
-            Charset.forName(DEFAULT_ENCODING);
-            post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-            try (CloseableHttpResponse response = (context == null ? httpClient.execute(post) : httpClient.execute(post, context));
-                    StringWriter writer = new StringWriter()) {
-                int code = response.getStatusLine().getStatusCode();
-                if (code == HttpStatus.SC_OK) {
-                    logger.trace("{}: {}", code, response.getStatusLine().getReasonPhrase());
-                    IOUtils.copy(response.getEntity().getContent(), writer, DEFAULT_ENCODING);
-                    return writer.toString();
-                }
-//                logger.trace("{}: {}\n{}", code, response.getstatusline().getreasonphrase(),
-//                        ioutils.tostring(response.getentity().getcontent(), default_encoding));
-                throw new HTTPException(code, response.getStatusLine().getReasonPhrase());
-            }
-        }
     }
 
     /**
@@ -250,8 +136,8 @@ public class Utils {
      *
      * @param identifier a {@link java.lang.String} object.
      * @param languageCodeLength a int.
-     * @should split identifier correctly
      * @return an array of {@link java.lang.String} objects.
+     * @should split identifier correctly
      */
     public static String[] splitIdentifierAndLanguageCode(String identifier, int languageCodeLength) {
         if (identifier == null) {
@@ -281,10 +167,11 @@ public class Utils {
      *
      * @param datestring a {@link java.lang.Object} object.
      * @return a {@link java.lang.String} object.
+     * @should parse dates correctly
      */
     public static String parseDate(Object datestring) {
         if (datestring instanceof Long) {
-            return Utils.convertDate((Long) datestring);
+            return convertDate((Long) datestring);
         }
         return "";
     }
