@@ -20,12 +20,13 @@ import javax.servlet.ServletContextListener;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import io.goobi.viewer.connector.utils.Utils;
 
 /**
- * <p>ContextListener class.</p>
+ * <p>
+ * ContextListener class.
+ * </p>
  *
  */
 public class ContextListener implements ServletContextListener {
@@ -35,7 +36,8 @@ public class ContextListener implements ServletContextListener {
     /** {@inheritDoc} */
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        logger.info(Utils.formatVersionString(Utils.getVersion()));
+        logger.info("{}", Utils.formatVersionString(Utils.getVersion()));
+        io.goobi.viewer.controller.DataManager.getInstance().setConnectorVersion(Utils.getVersion());
     }
 
     /** {@inheritDoc} */
