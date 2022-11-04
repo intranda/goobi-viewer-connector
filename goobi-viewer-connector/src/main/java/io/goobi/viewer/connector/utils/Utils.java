@@ -177,7 +177,7 @@ public class Utils {
     }
 
     /**
-     * generates timestamp object from request
+     * Returns a parameter map built from {@link RequestHandler} values
      *
      * @param requestHandler The request that was send to the server(servlet)
      * @return a HashMap with the values from, until and set as string
