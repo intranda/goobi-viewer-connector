@@ -106,7 +106,9 @@ public class OAIDCFormat extends Format {
             return new ErrorCode().getBadArgument();
         }
         String versionDiscriminatorField =
-                DataManager.getInstance().getConfiguration().getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().getMetadataPrefix());
+                DataManager.getInstance()
+                        .getConfiguration()
+                        .getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().getMetadataPrefix());
         if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
             String[] identifierSplit = Utils.splitIdentifierAndLanguageCode(handler.getIdentifier(), 3);
             try {
@@ -209,8 +211,9 @@ public class OAIDCFormat extends Format {
      * @return
      * @throws SolrServerException
      * @throws IOException
+     * @should generate element correctly
      */
-    private Element generateSingleDCRecord(SolrDocument doc, RequestHandler handler, String requestedVersion, Namespace xmlns, Namespace nsOaiDoc,
+    Element generateSingleDCRecord(SolrDocument doc, RequestHandler handler, String requestedVersion, Namespace xmlns, Namespace nsOaiDoc,
             List<String> setSpecFields, String filterQuerySuffix) throws SolrServerException, IOException {
         boolean isWork = doc.getFieldValue(SolrConstants.ISWORK) != null && (boolean) doc.getFieldValue(SolrConstants.ISWORK);
         boolean isAnchor = doc.getFieldValue(SolrConstants.ISANCHOR) != null && (boolean) doc.getFieldValue(SolrConstants.ISANCHOR);
