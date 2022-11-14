@@ -50,7 +50,7 @@ public class LIDOFormat extends Format {
 
     private static final Logger logger = LogManager.getLogger(LIDOFormat.class);
 
-    private static final String LIDO_FILTER_QUERY = " +" + SolrConstants.SOURCEDOCFORMAT + ":LIDO";
+    private static final String LIDO_FILTER_QUERY =  " +(+" + SolrConstants.SOURCEDOCFORMAT + ":LIDO " + "-" + SolrConstants.DATEDELETED + ":*)";
 
     private List<String> setSpecFields =
             DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.LIDO.getMetadataPrefix());

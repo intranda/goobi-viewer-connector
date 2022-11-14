@@ -50,7 +50,7 @@ public class METSFormat extends Format {
 
     private static final Logger logger = LogManager.getLogger(METSFormat.class);
 
-    private static final String METS_FILTER_QUERY = " +(" + SolrConstants.SOURCEDOCFORMAT + ":METS " + SolrConstants.DATEDELETED + ":*)";
+    private static final String METS_FILTER_QUERY = " +(+" + SolrConstants.SOURCEDOCFORMAT + ":METS " + "-" + SolrConstants.DATEDELETED + ":*)";
 
     private List<String> setSpecFields =
             DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.METS.getMetadataPrefix());
