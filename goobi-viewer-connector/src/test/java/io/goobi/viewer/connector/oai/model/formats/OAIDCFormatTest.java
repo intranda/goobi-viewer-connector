@@ -8,12 +8,13 @@ import org.jdom2.Namespace;
 import org.junit.Assert;
 import org.junit.Test;
 
+import io.goobi.viewer.connector.AbstractSolrEnabledTest;
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.utils.SolrConstants;
 
-public class OAIDCFormatTest {
+public class OAIDCFormatTest extends AbstractSolrEnabledTest {
 
     /**
      * @see OAIDCFormat#generateSingleDCRecord(SolrDocument,RequestHandler,String,Namespace,Namespace,List,String)
@@ -35,7 +36,7 @@ public class OAIDCFormatTest {
         
         Element eleHeader = eleRecord.getChild("header", xmlns);
         Assert.assertNotNull(eleHeader);
-        Assert.assertEquals("PPN123456789", eleHeader.getChildText("identifier", xmlns));
+        Assert.assertEquals("repoPPN123456789", eleHeader.getChildText("identifier", xmlns));
        
         Element eleMetadata = eleRecord.getChild("metadata", xmlns);
         Assert.assertNotNull(eleMetadata);
