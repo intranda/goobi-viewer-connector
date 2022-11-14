@@ -103,7 +103,7 @@ public class SruServlet extends HttpServlet {
                     logger.error(e2.getMessage());
                 }
             }
-            logger.error(e.getMessage(), e);
+            logger.debug(e.getMessage());
             return;
         }
 
