@@ -52,6 +52,11 @@ public class METSFormat extends Format {
 
     private static final String METS_FILTER_QUERY = " +(+" + SolrConstants.SOURCEDOCFORMAT + ":METS " + "-" + SolrConstants.DATEDELETED + ":*)";
 
+    static final Namespace METS_NS = Namespace.getNamespace(Metadata.METS.getMetadataNamespacePrefix(), Metadata.METS.getMetadataNamespaceUri());
+    static final Namespace MODS_NS = Namespace.getNamespace("mods", "http://www.loc.gov/mods/v3");
+    static final Namespace DV_NS = Namespace.getNamespace("dv", "http://dfg-viewer.de/");
+    static final Namespace XLINK_NS = Namespace.getNamespace("xlink", "http://www.w3.org/1999/xlink");
+
     private List<String> setSpecFields =
             DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.METS.getMetadataPrefix());
 
@@ -64,8 +69,7 @@ public class METSFormat extends Format {
             String filterQuerySuffix) throws SolrServerException, IOException {
         Map<String, String> datestamp = Utils.filterDatestampFromRequest(handler);
 
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
-        Element xmlListIdentifiers = new Element("ListIdentifiers", xmlns);
+        Element xmlListIdentifiers = new Element("ListIdentifiers", OAI_NS);
 
         List<String> fieldList = new ArrayList<>(Arrays.asList(IDENTIFIER_FIELDS));
         fieldList.addAll(Arrays.asList(DATE_FIELDS));
@@ -93,7 +97,7 @@ public class METSFormat extends Format {
         // Create resumption token
         if (totalRawHits > firstRawRow + numRows) {
             Element resumption = createResumptionTokenAndElement(totalVirtualHits, totalRawHits, firstVirtualRow + virtualHitCount,
-                    firstRawRow + numRows, xmlns, handler);
+                    firstRawRow + numRows, OAI_NS, handler);
             xmlListIdentifiers.addContent(resumption);
         }
 
@@ -117,7 +121,7 @@ public class METSFormat extends Format {
             return new ErrorCode().getNoRecordsMatch();
         }
 
-        return generateMets(qr.getResults(), qr.getResults().getNumFound(), firstRawRow, numRows, handler, "ListRecords", setSpecFields,
+        return generateMetsRecords(qr.getResults(), qr.getResults().getNumFound(), firstRawRow, numRows, handler, "ListRecords", setSpecFields,
                 filterQuerySuffix);
     }
 
@@ -140,7 +144,7 @@ public class METSFormat extends Format {
                 logger.debug("Record not found in index: {}", handler.getIdentifier());
                 return new ErrorCode().getIdDoesNotExist();
             }
-            return generateMets(Collections.singletonList(doc), 1L, 0, 1, handler, "GetRecord", setSpecFields, filterQuerySuffix);
+            return generateMetsRecords(Collections.singletonList(doc), 1L, 0, 1, handler, "GetRecord", setSpecFields, filterQuerySuffix);
         } catch (IOException | SolrServerException e) {
             logger.error(e.getMessage());
             return new ErrorCode().getIdDoesNotExist();
@@ -161,16 +165,11 @@ public class METSFormat extends Format {
      * @throws JDOMException
      * @throws SolrServerException
      */
-    private static Element generateMets(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler,
+    private static Element generateMetsRecords(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler,
             String recordType, List<String> setSpecFields, String filterQuerySuffix) throws SolrServerException {
-        logger.trace("generateMets");
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
-        Element xmlListRecords = new Element(recordType, xmlns);
-
-        Namespace mets = Namespace.getNamespace(Metadata.METS.getMetadataNamespacePrefix(), Metadata.METS.getMetadataNamespaceUri());
-        Namespace mods = Namespace.getNamespace("mods", "http://www.loc.gov/mods/v3");
-        Namespace dv = Namespace.getNamespace("dv", "http://dfg-viewer.de/");
-        Namespace xlink = Namespace.getNamespace("xlink", "http://www.w3.org/1999/xlink");
+        logger.trace("generateMetsRecords");
+        
+        Element xmlListRecords = new Element(recordType, OAI_NS);
 
         if (records.size() < numRows) {
             numRows = records.size();
@@ -200,48 +199,70 @@ public class METSFormat extends Format {
                 continue;
             }
 
-            try {
-                org.jdom2.Document metsFile = XmlTools.getDocumentFromString(xml, null);
-                Element metsRoot = metsFile.getRootElement();
-                Element newMetsRoot = new Element(Metadata.METS.getMetadataPrefix(), mets);
-                newMetsRoot.addNamespaceDeclaration(XSI);
-                newMetsRoot.addNamespaceDeclaration(mods);
-                newMetsRoot.addNamespaceDeclaration(dv);
-                newMetsRoot.addNamespaceDeclaration(xlink);
-                newMetsRoot.setAttribute("schemaLocation",
-                        "http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-3.xsd http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/version17/mets.v1-7.xsd",
-                        XSI);
-                if (metsRoot.getAttributeValue(XmlConstants.ATT_NAME_OBJID) != null) {
-                    newMetsRoot.setAttribute(XmlConstants.ATT_NAME_OBJID, metsRoot.getAttributeValue(XmlConstants.ATT_NAME_OBJID));
-                }
-                newMetsRoot.addContent(metsRoot.cloneContent());
-
-                Element eleRecord = new Element("record", xmlns);
-                try {
-                    Element header = getHeader(doc, null, handler, null, setSpecFields, filterQuerySuffix);
-                    eleRecord.addContent(header);
-                    Element metadata = new Element("metadata", xmlns);
-                    metadata.addContent(newMetsRoot);
-                    eleRecord.addContent(metadata);
-                    xmlListRecords.addContent(eleRecord);
-                } catch (IOException e) {
-                    logger.error("Could not generate header: {}", e.getMessage());
-                    xmlListRecords.addContent(new ErrorCode().getIdDoesNotExist());
-                }
-            } catch (IOException | JDOMException e) {
-                logger.error("{}", e.getMessage());
-                logger.trace(xml);
+            Element eleRecord = generateMetsRecord(xml, doc, handler, setSpecFields, filterQuerySuffix);
+            if (eleRecord != null) {
+                xmlListRecords.addContent(eleRecord);
+            } else {
                 xmlListRecords.addContent(new ErrorCode().getIdDoesNotExist());
             }
         }
 
         // Create resumption token
         if (totalHits > firstRow + numRows) {
-            Element resumption = createResumptionTokenAndElement(totalHits, firstRow + numRows, xmlns, handler);
+            Element resumption = createResumptionTokenAndElement(totalHits, firstRow + numRows, OAI_NS, handler);
             xmlListRecords.addContent(resumption);
         }
 
         return xmlListRecords;
+    }
+
+    /**
+     * 
+     * @param xml
+     * @param doc
+     * @param handler
+     * @param setSpecFields
+     * @param filterQuerySuffix
+     * @return
+     * @throws SolrServerException
+     * @should generate element correctly
+     */
+    static Element generateMetsRecord(String xml, SolrDocument doc, RequestHandler handler, List<String> setSpecFields, String filterQuerySuffix)
+            throws SolrServerException {
+        logger.trace("generateMetsRecord");
+        if (StringUtils.isEmpty(xml)) {
+            return null;
+        }
+
+        try {
+            org.jdom2.Document metsFile = XmlTools.getDocumentFromString(xml, null);
+            Element metsRoot = metsFile.getRootElement();
+            Element newMetsRoot = new Element(Metadata.METS.getMetadataPrefix(), METS_NS);
+            newMetsRoot.addNamespaceDeclaration(XSI_NS);
+            newMetsRoot.addNamespaceDeclaration(MODS_NS);
+            newMetsRoot.addNamespaceDeclaration(DV_NS);
+            newMetsRoot.addNamespaceDeclaration(XLINK_NS);
+            newMetsRoot.setAttribute("schemaLocation",
+                    "http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-3.xsd http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/version17/mets.v1-7.xsd",
+                    XSI_NS);
+            if (metsRoot.getAttributeValue(XmlConstants.ATT_NAME_OBJID) != null) {
+                newMetsRoot.setAttribute(XmlConstants.ATT_NAME_OBJID, metsRoot.getAttributeValue(XmlConstants.ATT_NAME_OBJID));
+            }
+            newMetsRoot.addContent(metsRoot.cloneContent());
+
+            Element eleRecord = new Element("record", OAI_NS);
+            Element header = getHeader(doc, null, handler, null, setSpecFields, filterQuerySuffix);
+            eleRecord.addContent(header);
+            Element metadata = new Element("metadata", OAI_NS);
+            metadata.addContent(newMetsRoot);
+            eleRecord.addContent(metadata);
+
+            return eleRecord;
+        } catch (IOException | JDOMException e) {
+            logger.error("{}", e.getMessage());
+            logger.trace(xml);
+            return null;
+        }
     }
 
     /* (non-Javadoc)

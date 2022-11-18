@@ -50,7 +50,7 @@ public class LIDOFormat extends Format {
 
     private static final Logger logger = LogManager.getLogger(LIDOFormat.class);
 
-    private static final String LIDO_FILTER_QUERY =  " +(+" + SolrConstants.SOURCEDOCFORMAT + ":LIDO " + "-" + SolrConstants.DATEDELETED + ":*)";
+    private static final String LIDO_FILTER_QUERY = " +(+" + SolrConstants.SOURCEDOCFORMAT + ":LIDO " + "-" + SolrConstants.DATEDELETED + ":*)";
 
     private List<String> setSpecFields =
             DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.LIDO.getMetadataPrefix());
@@ -117,8 +117,7 @@ public class LIDOFormat extends Format {
      */
     private static Element generateLido(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler,
             String recordType, List<String> setSpecFields, String filterQuerySuffix) throws SolrServerException {
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
-        Element xmlListRecords = new Element(recordType, xmlns);
+        Element xmlListRecords = new Element(recordType, OAI_NS);
 
         Namespace lido = Namespace.getNamespace(Metadata.LIDO.getMetadataNamespacePrefix(), Metadata.LIDO.getMetadataNamespaceUri());
 
@@ -154,16 +153,16 @@ public class LIDOFormat extends Format {
                 org.jdom2.Document xmlDoc = XmlTools.getDocumentFromString(xml, null);
                 Element xmlRoot = xmlDoc.getRootElement();
                 Element newLido = new Element(Metadata.LIDO.getMetadataPrefix(), lido);
-                newLido.addNamespaceDeclaration(XSI);
+                newLido.addNamespaceDeclaration(XSI_NS);
                 newLido.setAttribute(
-                        new Attribute("schemaLocation", "http://www.lido-schema.org http://www.lido-schema.org/schema/v1.0/lido-v1.0.xsd", XSI));
+                        new Attribute("schemaLocation", "http://www.lido-schema.org http://www.lido-schema.org/schema/v1.0/lido-v1.0.xsd", XSI_NS));
                 newLido.addContent(xmlRoot.cloneContent());
 
-                Element eleRecord = new Element("record", xmlns);
+                Element eleRecord = new Element("record", OAI_NS);
                 try {
                     Element header = getHeader(doc, null, handler, null, setSpecFields, filterQuerySuffix);
                     eleRecord.addContent(header);
-                    Element metadata = new Element("metadata", xmlns);
+                    Element metadata = new Element("metadata", OAI_NS);
                     metadata.addContent(newLido);
                     eleRecord.addContent(metadata);
                     xmlListRecords.addContent(eleRecord);
@@ -180,7 +179,7 @@ public class LIDOFormat extends Format {
 
         // Create resumption token
         if (totalHits > firstRow + numRows) {
-            Element resumption = createResumptionTokenAndElement(totalHits, firstRow + numRows, xmlns, handler);
+            Element resumption = createResumptionTokenAndElement(totalHits, firstRow + numRows, OAI_NS, handler);
             xmlListRecords.addContent(resumption);
         }
 

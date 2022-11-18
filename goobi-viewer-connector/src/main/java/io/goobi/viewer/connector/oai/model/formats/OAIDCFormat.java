@@ -154,9 +154,8 @@ public class OAIDCFormat extends Format {
     private Element generateDC(List<SolrDocument> records, long totalVirtualHits, long totalRawHits, int firstVirtualRow, int firstRawRow,
             int numRows, RequestHandler handler, String recordType, String versionDiscriminatorField, String requestedVersion,
             String filterQuerySuffix) throws SolrServerException, IOException {
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Namespace nsOaiDoc = Namespace.getNamespace(Metadata.OAI_DC.getMetadataNamespacePrefix(), Metadata.OAI_DC.getMetadataNamespaceUri());
-        Element xmlListRecords = new Element(recordType, xmlns);
+        Element xmlListRecords = new Element(recordType, OAI_NS);
 
         if (records.size() < numRows) {
             numRows = records.size();
@@ -179,12 +178,12 @@ public class OAIDCFormat extends Format {
                             iso3code = lang.getIsoCode();
                         }
                     }
-                    xmlListRecords.addContent(generateSingleDCRecord(doc, handler, iso3code, xmlns, nsOaiDoc, setSpecFields, filterQuerySuffix));
+                    xmlListRecords.addContent(generateSingleDCRecord(doc, handler, iso3code, OAI_NS, nsOaiDoc, setSpecFields, filterQuerySuffix));
                 }
             }
         } else {
             for (SolrDocument doc : records) {
-                xmlListRecords.addContent(generateSingleDCRecord(doc, handler, null, xmlns, nsOaiDoc, setSpecFields, filterQuerySuffix));
+                xmlListRecords.addContent(generateSingleDCRecord(doc, handler, null, OAI_NS, nsOaiDoc, setSpecFields, filterQuerySuffix));
                 virtualHitCount++;
             }
         }
@@ -192,7 +191,7 @@ public class OAIDCFormat extends Format {
         // Create resumption token
         if (totalRawHits > firstRawRow + numRows) {
             Element resumption = createResumptionTokenAndElement(totalVirtualHits, totalRawHits, firstVirtualRow + virtualHitCount,
-                    firstRawRow + numRows, xmlns, handler);
+                    firstRawRow + numRows, OAI_NS, handler);
             xmlListRecords.addContent(resumption);
         }
 
@@ -270,8 +269,8 @@ public class OAIDCFormat extends Format {
         Element eleOaiDc = new Element("dc", nsOaiDoc);
         Namespace nsDc = Namespace.getNamespace(Metadata.DC.getMetadataNamespacePrefix(), Metadata.DC.getMetadataNamespaceUri());
         eleOaiDc.addNamespaceDeclaration(nsDc);
-        eleOaiDc.addNamespaceDeclaration(XSI);
-        eleOaiDc.setAttribute("schemaLocation", "http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd", XSI);
+        eleOaiDc.addNamespaceDeclaration(XSI_NS);
+        eleOaiDc.setAttribute("schemaLocation", "http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd", XSI_NS);
 
         // Configured fields
         List<io.goobi.viewer.connector.oai.model.metadata.Metadata> metadataList =

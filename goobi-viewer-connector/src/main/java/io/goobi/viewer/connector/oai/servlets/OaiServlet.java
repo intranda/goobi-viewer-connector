@@ -32,7 +32,6 @@ import org.apache.logging.log4j.Logger;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jdom2.Namespace;
 import org.jdom2.ProcessingInstruction;
 import org.jdom2.output.XMLOutputter;
 
@@ -72,9 +71,8 @@ public class OaiServlet extends HttpServlet {
         doc.addContent(pi);
         // generate root element
         Element root = Format.getOaiPmhElement("OAI-PMH");
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
 
-        Element responseDate = new Element("responseDate", xmlns);
+        Element responseDate = new Element("responseDate", Format.OAI_NS);
 
         responseDate.setText(Utils.getCurrentUTCTime(LocalDateTime.now()));
         root.addContent(responseDate);
@@ -83,7 +81,7 @@ public class OaiServlet extends HttpServlet {
 
         // handle request
         if (handler.getVerb() == null) {
-            Element requestType = new Element("request", xmlns);
+            Element requestType = new Element("request", Format.OAI_NS);
             requestType.setAttribute("verb", "missing");
             if (DataManager.getInstance().getConfiguration().isBaseUrlUseInRequestElement()) {
                 requestType.setText(DataManager.getInstance().getConfiguration().getBaseURL());
@@ -96,7 +94,7 @@ public class OaiServlet extends HttpServlet {
             // Check for invalid from/until parameters
             root.addContent(new ErrorCode().getBadArgument());
         } else {
-            Element requestType = new Element("request", xmlns);
+            Element requestType = new Element("request", Format.OAI_NS);
             requestType.setAttribute("verb", handler.getVerb().getTitle());
             if (handler.getMetadataPrefix() != null) {
                 requestType.setAttribute("metadataPrefix", handler.getMetadataPrefix().getMetadataPrefix());

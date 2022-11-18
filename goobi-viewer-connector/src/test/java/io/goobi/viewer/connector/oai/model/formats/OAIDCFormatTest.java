@@ -9,7 +9,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import io.goobi.viewer.connector.AbstractSolrEnabledTest;
-import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.utils.SolrConstants;
@@ -27,18 +26,17 @@ public class OAIDCFormatTest extends AbstractSolrEnabledTest {
 
         RequestHandler handler = new RequestHandler();
 
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Namespace nsOaiDoc = Namespace.getNamespace(Metadata.OAI_DC.getMetadataNamespacePrefix(), Metadata.OAI_DC.getMetadataNamespaceUri());
 
         OAIDCFormat format = new OAIDCFormat();
-        Element eleRecord = format.generateSingleDCRecord(doc, handler, null, xmlns, nsOaiDoc, null, null);
+        Element eleRecord = format.generateSingleDCRecord(doc, handler, null, Format.OAI_NS, nsOaiDoc, null, null);
         Assert.assertNotNull(eleRecord);
-        
-        Element eleHeader = eleRecord.getChild("header", xmlns);
+
+        Element eleHeader = eleRecord.getChild("header", Format.OAI_NS);
         Assert.assertNotNull(eleHeader);
-        Assert.assertEquals("repoPPN123456789", eleHeader.getChildText("identifier", xmlns));
-       
-        Element eleMetadata = eleRecord.getChild("metadata", xmlns);
+        Assert.assertEquals("repoPPN123456789", eleHeader.getChildText("identifier", Format.OAI_NS));
+
+        Element eleMetadata = eleRecord.getChild("metadata", Format.OAI_NS);
         Assert.assertNotNull(eleMetadata);
         Element eleOaiDc = eleMetadata.getChild("dc", nsOaiDoc);
         Assert.assertNotNull(eleOaiDc);
