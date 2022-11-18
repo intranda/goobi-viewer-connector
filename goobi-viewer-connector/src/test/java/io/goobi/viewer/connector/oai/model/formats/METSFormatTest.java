@@ -54,4 +54,16 @@ public class METSFormatTest extends AbstractTest {
         Element eleMets = eleMetadata.getChild("mets", METSFormat.METS_NS);
         Assert.assertNotNull(eleMets);
     }
+
+    /**
+     * @see METSFormat#generateMetsRecord(String,SolrDocument,RequestHandler,List,String)
+     * @verifies return null if xml empty
+     */
+    @Test
+    public void generateMetsRecord_shouldReturnNullIfXmlEmpty() throws Exception {
+        SolrDocument doc = new SolrDocument();
+        doc.setField(SolrConstants.PI_TOPSTRUCT, "PPN517154005");
+        Assert.assertNull(METSFormat.generateMetsRecord(XmlTools.getStringFromElement("", StandardCharsets.UTF_8.name()), doc, new RequestHandler(),
+                null, null));
+    }
 }

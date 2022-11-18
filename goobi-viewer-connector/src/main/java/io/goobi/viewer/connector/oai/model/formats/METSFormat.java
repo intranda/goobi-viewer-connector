@@ -226,6 +226,7 @@ public class METSFormat extends Format {
      * @return
      * @throws SolrServerException
      * @should generate element correctly
+     * @should return null if xml empty
      */
     static Element generateMetsRecord(String xml, SolrDocument doc, RequestHandler handler, List<String> setSpecFields, String filterQuerySuffix)
             throws SolrServerException {
