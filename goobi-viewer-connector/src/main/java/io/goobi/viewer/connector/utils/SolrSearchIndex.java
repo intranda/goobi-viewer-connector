@@ -394,19 +394,19 @@ public class SolrSearchIndex {
         StringBuilder sb = new StringBuilder();
         sb.append("+(")
                 .append(SolrConstants.PI)
-                .append(':')
+                .append(":\"")
                 .append(useIdentifier)
-                .append(" OR ")
+                .append("\" ")
                 .append(SolrConstants.URN)
-                .append(':')
+                .append(":\"")
                 .append(useIdentifier)
-                .append(" OR ")
+                .append("\" ")
                 .append(SolrConstants.IMAGEURN)
-                .append(':')
+                .append(":\"")
                 .append(useIdentifier)
-                .append(')')
+                .append("\")")
                 .append(filterQuerySuffix);
-        logger.debug(sb.toString());
+        logger.debug(sb);
         SolrQuery solrQuery = new SolrQuery(sb.toString());
         solrQuery.setRows(rows);
         if (fieldList != null && !fieldList.isEmpty()) {
