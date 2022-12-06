@@ -75,7 +75,6 @@ public class EpicurFormat extends Format {
     public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField,
             String filterQuerySuffix) throws SolrServerException, IOException {
         logger.trace("createListRecords");
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
 
         String urnPrefixBlacklistSuffix =
                 SolrSearchTools.getUrnPrefixBlacklistSuffix(DataManager.getInstance().getConfiguration().getUrnPrefixBlacklist());
@@ -90,7 +89,7 @@ public class EpicurFormat extends Format {
         if (records.isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
-        Element xmlListRecords = new Element("ListRecords", xmlns);
+        Element xmlListRecords = new Element("ListRecords", OAI_NS);
         if (records.size() < numRows) {
             numRows = records.size();
         }
@@ -99,10 +98,10 @@ public class EpicurFormat extends Format {
             long dateUpdated = SolrSearchTools.getLatestValidDateUpdated(doc, RequestHandler.getUntilTimestamp(handler.getUntil()));
             Long dateDeleted = (Long) doc.getFieldValue(SolrConstants.DATEDELETED);
             if (doc.getFieldValue(SolrConstants.URN) != null) {
-                Element eleRecord = new Element(XmlConstants.ELE_NAME_RECORD, xmlns);
+                Element eleRecord = new Element(XmlConstants.ELE_NAME_RECORD, OAI_NS);
                 Element header = generateEpicurHeader(doc, dateUpdated, setSpecFields);
                 eleRecord.addContent(header);
-                Element metadata = new Element(XmlConstants.ELE_NAME_METADATA, xmlns);
+                Element metadata = new Element(XmlConstants.ELE_NAME_METADATA, OAI_NS);
                 eleRecord.addContent(metadata);
                 boolean topstruct = doc.containsKey(SolrConstants.PI);
                 metadata.addContent(generateEpicurElement((String) doc.getFieldValue(SolrConstants.URN),
@@ -126,10 +125,10 @@ public class EpicurFormat extends Format {
                 if (qrInner != null && !qrInner.getResults().isEmpty()) {
                     for (SolrDocument pageDoc : qrInner.getResults()) {
                         String imgUrn = (String) pageDoc.getFieldValue(SolrConstants.IMAGEURN);
-                        Element pagerecord = new Element(XmlConstants.ELE_NAME_RECORD, xmlns);
+                        Element pagerecord = new Element(XmlConstants.ELE_NAME_RECORD, OAI_NS);
                         Element pageheader = generateEpicurPageHeader(doc, imgUrn, dateUpdated, setSpecFields);
                         pagerecord.addContent(pageheader);
-                        Element pagemetadata = new Element(XmlConstants.ELE_NAME_METADATA, xmlns);
+                        Element pagemetadata = new Element(XmlConstants.ELE_NAME_METADATA, OAI_NS);
                         pagerecord.addContent(pagemetadata);
                         pagemetadata.addContent(generateEpicurPageElement(imgUrn, (Long) doc.getFieldValue(SolrConstants.DATECREATED), dateUpdated,
                                 (Long) doc.getFieldValue(SolrConstants.DATEDELETED)));
@@ -144,10 +143,10 @@ public class EpicurFormat extends Format {
                 if (pageUrnValues != null) {
                     for (Object obj : pageUrnValues) {
                         String imgUrn = (String) obj;
-                        Element pagerecord = new Element(XmlConstants.ELE_NAME_RECORD, xmlns);
+                        Element pagerecord = new Element(XmlConstants.ELE_NAME_RECORD, OAI_NS);
                         Element pageheader = generateEpicurPageHeader(doc, imgUrn, dateUpdated, setSpecFields);
                         pagerecord.addContent(pageheader);
-                        Element pagemetadata = new Element(XmlConstants.ELE_NAME_METADATA, xmlns);
+                        Element pagemetadata = new Element(XmlConstants.ELE_NAME_METADATA, OAI_NS);
                         pagerecord.addContent(pagemetadata);
                         pagemetadata.addContent(
                                 generateEpicurPageElement(imgUrn, (Long) doc.getFieldValue(SolrConstants.DATECREATED), dateUpdated, dateDeleted));
@@ -161,7 +160,7 @@ public class EpicurFormat extends Format {
 
         // Create resumption token
         if (records.getNumFound() > firstRawRow + numRows) {
-            Element resumption = createResumptionTokenAndElement(records.getNumFound(), firstRawRow + numRows, xmlns, handler);
+            Element resumption = createResumptionTokenAndElement(records.getNumFound(), firstRawRow + numRows, OAI_NS, handler);
             xmlListRecords.addContent(resumption);
         }
 
@@ -185,14 +184,13 @@ public class EpicurFormat extends Format {
             if (doc == null) {
                 return new ErrorCode().getIdDoesNotExist();
             }
-            Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
-            Element getRecord = new Element("GetRecord", xmlns);
+            Element getRecord = new Element("GetRecord", OAI_NS);
             long dateupdated = SolrSearchTools.getLatestValidDateUpdated(doc, RequestHandler.getUntilTimestamp(handler.getUntil()));
             String urn = doc.getFieldValue(SolrConstants.URN) != null ? (String) doc.getFieldValue(SolrConstants.URN) : handler.getIdentifier();
             Element header = generateEpicurPageHeader(doc, urn, dateupdated, setSpecFields);
-            Element eleRecord = new Element(XmlConstants.ELE_NAME_RECORD, xmlns);
+            Element eleRecord = new Element(XmlConstants.ELE_NAME_RECORD, OAI_NS);
             eleRecord.addContent(header);
-            Element metadata = new Element(XmlConstants.ELE_NAME_METADATA, xmlns);
+            Element metadata = new Element(XmlConstants.ELE_NAME_METADATA, OAI_NS);
             eleRecord.addContent(metadata);
             metadata.addContent(generateEpicurPageElement(urn, (Long) doc.getFieldValue(SolrConstants.DATECREATED), dateupdated,
                     (Long) doc.getFieldValue(SolrConstants.DATEDELETED)));
@@ -216,15 +214,14 @@ public class EpicurFormat extends Format {
      * @return
      */
     private static Element generateEpicurHeader(SolrDocument doc, long dateUpdated, List<String> setSpecFields) {
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
-        Element header = new Element("header", xmlns);
-        Element identifier = new Element(XmlConstants.ELE_NAME_IDENTIFIER, xmlns);
+        Element header = new Element("header", OAI_NS);
+        Element identifier = new Element(XmlConstants.ELE_NAME_IDENTIFIER, OAI_NS);
         identifier.setText(
                 DataManager.getInstance().getConfiguration().getOaiIdentifier().get("repositoryIdentifier")
                         + (String) doc.getFieldValue(SolrConstants.URN));
         header.addContent(identifier);
 
-        Element datestamp = new Element("datestamp", xmlns);
+        Element datestamp = new Element("datestamp", OAI_NS);
         datestamp.setText(Utils.parseDate(dateUpdated));
         header.addContent(datestamp);
         // setSpec
@@ -233,7 +230,7 @@ public class EpicurFormat extends Format {
                 if (doc.containsKey(setSpecField)) {
                     for (Object fieldValue : doc.getFieldValues(setSpecField)) {
                         // TODO translation
-                        Element setSpec = new Element("setSpec", xmlns);
+                        Element setSpec = new Element("setSpec", OAI_NS);
                         setSpec.setText((String) fieldValue);
                         header.addContent(setSpec);
                     }
@@ -261,9 +258,10 @@ public class EpicurFormat extends Format {
         Namespace xmlns = Namespace.getNamespace("urn:nbn:de:1111-2004033116");
 
         Element epicur = new Element("epicur", xmlns);
-        epicur.addNamespaceDeclaration(XSI);
+        epicur.addNamespaceDeclaration(XSI_NS);
         epicur.addNamespaceDeclaration(EPICUR);
-        epicur.setAttribute("schemaLocation", "urn:nbn:de:1111-2004033116 http://www.persistent-identifier.de/xepicur/version1.0/xepicur.xsd", XSI);
+        epicur.setAttribute("schemaLocation", "urn:nbn:de:1111-2004033116 http://www.persistent-identifier.de/xepicur/version1.0/xepicur.xsd",
+                XSI_NS);
 
         // xsi:schemaLocation="urn:nbn:de:1111-2004033116 http://www.persistent-identifier.de/xepicur/version1.0/xepicur.xsd"
         // xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -328,14 +326,13 @@ public class EpicurFormat extends Format {
      * @return
      */
     private static Element generateEpicurPageHeader(SolrDocument doc, String urn, long dateUpdated, List<String> setSpecFields) {
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
-        Element header = new Element("header", xmlns);
+        Element header = new Element("header", OAI_NS);
 
-        Element identifier = new Element(XmlConstants.ELE_NAME_IDENTIFIER, xmlns);
+        Element identifier = new Element(XmlConstants.ELE_NAME_IDENTIFIER, OAI_NS);
         identifier.setText(DataManager.getInstance().getConfiguration().getOaiIdentifier().get("repositoryIdentifier") + urn);
         header.addContent(identifier);
 
-        Element datestamp = new Element("datestamp", xmlns);
+        Element datestamp = new Element("datestamp", OAI_NS);
         datestamp.setText(Utils.parseDate(dateUpdated));
         header.addContent(datestamp);
         // setSpec
@@ -344,7 +341,7 @@ public class EpicurFormat extends Format {
                 if (doc.containsKey(setSpecField)) {
                     for (Object fieldValue : doc.getFieldValues(setSpecField)) {
                         // TODO translation
-                        Element setSpec = new Element("setSpec", xmlns);
+                        Element setSpec = new Element("setSpec", OAI_NS);
                         setSpec.setText((String) fieldValue);
                         header.addContent(setSpec);
                     }
@@ -371,9 +368,10 @@ public class EpicurFormat extends Format {
         Namespace xmlns = Namespace.getNamespace("urn:nbn:de:1111-2004033116");
 
         Element epicur = new Element("epicur", xmlns);
-        epicur.addNamespaceDeclaration(XSI);
+        epicur.addNamespaceDeclaration(XSI_NS);
         epicur.addNamespaceDeclaration(EPICUR);
-        epicur.setAttribute("schemaLocation", "urn:nbn:de:1111-2004033116 http://www.persistent-identifier.de/xepicur/version1.0/xepicur.xsd", XSI);
+        epicur.setAttribute("schemaLocation", "urn:nbn:de:1111-2004033116 http://www.persistent-identifier.de/xepicur/version1.0/xepicur.xsd",
+                XSI_NS);
         String status = STATUS_URN_NEW;
 
         // xsi:schemaLocation="urn:nbn:de:1111-2004033116 http://www.persistent-identifier.de/xepicur/version1.0/xepicur.xsd"

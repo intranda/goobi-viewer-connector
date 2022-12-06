@@ -73,9 +73,11 @@ public abstract class Format {
     private static final Logger logger = LogManager.getLogger(Format.class);
 
     /** Constant <code>XML</code> */
-    protected static final Namespace XML = Namespace.getNamespace("xml", "http://www.w3.org/XML/1998/namespace");
+    protected static final Namespace XML_NS = Namespace.getNamespace("xml", "http://www.w3.org/XML/1998/namespace");
     /** Constant <code>XSI</code> */
-    protected static final Namespace XSI = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+    protected static final Namespace XSI_NS = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+
+    public static final Namespace OAI_NS = DataManager.getInstance().getConfiguration().getStandardNameSpace();
 
     public static final String ACCESSCONDITION_OPENACCESS = "info:eu-repo/semantics/openAccess";
     public static final String ACCESSCONDITION_CLOSEDACCESS = "info:eu-repo/semantics/closedAccess";
@@ -144,36 +146,35 @@ public abstract class Format {
     public static Element getIdentifyXML(String filterQuerySuffix) throws SolrServerException, IOException {
         // TODO: optional parameter: compression is not implemented
         // TODO: optional parameter: description is not implemented
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Map<String, String> identifyTags = DataManager.getInstance().getConfiguration().getIdentifyTags();
-        Element identify = new Element("Identify", xmlns);
+        Element identify = new Element("Identify", OAI_NS);
 
-        Element repositoryName = new Element("repositoryName", xmlns);
+        Element repositoryName = new Element("repositoryName", OAI_NS);
         repositoryName.setText(identifyTags.get("repositoryName"));
         identify.addContent(repositoryName);
 
-        Element baseURL = new Element("baseURL", xmlns);
+        Element baseURL = new Element("baseURL", OAI_NS);
         baseURL.setText(identifyTags.get("baseURL"));
         identify.addContent(baseURL);
 
-        Element protocolVersion = new Element("protocolVersion", xmlns);
+        Element protocolVersion = new Element("protocolVersion", OAI_NS);
         protocolVersion.setText(identifyTags.get("protocolVersion"));
         identify.addContent(protocolVersion);
 
         // TODO: protocol definition allow more than one email address, change away from HashMap
-        Element adminEmail = new Element("adminEmail", xmlns);
+        Element adminEmail = new Element("adminEmail", OAI_NS);
         adminEmail.setText(identifyTags.get("adminEmail")); //
         identify.addContent(adminEmail);
 
-        Element earliestDatestamp = new Element("earliestDatestamp", xmlns);
+        Element earliestDatestamp = new Element("earliestDatestamp", OAI_NS);
         earliestDatestamp.setText(DataManager.getInstance().getSearchIndex().getEarliestRecordDatestamp(filterQuerySuffix));
         identify.addContent(earliestDatestamp);
 
-        Element deletedRecord = new Element("deletedRecord", xmlns);
+        Element deletedRecord = new Element("deletedRecord", OAI_NS);
         deletedRecord.setText(identifyTags.get("deletedRecord"));
         identify.addContent(deletedRecord);
 
-        Element granularity = new Element("granularity", xmlns);
+        Element granularity = new Element("granularity", OAI_NS);
         granularity.setText(identifyTags.get("granularity"));
         identify.addContent(granularity);
 
@@ -187,24 +188,23 @@ public abstract class Format {
      * @should construct element correctly
      */
     public static Element createMetadataFormats() {
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         if (Metadata.values().length == 0) {
             return new ErrorCode().getNoMetadataFormats();
         }
-        Element listMetadataFormats = new Element("ListMetadataFormats", xmlns);
+        Element listMetadataFormats = new Element("ListMetadataFormats", OAI_NS);
         for (Metadata m : Metadata.values()) {
             // logger.trace("{}: {}", m.getMetadataPrefix(), DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(m.getMetadataPrefix()));
             if (m.isOaiSet() && DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(m.getMetadataPrefix())) {
-                Element metadataPrefix = new Element("metadataPrefix", xmlns);
+                Element metadataPrefix = new Element("metadataPrefix", OAI_NS);
                 metadataPrefix.setText(m.getMetadataPrefix());
 
-                Element schema = new Element("schema", xmlns);
+                Element schema = new Element("schema", OAI_NS);
                 schema.setText(m.getSchema());
 
-                Element metadataNamespace = new Element("metadataNamespace", xmlns);
+                Element metadataNamespace = new Element("metadataNamespace", OAI_NS);
                 metadataNamespace.setText(m.getMetadataNamespaceUri());
 
-                Element metadataFormat = new Element("metadataFormat", xmlns);
+                Element metadataFormat = new Element("metadataFormat", OAI_NS);
                 metadataFormat.addContent(metadataPrefix);
                 metadataFormat.addContent(schema);
                 metadataFormat.addContent(metadataNamespace);
@@ -233,18 +233,17 @@ public abstract class Format {
         }
 
         boolean empty = true;
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
-        Element listSets = new Element("ListSets", xmlns);
+        Element listSets = new Element("ListSets", OAI_NS);
         for (Set set : allValuesSetConfigurations) {
             if (set.getValues().isEmpty()) {
                 continue;
             }
             for (String value : set.getValues()) {
-                Element eleSet = new Element("set", xmlns);
-                Element eleSetSpec = new Element(XmlConstants.ELE_NAME_SETSPEC, xmlns);
+                Element eleSet = new Element("set", OAI_NS);
+                Element eleSetSpec = new Element(XmlConstants.ELE_NAME_SETSPEC, OAI_NS);
                 eleSetSpec.setText(set.getSetName() + ":" + value);
                 eleSet.addContent(eleSetSpec);
-                Element name = new Element("setName", xmlns);
+                Element name = new Element("setName", OAI_NS);
                 if (set.isTranslate()) {
                     name.setText(ViewerResourceBundle.getTranslation(value, locale));
                 } else {
@@ -258,12 +257,12 @@ public abstract class Format {
         List<Set> additionalSets = DataManager.getInstance().getConfiguration().getAdditionalSets();
         if (additionalSets != null && !additionalSets.isEmpty()) {
             for (Set additionalSet : additionalSets) {
-                Element set = new Element("set", xmlns);
+                Element set = new Element("set", OAI_NS);
                 // TODO
-                Element setSpec = new Element(XmlConstants.ELE_NAME_SETSPEC, xmlns);
+                Element setSpec = new Element(XmlConstants.ELE_NAME_SETSPEC, OAI_NS);
                 setSpec.setText(additionalSet.getSetSpec());
                 set.addContent(setSpec);
-                Element name = new Element("setName", xmlns);
+                Element name = new Element("setName", OAI_NS);
                 name.setText(additionalSet.getSetName());
                 set.addContent(name);
                 listSets.addContent(set);
@@ -294,8 +293,7 @@ public abstract class Format {
             String filterQuerySuffix) throws SolrServerException, IOException {
         Map<String, String> datestamp = Utils.filterDatestampFromRequest(handler);
 
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
-        Element xmlListIdentifiers = new Element("ListIdentifiers", xmlns);
+        Element xmlListIdentifiers = new Element("ListIdentifiers", OAI_NS);
 
         List<String> setSpecFields =
                 DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix().getMetadataPrefix());
@@ -348,7 +346,7 @@ public abstract class Format {
         // Create resumption token
         if (totalRawHits > firstRawRow + numRows) {
             Element resumption = createResumptionTokenAndElement(totalVirtualHits, totalRawHits, firstVirtualRow + virtualHitCount,
-                    firstRawRow + numRows, xmlns, handler);
+                    firstRawRow + numRows, OAI_NS, handler);
             xmlListIdentifiers.addContent(resumption);
         }
 
@@ -389,16 +387,15 @@ public abstract class Format {
     protected static Element getHeader(SolrDocument doc, SolrDocument topstructDoc, RequestHandler handler, String requestedVersion,
             List<String> setSpecFields, String filterQuerySuffix) throws SolrServerException, IOException {
         // logger.trace("getHeader: {}", doc.getFieldValue(SolrConstants.PI));
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
-        Element header = new Element("header", xmlns);
+        Element header = new Element("header", OAI_NS);
         // identifier
         if (doc.getFieldValue(SolrConstants.URN) != null && ((String) doc.getFieldValue(SolrConstants.URN)).length() > 0) {
-            Element urn_identifier = new Element("identifier", xmlns);
-            urn_identifier.setText(DataManager.getInstance().getConfiguration().getOaiIdentifier().get("repositoryIdentifier")
+            Element urnIdentifier = new Element("identifier", OAI_NS);
+            urnIdentifier.setText(DataManager.getInstance().getConfiguration().getOaiIdentifier().get("repositoryIdentifier")
                     + (String) doc.getFieldValue(SolrConstants.URN));
-            header.addContent(urn_identifier);
+            header.addContent(urnIdentifier);
         } else {
-            Element identifier = new Element("identifier", xmlns);
+            Element identifier = new Element("identifier", OAI_NS);
             String pi = (String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT);
             if (pi == null) {
                 pi = (String) doc.getFieldValue(SolrConstants.PI);
@@ -408,7 +405,7 @@ public abstract class Format {
             header.addContent(identifier);
         }
         // datestamp
-        Element datestamp = new Element("datestamp", xmlns);
+        Element datestamp = new Element("datestamp", OAI_NS);
         long untilTimestamp = RequestHandler.getUntilTimestamp(handler.getUntil());
         logger.trace("untilTimestamp: {}", untilTimestamp);
         long timestampModified = SolrSearchTools.getLatestValidDateUpdated(topstructDoc != null ? topstructDoc : doc, untilTimestamp);
@@ -423,22 +420,20 @@ public abstract class Format {
         // setSpec
         if (StringUtils.isNotEmpty(handler.getSet())) {
             // setSpec from handler
-            Element setSpec = new Element(XmlConstants.ELE_NAME_SETSPEC, xmlns);
+            Element setSpec = new Element(XmlConstants.ELE_NAME_SETSPEC, OAI_NS);
             setSpec.setText(handler.getSet());
             header.addContent(setSpec);
-        } else if (handler.getMetadataPrefix() != null) {
+        } else if (handler.getMetadataPrefix() != null && setSpecFields != null && !setSpecFields.isEmpty()) {
             // setSpec from config
-            if (setSpecFields != null && !setSpecFields.isEmpty()) {
-                for (String setSpecField : setSpecFields) {
-                    if (!doc.containsKey(setSpecField)) {
-                        continue;
-                    }
-                    for (Object fieldValue : doc.getFieldValues(setSpecField)) {
-                        // TODO translation
-                        Element setSpec = new Element(XmlConstants.ELE_NAME_SETSPEC, xmlns);
-                        setSpec.setText((String) fieldValue);
-                        header.addContent(setSpec);
-                    }
+            for (String setSpecField : setSpecFields) {
+                if (!doc.containsKey(setSpecField)) {
+                    continue;
+                }
+                for (Object fieldValue : doc.getFieldValues(setSpecField)) {
+                    // TODO translation
+                    Element setSpec = new Element(XmlConstants.ELE_NAME_SETSPEC, OAI_NS);
+                    setSpec.setText((String) fieldValue);
+                    header.addContent(setSpec);
                 }
             }
         }

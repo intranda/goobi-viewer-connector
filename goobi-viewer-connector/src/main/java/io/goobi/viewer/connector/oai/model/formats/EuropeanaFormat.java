@@ -101,12 +101,11 @@ public class EuropeanaFormat extends OAIDCFormat {
      */
     private Element generateESE(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler, String recordType,
             String filterQuerySuffix) throws SolrServerException, IOException {
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Namespace nsDc = Namespace.getNamespace(Metadata.DC.getMetadataNamespacePrefix(), Metadata.DC.getMetadataNamespaceUri());
         Namespace nsDcTerms = Namespace.getNamespace("dcterms", "http://purl.org/dc/terms/");
         Namespace nsEuropeana = Namespace.getNamespace(Metadata.ESE.getMetadataNamespacePrefix(), Metadata.ESE.getMetadataNamespaceUri());
 
-        Element xmlListRecords = new Element(recordType, xmlns);
+        Element xmlListRecords = new Element(recordType, OAI_NS);
 
         if (records.size() < numRows) {
             numRows = records.size();
@@ -138,7 +137,7 @@ public class EuropeanaFormat extends OAIDCFormat {
                 }
             }
 
-            Element eleRecord = new Element("record", xmlns);
+            Element eleRecord = new Element("record", OAI_NS);
             Element header = getHeader(doc, topstructDoc, handler, null, setSpecFields, filterQuerySuffix);
             eleRecord.addContent(header);
 
@@ -147,7 +146,7 @@ public class EuropeanaFormat extends OAIDCFormat {
             String type = null;
 
             // create the metadata element, special for dc
-            Element eleMetadata = new Element("metadata", xmlns);
+            Element eleMetadata = new Element("metadata", OAI_NS);
             eleMetadata.addNamespaceDeclaration(nsEuropeana);
             eleMetadata.addNamespaceDeclaration(nsDc);
             eleMetadata.addNamespaceDeclaration(nsDcTerms);
@@ -366,7 +365,7 @@ public class EuropeanaFormat extends OAIDCFormat {
 
         // Create resumption token
         if (totalHits > firstRow + numRows) {
-            Element resumption = createResumptionTokenAndElement(totalHits, firstRow + numRows, xmlns, handler);
+            Element resumption = createResumptionTokenAndElement(totalHits, firstRow + numRows, OAI_NS, handler);
             xmlListRecords.addContent(resumption);
         }
 

@@ -111,7 +111,9 @@ public class TEIFormat extends Format {
         //                DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix().getMetadataPrefix());
 
         String versionDiscriminatorField =
-                DataManager.getInstance().getConfiguration().getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().getMetadataPrefix());
+                DataManager.getInstance()
+                        .getConfiguration()
+                        .getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().getMetadataPrefix());
         if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
             String[] identifierSplit = Utils.splitIdentifierAndLanguageCode(handler.getIdentifier(), 3);
             try {
@@ -176,8 +178,7 @@ public class TEIFormat extends Format {
             int numRows, RequestHandler handler, String recordType, String versionDiscriminatorField, String requestedVersion,
             String filterQuerySuffix)
             throws JDOMException, IOException, SolrServerException, HTTPException {
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
-        Element xmlListRecords = new Element(recordType, xmlns);
+        Element xmlListRecords = new Element(recordType, OAI_NS);
 
         Namespace namespace = Namespace.getNamespace(handler.getMetadataPrefix().getMetadataNamespacePrefix(),
                 handler.getMetadataPrefix().getMetadataNamespaceUri());
@@ -233,17 +234,17 @@ public class TEIFormat extends Format {
                     switch (handler.getMetadataPrefix()) {
                         case TEI:
                             newDoc = new Element("tei", namespace);
-                            newDoc.addNamespaceDeclaration(XSI);
-                            newDoc.setAttribute(new Attribute("schemaLocation", handler.getMetadataPrefix().getSchema(), XSI));
+                            newDoc.addNamespaceDeclaration(XSI_NS);
+                            newDoc.setAttribute(new Attribute("schemaLocation", handler.getMetadataPrefix().getSchema(), XSI_NS));
                             break;
                         case CMDI:
                             newDoc = new Element("CMD", CMDI);
-                            newDoc.addNamespaceDeclaration(XSI);
+                            newDoc.addNamespaceDeclaration(XSI_NS);
                             newDoc.addNamespaceDeclaration(COMPONENTS);
                             newDoc.setAttribute("CMDVersion", "1.2");
                             newDoc.setAttribute(new Attribute("schemaLocation",
                                     "http://www.clarin.eu/cmd/1 https://infra.clarin.eu/CMDI/1.x/xsd/cmd-envelop.xsd http://www.clarin.eu/cmd/1/profiles/clarin.eu:cr1:p_1380106710826 https://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/1.x/profiles/clarin.eu:cr1:p_1380106710826/xsd",
-                                    XSI));
+                                    XSI_NS));
                             break;
                         default:
                             xmlListRecords.addContent(new ErrorCode().getCannotDisseminateFormat());
@@ -260,13 +261,13 @@ public class TEIFormat extends Format {
                             iso3code = lang.getIsoCode();
                         }
                     }
-                    Element record = new Element("record", xmlns);
+                    Element rec = new Element("record", OAI_NS);
                     Element header = getHeader(doc, null, handler, iso3code, setSpecFields, filterQuerySuffix);
-                    record.addContent(header);
-                    Element metadata = new Element("metadata", xmlns);
+                    rec.addContent(header);
+                    Element metadata = new Element("metadata", OAI_NS);
                     metadata.addContent(newDoc);
-                    record.addContent(metadata);
-                    xmlListRecords.addContent(record);
+                    rec.addContent(metadata);
+                    xmlListRecords.addContent(rec);
                 }
             }
         } else {
@@ -277,7 +278,7 @@ public class TEIFormat extends Format {
         // Create resumption token
         if (totalRawHits > firstRawRow + numRows) {
             Element resumption = createResumptionTokenAndElement(totalVirtualHits, totalRawHits, firstVirtualRow + virtualHitCount,
-                    firstRawRow + numRows, xmlns, handler);
+                    firstRawRow + numRows, OAI_NS, handler);
             xmlListRecords.addContent(resumption);
         }
 
@@ -292,15 +293,14 @@ public class TEIFormat extends Format {
     protected static Element getHeader(SolrDocument doc, SolrDocument topstructDoc, RequestHandler handler, String requestedVersion,
             List<String> setSpecFields, String filterQuerySuffix)
             throws SolrServerException, IOException {
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
-        Element header = new Element("header", xmlns);
+        Element header = new Element("header", OAI_NS);
         // identifier
-        Element identifier = new Element("identifier", xmlns);
+        Element identifier = new Element("identifier", OAI_NS);
         identifier.setText(DataManager.getInstance().getConfiguration().getOaiIdentifier().get("repositoryIdentifier")
                 + (String) doc.getFieldValue(SolrConstants.PI) + '_' + requestedVersion);
         header.addContent(identifier);
         // datestamp
-        Element datestamp = new Element("datestamp", xmlns);
+        Element datestamp = new Element("datestamp", OAI_NS);
         long untilTimestamp = RequestHandler.getUntilTimestamp(handler.getUntil());
         long timestampModified = SolrSearchTools.getLatestValidDateUpdated(topstructDoc != null ? topstructDoc : doc, untilTimestamp);
         datestamp.setText(Utils.parseDate(timestampModified));
@@ -315,7 +315,7 @@ public class TEIFormat extends Format {
                 if (doc.containsKey(setSpecField)) {
                     for (Object fieldValue : doc.getFieldValues(setSpecField)) {
                         // TODO translation
-                        Element setSpec = new Element("setSpec", xmlns);
+                        Element setSpec = new Element("setSpec", OAI_NS);
                         setSpec.setText((String) fieldValue);
                         header.addContent(setSpec);
                     }
