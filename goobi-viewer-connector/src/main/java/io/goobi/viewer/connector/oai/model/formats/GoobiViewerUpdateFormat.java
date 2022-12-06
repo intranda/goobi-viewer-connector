@@ -172,12 +172,11 @@ public class GoobiViewerUpdateFormat extends Format {
         }
         logger.trace("generateIntrandaViewerUpdates: {}", handler.getMetadataPrefix().getMetadataPrefix());
 
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
         Namespace nsOverviewPage =
                 Namespace.getNamespace(Metadata.IV_OVERVIEWPAGE.getMetadataNamespacePrefix(), Metadata.IV_OVERVIEWPAGE.getMetadataNamespaceUri());
         Namespace nsCrowdsourcingUpdates =
                 Namespace.getNamespace(Metadata.IV_CROWDSOURCING.getMetadataNamespacePrefix(), Metadata.IV_CROWDSOURCING.getMetadataNamespaceUri());
-        Element xmlListRecords = new Element(recordType, xmlns);
+        Element xmlListRecords = new Element(recordType, OAI_NS);
 
         int useNumRows = numRows;
         if (jsonArray.length() < useNumRows) {
@@ -196,13 +195,13 @@ public class GoobiViewerUpdateFormat extends Format {
             JSONObject jsonObj = (JSONObject) jsonArray.get(i);
             String identifier = (String) jsonObj.get("id");
 
-            Element eleRecord = new Element("record", xmlns);
+            Element eleRecord = new Element("record", OAI_NS);
             xmlListRecords.addContent(eleRecord);
 
             // Header
-            Element header = new Element("header", xmlns);
+            Element header = new Element("header", OAI_NS);
 
-            Element eleIdentifier = new Element("identifier", xmlns);
+            Element eleIdentifier = new Element("identifier", OAI_NS);
             eleIdentifier.setText(identifier);
             header.addContent(eleIdentifier);
 
@@ -216,14 +215,14 @@ public class GoobiViewerUpdateFormat extends Format {
             if (timestamp == null) {
                 timestamp = 0L;
             }
-            Element eleDatestamp = new Element("datestamp", xmlns);
+            Element eleDatestamp = new Element("datestamp", OAI_NS);
             // long untilTimestamp = RequestHandler.getUntilTimestamp(handler.getUntil());
             eleDatestamp.setText(Utils.parseDate(timestamp));
             header.addContent(eleDatestamp);
 
             eleRecord.addContent(header);
 
-            Element metadata = new Element("metadata", xmlns);
+            Element metadata = new Element("metadata", OAI_NS);
             try {
                 // Add process ID, if available
                 String processId = null;
@@ -270,7 +269,7 @@ public class GoobiViewerUpdateFormat extends Format {
 
         // Create resumption token
         if (totalHits > firstRow + useNumRows) {
-            Element resumption = createResumptionTokenAndElement(totalHits, firstRow + useNumRows, xmlns, handler);
+            Element resumption = createResumptionTokenAndElement(totalHits, firstRow + useNumRows, OAI_NS, handler);
             xmlListRecords.addContent(resumption);
         }
 

@@ -50,7 +50,10 @@ public class LIDOFormat extends Format {
 
     private static final Logger logger = LogManager.getLogger(LIDOFormat.class);
 
-    private static final String LIDO_FILTER_QUERY =  " +(+" + SolrConstants.SOURCEDOCFORMAT + ":LIDO " + "-" + SolrConstants.DATEDELETED + ":*)";
+    static final Namespace LIDO_NS =
+            Namespace.getNamespace(Metadata.LIDO.getMetadataNamespacePrefix(), Metadata.LIDO.getMetadataNamespaceUri());
+
+    private static final String LIDO_FILTER_QUERY = " +(+" + SolrConstants.SOURCEDOCFORMAT + ":LIDO " + "-" + SolrConstants.DATEDELETED + ":*)";
 
     private List<String> setSpecFields =
             DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.LIDO.getMetadataPrefix());
@@ -72,7 +75,7 @@ public class LIDOFormat extends Format {
             return new ErrorCode().getNoRecordsMatch();
         }
 
-        return generateLido(qr.getResults(), qr.getResults().getNumFound(), firstRawRow, numRows, handler, "ListRecords", setSpecFields,
+        return generateLidoRecords(qr.getResults(), qr.getResults().getNumFound(), firstRawRow, numRows, handler, "ListRecords", setSpecFields,
                 filterQuerySuffix);
     }
 
@@ -93,7 +96,7 @@ public class LIDOFormat extends Format {
             if (doc == null) {
                 return new ErrorCode().getIdDoesNotExist();
             }
-            return generateLido(Collections.singletonList(doc), 1L, 0, 1, handler, "GetRecord", setSpecFields, filterQuerySuffix);
+            return generateLidoRecords(Collections.singletonList(doc), 1L, 0, 1, handler, "GetRecord", setSpecFields, filterQuerySuffix);
         } catch (IOException | SolrServerException e) {
             return new ErrorCode().getIdDoesNotExist();
         }
@@ -115,12 +118,9 @@ public class LIDOFormat extends Format {
      * @throws SolrServerException
      * @throws HTTPException
      */
-    private static Element generateLido(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler,
+    private static Element generateLidoRecords(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler,
             String recordType, List<String> setSpecFields, String filterQuerySuffix) throws SolrServerException {
-        Namespace xmlns = DataManager.getInstance().getConfiguration().getStandardNameSpace();
-        Element xmlListRecords = new Element(recordType, xmlns);
-
-        Namespace lido = Namespace.getNamespace(Metadata.LIDO.getMetadataNamespacePrefix(), Metadata.LIDO.getMetadataNamespaceUri());
+        Element xmlListRecords = new Element(recordType, OAI_NS);
 
         if (records.size() < numRows) {
             numRows = records.size();
@@ -150,41 +150,62 @@ public class LIDOFormat extends Format {
                 continue;
             }
 
-            try {
-                org.jdom2.Document xmlDoc = XmlTools.getDocumentFromString(xml, null);
-                Element xmlRoot = xmlDoc.getRootElement();
-                Element newLido = new Element(Metadata.LIDO.getMetadataPrefix(), lido);
-                newLido.addNamespaceDeclaration(XSI);
-                newLido.setAttribute(
-                        new Attribute("schemaLocation", "http://www.lido-schema.org http://www.lido-schema.org/schema/v1.0/lido-v1.0.xsd", XSI));
-                newLido.addContent(xmlRoot.cloneContent());
-
-                Element eleRecord = new Element("record", xmlns);
-                try {
-                    Element header = getHeader(doc, null, handler, null, setSpecFields, filterQuerySuffix);
-                    eleRecord.addContent(header);
-                    Element metadata = new Element("metadata", xmlns);
-                    metadata.addContent(newLido);
-                    eleRecord.addContent(metadata);
-                    xmlListRecords.addContent(eleRecord);
-                } catch (IOException e) {
-                    logger.error("Could not generate header: {}", e.getMessage());
-                    xmlListRecords.addContent(new ErrorCode().getIdDoesNotExist());
-                }
-            } catch (IOException | JDOMException e) {
-                logger.error("{}:\n{}", e.getMessage(), xml);
+            Element eleRecord = generateLidoRecord(xml, doc, handler, setSpecFields, filterQuerySuffix);
+            if (eleRecord != null) {
+                xmlListRecords.addContent(eleRecord);
+            } else {
                 xmlListRecords.addContent(new ErrorCode().getIdDoesNotExist());
             }
-
         }
 
         // Create resumption token
         if (totalHits > firstRow + numRows) {
-            Element resumption = createResumptionTokenAndElement(totalHits, firstRow + numRows, xmlns, handler);
+            Element resumption = createResumptionTokenAndElement(totalHits, firstRow + numRows, OAI_NS, handler);
             xmlListRecords.addContent(resumption);
         }
 
         return xmlListRecords;
+    }
+
+    /**
+     * 
+     * @param xml
+     * @param doc
+     * @param handler
+     * @param setSpecFields
+     * @param filterQuerySuffix
+     * @return
+     * @throws SolrServerException
+     * @should generate element correctly
+     * @should return null if xml empty
+     */
+    static Element generateLidoRecord(String xml, SolrDocument doc, RequestHandler handler, List<String> setSpecFields, String filterQuerySuffix)
+            throws SolrServerException {
+        logger.trace("generateLidoRecord");
+        if (StringUtils.isEmpty(xml)) {
+            return null;
+        }
+
+        try {
+            org.jdom2.Document xmlDoc = XmlTools.getDocumentFromString(xml, null);
+            Element xmlRoot = xmlDoc.getRootElement();
+            Element newLido = new Element(Metadata.LIDO.getMetadataPrefix(), LIDO_NS);
+            newLido.addNamespaceDeclaration(XSI_NS);
+            newLido.setAttribute(
+                    new Attribute("schemaLocation", "http://www.lido-schema.org http://www.lido-schema.org/schema/v1.0/lido-v1.0.xsd", XSI_NS));
+            newLido.addContent(xmlRoot.cloneContent());
+
+            Element eleRecord = new Element("record", OAI_NS);
+            Element header = getHeader(doc, null, handler, null, setSpecFields, filterQuerySuffix);
+            eleRecord.addContent(header);
+            Element metadata = new Element("metadata", OAI_NS);
+            metadata.addContent(newLido);
+            eleRecord.addContent(metadata);
+            return eleRecord;
+        } catch (IOException | JDOMException e) {
+            logger.error("{}:\n{}", e.getMessage(), xml);
+            return null;
+        }
     }
 
     /* (non-Javadoc)

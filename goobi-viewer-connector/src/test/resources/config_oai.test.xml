@@ -118,7 +118,7 @@
         <enabled>true</enabled>
         <hitsPerToken>13</hitsPerToken>
         <!-- Verzeichnis in dem die mets Dateien liegen -->
-        <metsDirectory>/opt/digiverso/viewer/indexed_mets/</metsDirectory>
+        <metsDirectory>viewer/indexed_mets/</metsDirectory>
     </mets>
     
     <lido>

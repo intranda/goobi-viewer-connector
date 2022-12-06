@@ -138,9 +138,9 @@ public class MARCXMLFormat extends METSFormat {
 
                 Element metadata = new Element(XmlConstants.ELE_NAME_METADATA, xmlns);
                 Element answer = new Element(XmlConstants.ELE_NAME_RECORD, nsMarc);
-                answer.addNamespaceDeclaration(XSI);
+                answer.addNamespaceDeclaration(XSI_NS);
                 answer.setAttribute("schemaLocation", "http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd",
-                        XSI);
+                        XSI_NS);
                 answer.addContent(rootMarc.cloneContent());
                 metadata.addContent(answer);
                 eleRecord.addContent(metadata);
@@ -189,8 +189,9 @@ public class MARCXMLFormat extends METSFormat {
 
             Element metadata = new Element(XmlConstants.ELE_NAME_METADATA, xmlns);
             Element answer = new Element(XmlConstants.ELE_NAME_RECORD, nsMarc);
-            answer.addNamespaceDeclaration(XSI);
-            answer.setAttribute("schemaLocation", "http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd", XSI);
+            answer.addNamespaceDeclaration(XSI_NS);
+            answer.setAttribute("schemaLocation", "http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd",
+                    XSI_NS);
             answer.addContent(root.cloneContent());
             metadata.addContent(answer);
             eleRecord.addContent(metadata);

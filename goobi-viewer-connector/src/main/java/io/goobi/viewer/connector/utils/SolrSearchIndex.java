@@ -46,6 +46,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
 import io.goobi.viewer.connector.DataManager;
+import io.goobi.viewer.controller.StringTools;
 import io.goobi.viewer.exceptions.IndexUnreachableException;
 import io.goobi.viewer.model.search.SearchHelper;
 
@@ -261,7 +262,7 @@ public class SolrSearchIndex {
             sbQuery.append(" +(").append(SolrConstants.URN).append(":* ").append(SolrConstants.IMAGEURN_OAI).append(":*)");
         }
         sbQuery.append(filterQuerySuffix);
-        logger.debug("OAI query: {}", sbQuery);
+         logger.debug("OAI query: {}", StringTools.stripPatternBreakingChars(sbQuery.toString()));
         logger.trace("start: {}, rows: {}", firstRow, numRows);
         SolrQuery solrQuery = new SolrQuery(sbQuery.toString());
         solrQuery.setStart(firstRow);
@@ -394,19 +395,19 @@ public class SolrSearchIndex {
         StringBuilder sb = new StringBuilder();
         sb.append("+(")
                 .append(SolrConstants.PI)
-                .append(':')
+                .append(":\"")
                 .append(useIdentifier)
-                .append(" OR ")
+                .append("\" ")
                 .append(SolrConstants.URN)
-                .append(':')
+                .append(":\"")
                 .append(useIdentifier)
-                .append(" OR ")
+                .append("\" ")
                 .append(SolrConstants.IMAGEURN)
-                .append(':')
+                .append(":\"")
                 .append(useIdentifier)
-                .append(')')
+                .append("\")")
                 .append(filterQuerySuffix);
-        logger.debug(sb.toString());
+        logger.debug(sb);
         SolrQuery solrQuery = new SolrQuery(sb.toString());
         solrQuery.setRows(rows);
         if (fieldList != null && !fieldList.isEmpty()) {
