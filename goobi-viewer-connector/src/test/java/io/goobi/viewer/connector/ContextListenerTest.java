@@ -16,38 +16,20 @@
 package io.goobi.viewer.connector;
 
 import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.junit.Assert;
+import org.junit.Test;
 
-import io.goobi.viewer.connector.utils.Utils;
-
-/**
- * <p>
- * ContextListener class.
- * </p>
- *
- */
-public class ContextListener implements ServletContextListener {
-
-    private static final Logger logger = LogManager.getLogger(ContextListener.class);
-
+public class ContextListenerTest {
+    
     /**
-     * {@inheritDoc}
-     * 
-     * @should set version correctly
+     * @see ContextListener#contextInitialized(ServletContextEvent)
+     * @verifies set version correctly
      */
-    @Override
-    public void contextInitialized(ServletContextEvent sce) {
-        logger.info("{}", Utils.formatVersionString(Utils.getVersion()));
-        io.goobi.viewer.controller.DataManager.getInstance().setConnectorVersion(Utils.getVersion());
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void contextDestroyed(ServletContextEvent sce) {
-        // Shut all loggers down to prevent memory leaks when re-deploying the context
-        LogManager.shutdown();
+    @Test
+    public void contextInitialized_shouldSetVersionCorrectly() throws Exception {
+        ContextListener listener = new ContextListener();
+        listener.contextInitialized(null);
+        Assert.assertNotNull(io.goobi.viewer.controller.DataManager.getInstance().getConnectorVersion());
     }
 }

@@ -30,17 +30,6 @@
         <url-pattern>/sru</url-pattern>
         <url-pattern>/sru/</url-pattern>
     </servlet-mapping>
-    <servlet>
-        <description></description>
-        <display-name>ConnectorToolServlet</display-name>
-        <servlet-name>ConnectorToolServlet</servlet-name>
-        <servlet-class>io.goobi.viewer.connector.ConnectorToolServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>ConnectorToolServlet</servlet-name>
-        <url-pattern>/oai/tools</url-pattern>
-        <url-pattern>/oai/tools/</url-pattern>
-    </servlet-mapping>
 
     <mime-mapping>
         <extension>htc</extension>

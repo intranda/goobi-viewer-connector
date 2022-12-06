@@ -16,11 +16,15 @@
 package io.goobi.viewer.connector.utils;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import io.goobi.viewer.connector.AbstractTest;
+import io.goobi.viewer.connector.oai.RequestHandler;
+import io.goobi.viewer.connector.oai.enums.Metadata;
+import io.goobi.viewer.connector.oai.enums.Verb;
 
 public class UtilsTest extends AbstractTest {
 
@@ -90,5 +94,75 @@ public class UtilsTest extends AbstractTest {
     public void cleanUpTimestamp_shouldCleanUpTimestampCorrectly() throws Exception {
         Assert.assertEquals("20201028133500", Utils.cleanUpTimestamp("2020-10-28T13:35:00"));
         Assert.assertEquals("20201028133500", Utils.cleanUpTimestamp("2020-10-28T13:35:00.000"));
+    }
+
+    /**
+     * @see Utils#filterDatestampFromRequest(RequestHandler)
+     * @verifies contain from timestamp
+     */
+    @Test
+    public void filterDatestampFromRequest_shouldContainFromTimestamp() throws Exception {
+        RequestHandler rh = new RequestHandler();
+        rh.setFrom("2022-11-04T16:00:00Z");
+        Map<String, String> datestamp = Utils.filterDatestampFromRequest(rh);
+        Assert.assertEquals("20221104160000", datestamp.get("from"));
+    }
+
+    /**
+     * @see Utils#filterDatestampFromRequest(RequestHandler)
+     * @verifies contain until timestamp
+     */
+    @Test
+    public void filterDatestampFromRequest_shouldContainUntilTimestamp() throws Exception {
+        RequestHandler rh = new RequestHandler();
+        rh.setUntil("2022-11-04T16:59:59Z");
+        Map<String, String> datestamp = Utils.filterDatestampFromRequest(rh);
+        Assert.assertEquals("20221104165959", datestamp.get("until"));
+    }
+
+    /**
+     * @see Utils#filterDatestampFromRequest(RequestHandler)
+     * @verifies contain set
+     */
+    @Test
+    public void filterDatestampFromRequest_shouldContainSet() throws Exception {
+        RequestHandler rh = new RequestHandler();
+        rh.setSet("varia");
+        Map<String, String> datestamp = Utils.filterDatestampFromRequest(rh);
+        Assert.assertEquals("varia", datestamp.get("set"));
+    }
+
+    /**
+     * @see Utils#filterDatestampFromRequest(RequestHandler)
+     * @verifies contain metadataPrefix
+     */
+    @Test
+    public void filterDatestampFromRequest_shouldContainMetadataPrefix() throws Exception {
+        RequestHandler rh = new RequestHandler();
+        rh.setMetadataPrefix(Metadata.OAI_DC);
+        Map<String, String> datestamp = Utils.filterDatestampFromRequest(rh);
+        Assert.assertEquals(Metadata.OAI_DC.getMetadataPrefix(), datestamp.get("metadataPrefix"));
+    }
+
+    /**
+     * @see Utils#filterDatestampFromRequest(RequestHandler)
+     * @verifies contain verb
+     */
+    @Test
+    public void filterDatestampFromRequest_shouldContainVerb() throws Exception {
+        RequestHandler rh = new RequestHandler();
+        rh.setVerb(Verb.GETRECORD);
+        Map<String, String> datestamp = Utils.filterDatestampFromRequest(rh);
+        Assert.assertEquals(Verb.GETRECORD.getTitle(), datestamp.get("verb"));
+    }
+
+    /**
+     * @see Utils#formatVersionString(String)
+     * @verifies format string correctly
+     */
+    //@Test
+    //TODO
+    public void formatVersionString_shouldFormatStringCorrectly() throws Exception {
+        Assert.assertTrue(Utils.formatVersionString(Utils.getVersion()).startsWith("Goobi viewer Connector"));
     }
 }
