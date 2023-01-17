@@ -69,8 +69,8 @@
 		<junit.version>4.13.2</junit.version>
 		<log4j.version>2.19.0</log4j.version>
 		<solr.version>8.11.2</solr.version>
-		<tomcat.version>9.0.70</tomcat.version>
-		<xstream.version>1.4.19</xstream.version>
+		<tomcat.version>9.0.71</tomcat.version>
+		<xstream.version>1.4.20</xstream.version>
 	</properties>
 
 
@@ -175,7 +175,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.1.0</version>
                 <executions>
                     <execution>
                         <id>enforce-maven</id>
@@ -196,7 +196,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.1.2</version>
+                <version>3.3.0</version>
                 <executions>
                     <execution>
                         <id>analyze</id>
@@ -241,7 +241,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.10.1</version>
                 <configuration>
                     <compilerArgument>-Xlint:deprecation</compilerArgument>
                     <!--compilerArgument>-Xlint:unchecked</compilerArgument -->
@@ -267,7 +267,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.3.0</version>
                 <configuration>
                     <archive>
                         <addMavenDescriptor>false</addMavenDescriptor>
@@ -314,7 +314,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
-                <version>1.4</version>
+                <version>3.0.0</version>
                 <configuration>
                     <shortRevisionLength>7</shortRevisionLength>
                     <doCheck>false</doCheck>
@@ -331,7 +331,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.4.1</version>
                 <configuration>
                     <doclint>none</doclint>
                     <fixTags>link,throws,return,param</fixTags>
@@ -347,7 +347,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.7</version>
+                <version>0.8.8</version>
                 <executions>
                     <execution>
                         <goals>
@@ -375,7 +375,7 @@
             <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
-                <version>7.1.0</version>
+                <version>7.4.4</version>
                 <configuration>
                     <!--failBuildOnCVSS>5.0</failBuildOnCVSS-->
                     <skipProvidedScope>true</skipProvidedScope>
