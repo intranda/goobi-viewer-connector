@@ -181,11 +181,25 @@ public class ConfigurationTest extends AbstractTest {
 
     /**
      * @see Configuration#getViewerConfigFolder()
-     * @verifies return correct value
+     * @verifies add trailing slash
      */
     @Test
-    public void getViewerConfigFolder_shouldReturnCorrectValue() throws Exception {
+    public void getViewerConfigFolder_shouldAddTrailingSlash() throws Exception {
         Assert.assertEquals("src/test/resources/", DataManager.getInstance().getConfiguration().getViewerConfigFolder());
+    }
+
+    /**
+     * @see Configuration#getViewerConfigFolder()
+     * @verifies return environment variable value if available
+     */
+    @Test
+    public void getViewerConfigFolder_shouldReturnEnvironmentVariableValueIfAvailable() throws Exception {
+        try {
+            System.setProperty("configFolder", "/opt/digiverso/viewer/config_other/");
+            Assert.assertTrue(DataManager.getInstance().getConfiguration().getViewerConfigFolder().endsWith("/opt/digiverso/viewer/config_other/"));
+        } finally {
+            System.clearProperty("configFolder");
+        }
     }
 
     /**
@@ -406,5 +420,4 @@ public class ConfigurationTest extends AbstractTest {
         Assert.assertEquals("http://www.openarchives.org/OAI/2.0/", map.get("xmlns"));
         Assert.assertEquals("repo", map.get("repositoryIdentifier"));
     }
-
 }
