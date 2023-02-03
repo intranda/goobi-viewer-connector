@@ -48,12 +48,12 @@ import org.jdom2.transform.XSLTransformer;
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.exceptions.MissingArgumentException;
 import io.goobi.viewer.connector.oai.enums.Metadata;
-import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.SolrSearchIndex;
 import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.controller.NetTools;
 import io.goobi.viewer.controller.XmlTools;
 import io.goobi.viewer.exceptions.HTTPException;
+import io.goobi.viewer.solr.SolrConstants;
 import io.goobi.viewer.solr.SolrTools;
 
 /**

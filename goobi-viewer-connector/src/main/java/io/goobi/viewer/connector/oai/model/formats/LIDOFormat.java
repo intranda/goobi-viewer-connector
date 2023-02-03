@@ -37,11 +37,11 @@ import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
-import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.Utils;
 import io.goobi.viewer.controller.NetTools;
 import io.goobi.viewer.controller.XmlTools;
 import io.goobi.viewer.exceptions.HTTPException;
+import io.goobi.viewer.solr.SolrConstants;
 
 /**
  * LIDO
