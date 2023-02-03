@@ -473,10 +473,11 @@ public class OAIDCFormat extends Format {
      * @param anchorDoc a {@link org.apache.solr.common.SolrDocument} object.
      * @param namespace a {@link org.jdom2.Namespace} object.
      * @return a {@link org.jdom2.Element} object.
+     * @should throw IllegalArgumentException if topstructDoc null
+     * @should create element correctly
      */
-    protected static Element generateDcSource(SolrDocument doc, SolrDocument topstructDoc, SolrDocument anchorDoc, Namespace namespace) {
+    static Element generateDcSource(SolrDocument doc, SolrDocument topstructDoc, SolrDocument anchorDoc, Namespace namespace) {
         if (topstructDoc == null) {
-            logger.debug(doc.getFieldValueMap().toString());
             throw new IllegalArgumentException("topstructDoc may not be null");
         }
 
