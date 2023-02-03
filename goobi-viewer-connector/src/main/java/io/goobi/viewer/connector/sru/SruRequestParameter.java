@@ -23,10 +23,15 @@ import io.goobi.viewer.connector.exceptions.MissingArgumentException;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 
 /**
- * <p>SruRequestParameter class.</p>
+ * <p>
+ * SruRequestParameter class.
+ * </p>
  *
  */
 public class SruRequestParameter {
+
+    public static final String PARAM_OPERATION = "operation";
+    public static final String PARAM_VERSION = "version";
 
     // mandatory   The string: 'searchRetrieve'.
     private SruOperation operation;
@@ -74,7 +79,9 @@ public class SruRequestParameter {
     private int maximumTerms = 0;
 
     /**
-     * <p>Constructor for SruRequestParameter.</p>
+     * <p>
+     * Constructor for SruRequestParameter.
+     * </p>
      *
      * @throws org.apache.commons.cli.MissingArgumentException
      * @param request a {@link javax.servlet.http.HttpServletRequest} object.
@@ -164,7 +171,9 @@ public class SruRequestParameter {
     }
 
     /**
-     * <p>Getter for the field <code>operation</code>.</p>
+     * <p>
+     * Getter for the field <code>operation</code>.
+     * </p>
      *
      * @return a {@link io.goobi.viewer.connector.sru.SruOperation} object.
      */
@@ -173,7 +182,9 @@ public class SruRequestParameter {
     }
 
     /**
-     * <p>Getter for the field <code>version</code>.</p>
+     * <p>
+     * Getter for the field <code>version</code>.
+     * </p>
      *
      * @return a {@link java.lang.String} object.
      */
@@ -182,7 +193,9 @@ public class SruRequestParameter {
     }
 
     /**
-     * <p>Getter for the field <code>query</code>.</p>
+     * <p>
+     * Getter for the field <code>query</code>.
+     * </p>
      *
      * @return a {@link java.lang.String} object.
      */
@@ -191,7 +204,9 @@ public class SruRequestParameter {
     }
 
     /**
-     * <p>Getter for the field <code>startRecord</code>.</p>
+     * <p>
+     * Getter for the field <code>startRecord</code>.
+     * </p>
      *
      * @return a int.
      */
@@ -200,7 +215,9 @@ public class SruRequestParameter {
     }
 
     /**
-     * <p>Getter for the field <code>maximumRecords</code>.</p>
+     * <p>
+     * Getter for the field <code>maximumRecords</code>.
+     * </p>
      *
      * @return a int.
      */
@@ -209,7 +226,9 @@ public class SruRequestParameter {
     }
 
     /**
-     * <p>Getter for the field <code>recordPacking</code>.</p>
+     * <p>
+     * Getter for the field <code>recordPacking</code>.
+     * </p>
      *
      * @return a {@link java.lang.String} object.
      */
@@ -218,7 +237,9 @@ public class SruRequestParameter {
     }
 
     /**
-     * <p>Getter for the field <code>recordSchema</code>.</p>
+     * <p>
+     * Getter for the field <code>recordSchema</code>.
+     * </p>
      *
      * @return a {@link io.goobi.viewer.connector.oai.enums.Metadata} object.
      */
@@ -227,7 +248,9 @@ public class SruRequestParameter {
     }
 
     /**
-     * <p>Getter for the field <code>recordXPath</code>.</p>
+     * <p>
+     * Getter for the field <code>recordXPath</code>.
+     * </p>
      *
      * @return a {@link java.lang.String} object.
      */
@@ -236,7 +259,9 @@ public class SruRequestParameter {
     }
 
     /**
-     * <p>Getter for the field <code>resultSetTTL</code>.</p>
+     * <p>
+     * Getter for the field <code>resultSetTTL</code>.
+     * </p>
      *
      * @return a {@link java.lang.String} object.
      */
@@ -245,7 +270,9 @@ public class SruRequestParameter {
     }
 
     /**
-     * <p>Getter for the field <code>sortKeys</code>.</p>
+     * <p>
+     * Getter for the field <code>sortKeys</code>.
+     * </p>
      *
      * @return a {@link java.lang.String} object.
      */
@@ -254,7 +281,9 @@ public class SruRequestParameter {
     }
 
     /**
-     * <p>Getter for the field <code>stylesheet</code>.</p>
+     * <p>
+     * Getter for the field <code>stylesheet</code>.
+     * </p>
      *
      * @return a {@link java.lang.String} object.
      */
@@ -263,7 +292,9 @@ public class SruRequestParameter {
     }
 
     /**
-     * <p>Getter for the field <code>extraRequestData</code>.</p>
+     * <p>
+     * Getter for the field <code>extraRequestData</code>.
+     * </p>
      *
      * @return a {@link java.lang.String} object.
      */
@@ -272,7 +303,9 @@ public class SruRequestParameter {
     }
 
     /**
-     * <p>Getter for the field <code>scanClause</code>.</p>
+     * <p>
+     * Getter for the field <code>scanClause</code>.
+     * </p>
      *
      * @return the scanClause
      */
@@ -281,7 +314,9 @@ public class SruRequestParameter {
     }
 
     /**
-     * <p>Getter for the field <code>maximumTerms</code>.</p>
+     * <p>
+     * Getter for the field <code>maximumTerms</code>.
+     * </p>
      *
      * @return the maximumTerms
      */
@@ -290,7 +325,9 @@ public class SruRequestParameter {
     }
 
     /**
-     * <p>Getter for the field <code>responsePosition</code>.</p>
+     * <p>
+     * Getter for the field <code>responsePosition</code>.
+     * </p>
      *
      * @return the responsePosition
      */

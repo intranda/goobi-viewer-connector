@@ -16,6 +16,7 @@
 package io.goobi.viewer.connector.sru;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -53,6 +54,7 @@ import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.controller.NetTools;
 import io.goobi.viewer.controller.XmlTools;
 import io.goobi.viewer.exceptions.HTTPException;
+import io.goobi.viewer.solr.SolrTools;
 
 /**
  * <p>
@@ -89,12 +91,12 @@ public class SruServlet extends HttpServlet {
             parameter = new SruRequestParameter(request);
         } catch (MissingArgumentException e) {
             try {
-                if (e.getMessage().contains("version")) {
-                    missingArgument(response, "version");
-                } else if (e.getMessage().contains("operation")) {
-                    missingArgument(response, "operation");
+                if (e.getMessage().contains(SruRequestParameter.PARAM_VERSION)) {
+                    missingArgument(parameter, response, SruRequestParameter.PARAM_VERSION);
+                } else if (e.getMessage().contains(SruRequestParameter.PARAM_OPERATION)) {
+                    missingArgument(parameter, response, SruRequestParameter.PARAM_OPERATION);
                 } else {
-                    missingArgument(response, "");
+                    missingArgument(parameter, response, "");
                 }
             } catch (IOException e1) {
                 try {
@@ -119,7 +121,7 @@ public class SruServlet extends HttpServlet {
                 logger.trace("operation is searchRetrieve");
                 if (parameter.getQuery() == null || parameter.getQuery().isEmpty()) {
                     try {
-                        missingArgument(response, "query");
+                        missingArgument(parameter, response, "query");
                     } catch (IOException e) {
                         try {
                             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -166,7 +168,7 @@ public class SruServlet extends HttpServlet {
                 logger.trace("operation is scan");
                 if (parameter.getScanClause() == null || parameter.getScanClause().isEmpty()) {
                     try {
-                        missingArgument(response, "scanClause");
+                        missingArgument(parameter, response, "scanClause");
                     } catch (IOException e) {
                         try {
                             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -182,7 +184,7 @@ public class SruServlet extends HttpServlet {
                 // http://s2w.visuallibrary.net/dps/sru/?operation=scan&version=1.1&scanClause=Augsburg
                 // http://sru.gbv.de/opac-de-27?version=1.2&operation=scan&scanClause=Augsburg
                 try {
-                    unsupportedOperation(response, "scan");
+                    unsupportedOperation(parameter, response, "scan");
                 } catch (IOException e) {
                     logger.error(e.getMessage());
                     try {
@@ -195,7 +197,7 @@ public class SruServlet extends HttpServlet {
             case UNSUPPORTETPARAMETER:
             default:
                 try {
-                    unsupportedOperation(response, request.getParameter("operation"));
+                    unsupportedOperation(parameter, response, request.getParameter(SruRequestParameter.PARAM_OPERATION));
                 } catch (IOException e) {
                     logger.error(e.getMessage());
                     try {
@@ -208,7 +210,7 @@ public class SruServlet extends HttpServlet {
         }
 
         Format format = Format.getPrettyFormat();
-        format.setEncoding("utf-8");
+        format.setEncoding(StandardCharsets.UTF_8.name().toLowerCase());
         XMLOutputter xmlOut = new XMLOutputter(format);
         try {
             xmlOut.output(doc, response.getOutputStream());
@@ -224,14 +226,15 @@ public class SruServlet extends HttpServlet {
     }
 
     /**
+     * @param parameter
      * @param response
-     * @param string
+     * @param schema
      * @throws IOException
      */
-    private static void wrongSchema(HttpServletResponse response, String parameter) throws IOException {
+    private static void wrongSchema(SruRequestParameter parameter, HttpServletResponse response, String schema) throws IOException {
         Element searchRetrieveResponse = new Element("searchRetrieveResponse", SRU_NAMESPACE);
-        Element version = new Element("version", SRU_NAMESPACE);
-        version.setText("1.2");
+        Element version = new Element(SruRequestParameter.PARAM_VERSION, SRU_NAMESPACE);
+        version.setText(parameter != null ? parameter.getVersion() : "?");
         searchRetrieveResponse.addContent(version);
         Element diagnostic = new Element("diagnostic", SRU_NAMESPACE);
         searchRetrieveResponse.addContent(diagnostic);
@@ -246,12 +249,12 @@ public class SruServlet extends HttpServlet {
 
         Element message = new Element("message", DIAG_NAMESPACE);
 
-        message.setText("Unknown schema for retrieval / " + parameter);
+        message.setText("Unknown schema for retrieval / " + schema);
         diagnostic.addContent(message);
         Document doc = new Document();
         doc.setRootElement(searchRetrieveResponse);
         Format format = Format.getPrettyFormat();
-        format.setEncoding("utf-8");
+        format.setEncoding(StandardCharsets.UTF_8.name().toLowerCase());
         XMLOutputter xmlOut = new XMLOutputter(format);
         xmlOut.output(doc, response.getOutputStream());
 
@@ -268,8 +271,12 @@ public class SruServlet extends HttpServlet {
      */
     private static Element generateSearchRetrieve(SruRequestParameter parameter, SolrSearchIndex solr, String filterQuerySuffix)
             throws SolrServerException, IOException {
+        if (parameter == null) {
+            throw new IllegalArgumentException("parameter may not be null");
+        }
+
         Element root = new Element("searchRetrieveResponse", SRU_NAMESPACE);
-        Element version = new Element("version", SRU_NAMESPACE);
+        Element version = new Element(SruRequestParameter.PARAM_VERSION, SRU_NAMESPACE);
         version.setText(parameter.getVersion());
         root.addContent(version);
 
@@ -291,21 +298,21 @@ public class SruServlet extends HttpServlet {
         root.addContent(records);
 
         generateRecords(records, solrDocuments, parameter, solr, filterQuerySuffix);
-        generateEchoedSearchRetrieveRequest(root, solrDocuments, parameter);
+        generateEchoedSearchRetrieveRequest(root, parameter);
 
         return root;
     }
 
     /**
-     * 
+     * @param parameter SRU request parameter object
      * @param response
-     * @param parameter
+     * @param missing Name of the missing parameter
      * @throws IOException
      */
-    private static void missingArgument(HttpServletResponse response, String parameter) throws IOException {
+    private static void missingArgument(SruRequestParameter parameter, HttpServletResponse response, String missing) throws IOException {
         Element searchRetrieveResponse = new Element("searchRetrieveResponse", SRU_NAMESPACE);
-        Element version = new Element("version", SRU_NAMESPACE);
-        version.setText("1.2");
+        Element version = new Element(SruRequestParameter.PARAM_VERSION, SRU_NAMESPACE);
+        version.setText(parameter != null ? parameter.getVersion() : "?");
         searchRetrieveResponse.addContent(version);
         Element diagnostic = new Element("diagnostic", SRU_NAMESPACE);
         searchRetrieveResponse.addContent(diagnostic);
@@ -320,7 +327,7 @@ public class SruServlet extends HttpServlet {
 
         Element message = new Element("message", DIAG_NAMESPACE);
 
-        message.setText("Mandatory parameter not supplied / " + parameter);
+        message.setText("Mandatory parameter not supplied / " + missing);
         diagnostic.addContent(message);
         Document doc = new Document();
         doc.setRootElement(searchRetrieveResponse);
@@ -331,15 +338,15 @@ public class SruServlet extends HttpServlet {
     }
 
     /**
-     * 
-     * @param response
      * @param parameter
+     * @param response
+     * @param operation
      * @throws IOException
      */
-    private static void unsupportedOperation(HttpServletResponse response, String parameter) throws IOException {
+    private static void unsupportedOperation(SruRequestParameter parameter, HttpServletResponse response, String operation) throws IOException {
         Element searchRetrieveResponse = new Element("searchRetrieveResponse", SRU_NAMESPACE);
-        Element version = new Element("version", SRU_NAMESPACE);
-        version.setText("1.2");
+        Element version = new Element(SruRequestParameter.PARAM_VERSION, SRU_NAMESPACE);
+        version.setText(parameter != null ? parameter.getVersion() : "?");
         searchRetrieveResponse.addContent(version);
         Element diagnostic = new Element("diagnostic", SRU_NAMESPACE);
         searchRetrieveResponse.addContent(diagnostic);
@@ -354,12 +361,12 @@ public class SruServlet extends HttpServlet {
 
         Element message = new Element("message", DIAG_NAMESPACE);
 
-        message.setText("Unsupported operation / " + parameter);
+        message.setText("Unsupported operation / " + operation);
         diagnostic.addContent(message);
         Document doc = new Document();
         doc.setRootElement(searchRetrieveResponse);
         Format format = Format.getPrettyFormat();
-        format.setEncoding("utf-8");
+        format.setEncoding(StandardCharsets.UTF_8.name().toLowerCase());
         XMLOutputter xmlOut = new XMLOutputter(format);
         xmlOut.output(doc, response.getOutputStream());
     }
@@ -423,14 +430,13 @@ public class SruServlet extends HttpServlet {
 
     /**
      * @param root
-     * @param solrDocuments
      * @param parameter
      */
-    private static void generateEchoedSearchRetrieveRequest(Element root, List<SolrDocument> solrDocuments, SruRequestParameter parameter) {
+    private static void generateEchoedSearchRetrieveRequest(Element root, SruRequestParameter parameter) {
         Element echoedSearchRetrieveRequest = new Element("echoedSearchRetrieveRequest", SRU_NAMESPACE);
         root.addContent(echoedSearchRetrieveRequest);
 
-        Element version = new Element("version", SRU_NAMESPACE);
+        Element version = new Element(SruRequestParameter.PARAM_VERSION, SRU_NAMESPACE);
         version.setText(parameter.getVersion());
         echoedSearchRetrieveRequest.addContent(version);
 
@@ -472,19 +478,25 @@ public class SruServlet extends HttpServlet {
         }
 
         for (SolrDocument document : solrDocuments) {
-            Element record = new Element("record", SRU_NAMESPACE);
-            records.addContent(record);
+            Element rec = new Element("record", SRU_NAMESPACE);
+            records.addContent(rec);
 
             Element recordSchema = new Element("recordSchema", SRU_NAMESPACE);
             recordSchema.setText(parameter.getRecordSchema().getMetadataPrefix());
-            record.addContent(recordSchema);
+            rec.addContent(recordSchema);
 
             Element recordPacking = new Element("recordPacking", SRU_NAMESPACE);
             recordPacking.setText(parameter.getRecordPacking());
-            record.addContent(recordPacking);
+            rec.addContent(recordPacking);
 
             Element recordData = new Element("recordData", SRU_NAMESPACE);
-            record.addContent(recordData);
+            rec.addContent(recordData);
+
+            if ("1.2".equals(parameter.getVersion())) {
+                Element recordIdentifier = new Element("recordIdentifier", SRU_NAMESPACE);
+                recordIdentifier.setText(SolrTools.getSingleFieldStringValue(document, SolrConstants.PI_TOPSTRUCT));
+                rec.addContent(recordIdentifier);
+            }
 
             switch (parameter.getRecordSchema()) {
                 case SOLR:
@@ -558,7 +570,7 @@ public class SruServlet extends HttpServlet {
         String yearpublish = null;
 
         // creating Element <dc:title />
-        Element dc_title = new Element("title", DC_NAMEPSACE);
+        Element eleDcTitle = new Element("title", DC_NAMEPSACE);
         if (doc.getFieldValues(SolrConstants.TITLE) != null) {
             title = (String) doc.getFieldValues("MD_TITLE").iterator().next();
         } else {
@@ -571,22 +583,23 @@ public class SruServlet extends HttpServlet {
                 title = anchorTitle + "; " + title;
             }
         }
-        dc_title.setText(title);
-        dc.addContent(dc_title);
+        eleDcTitle.setText(title);
+        dc.addContent(eleDcTitle);
 
         // creating Element <dc:creator />
         if (doc.getFieldValues("MD_CREATOR") != null) {
+            StringBuilder sb = new StringBuilder();
             for (Object fieldValue : doc.getFieldValues("MD_CREATOR")) {
                 String value = (String) fieldValue;
-                if (StringUtils.isEmpty(creators)) {
-                    creators = value;
-                } else {
-                    creators += ", " + value;
+                if (sb.length() > 0) {
+                    sb.append(", ");
                 }
-                Element dc_creator = new Element("creator", DC_NAMEPSACE);
-                dc_creator.setText(value);
-                dc.addContent(dc_creator);
+                sb.append(value);
+                Element eleDcCreator = new Element("creator", DC_NAMEPSACE);
+                eleDcCreator.setText(value);
+                dc.addContent(eleDcCreator);
             }
+            creators = sb.toString();
         }
 
         // creating <dc:subject />
@@ -594,64 +607,64 @@ public class SruServlet extends HttpServlet {
         // in lucene there are two space between the strings -> every one must be an new xml subject element
         if (doc.getFieldValues(SolrConstants.DC) != null) {
             for (Object fieldValue : doc.getFieldValues(SolrConstants.DC)) {
-                Element dc_type = new Element("subject", DC_NAMEPSACE);
+                Element eleDcType = new Element("subject", DC_NAMEPSACE);
                 if (((String) fieldValue).equals("")) {
-                    dc_type.setText((String) fieldValue);
-                    dc.addContent(dc_type);
+                    eleDcType.setText((String) fieldValue);
+                    dc.addContent(eleDcType);
                 }
             }
         }
 
         // creating <dc:publisher .../>
-        Element dc_publisher = new Element("publisher", DC_NAMEPSACE);
+        Element eleDcPublisher = new Element("publisher", DC_NAMEPSACE);
         if (doc.getFieldValues("MD_PUBLISHER") != null) {
             publisher = (String) doc.getFieldValues("MD_PUBLISHER").iterator().next();
-            dc_publisher.setText(publisher);
+            eleDcPublisher.setText(publisher);
         }
-        dc.addContent(dc_publisher);
+        dc.addContent(eleDcPublisher);
 
         if (doc.getFieldValues("MD_PLACEPUBLISH") != null) {
             placepublish = (String) doc.getFieldValues("MD_PLACEPUBLISH").iterator().next();
         }
 
         // creating <dc:date />
-        Element dc_yearPublish = new Element("date", DC_NAMEPSACE);
+        Element eleDcYearPublish = new Element("date", DC_NAMEPSACE);
         if (doc.getFieldValues("MD_YEARPUBLISH") != null) {
             yearpublish = (String) doc.getFieldValues("MD_YEARPUBLISH").iterator().next();
-            dc_yearPublish.setText(yearpublish);
+            eleDcYearPublish.setText(yearpublish);
         }
-        dc.addContent(dc_yearPublish);
+        dc.addContent(eleDcYearPublish);
 
         // creting <dc:type />
-        Element dc_type = new Element("type", DC_NAMEPSACE);
+        Element eleDcType = new Element("type", DC_NAMEPSACE);
         if (doc.getFieldValue(SolrConstants.DOCSTRCT) != null) {
-            dc_type.setText((String) doc.getFieldValue(SolrConstants.DOCSTRCT));
+            eleDcType.setText((String) doc.getFieldValue(SolrConstants.DOCSTRCT));
         }
-        dc.addContent(dc_type);
+        dc.addContent(eleDcType);
         // always create a standard type with the default dc:type
-        dc_type = new Element("type", DC_NAMEPSACE);
-        dc_type.setText("Text");
-        dc.addContent(dc_type);
+        eleDcType = new Element("type", DC_NAMEPSACE);
+        eleDcType.setText("Text");
+        dc.addContent(eleDcType);
 
         // creating <dc:format />
         // creating <dc:format /> second one appears always
-        Element dc_format = new Element("format", DC_NAMEPSACE);
-        dc_format.setText("image/jpeg");
-        dc.addContent(dc_format);
+        Element eleDcFormat = new Element("format", DC_NAMEPSACE);
+        eleDcFormat.setText("image/jpeg");
+        dc.addContent(eleDcFormat);
 
-        dc_format = new Element("format", DC_NAMEPSACE);
-        dc_format.setText("application/pdf");
-        dc.addContent(dc_format);
+        eleDcFormat = new Element("format", DC_NAMEPSACE);
+        eleDcFormat.setText("application/pdf");
+        dc.addContent(eleDcFormat);
 
         // create <dc:identifier />
         if (doc.getFieldValue(SolrConstants.URN) != null && ((String) doc.getFieldValue(SolrConstants.URN)).length() > 0) {
-            Element dc_identifier = new Element("identifier", DC_NAMEPSACE);
-            dc_identifier.setText(DataManager.getInstance().getConfiguration().getUrnResolverUrl() + (String) doc.getFieldValue(SolrConstants.URN));
-            dc.addContent(dc_identifier);
+            Element eleDcIdentifier = new Element("identifier", DC_NAMEPSACE);
+            eleDcIdentifier.setText(DataManager.getInstance().getConfiguration().getUrnResolverUrl() + (String) doc.getFieldValue(SolrConstants.URN));
+            dc.addContent(eleDcIdentifier);
         }
         // create <dc:source />
         {
-            Element dc_source = new Element("source", DC_NAMEPSACE);
+            Element eleDcSource = new Element("source", DC_NAMEPSACE);
             if (creators == null) {
                 creators = "-";
             }
@@ -668,14 +681,14 @@ public class SruServlet extends HttpServlet {
                 publisher = "-";
             }
             String sourceString = creators + ": " + title + ", " + placepublish + ": " + publisher + " " + yearpublish + ".";
-            dc_source.setText(sourceString);
-            dc.addContent(dc_source);
+            eleDcSource.setText(sourceString);
+            dc.addContent(eleDcSource);
         }
 
         // create <dc:rights />
-        Element dc_rights = new Element("rights", DC_NAMEPSACE);
-        dc_rights.setText("Open Access");
-        dc.addContent(dc_rights);
+        Element eleDcRights = new Element("rights", DC_NAMEPSACE);
+        eleDcRights.setText("Open Access");
+        dc.addContent(eleDcRights);
         recordData.addContent(dc);
     }
 
@@ -766,7 +779,7 @@ public class SruServlet extends HttpServlet {
     }
 
     /**
-     * @param document
+     * @param doc
      * @param recordData
      */
     private static void generateModsRecord(SolrDocument doc, Element recordData) {
@@ -898,19 +911,19 @@ public class SruServlet extends HttpServlet {
     private static Element getExplain(HttpServletRequest request, SruRequestParameter parameter) {
         Element root = new Element("explainResponse", SRU_NAMESPACE);
 
-        Element version = new Element("version", SRU_NAMESPACE);
+        Element version = new Element(SruRequestParameter.PARAM_VERSION, SRU_NAMESPACE);
         version.setText(parameter.getVersion());
         root.addContent(version);
 
-        Element record = new Element("record", SRU_NAMESPACE);
-        root.addContent(record);
+        Element eleRecord = new Element("record", SRU_NAMESPACE);
+        root.addContent(eleRecord);
 
         Element recordSchema = new Element("recordSchema", SRU_NAMESPACE);
         recordSchema.setText(EXPLAIN_NAMESPACE.getURI());
-        record.addContent(recordSchema);
+        eleRecord.addContent(recordSchema);
 
         Element recordData = new Element("recordData", SRU_NAMESPACE);
-        record.addContent(recordData);
+        eleRecord.addContent(recordData);
 
         Element explain = new Element("explain", EXPLAIN_NAMESPACE);
         explain.setAttribute("id", "intranda GmbH");
@@ -919,7 +932,7 @@ public class SruServlet extends HttpServlet {
 
         Element serverInfo = new Element("serverInfo", EXPLAIN_NAMESPACE);
         serverInfo.setAttribute("protocol", "SRU");
-        serverInfo.setAttribute("version", "1.2");
+        serverInfo.setAttribute(SruRequestParameter.PARAM_VERSION, "1.2");
         serverInfo.setAttribute("transport", "http");
 
         explain.addContent(serverInfo);
@@ -953,7 +966,7 @@ public class SruServlet extends HttpServlet {
         databaseInfo.addContent(contact);
 
         Element implementation = new Element("implementation", EXPLAIN_NAMESPACE);
-        implementation.setAttribute("version", "1.2");
+        implementation.setAttribute(SruRequestParameter.PARAM_VERSION, "1.2");
         databaseInfo.addContent(implementation);
 
         Element indexInfo = new Element("indexInfo", EXPLAIN_NAMESPACE);
@@ -1125,63 +1138,29 @@ public class SruServlet extends HttpServlet {
         operator.setText("and");
         configInfo.addContent(operator);
 
-        {
-            Element supports = new Element("supports", EXPLAIN_NAMESPACE);
-            supports.setAttribute("type", "booleanOperator");
-            supports.setText("and");
-            configInfo.addContent(supports);
-        }
-        {
-            Element supports = new Element("supports", EXPLAIN_NAMESPACE);
-            supports.setAttribute("type", "booleanOperator");
-            supports.setText("or");
-            configInfo.addContent(supports);
-        }
-        {
-            Element supports = new Element("supports", EXPLAIN_NAMESPACE);
-            supports.setAttribute("type", "booleanOperator");
-            supports.setText("not");
-            configInfo.addContent(supports);
-        }
-        {
-            Element supports = new Element("supports", EXPLAIN_NAMESPACE);
-            supports.setAttribute("type", "maskingCharacter");
-            supports.setText("*");
-            configInfo.addContent(supports);
-        }
-
-        {
-            Element supports = new Element("supports", EXPLAIN_NAMESPACE);
-            supports.setAttribute("type", "relation");
-            supports.setText("=");
-            configInfo.addContent(supports);
-        }
-        {
-            Element supports = new Element("supports", EXPLAIN_NAMESPACE);
-            supports.setAttribute("type", "relation");
-            supports.setText("&lt;");
-            configInfo.addContent(supports);
-        }
-        {
-            Element supports = new Element("supports", EXPLAIN_NAMESPACE);
-            supports.setAttribute("type", "relation");
-            supports.setText("&gt;");
-            configInfo.addContent(supports);
-        }
-        {
-            Element supports = new Element("supports", EXPLAIN_NAMESPACE);
-            supports.setAttribute("type", "relation");
-            supports.setText("exact");
-            configInfo.addContent(supports);
-        }
-        {
-            Element supports = new Element("supports", EXPLAIN_NAMESPACE);
-            supports.setAttribute("type", "relation");
-            supports.setText("within");
-            configInfo.addContent(supports);
-        }
+        addSupportsElement(configInfo, "and");
+        addSupportsElement(configInfo, "or");
+        addSupportsElement(configInfo, "not");
+        addSupportsElement(configInfo, "*");
+        addSupportsElement(configInfo, "=");
+        addSupportsElement(configInfo, "&lt;");
+        addSupportsElement(configInfo, "&gt;");
+        addSupportsElement(configInfo, "exact");
+        addSupportsElement(configInfo, "within");
 
         return root;
+    }
+
+    /**
+     * 
+     * @param eleConfigInfo
+     * @param value
+     */
+    private static void addSupportsElement(Element eleConfigInfo, String value) {
+        Element supports = new Element("supports", EXPLAIN_NAMESPACE);
+        supports.setAttribute("type", "relation");
+        supports.setText(value);
+        eleConfigInfo.addContent(supports);
     }
 
     private static Element createIndex(SearchField field) {
