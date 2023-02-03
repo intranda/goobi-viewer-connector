@@ -1002,123 +1002,19 @@ public class SruServlet extends HttpServlet {
             indexInfo.addContent(index);
         }
 
-        {
-            // mods
-            Element schemaInfo = new Element("schemaInfo", EXPLAIN_NAMESPACE);
-            explain.addContent(schemaInfo);
-
-            Element schema = new Element("schema", EXPLAIN_NAMESPACE);
-            schema.setAttribute("retrieve", "true");
-            schema.setAttribute("sort", "false");
-            schema.setAttribute("identifier", "info:srw/schema/1/mods-v3.3");
-            schema.setAttribute("location", "http://www.loc.gov/standards/mods/v3/mods-3-3.xsd");
-            schema.setAttribute("name", "mods");
-
-            Element schemaTitle = new Element("title", EXPLAIN_NAMESPACE);
-            schemaTitle.setAttribute("primary", "true");
-            schemaTitle.setText("MODS");
-            schema.addContent(schemaTitle);
-            schemaInfo.addContent(schema);
-        }
-
-        {
-            // dc
-            Element schemaInfo = new Element("schemaInfo", EXPLAIN_NAMESPACE);
-            explain.addContent(schemaInfo);
-
-            Element schema = new Element("schema", EXPLAIN_NAMESPACE);
-            schema.setAttribute("retrieve", "true");
-            schema.setAttribute("sort", "false");
-            schema.setAttribute("identifier", "info:srw/schema/1/dc-v1.1");
-            schema.setAttribute("location", "http://www.loc.gov/standards/sru/resources/dc-schema.xsd");
-            schema.setAttribute("name", "dc");
-
-            Element schemaTitle = new Element("title", EXPLAIN_NAMESPACE);
-            schemaTitle.setAttribute("primary", "true");
-            schemaTitle.setText("Dublin Core");
-            schema.addContent(schemaTitle);
-            schemaInfo.addContent(schema);
-
-        }
-
-        {
-            // marcxml
-            Element schemaInfo = new Element("schemaInfo", EXPLAIN_NAMESPACE);
-            explain.addContent(schemaInfo);
-
-            Element schema = new Element("schema", EXPLAIN_NAMESPACE);
-            schema.setAttribute("retrieve", "true");
-            schema.setAttribute("sort", "false");
-            schema.setAttribute("identifier", "info:srw/schema/1/marcxml-v1.1");
-            schema.setAttribute("location", "http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd");
-            schema.setAttribute("name", "marcxml");
-
-            Element schemaTitle = new Element("title", EXPLAIN_NAMESPACE);
-            schemaTitle.setAttribute("primary", "true");
-            schemaTitle.setText("MARC21-XML");
-            schema.addContent(schemaTitle);
-            schemaInfo.addContent(schema);
-
-        }
-
-        {
-            // solr
-            Element schemaInfo = new Element("schemaInfo", EXPLAIN_NAMESPACE);
-            explain.addContent(schemaInfo);
-
-            Element schema = new Element("schema", EXPLAIN_NAMESPACE);
-            schema.setAttribute("retrieve", "true");
-            schema.setAttribute("sort", "false");
-            // TODO schema location?
-            schema.setAttribute("identifier", "info:srw/schema/1/solr-v1.1");
-            schema.setAttribute("location", "");
-            schema.setAttribute("name", "solr");
-
-            Element schemaTitle = new Element("title", EXPLAIN_NAMESPACE);
-            schemaTitle.setAttribute("primary", "true");
-            schemaTitle.setText("SOLR");
-            schema.addContent(schemaTitle);
-            schemaInfo.addContent(schema);
-        }
-
-        {
-            // mets
-            Element schemaInfo = new Element("schemaInfo", EXPLAIN_NAMESPACE);
-            explain.addContent(schemaInfo);
-
-            Element schema = new Element("schema", EXPLAIN_NAMESPACE);
-            schema.setAttribute("retrieve", "true");
-            schema.setAttribute("sort", "false");
-            schema.setAttribute("identifier", "http://www.loc.gov/METS/");
-            schema.setAttribute("location", "http://www.loc.gov/standards/mets/version18/mets.xsd");
-            schema.setAttribute("name", "mets");
-
-            Element schemaTitle = new Element("title", EXPLAIN_NAMESPACE);
-            schemaTitle.setAttribute("primary", "true");
-            schemaTitle.setText("METS/MODS");
-            schema.addContent(schemaTitle);
-            schemaInfo.addContent(schema);
-
-        }
-        {
-            // lido
-            Element schemaInfo = new Element("schemaInfo", EXPLAIN_NAMESPACE);
-            explain.addContent(schemaInfo);
-
-            Element schema = new Element("schema", EXPLAIN_NAMESPACE);
-            schema.setAttribute("retrieve", "true");
-            schema.setAttribute("sort", "false");
-            schema.setAttribute("identifier", "http://www.lido-schema.org");
-            schema.setAttribute("location", "http://www.lido-schema.org/schema/v1.0/lido-v1.0.xsd");
-            schema.setAttribute("name", "lido");
-
-            Element schemaTitle = new Element("title", EXPLAIN_NAMESPACE);
-            schemaTitle.setAttribute("primary", "true");
-            schemaTitle.setText("LIDO");
-            schema.addContent(schemaTitle);
-            schemaInfo.addContent(schema);
-
-        }
+        explain.addContent(
+                createSchemaInfo("MODS", "mods", "info:srw/schema/1/mods-v3.3", "http://www.loc.gov/standards/mods/v3/mods-3-3.xsd"));
+        explain.addContent(
+                createSchemaInfo("Dublin Core", "dc", "info:srw/schema/1/dc-v1.1", "http://www.loc.gov/standards/sru/resources/dc-schema.xsd"));
+        explain.addContent(
+                createSchemaInfo("MARC21-XML", "marcxml", "info:srw/schema/1/marcxml-v1.1",
+                        "http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd"));
+        explain.addContent(
+                createSchemaInfo("SOLR", "solr", "info:srw/schema/1/solr-v1.1", ""));
+        explain.addContent(
+                createSchemaInfo("METS/MODS", "mets", "http://www.loc.gov/METS/", "http://www.loc.gov/standards/mets/version18/mets.xsd"));
+        explain.addContent(
+                createSchemaInfo("LIDO", "lido", "http://www.lido-schema.org", "http://www.lido-schema.org/schema/v1.0/lido-v1.0.xsd"));
 
         Element configInfo = new Element("configInfo", EXPLAIN_NAMESPACE);
         explain.addContent(configInfo);
@@ -1149,6 +1045,33 @@ public class SruServlet extends HttpServlet {
         addSupportsElement(configInfo, "within");
 
         return root;
+    }
+
+    /**
+     * 
+     * @param displayTitle
+     * @param name
+     * @param identifier
+     * @param location
+     * @return
+     */
+    private static Element createSchemaInfo(String displayTitle, String name, String identifier, String location) {
+        Element ret = new Element("schemaInfo", EXPLAIN_NAMESPACE);
+
+        Element schema = new Element("schema", EXPLAIN_NAMESPACE);
+        schema.setAttribute("retrieve", "true");
+        schema.setAttribute("sort", "false");
+        schema.setAttribute("identifier", identifier);
+        schema.setAttribute("location", location);
+        schema.setAttribute("name", name);
+
+        Element schemaTitle = new Element("title", EXPLAIN_NAMESPACE);
+        schemaTitle.setAttribute("primary", "true");
+        schemaTitle.setText(displayTitle);
+        schema.addContent(schemaTitle);
+        ret.addContent(schema);
+
+        return ret;
     }
 
     /**
