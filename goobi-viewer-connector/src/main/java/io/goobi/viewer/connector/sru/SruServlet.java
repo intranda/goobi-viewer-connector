@@ -135,7 +135,7 @@ public class SruServlet extends HttpServlet {
 
                 if (parameter.getRecordSchema() == null) {
                     try {
-                        wrongSchema(response, request.getParameter("recordSchema"));
+                        wrongSchema(parameter, response, request.getParameter("recordSchema"));
                     } catch (IOException e) {
                         try {
                             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
