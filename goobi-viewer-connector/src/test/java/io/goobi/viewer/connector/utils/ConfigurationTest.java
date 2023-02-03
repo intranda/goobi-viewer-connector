@@ -28,6 +28,7 @@ import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.model.FieldConfiguration;
 import io.goobi.viewer.connector.oai.model.Set;
 import io.goobi.viewer.connector.oai.model.formats.Format;
+import io.goobi.viewer.solr.SolrConstants;
 
 public class ConfigurationTest extends AbstractTest {
 

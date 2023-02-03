@@ -23,6 +23,8 @@ import org.apache.solr.common.SolrDocument;
 import org.junit.Assert;
 import org.junit.Test;
 
+import io.goobi.viewer.solr.SolrConstants;
+
 public class SolrSearchToolsTest {
 
     /**

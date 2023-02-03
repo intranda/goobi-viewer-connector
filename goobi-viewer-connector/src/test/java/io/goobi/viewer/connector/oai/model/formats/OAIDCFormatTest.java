@@ -11,7 +11,7 @@ import org.junit.Test;
 import io.goobi.viewer.connector.AbstractSolrEnabledTest;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
-import io.goobi.viewer.connector.utils.SolrConstants;
+import io.goobi.viewer.solr.SolrConstants;
 
 public class OAIDCFormatTest extends AbstractSolrEnabledTest {
 
