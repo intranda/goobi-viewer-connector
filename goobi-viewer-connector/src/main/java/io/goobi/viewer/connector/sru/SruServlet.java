@@ -68,7 +68,7 @@ public class SruServlet extends HttpServlet {
     private static final Logger logger = LogManager.getLogger(SruServlet.class);
 
     private static final Namespace SRU_NAMESPACE = Namespace.getNamespace("srw", "http://www.loc.gov/zing/srw/");
-    private static final Namespace EXPLAIN_NAMESPACE = Namespace.getNamespace("ns", "http://explain.z3950.org/dtd/2.0/");
+    static final Namespace EXPLAIN_NAMESPACE = Namespace.getNamespace("ns", "http://explain.z3950.org/dtd/2.0/");
     private static final Namespace DIAG_NAMESPACE = Namespace.getNamespace("diag", "http://www.loc.gov/zing/srw/diagnostic/");
 
     private static final Namespace METS_NAMESPACE = Namespace.getNamespace("mets", "http://www.loc.gov/METS/");
@@ -1003,18 +1003,19 @@ public class SruServlet extends HttpServlet {
         }
 
         explain.addContent(
-                createSchemaInfo("MODS", "mods", "info:srw/schema/1/mods-v3.3", "http://www.loc.gov/standards/mods/v3/mods-3-3.xsd"));
+                createSchemaInfoElement("MODS", "mods", "info:srw/schema/1/mods-v3.3", "http://www.loc.gov/standards/mods/v3/mods-3-3.xsd"));
         explain.addContent(
-                createSchemaInfo("Dublin Core", "dc", "info:srw/schema/1/dc-v1.1", "http://www.loc.gov/standards/sru/resources/dc-schema.xsd"));
+                createSchemaInfoElement("Dublin Core", "dc", "info:srw/schema/1/dc-v1.1",
+                        "http://www.loc.gov/standards/sru/resources/dc-schema.xsd"));
         explain.addContent(
-                createSchemaInfo("MARC21-XML", "marcxml", "info:srw/schema/1/marcxml-v1.1",
+                createSchemaInfoElement("MARC21-XML", "marcxml", "info:srw/schema/1/marcxml-v1.1",
                         "http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd"));
         explain.addContent(
-                createSchemaInfo("SOLR", "solr", "info:srw/schema/1/solr-v1.1", ""));
+                createSchemaInfoElement("SOLR", "solr", "info:srw/schema/1/solr-v1.1", ""));
         explain.addContent(
-                createSchemaInfo("METS/MODS", "mets", "http://www.loc.gov/METS/", "http://www.loc.gov/standards/mets/version18/mets.xsd"));
+                createSchemaInfoElement("METS/MODS", "mets", "http://www.loc.gov/METS/", "http://www.loc.gov/standards/mets/version18/mets.xsd"));
         explain.addContent(
-                createSchemaInfo("LIDO", "lido", "http://www.lido-schema.org", "http://www.lido-schema.org/schema/v1.0/lido-v1.0.xsd"));
+                createSchemaInfoElement("LIDO", "lido", "http://www.lido-schema.org", "http://www.lido-schema.org/schema/v1.0/lido-v1.0.xsd"));
 
         Element configInfo = new Element("configInfo", EXPLAIN_NAMESPACE);
         explain.addContent(configInfo);
@@ -1034,15 +1035,15 @@ public class SruServlet extends HttpServlet {
         operator.setText("and");
         configInfo.addContent(operator);
 
-        addSupportsElement(configInfo, "and");
-        addSupportsElement(configInfo, "or");
-        addSupportsElement(configInfo, "not");
-        addSupportsElement(configInfo, "*");
-        addSupportsElement(configInfo, "=");
-        addSupportsElement(configInfo, "&lt;");
-        addSupportsElement(configInfo, "&gt;");
-        addSupportsElement(configInfo, "exact");
-        addSupportsElement(configInfo, "within");
+        configInfo.addContent(createSupportsElement("and"));
+        configInfo.addContent(createSupportsElement("or"));
+        configInfo.addContent(createSupportsElement("not"));
+        configInfo.addContent(createSupportsElement("*"));
+        configInfo.addContent(createSupportsElement("="));
+        configInfo.addContent(createSupportsElement("&lt;"));
+        configInfo.addContent(createSupportsElement("&gt;"));
+        configInfo.addContent(createSupportsElement("exact"));
+        configInfo.addContent(createSupportsElement("within"));
 
         return root;
     }
@@ -1054,8 +1055,9 @@ public class SruServlet extends HttpServlet {
      * @param identifier
      * @param location
      * @return
+     * @should create element correctly
      */
-    private static Element createSchemaInfo(String displayTitle, String name, String identifier, String location) {
+    static Element createSchemaInfoElement(String displayTitle, String name, String identifier, String location) {
         Element ret = new Element("schemaInfo", EXPLAIN_NAMESPACE);
 
         Element schema = new Element("schema", EXPLAIN_NAMESPACE);
@@ -1078,12 +1080,14 @@ public class SruServlet extends HttpServlet {
      * 
      * @param eleConfigInfo
      * @param value
+     * @should create element correctly
      */
-    private static void addSupportsElement(Element eleConfigInfo, String value) {
-        Element supports = new Element("supports", EXPLAIN_NAMESPACE);
-        supports.setAttribute("type", "relation");
-        supports.setText(value);
-        eleConfigInfo.addContent(supports);
+    static Element createSupportsElement(String value) {
+        Element ret = new Element("supports", EXPLAIN_NAMESPACE);
+        ret.setAttribute("type", "relation");
+        ret.setText(value);
+
+        return ret;
     }
 
     private static Element createIndex(SearchField field) {
