@@ -76,4 +76,23 @@ public class SruServletTest {
         Assert.assertEquals("info:srw/diagnostic/1/7", eleUri.getText());
         Assert.assertEquals("Mandatory parameter not supplied / scanClause", eleDiagnostic.getChildText("message", SruServlet.DIAG_NAMESPACE));
     }
+    /**
+     * @see SruServlet#createUnsupportedOperationDocument(String,String)
+     * @verifies create document correctly
+     */
+    @Test
+    public void createUnsupportedOperationDocument_shouldCreateDocumentCorrectly() throws Exception {
+        Document doc = SruServlet.createMissingArgumentDocument("1.2", "foobar");
+        Assert.assertNotNull(doc);
+        Element eleRoot = doc.getRootElement();
+        Assert.assertNotNull(eleRoot);
+        Assert.assertEquals("1.2", eleRoot.getChildText("version", SruServlet.SRU_NAMESPACE));
+
+        Element eleDiagnostic = eleRoot.getChild("diagnostic", SruServlet.SRU_NAMESPACE);
+        Assert.assertNotNull(eleDiagnostic);
+        Element eleUri = eleDiagnostic.getChild("uri", SruServlet.DIAG_NAMESPACE);
+        Assert.assertNotNull(eleUri);
+        Assert.assertEquals("info:srw/diagnostic/1/4", eleUri.getText());
+        Assert.assertEquals("Unsupported operation / foobar", eleDiagnostic.getChildText("message", SruServlet.DIAG_NAMESPACE));
+    }
 }

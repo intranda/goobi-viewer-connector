@@ -226,56 +226,6 @@ public class SruServlet extends HttpServlet {
     }
 
     /**
-     * Creates wrong schema error XML and writes it into response.
-     * 
-     * @param parameter
-     * @param response
-     * @param schema
-     * @throws IOException
-     */
-    private static void wrongSchema(SruRequestParameter parameter, HttpServletResponse response, String schema) throws IOException {
-        Document doc = createWrongSchemaDocument(parameter != null ? parameter.getVersion() : "?", schema);
-        Format format = Format.getPrettyFormat();
-        format.setEncoding(StandardCharsets.UTF_8.name().toLowerCase());
-        XMLOutputter xmlOut = new XMLOutputter(format);
-        xmlOut.output(doc, response.getOutputStream());
-    }
-
-    /**
-     * Creates wrong schema error {@link Document}
-     * 
-     * @param version
-     * @param schema
-     * @return
-     * @should create document correctly
-     */
-    static Document createWrongSchemaDocument(String version, String schema) {
-        Element searchRetrieveResponse = new Element("searchRetrieveResponse", SRU_NAMESPACE);
-        Element eleVersion = new Element(SruRequestParameter.PARAM_VERSION, SRU_NAMESPACE);
-        eleVersion.setText(version);
-        searchRetrieveResponse.addContent(eleVersion);
-        Element diagnostic = new Element("diagnostic", SRU_NAMESPACE);
-        searchRetrieveResponse.addContent(diagnostic);
-
-        Element uri = new Element("uri", DIAG_NAMESPACE);
-        uri.setText("info:srw/diagnostic/1/66");
-        diagnostic.addContent(uri);
-
-        Element details = new Element("details", DIAG_NAMESPACE);
-        details.setText("   Unknown schema for retrieval");
-        diagnostic.addContent(details);
-
-        Element message = new Element("message", DIAG_NAMESPACE);
-        message.setText("Unknown schema for retrieval / " + schema);
-        diagnostic.addContent(message);
-
-        Document ret = new Document();
-        ret.setRootElement(searchRetrieveResponse);
-
-        return ret;
-    }
-
-    /**
      * 
      * @param parameter
      * @param solr
@@ -319,6 +269,34 @@ public class SruServlet extends HttpServlet {
     }
 
     /**
+     * Creates wrong schema error XML and writes it into response.
+     * 
+     * @param parameter
+     * @param response
+     * @param schema
+     * @throws IOException
+     */
+    private static void wrongSchema(SruRequestParameter parameter, HttpServletResponse response, String schema) throws IOException {
+        Document doc = createWrongSchemaDocument(parameter != null ? parameter.getVersion() : "?", schema);
+        Format format = Format.getPrettyFormat();
+        format.setEncoding(StandardCharsets.UTF_8.name().toLowerCase());
+        XMLOutputter xmlOut = new XMLOutputter(format);
+        xmlOut.output(doc, response.getOutputStream());
+    }
+
+    /**
+     * Creates wrong schema error {@link Document}
+     * 
+     * @param version
+     * @param schema
+     * @return
+     * @should create document correctly
+     */
+    static Document createWrongSchemaDocument(String version, String schema) {
+        return createErrorResponseDocument(version, "info:srw/diagnostic/1/66", "Unknown schema for retrieval", schema);
+    }
+
+    /**
      * @param parameter SRU request parameter object
      * @param response
      * @param missing Name of the missing parameter
@@ -342,31 +320,8 @@ public class SruServlet extends HttpServlet {
      * @should create document correctly
      */
     static Document createMissingArgumentDocument(String version, String missing) {
-        Element searchRetrieveResponse = new Element("searchRetrieveResponse", SRU_NAMESPACE);
-
-        Element eleVersion = new Element(SruRequestParameter.PARAM_VERSION, SRU_NAMESPACE);
-        eleVersion.setText(version);
-        searchRetrieveResponse.addContent(eleVersion);
-
-        Element diagnostic = new Element("diagnostic", SRU_NAMESPACE);
-        searchRetrieveResponse.addContent(diagnostic);
-
-        Element uri = new Element("uri", DIAG_NAMESPACE);
-        uri.setText("info:srw/diagnostic/1/7");
-        diagnostic.addContent(uri);
-
-        Element details = new Element("details", DIAG_NAMESPACE);
-        details.setText("Mandatory parameter not supplied");
-        diagnostic.addContent(details);
-
-        Element message = new Element("message", DIAG_NAMESPACE);
-        message.setText("Mandatory parameter not supplied / " + missing);
-        diagnostic.addContent(message);
-
-        Document ret = new Document();
-        ret.setRootElement(searchRetrieveResponse);
-
-        return ret;
+        return createErrorResponseDocument(version, "info:srw/diagnostic/1/7",
+                "Mandatory parameter not supplied", missing);
     }
 
     /**
@@ -375,32 +330,58 @@ public class SruServlet extends HttpServlet {
      * @param operation
      * @throws IOException
      */
-    private static void unsupportedOperation(SruRequestParameter parameter, HttpServletResponse response, String operation) throws IOException {
-        Element searchRetrieveResponse = new Element("searchRetrieveResponse", SRU_NAMESPACE);
-        Element version = new Element(SruRequestParameter.PARAM_VERSION, SRU_NAMESPACE);
-        version.setText(parameter != null ? parameter.getVersion() : "?");
-        searchRetrieveResponse.addContent(version);
-        Element diagnostic = new Element("diagnostic", SRU_NAMESPACE);
-        searchRetrieveResponse.addContent(diagnostic);
-
-        Element uri = new Element("uri", DIAG_NAMESPACE);
-        uri.setText("info:srw/diagnostic/1/4");
-        diagnostic.addContent(uri);
-
-        Element details = new Element("details", DIAG_NAMESPACE);
-        details.setText("Unsupported operation");
-        diagnostic.addContent(details);
-
-        Element message = new Element("message", DIAG_NAMESPACE);
-
-        message.setText("Unsupported operation / " + operation);
-        diagnostic.addContent(message);
-        Document doc = new Document();
-        doc.setRootElement(searchRetrieveResponse);
+    static void unsupportedOperation(SruRequestParameter parameter, HttpServletResponse response, String operation) throws IOException {
+        Document doc = createUnsupportedOperationDocument(parameter != null ? parameter.getVersion() : "?", operation);
         Format format = Format.getPrettyFormat();
         format.setEncoding(StandardCharsets.UTF_8.name().toLowerCase());
         XMLOutputter xmlOut = new XMLOutputter(format);
         xmlOut.output(doc, response.getOutputStream());
+    }
+
+    /**
+     * 
+     * @param version
+     * @param operation
+     * @return
+     * @should create document correctly
+     */
+    static Document createUnsupportedOperationDocument(String version, String operation) {
+        return createErrorResponseDocument(version, "info:srw/diagnostic/1/4", "Unsupported operation", operation);
+    }
+
+    /**
+     * Creates an error XML {@link Document} with given content.
+     * 
+     * @param version SRU protocol version
+     * @param uriText Text for the uri element
+     * @param detailsText Text for the details element
+     * @param arg Problematic argument
+     * @return
+     */
+    static Document createErrorResponseDocument(String version, String uriText, String detailsText, String arg) {
+        Element searchRetrieveResponse = new Element("searchRetrieveResponse", SRU_NAMESPACE);
+        Element eleVersion = new Element(SruRequestParameter.PARAM_VERSION, SRU_NAMESPACE);
+        eleVersion.setText(version);
+        searchRetrieveResponse.addContent(eleVersion);
+        Element diagnostic = new Element("diagnostic", SRU_NAMESPACE);
+        searchRetrieveResponse.addContent(diagnostic);
+
+        Element uri = new Element("uri", DIAG_NAMESPACE);
+        uri.setText(uriText);
+        diagnostic.addContent(uri);
+
+        Element details = new Element("details", DIAG_NAMESPACE);
+        details.setText(detailsText);
+        diagnostic.addContent(details);
+
+        Element message = new Element("message", DIAG_NAMESPACE);
+        message.setText(detailsText + " / " + arg);
+        diagnostic.addContent(message);
+
+        Document ret = new Document();
+        ret.setRootElement(searchRetrieveResponse);
+
+        return ret;
     }
 
     /**
