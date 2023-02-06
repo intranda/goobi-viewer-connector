@@ -245,7 +245,7 @@ public class SruServlet extends HttpServlet {
         version.setText(parameter.getVersion());
         root.addContent(version);
 
-        String query = generateSearchQuery(parameter, filterQuerySuffix);
+        String query = generateSearchQuery(parameter.getQuery(), parameter.getRecordSchema(), filterQuerySuffix);
         QueryResponse queryResponse =
                 solr.search(query, parameter.getStartRecord() - 1, parameter.getStartRecord() - 1 + parameter.getMaximumRecords(), null, null, null);
         SolrDocumentList solrDocuments = queryResponse.getResults();
@@ -385,14 +385,20 @@ public class SruServlet extends HttpServlet {
     }
 
     /**
-     * @param parameter
+     * @param sruQuery
+     * @param recordSchema
      * @param filterQuerySuffix Filter query suffix for the client's session
      * @return
+     * @should create query correctly
      */
-    private static String generateSearchQuery(SruRequestParameter parameter, String filterQuerySuffix) {
+    static String generateSearchQuery(String sruQuery, Metadata recordSchema, String filterQuerySuffix) {
+        if(sruQuery == null) {
+         throw new IllegalArgumentException("sruQuery may not be null");    
+        }
+        
         // map dc queries to solr queries
         StringBuilder sbValue = new StringBuilder();
-        String initValue = parameter.getQuery();
+        String initValue = sruQuery;
         for (Matcher m = Pattern.compile("dc.\\w+").matcher(initValue); m.find();) {
             String searchParameter = m.toMatchResult().group();
             SearchField sf = SearchField.getFieldByDcName(searchParameter);
@@ -400,43 +406,45 @@ public class SruServlet extends HttpServlet {
                 initValue = initValue.replaceAll(searchParameter + "\\s*=", sf.getSolrName() + ":");
             }
         }
-        // map iv queries to solr queries
-        for (Matcher m = Pattern.compile("iv.\\w+").matcher(initValue); m.find();) {
-            String searchParameter = m.toMatchResult().group();
-            SearchField sf = SearchField.getFieldByInternalName(searchParameter);
-            if (sf != null) {
-                initValue = initValue.replaceAll(searchParameter + "\\s*=", sf.getSolrName() + ":");
-            }
-        }
+        // map iv queries to solr queries TODO This is probably unused
+        //        for (Matcher m = Pattern.compile("iv.(\\w+)").matcher(initValue); m.find();) {
+        //            String searchParameter = m.toMatchResult().group(1);
+        //            SearchField sf = SearchField.getFieldByInternalName(searchParameter);
+        //            if (sf != null) {
+        //                initValue = initValue.replaceAll(searchParameter + "\\s*=", sf.getSolrName() + ":");
+        //            }
+        //        }
         // map cql fields to solr queries
-        for (Matcher m = Pattern.compile("\\w{1,20}\\s?=").matcher(initValue); m.find();) {
+        for (Matcher m = Pattern.compile("(\\w{1,20})\\s?=").matcher(initValue); m.find();) {
             String searchParameter = m.toMatchResult().group();
-            String param = searchParameter.replace("=", "").trim();
+            String param = searchParameter.replaceAll("\\s*=", "").trim();
             SearchField sf = SearchField.getFieldByCqlName(param);
             if (sf != null) {
-                initValue = initValue.replaceAll(sf + "\\s*=", sf.getSolrName() + ":");
+                initValue = initValue.replaceAll(searchParameter, sf.getSolrName() + ":");
             }
         }
         sbValue.append(initValue);
 
-        switch (parameter.getRecordSchema()) {
-            case LIDO:
-                sbValue.append(" AND ").append(SolrConstants.SOURCEDOCFORMAT).append(":LIDO");
-                break;
-            case MARCXML:
-            case MODS:
-            case METS:
-                sbValue.append(" AND ").append(SolrConstants.SOURCEDOCFORMAT).append(":METS");
-                break;
-            default:
-                break;
+        if (recordSchema != null) {
+            switch (recordSchema) {
+                case LIDO:
+                    sbValue.append(" AND ").append(SolrConstants.SOURCEDOCFORMAT).append(":LIDO");
+                    break;
+                case MARCXML:
+                case MODS:
+                case METS:
+                    sbValue.append(" AND ").append(SolrConstants.SOURCEDOCFORMAT).append(":METS");
+                    break;
+                default:
+                    break;
+            }
         }
         sbValue.append(" AND (")
                 .append(SolrConstants.ISWORK)
                 .append(":true OR ")
                 .append(SolrConstants.ISANCHOR)
                 .append(":true)")
-                .append(filterQuerySuffix);
+                .append(filterQuerySuffix != null ? filterQuerySuffix : "");
         logger.trace(sbValue);
         return sbValue.toString();
     }
@@ -445,7 +453,7 @@ public class SruServlet extends HttpServlet {
      * @param root
      * @param parameter
      */
-    private static void generateEchoedSearchRetrieveRequest(Element root, SruRequestParameter parameter) {
+    static void generateEchoedSearchRetrieveRequest(Element root, SruRequestParameter parameter) {
         Element echoedSearchRetrieveRequest = new Element("echoedSearchRetrieveRequest", SRU_NAMESPACE);
         root.addContent(echoedSearchRetrieveRequest);
 
