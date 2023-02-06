@@ -82,7 +82,7 @@ public class SruServletTest {
      */
     @Test
     public void createUnsupportedOperationDocument_shouldCreateDocumentCorrectly() throws Exception {
-        Document doc = SruServlet.createMissingArgumentDocument("1.2", "foobar");
+        Document doc = SruServlet.createUnsupportedOperationDocument("1.2", "foobar");
         Assert.assertNotNull(doc);
         Element eleRoot = doc.getRootElement();
         Assert.assertNotNull(eleRoot);
