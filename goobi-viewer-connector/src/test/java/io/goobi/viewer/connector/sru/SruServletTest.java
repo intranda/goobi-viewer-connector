@@ -56,4 +56,24 @@ public class SruServletTest {
         Assert.assertEquals("info:srw/diagnostic/1/66", eleUri.getText());
         Assert.assertEquals("Unknown schema for retrieval / sf", eleDiagnostic.getChildText("message", SruServlet.DIAG_NAMESPACE));
     }
+
+    /**
+     * @see SruServlet#createMissingArgumentDocument(String,String)
+     * @verifies create document correctly
+     */
+    @Test
+    public void createMissingArgumentDocument_shouldCreateDocumentCorrectly() throws Exception {
+        Document doc = SruServlet.createMissingArgumentDocument("1.1", "scanClause");
+        Assert.assertNotNull(doc);
+        Element eleRoot = doc.getRootElement();
+        Assert.assertNotNull(eleRoot);
+        Assert.assertEquals("1.1", eleRoot.getChildText("version", SruServlet.SRU_NAMESPACE));
+
+        Element eleDiagnostic = eleRoot.getChild("diagnostic", SruServlet.SRU_NAMESPACE);
+        Assert.assertNotNull(eleDiagnostic);
+        Element eleUri = eleDiagnostic.getChild("uri", SruServlet.DIAG_NAMESPACE);
+        Assert.assertNotNull(eleUri);
+        Assert.assertEquals("info:srw/diagnostic/1/7", eleUri.getText());
+        Assert.assertEquals("Mandatory parameter not supplied / scanClause", eleDiagnostic.getChildText("message", SruServlet.DIAG_NAMESPACE));
+    }
 }

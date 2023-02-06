@@ -242,7 +242,7 @@ public class SruServlet extends HttpServlet {
     }
 
     /**
-     * Creates wrong schema error {@link Document};
+     * Creates wrong schema error {@link Document}
      * 
      * @param version
      * @param schema
@@ -325,10 +325,29 @@ public class SruServlet extends HttpServlet {
      * @throws IOException
      */
     private static void missingArgument(SruRequestParameter parameter, HttpServletResponse response, String missing) throws IOException {
+        Document doc = createMissingArgumentDocument(parameter != null ? parameter.getVersion() : "?", missing);
+        Format format = Format.getPrettyFormat();
+        format.setEncoding(StandardCharsets.UTF_8.name().toLowerCase());
+        XMLOutputter xmlOut = new XMLOutputter(format);
+        xmlOut.output(doc, response.getOutputStream());
+    }
+
+    /**
+     * 
+     * Creates missing argument error {@link Document}
+     * 
+     * @param version
+     * @param missing
+     * @return
+     * @should create document correctly
+     */
+    static Document createMissingArgumentDocument(String version, String missing) {
         Element searchRetrieveResponse = new Element("searchRetrieveResponse", SRU_NAMESPACE);
-        Element version = new Element(SruRequestParameter.PARAM_VERSION, SRU_NAMESPACE);
-        version.setText(parameter != null ? parameter.getVersion() : "?");
-        searchRetrieveResponse.addContent(version);
+
+        Element eleVersion = new Element(SruRequestParameter.PARAM_VERSION, SRU_NAMESPACE);
+        eleVersion.setText(version);
+        searchRetrieveResponse.addContent(eleVersion);
+
         Element diagnostic = new Element("diagnostic", SRU_NAMESPACE);
         searchRetrieveResponse.addContent(diagnostic);
 
@@ -341,15 +360,13 @@ public class SruServlet extends HttpServlet {
         diagnostic.addContent(details);
 
         Element message = new Element("message", DIAG_NAMESPACE);
-
         message.setText("Mandatory parameter not supplied / " + missing);
         diagnostic.addContent(message);
-        Document doc = new Document();
-        doc.setRootElement(searchRetrieveResponse);
-        Format format = Format.getPrettyFormat();
-        format.setEncoding("utf-8");
-        XMLOutputter xmlOut = new XMLOutputter(format);
-        xmlOut.output(doc, response.getOutputStream());
+
+        Document ret = new Document();
+        ret.setRootElement(searchRetrieveResponse);
+
+        return ret;
     }
 
     /**
