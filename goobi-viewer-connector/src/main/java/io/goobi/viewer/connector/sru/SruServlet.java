@@ -233,8 +233,9 @@ public class SruServlet extends HttpServlet {
      * @return
      * @throws SolrServerException
      * @throws IOException
+     * @should create element correctly
      */
-    private static Element generateSearchRetrieve(SruRequestParameter parameter, SolrSearchIndex solr, String filterQuerySuffix)
+    static Element generateSearchRetrieve(SruRequestParameter parameter, SolrSearchIndex solr, String filterQuerySuffix)
             throws SolrServerException, IOException {
         if (parameter == null) {
             throw new IllegalArgumentException("parameter may not be null");
@@ -389,13 +390,14 @@ public class SruServlet extends HttpServlet {
      * @param recordSchema
      * @param filterQuerySuffix Filter query suffix for the client's session
      * @return
+     * @should throw {@link IllegalArgumentException} if sruQuery null
      * @should create query correctly
      */
     static String generateSearchQuery(String sruQuery, Metadata recordSchema, String filterQuerySuffix) {
-        if(sruQuery == null) {
-         throw new IllegalArgumentException("sruQuery may not be null");    
+        if (sruQuery == null) {
+            throw new IllegalArgumentException("sruQuery may not be null");
         }
-        
+
         // map dc queries to solr queries
         StringBuilder sbValue = new StringBuilder();
         String initValue = sruQuery;

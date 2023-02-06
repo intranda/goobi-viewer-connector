@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import io.goobi.viewer.connector.AbstractSolrEnabledTest;
+import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 
 public class SruServletTest extends AbstractSolrEnabledTest {
@@ -38,6 +39,30 @@ public class SruServletTest extends AbstractSolrEnabledTest {
         Element ele = SruServlet.createSupportsElement("your mom");
         Assert.assertNotNull(ele);
         Assert.assertEquals("your mom", ele.getText());
+    }
+
+    /**
+     * @see SruServlet#generateSearchRetrieve(SruRequestParameter,SolrSearchIndex,String)
+     * @verifies create element correctly
+     */
+    @Test
+    public void generateSearchRetrieve_shouldCreateElementCorrectly() throws Exception {
+        SruRequestParameter parameter =
+                new SruRequestParameter(SruOperation.SEARCHRETRIEVE, "1.2", "identifier=PPN517154005", 1, 10, "recordPacking_value",
+                        Metadata.OAI_DC, "recordXPath_value", "resultSetTTL_value", "sortKeys_value", "stylesheet_value", "extraRequestData_value",
+                        "scanClause_value", 5, 10);
+
+        Element eleSearchRetrieve = SruServlet.generateSearchRetrieve(parameter, DataManager.getInstance().getSearchIndex(), "-DC:foo");
+        Assert.assertNotNull(eleSearchRetrieve);
+        Assert.assertEquals("1.2", eleSearchRetrieve.getChildText("version", SruServlet.SRU_NAMESPACE));
+        Assert.assertEquals("1", eleSearchRetrieve.getChildText("numberOfRecords", SruServlet.SRU_NAMESPACE));
+
+        Element eleRecords = eleSearchRetrieve.getChild("records", SruServlet.SRU_NAMESPACE);
+        Assert.assertNotNull(eleRecords);
+
+        Assert.assertNotNull(eleRecords.getChild("record", SruServlet.SRU_NAMESPACE));
+        Assert.assertNotNull(eleSearchRetrieve.getChild("echoedSearchRetrieveRequest", SruServlet.SRU_NAMESPACE));
+
     }
 
     /**
@@ -102,13 +127,22 @@ public class SruServletTest extends AbstractSolrEnabledTest {
 
     /**
      * @see SruServlet#generateSearchQuery(String,Metadata,String)
+     * @verifies throw {@link IllegalArgumentException} if sruQuery null
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void generateSearchQuery_shouldThrowLinkIllegalArgumentExceptionIfSruQueryNull() throws Exception {
+        SruServlet.generateSearchQuery(null, Metadata.LIDO, null);
+    }
+
+    /**
+     * @see SruServlet#generateSearchQuery(String,Metadata,String)
      * @verifies create query correctly
      */
     @Test
     public void generateSearchQuery_shouldCreateQueryCorrectly() throws Exception {
         String result = SruServlet.generateSearchQuery("dc.identifier=urn:nbn:foo;bar:123", Metadata.LIDO, " -DC:a.*");
         Assert.assertEquals("URN:urn:nbn:foo;bar:123 AND SOURCEDOCFORMAT:LIDO AND (ISWORK:true OR ISANCHOR:true) -DC:a.*", result);
-        
+
         result = SruServlet.generateSearchQuery("anywhere=foo", Metadata.MARCXML, null);
         Assert.assertEquals("*:foo AND SOURCEDOCFORMAT:METS AND (ISWORK:true OR ISANCHOR:true)", result);
     }

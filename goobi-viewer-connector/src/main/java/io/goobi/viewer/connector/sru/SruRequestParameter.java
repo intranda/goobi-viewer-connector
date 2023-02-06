@@ -171,6 +171,46 @@ public class SruRequestParameter {
     }
 
     /**
+     * 
+     * @param operation
+     * @param version
+     * @param query
+     * @param startRecord
+     * @param maximumRecords
+     * @param recordPacking
+     * @param recordSchema
+     * @param recordXPath
+     * @param resultSetTTL
+     * @param sortKeys
+     * @param stylesheet
+     * @param extraRequestData
+     * @param scanClause
+     * @param responsePosition
+     * @param maximumTerms
+     * @should set params correctly
+     */
+    public SruRequestParameter(SruOperation operation, String version, String query, int startRecord, int maximumRecords, String recordPacking,
+            Metadata recordSchema, String recordXPath, String resultSetTTL, String sortKeys, String stylesheet, String extraRequestData,
+            String scanClause, int responsePosition, int maximumTerms) {
+        this.operation = operation;
+        this.version = version;
+        this.query = query;
+        this.startRecord = startRecord;
+        this.maximumRecords = maximumRecords;
+        this.recordPacking = recordPacking;
+        this.recordSchema = recordSchema;
+        this.recordXPath = recordXPath;
+        this.resultSetTTL = resultSetTTL;
+        this.sortKeys = sortKeys;
+        this.stylesheet = stylesheet;
+        this.extraRequestData = extraRequestData;
+        this.scanClause = scanClause;
+        this.responsePosition = responsePosition;
+        this.maximumTerms = maximumTerms;
+
+    }
+
+    /**
      * <p>
      * Getter for the field <code>operation</code>.
      * </p>
