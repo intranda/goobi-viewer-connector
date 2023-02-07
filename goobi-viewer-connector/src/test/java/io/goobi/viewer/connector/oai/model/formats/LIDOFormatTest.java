@@ -16,6 +16,7 @@
 package io.goobi.viewer.connector.oai.model.formats;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import org.apache.solr.common.SolrDocument;
 import org.jdom2.Document;
@@ -24,8 +25,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import io.goobi.viewer.connector.oai.RequestHandler;
-import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.controller.XmlTools;
+import io.goobi.viewer.solr.SolrConstants;
 
 public class LIDOFormatTest {
 

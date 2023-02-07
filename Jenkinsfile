@@ -43,7 +43,7 @@ pipeline {
     stage('deployment of artifacts to maven repository') {
       when {
         anyOf {
-          branch 'master'
+          tag "v*"
           branch 'develop'
         }
       }

@@ -15,7 +15,7 @@
  */
 package io.goobi.viewer.connector.sru;
 
-import io.goobi.viewer.connector.utils.SolrConstants;
+import io.goobi.viewer.solr.SolrConstants;
 
 /**
  * <p>SearchField class.</p>

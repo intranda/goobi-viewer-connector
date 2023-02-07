@@ -26,8 +26,8 @@ import org.junit.Test;
 
 import io.goobi.viewer.connector.AbstractTest;
 import io.goobi.viewer.connector.oai.RequestHandler;
-import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.controller.XmlTools;
+import io.goobi.viewer.solr.SolrConstants;
 
 public class METSFormatTest extends AbstractTest {
 

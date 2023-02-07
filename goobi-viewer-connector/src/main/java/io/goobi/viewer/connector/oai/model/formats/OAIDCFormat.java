@@ -42,12 +42,12 @@ import io.goobi.viewer.connector.oai.model.ErrorCode;
 import io.goobi.viewer.connector.oai.model.language.Language;
 import io.goobi.viewer.connector.oai.model.metadata.MetadataParameter;
 import io.goobi.viewer.connector.oai.model.metadata.MetadataParameter.MetadataParameterType;
-import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
 import io.goobi.viewer.controller.NetTools;
 import io.goobi.viewer.exceptions.HTTPException;
 import io.goobi.viewer.messages.ViewerResourceBundle;
+import io.goobi.viewer.solr.SolrConstants;
 
 /**
  * oai_dc
@@ -473,10 +473,11 @@ public class OAIDCFormat extends Format {
      * @param anchorDoc a {@link org.apache.solr.common.SolrDocument} object.
      * @param namespace a {@link org.jdom2.Namespace} object.
      * @return a {@link org.jdom2.Element} object.
+     * @should throw IllegalArgumentException if topstructDoc null
+     * @should create element correctly
      */
-    protected static Element generateDcSource(SolrDocument doc, SolrDocument topstructDoc, SolrDocument anchorDoc, Namespace namespace) {
+    static Element generateDcSource(SolrDocument doc, SolrDocument topstructDoc, SolrDocument anchorDoc, Namespace namespace) {
         if (topstructDoc == null) {
-            logger.debug(doc.getFieldValueMap().toString());
             throw new IllegalArgumentException("topstructDoc may not be null");
         }
 
@@ -538,8 +539,8 @@ public class OAIDCFormat extends Format {
         String orderLabelFirst = null;
         String orderLabelLast = null;
         if (doc != null) {
-            orderLabelFirst = (String) doc.getFirstValue(SolrConstants.ORDERLABELFIRST);
-            orderLabelLast = (String) doc.getFirstValue(SolrConstants.ORDERLABELLAST);
+            orderLabelFirst = (String) doc.getFirstValue("ORDERLABELFIRST");
+            orderLabelLast = (String) doc.getFirstValue("ORDERLABELLAST");
         }
 
         StringBuilder sbSourceString = new StringBuilder();

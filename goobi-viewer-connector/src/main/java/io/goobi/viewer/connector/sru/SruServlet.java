@@ -16,6 +16,7 @@
 package io.goobi.viewer.connector.sru;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -47,12 +48,13 @@ import org.jdom2.transform.XSLTransformer;
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.exceptions.MissingArgumentException;
 import io.goobi.viewer.connector.oai.enums.Metadata;
-import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.SolrSearchIndex;
 import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.controller.NetTools;
 import io.goobi.viewer.controller.XmlTools;
 import io.goobi.viewer.exceptions.HTTPException;
+import io.goobi.viewer.solr.SolrConstants;
+import io.goobi.viewer.solr.SolrTools;
 
 /**
  * <p>
@@ -65,9 +67,9 @@ public class SruServlet extends HttpServlet {
     private static final long serialVersionUID = -6396567784411891113L;
     private static final Logger logger = LogManager.getLogger(SruServlet.class);
 
-    private static final Namespace SRU_NAMESPACE = Namespace.getNamespace("srw", "http://www.loc.gov/zing/srw/");
-    private static final Namespace EXPLAIN_NAMESPACE = Namespace.getNamespace("ns", "http://explain.z3950.org/dtd/2.0/");
-    private static final Namespace DIAG_NAMESPACE = Namespace.getNamespace("diag", "http://www.loc.gov/zing/srw/diagnostic/");
+    static final Namespace SRU_NAMESPACE = Namespace.getNamespace("srw", "http://www.loc.gov/zing/srw/");
+    static final Namespace EXPLAIN_NAMESPACE = Namespace.getNamespace("ns", "http://explain.z3950.org/dtd/2.0/");
+    static final Namespace DIAG_NAMESPACE = Namespace.getNamespace("diag", "http://www.loc.gov/zing/srw/diagnostic/");
 
     private static final Namespace METS_NAMESPACE = Namespace.getNamespace("mets", "http://www.loc.gov/METS/");
     private static final Namespace XSI_NAMESPACE = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
@@ -89,12 +91,12 @@ public class SruServlet extends HttpServlet {
             parameter = new SruRequestParameter(request);
         } catch (MissingArgumentException e) {
             try {
-                if (e.getMessage().contains("version")) {
-                    missingArgument(response, "version");
-                } else if (e.getMessage().contains("operation")) {
-                    missingArgument(response, "operation");
+                if (e.getMessage().contains(SruRequestParameter.PARAM_VERSION)) {
+                    missingArgument(parameter, response, SruRequestParameter.PARAM_VERSION);
+                } else if (e.getMessage().contains(SruRequestParameter.PARAM_OPERATION)) {
+                    missingArgument(parameter, response, SruRequestParameter.PARAM_OPERATION);
                 } else {
-                    missingArgument(response, "");
+                    missingArgument(parameter, response, "");
                 }
             } catch (IOException e1) {
                 try {
@@ -119,7 +121,7 @@ public class SruServlet extends HttpServlet {
                 logger.trace("operation is searchRetrieve");
                 if (parameter.getQuery() == null || parameter.getQuery().isEmpty()) {
                     try {
-                        missingArgument(response, "query");
+                        missingArgument(parameter, response, "query");
                     } catch (IOException e) {
                         try {
                             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -133,7 +135,7 @@ public class SruServlet extends HttpServlet {
 
                 if (parameter.getRecordSchema() == null) {
                     try {
-                        wrongSchema(response, request.getParameter("recordSchema"));
+                        wrongSchema(parameter, response, request.getParameter("recordSchema"));
                     } catch (IOException e) {
                         try {
                             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -166,7 +168,7 @@ public class SruServlet extends HttpServlet {
                 logger.trace("operation is scan");
                 if (parameter.getScanClause() == null || parameter.getScanClause().isEmpty()) {
                     try {
-                        missingArgument(response, "scanClause");
+                        missingArgument(parameter, response, "scanClause");
                     } catch (IOException e) {
                         try {
                             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -182,7 +184,7 @@ public class SruServlet extends HttpServlet {
                 // http://s2w.visuallibrary.net/dps/sru/?operation=scan&version=1.1&scanClause=Augsburg
                 // http://sru.gbv.de/opac-de-27?version=1.2&operation=scan&scanClause=Augsburg
                 try {
-                    unsupportedOperation(response, "scan");
+                    unsupportedOperation(parameter, response, "scan");
                 } catch (IOException e) {
                     logger.error(e.getMessage());
                     try {
@@ -195,7 +197,7 @@ public class SruServlet extends HttpServlet {
             case UNSUPPORTETPARAMETER:
             default:
                 try {
-                    unsupportedOperation(response, request.getParameter("operation"));
+                    unsupportedOperation(parameter, response, request.getParameter(SruRequestParameter.PARAM_OPERATION));
                 } catch (IOException e) {
                     logger.error(e.getMessage());
                     try {
@@ -208,7 +210,7 @@ public class SruServlet extends HttpServlet {
         }
 
         Format format = Format.getPrettyFormat();
-        format.setEncoding("utf-8");
+        format.setEncoding(StandardCharsets.UTF_8.name().toLowerCase());
         XMLOutputter xmlOut = new XMLOutputter(format);
         try {
             xmlOut.output(doc, response.getOutputStream());
@@ -224,40 +226,6 @@ public class SruServlet extends HttpServlet {
     }
 
     /**
-     * @param response
-     * @param string
-     * @throws IOException
-     */
-    private static void wrongSchema(HttpServletResponse response, String parameter) throws IOException {
-        Element searchRetrieveResponse = new Element("searchRetrieveResponse", SRU_NAMESPACE);
-        Element version = new Element("version", SRU_NAMESPACE);
-        version.setText("1.2");
-        searchRetrieveResponse.addContent(version);
-        Element diagnostic = new Element("diagnostic", SRU_NAMESPACE);
-        searchRetrieveResponse.addContent(diagnostic);
-
-        Element uri = new Element("uri", DIAG_NAMESPACE);
-        uri.setText("info:srw/diagnostic/1/66");
-        diagnostic.addContent(uri);
-
-        Element details = new Element("details", DIAG_NAMESPACE);
-        details.setText("   Unknown schema for retrieval");
-        diagnostic.addContent(details);
-
-        Element message = new Element("message", DIAG_NAMESPACE);
-
-        message.setText("Unknown schema for retrieval / " + parameter);
-        diagnostic.addContent(message);
-        Document doc = new Document();
-        doc.setRootElement(searchRetrieveResponse);
-        Format format = Format.getPrettyFormat();
-        format.setEncoding("utf-8");
-        XMLOutputter xmlOut = new XMLOutputter(format);
-        xmlOut.output(doc, response.getOutputStream());
-
-    }
-
-    /**
      * 
      * @param parameter
      * @param solr
@@ -265,15 +233,20 @@ public class SruServlet extends HttpServlet {
      * @return
      * @throws SolrServerException
      * @throws IOException
+     * @should create element correctly
      */
-    private static Element generateSearchRetrieve(SruRequestParameter parameter, SolrSearchIndex solr, String filterQuerySuffix)
+    static Element generateSearchRetrieve(SruRequestParameter parameter, SolrSearchIndex solr, String filterQuerySuffix)
             throws SolrServerException, IOException {
+        if (parameter == null) {
+            throw new IllegalArgumentException("parameter may not be null");
+        }
+
         Element root = new Element("searchRetrieveResponse", SRU_NAMESPACE);
-        Element version = new Element("version", SRU_NAMESPACE);
+        Element version = new Element(SruRequestParameter.PARAM_VERSION, SRU_NAMESPACE);
         version.setText(parameter.getVersion());
         root.addContent(version);
 
-        String query = generateSearchQuery(parameter, filterQuerySuffix);
+        String query = generateSearchQuery(parameter.getQuery(), parameter.getRecordSchema(), filterQuerySuffix);
         QueryResponse queryResponse =
                 solr.search(query, parameter.getStartRecord() - 1, parameter.getStartRecord() - 1 + parameter.getMaximumRecords(), null, null, null);
         SolrDocumentList solrDocuments = queryResponse.getResults();
@@ -291,88 +264,143 @@ public class SruServlet extends HttpServlet {
         root.addContent(records);
 
         generateRecords(records, solrDocuments, parameter, solr, filterQuerySuffix);
-        generateEchoedSearchRetrieveRequest(root, solrDocuments, parameter);
+        generateEchoedSearchRetrieveRequest(root, parameter);
 
         return root;
     }
 
     /**
+     * Creates wrong schema error XML and writes it into response.
      * 
-     * @param response
      * @param parameter
+     * @param response
+     * @param schema
      * @throws IOException
      */
-    private static void missingArgument(HttpServletResponse response, String parameter) throws IOException {
-        Element searchRetrieveResponse = new Element("searchRetrieveResponse", SRU_NAMESPACE);
-        Element version = new Element("version", SRU_NAMESPACE);
-        version.setText("1.2");
-        searchRetrieveResponse.addContent(version);
-        Element diagnostic = new Element("diagnostic", SRU_NAMESPACE);
-        searchRetrieveResponse.addContent(diagnostic);
-
-        Element uri = new Element("uri", DIAG_NAMESPACE);
-        uri.setText("info:srw/diagnostic/1/7");
-        diagnostic.addContent(uri);
-
-        Element details = new Element("details", DIAG_NAMESPACE);
-        details.setText("Mandatory parameter not supplied");
-        diagnostic.addContent(details);
-
-        Element message = new Element("message", DIAG_NAMESPACE);
-
-        message.setText("Mandatory parameter not supplied / " + parameter);
-        diagnostic.addContent(message);
-        Document doc = new Document();
-        doc.setRootElement(searchRetrieveResponse);
+    private static void wrongSchema(SruRequestParameter parameter, HttpServletResponse response, String schema) throws IOException {
+        Document doc = createWrongSchemaDocument(parameter != null ? parameter.getVersion() : "?", schema);
         Format format = Format.getPrettyFormat();
-        format.setEncoding("utf-8");
+        format.setEncoding(StandardCharsets.UTF_8.name().toLowerCase());
+        XMLOutputter xmlOut = new XMLOutputter(format);
+        xmlOut.output(doc, response.getOutputStream());
+    }
+
+    /**
+     * Creates wrong schema error {@link Document}
+     * 
+     * @param version
+     * @param schema
+     * @return
+     * @should create document correctly
+     */
+    static Document createWrongSchemaDocument(String version, String schema) {
+        return createErrorResponseDocument(version, "info:srw/diagnostic/1/66", "Unknown schema for retrieval", schema);
+    }
+
+    /**
+     * @param parameter SRU request parameter object
+     * @param response
+     * @param missing Name of the missing parameter
+     * @throws IOException
+     */
+    private static void missingArgument(SruRequestParameter parameter, HttpServletResponse response, String missing) throws IOException {
+        Document doc = createMissingArgumentDocument(parameter != null ? parameter.getVersion() : "?", missing);
+        Format format = Format.getPrettyFormat();
+        format.setEncoding(StandardCharsets.UTF_8.name().toLowerCase());
         XMLOutputter xmlOut = new XMLOutputter(format);
         xmlOut.output(doc, response.getOutputStream());
     }
 
     /**
      * 
-     * @param response
+     * Creates missing argument error {@link Document}
+     * 
+     * @param version
+     * @param missing
+     * @return
+     * @should create document correctly
+     */
+    static Document createMissingArgumentDocument(String version, String missing) {
+        return createErrorResponseDocument(version, "info:srw/diagnostic/1/7",
+                "Mandatory parameter not supplied", missing);
+    }
+
+    /**
      * @param parameter
+     * @param response
+     * @param operation
      * @throws IOException
      */
-    private static void unsupportedOperation(HttpServletResponse response, String parameter) throws IOException {
-        Element searchRetrieveResponse = new Element("searchRetrieveResponse", SRU_NAMESPACE);
-        Element version = new Element("version", SRU_NAMESPACE);
-        version.setText("1.2");
-        searchRetrieveResponse.addContent(version);
-        Element diagnostic = new Element("diagnostic", SRU_NAMESPACE);
-        searchRetrieveResponse.addContent(diagnostic);
-
-        Element uri = new Element("uri", DIAG_NAMESPACE);
-        uri.setText("info:srw/diagnostic/1/4");
-        diagnostic.addContent(uri);
-
-        Element details = new Element("details", DIAG_NAMESPACE);
-        details.setText("Unsupported operation");
-        diagnostic.addContent(details);
-
-        Element message = new Element("message", DIAG_NAMESPACE);
-
-        message.setText("Unsupported operation / " + parameter);
-        diagnostic.addContent(message);
-        Document doc = new Document();
-        doc.setRootElement(searchRetrieveResponse);
+    static void unsupportedOperation(SruRequestParameter parameter, HttpServletResponse response, String operation) throws IOException {
+        Document doc = createUnsupportedOperationDocument(parameter != null ? parameter.getVersion() : "?", operation);
         Format format = Format.getPrettyFormat();
-        format.setEncoding("utf-8");
+        format.setEncoding(StandardCharsets.UTF_8.name().toLowerCase());
         XMLOutputter xmlOut = new XMLOutputter(format);
         xmlOut.output(doc, response.getOutputStream());
     }
 
     /**
-     * @param parameter
-     * @param filterQuerySuffix Filter query suffix for the client's session
+     * 
+     * @param version
+     * @param operation
+     * @return
+     * @should create document correctly
+     */
+    static Document createUnsupportedOperationDocument(String version, String operation) {
+        return createErrorResponseDocument(version, "info:srw/diagnostic/1/4", "Unsupported operation", operation);
+    }
+
+    /**
+     * Creates an error XML {@link Document} with given content.
+     * 
+     * @param version SRU protocol version
+     * @param uriText Text for the uri element
+     * @param detailsText Text for the details element
+     * @param arg Problematic argument
      * @return
      */
-    private static String generateSearchQuery(SruRequestParameter parameter, String filterQuerySuffix) {
+    static Document createErrorResponseDocument(String version, String uriText, String detailsText, String arg) {
+        Element searchRetrieveResponse = new Element("searchRetrieveResponse", SRU_NAMESPACE);
+        Element eleVersion = new Element(SruRequestParameter.PARAM_VERSION, SRU_NAMESPACE);
+        eleVersion.setText(version);
+        searchRetrieveResponse.addContent(eleVersion);
+        Element diagnostic = new Element("diagnostic", SRU_NAMESPACE);
+        searchRetrieveResponse.addContent(diagnostic);
+
+        Element uri = new Element("uri", DIAG_NAMESPACE);
+        uri.setText(uriText);
+        diagnostic.addContent(uri);
+
+        Element details = new Element("details", DIAG_NAMESPACE);
+        details.setText(detailsText);
+        diagnostic.addContent(details);
+
+        Element message = new Element("message", DIAG_NAMESPACE);
+        message.setText(detailsText + " / " + arg);
+        diagnostic.addContent(message);
+
+        Document ret = new Document();
+        ret.setRootElement(searchRetrieveResponse);
+
+        return ret;
+    }
+
+    /**
+     * @param sruQuery
+     * @param recordSchema
+     * @param filterQuerySuffix Filter query suffix for the client's session
+     * @return
+     * @should throw {@link IllegalArgumentException} if sruQuery null
+     * @should create query correctly
+     */
+    static String generateSearchQuery(String sruQuery, Metadata recordSchema, String filterQuerySuffix) {
+        if (sruQuery == null) {
+            throw new IllegalArgumentException("sruQuery may not be null");
+        }
+
         // map dc queries to solr queries
         StringBuilder sbValue = new StringBuilder();
-        String initValue = parameter.getQuery();
+        String initValue = sruQuery;
         for (Matcher m = Pattern.compile("dc.\\w+").matcher(initValue); m.find();) {
             String searchParameter = m.toMatchResult().group();
             SearchField sf = SearchField.getFieldByDcName(searchParameter);
@@ -380,57 +408,58 @@ public class SruServlet extends HttpServlet {
                 initValue = initValue.replaceAll(searchParameter + "\\s*=", sf.getSolrName() + ":");
             }
         }
-        // map iv queries to solr queries
-        for (Matcher m = Pattern.compile("iv.\\w+").matcher(initValue); m.find();) {
-            String searchParameter = m.toMatchResult().group();
-            SearchField sf = SearchField.getFieldByInternalName(searchParameter);
-            if (sf != null) {
-                initValue = initValue.replaceAll(searchParameter + "\\s*=", sf.getSolrName() + ":");
-            }
-        }
+        // map iv queries to solr queries TODO This is probably unused
+        //        for (Matcher m = Pattern.compile("iv.(\\w+)").matcher(initValue); m.find();) {
+        //            String searchParameter = m.toMatchResult().group(1);
+        //            SearchField sf = SearchField.getFieldByInternalName(searchParameter);
+        //            if (sf != null) {
+        //                initValue = initValue.replaceAll(searchParameter + "\\s*=", sf.getSolrName() + ":");
+        //            }
+        //        }
         // map cql fields to solr queries
-        for (Matcher m = Pattern.compile("\\w{1,20}\\s?=").matcher(initValue); m.find();) {
+        for (Matcher m = Pattern.compile("(\\w{1,20})\\s?=").matcher(initValue); m.find();) {
             String searchParameter = m.toMatchResult().group();
             String param = searchParameter.replace("=", "").trim();
             SearchField sf = SearchField.getFieldByCqlName(param);
             if (sf != null) {
-                initValue = initValue.replaceAll(sf + "\\s*=", sf.getSolrName() + ":");
+                initValue = initValue.replaceAll(searchParameter, sf.getSolrName() + ":");
             }
         }
         sbValue.append(initValue);
 
-        switch (parameter.getRecordSchema()) {
-            case LIDO:
-                sbValue.append(" AND ").append(SolrConstants.SOURCEDOCFORMAT).append(":LIDO");
-                break;
-            case MARCXML:
-            case MODS:
-            case METS:
-                sbValue.append(" AND ").append(SolrConstants.SOURCEDOCFORMAT).append(":METS");
-                break;
-            default:
-                break;
+        if (recordSchema != null) {
+            switch (recordSchema) {
+                case LIDO:
+                    sbValue.append(" AND ").append(SolrConstants.SOURCEDOCFORMAT).append(":LIDO");
+                    break;
+                case MARCXML:
+                case MODS:
+                case METS:
+                    sbValue.append(" AND ").append(SolrConstants.SOURCEDOCFORMAT).append(":METS");
+                    break;
+                default:
+                    break;
+            }
         }
         sbValue.append(" AND (")
                 .append(SolrConstants.ISWORK)
                 .append(":true OR ")
                 .append(SolrConstants.ISANCHOR)
                 .append(":true)")
-                .append(filterQuerySuffix);
+                .append(filterQuerySuffix != null ? filterQuerySuffix : "");
         logger.trace(sbValue);
         return sbValue.toString();
     }
 
     /**
      * @param root
-     * @param solrDocuments
      * @param parameter
      */
-    private static void generateEchoedSearchRetrieveRequest(Element root, List<SolrDocument> solrDocuments, SruRequestParameter parameter) {
+    static void generateEchoedSearchRetrieveRequest(Element root, SruRequestParameter parameter) {
         Element echoedSearchRetrieveRequest = new Element("echoedSearchRetrieveRequest", SRU_NAMESPACE);
         root.addContent(echoedSearchRetrieveRequest);
 
-        Element version = new Element("version", SRU_NAMESPACE);
+        Element version = new Element(SruRequestParameter.PARAM_VERSION, SRU_NAMESPACE);
         version.setText(parameter.getVersion());
         echoedSearchRetrieveRequest.addContent(version);
 
@@ -472,19 +501,25 @@ public class SruServlet extends HttpServlet {
         }
 
         for (SolrDocument document : solrDocuments) {
-            Element record = new Element("record", SRU_NAMESPACE);
-            records.addContent(record);
+            Element rec = new Element("record", SRU_NAMESPACE);
+            records.addContent(rec);
 
             Element recordSchema = new Element("recordSchema", SRU_NAMESPACE);
             recordSchema.setText(parameter.getRecordSchema().getMetadataPrefix());
-            record.addContent(recordSchema);
+            rec.addContent(recordSchema);
 
             Element recordPacking = new Element("recordPacking", SRU_NAMESPACE);
             recordPacking.setText(parameter.getRecordPacking());
-            record.addContent(recordPacking);
+            rec.addContent(recordPacking);
 
             Element recordData = new Element("recordData", SRU_NAMESPACE);
-            record.addContent(recordData);
+            rec.addContent(recordData);
+
+            if ("1.2".equals(parameter.getVersion())) {
+                Element recordIdentifier = new Element("recordIdentifier", SRU_NAMESPACE);
+                recordIdentifier.setText(SolrTools.getSingleFieldStringValue(document, SolrConstants.PI_TOPSTRUCT));
+                rec.addContent(recordIdentifier);
+            }
 
             switch (parameter.getRecordSchema()) {
                 case SOLR:
@@ -558,7 +593,7 @@ public class SruServlet extends HttpServlet {
         String yearpublish = null;
 
         // creating Element <dc:title />
-        Element dc_title = new Element("title", DC_NAMEPSACE);
+        Element eleDcTitle = new Element("title", DC_NAMEPSACE);
         if (doc.getFieldValues(SolrConstants.TITLE) != null) {
             title = (String) doc.getFieldValues("MD_TITLE").iterator().next();
         } else {
@@ -571,22 +606,23 @@ public class SruServlet extends HttpServlet {
                 title = anchorTitle + "; " + title;
             }
         }
-        dc_title.setText(title);
-        dc.addContent(dc_title);
+        eleDcTitle.setText(title);
+        dc.addContent(eleDcTitle);
 
         // creating Element <dc:creator />
         if (doc.getFieldValues("MD_CREATOR") != null) {
+            StringBuilder sb = new StringBuilder();
             for (Object fieldValue : doc.getFieldValues("MD_CREATOR")) {
                 String value = (String) fieldValue;
-                if (StringUtils.isEmpty(creators)) {
-                    creators = value;
-                } else {
-                    creators += ", " + value;
+                if (sb.length() > 0) {
+                    sb.append(", ");
                 }
-                Element dc_creator = new Element("creator", DC_NAMEPSACE);
-                dc_creator.setText(value);
-                dc.addContent(dc_creator);
+                sb.append(value);
+                Element eleDcCreator = new Element("creator", DC_NAMEPSACE);
+                eleDcCreator.setText(value);
+                dc.addContent(eleDcCreator);
             }
+            creators = sb.toString();
         }
 
         // creating <dc:subject />
@@ -594,64 +630,64 @@ public class SruServlet extends HttpServlet {
         // in lucene there are two space between the strings -> every one must be an new xml subject element
         if (doc.getFieldValues(SolrConstants.DC) != null) {
             for (Object fieldValue : doc.getFieldValues(SolrConstants.DC)) {
-                Element dc_type = new Element("subject", DC_NAMEPSACE);
+                Element eleDcType = new Element("subject", DC_NAMEPSACE);
                 if (((String) fieldValue).equals("")) {
-                    dc_type.setText((String) fieldValue);
-                    dc.addContent(dc_type);
+                    eleDcType.setText((String) fieldValue);
+                    dc.addContent(eleDcType);
                 }
             }
         }
 
         // creating <dc:publisher .../>
-        Element dc_publisher = new Element("publisher", DC_NAMEPSACE);
+        Element eleDcPublisher = new Element("publisher", DC_NAMEPSACE);
         if (doc.getFieldValues("MD_PUBLISHER") != null) {
             publisher = (String) doc.getFieldValues("MD_PUBLISHER").iterator().next();
-            dc_publisher.setText(publisher);
+            eleDcPublisher.setText(publisher);
         }
-        dc.addContent(dc_publisher);
+        dc.addContent(eleDcPublisher);
 
         if (doc.getFieldValues("MD_PLACEPUBLISH") != null) {
             placepublish = (String) doc.getFieldValues("MD_PLACEPUBLISH").iterator().next();
         }
 
         // creating <dc:date />
-        Element dc_yearPublish = new Element("date", DC_NAMEPSACE);
+        Element eleDcYearPublish = new Element("date", DC_NAMEPSACE);
         if (doc.getFieldValues("MD_YEARPUBLISH") != null) {
             yearpublish = (String) doc.getFieldValues("MD_YEARPUBLISH").iterator().next();
-            dc_yearPublish.setText(yearpublish);
+            eleDcYearPublish.setText(yearpublish);
         }
-        dc.addContent(dc_yearPublish);
+        dc.addContent(eleDcYearPublish);
 
         // creting <dc:type />
-        Element dc_type = new Element("type", DC_NAMEPSACE);
+        Element eleDcType = new Element("type", DC_NAMEPSACE);
         if (doc.getFieldValue(SolrConstants.DOCSTRCT) != null) {
-            dc_type.setText((String) doc.getFieldValue(SolrConstants.DOCSTRCT));
+            eleDcType.setText((String) doc.getFieldValue(SolrConstants.DOCSTRCT));
         }
-        dc.addContent(dc_type);
+        dc.addContent(eleDcType);
         // always create a standard type with the default dc:type
-        dc_type = new Element("type", DC_NAMEPSACE);
-        dc_type.setText("Text");
-        dc.addContent(dc_type);
+        eleDcType = new Element("type", DC_NAMEPSACE);
+        eleDcType.setText("Text");
+        dc.addContent(eleDcType);
 
         // creating <dc:format />
         // creating <dc:format /> second one appears always
-        Element dc_format = new Element("format", DC_NAMEPSACE);
-        dc_format.setText("image/jpeg");
-        dc.addContent(dc_format);
+        Element eleDcFormat = new Element("format", DC_NAMEPSACE);
+        eleDcFormat.setText("image/jpeg");
+        dc.addContent(eleDcFormat);
 
-        dc_format = new Element("format", DC_NAMEPSACE);
-        dc_format.setText("application/pdf");
-        dc.addContent(dc_format);
+        eleDcFormat = new Element("format", DC_NAMEPSACE);
+        eleDcFormat.setText("application/pdf");
+        dc.addContent(eleDcFormat);
 
         // create <dc:identifier />
         if (doc.getFieldValue(SolrConstants.URN) != null && ((String) doc.getFieldValue(SolrConstants.URN)).length() > 0) {
-            Element dc_identifier = new Element("identifier", DC_NAMEPSACE);
-            dc_identifier.setText(DataManager.getInstance().getConfiguration().getUrnResolverUrl() + (String) doc.getFieldValue(SolrConstants.URN));
-            dc.addContent(dc_identifier);
+            Element eleDcIdentifier = new Element("identifier", DC_NAMEPSACE);
+            eleDcIdentifier.setText(DataManager.getInstance().getConfiguration().getUrnResolverUrl() + (String) doc.getFieldValue(SolrConstants.URN));
+            dc.addContent(eleDcIdentifier);
         }
         // create <dc:source />
         {
-            Element dc_source = new Element("source", DC_NAMEPSACE);
+            Element eleDcSource = new Element("source", DC_NAMEPSACE);
             if (creators == null) {
                 creators = "-";
             }
@@ -668,14 +704,14 @@ public class SruServlet extends HttpServlet {
                 publisher = "-";
             }
             String sourceString = creators + ": " + title + ", " + placepublish + ": " + publisher + " " + yearpublish + ".";
-            dc_source.setText(sourceString);
-            dc.addContent(dc_source);
+            eleDcSource.setText(sourceString);
+            dc.addContent(eleDcSource);
         }
 
         // create <dc:rights />
-        Element dc_rights = new Element("rights", DC_NAMEPSACE);
-        dc_rights.setText("Open Access");
-        dc.addContent(dc_rights);
+        Element eleDcRights = new Element("rights", DC_NAMEPSACE);
+        eleDcRights.setText("Open Access");
+        dc.addContent(eleDcRights);
         recordData.addContent(dc);
     }
 
@@ -766,7 +802,7 @@ public class SruServlet extends HttpServlet {
     }
 
     /**
-     * @param document
+     * @param doc
      * @param recordData
      */
     private static void generateModsRecord(SolrDocument doc, Element recordData) {
@@ -898,19 +934,19 @@ public class SruServlet extends HttpServlet {
     private static Element getExplain(HttpServletRequest request, SruRequestParameter parameter) {
         Element root = new Element("explainResponse", SRU_NAMESPACE);
 
-        Element version = new Element("version", SRU_NAMESPACE);
+        Element version = new Element(SruRequestParameter.PARAM_VERSION, SRU_NAMESPACE);
         version.setText(parameter.getVersion());
         root.addContent(version);
 
-        Element record = new Element("record", SRU_NAMESPACE);
-        root.addContent(record);
+        Element eleRecord = new Element("record", SRU_NAMESPACE);
+        root.addContent(eleRecord);
 
         Element recordSchema = new Element("recordSchema", SRU_NAMESPACE);
         recordSchema.setText(EXPLAIN_NAMESPACE.getURI());
-        record.addContent(recordSchema);
+        eleRecord.addContent(recordSchema);
 
         Element recordData = new Element("recordData", SRU_NAMESPACE);
-        record.addContent(recordData);
+        eleRecord.addContent(recordData);
 
         Element explain = new Element("explain", EXPLAIN_NAMESPACE);
         explain.setAttribute("id", "intranda GmbH");
@@ -919,7 +955,7 @@ public class SruServlet extends HttpServlet {
 
         Element serverInfo = new Element("serverInfo", EXPLAIN_NAMESPACE);
         serverInfo.setAttribute("protocol", "SRU");
-        serverInfo.setAttribute("version", "1.2");
+        serverInfo.setAttribute(SruRequestParameter.PARAM_VERSION, "1.2");
         serverInfo.setAttribute("transport", "http");
 
         explain.addContent(serverInfo);
@@ -953,7 +989,7 @@ public class SruServlet extends HttpServlet {
         databaseInfo.addContent(contact);
 
         Element implementation = new Element("implementation", EXPLAIN_NAMESPACE);
-        implementation.setAttribute("version", "1.2");
+        implementation.setAttribute(SruRequestParameter.PARAM_VERSION, "1.2");
         databaseInfo.addContent(implementation);
 
         Element indexInfo = new Element("indexInfo", EXPLAIN_NAMESPACE);
@@ -989,123 +1025,20 @@ public class SruServlet extends HttpServlet {
             indexInfo.addContent(index);
         }
 
-        {
-            // mods
-            Element schemaInfo = new Element("schemaInfo", EXPLAIN_NAMESPACE);
-            explain.addContent(schemaInfo);
-
-            Element schema = new Element("schema", EXPLAIN_NAMESPACE);
-            schema.setAttribute("retrieve", "true");
-            schema.setAttribute("sort", "false");
-            schema.setAttribute("identifier", "info:srw/schema/1/mods-v3.3");
-            schema.setAttribute("location", "http://www.loc.gov/standards/mods/v3/mods-3-3.xsd");
-            schema.setAttribute("name", "mods");
-
-            Element schemaTitle = new Element("title", EXPLAIN_NAMESPACE);
-            schemaTitle.setAttribute("primary", "true");
-            schemaTitle.setText("MODS");
-            schema.addContent(schemaTitle);
-            schemaInfo.addContent(schema);
-        }
-
-        {
-            // dc
-            Element schemaInfo = new Element("schemaInfo", EXPLAIN_NAMESPACE);
-            explain.addContent(schemaInfo);
-
-            Element schema = new Element("schema", EXPLAIN_NAMESPACE);
-            schema.setAttribute("retrieve", "true");
-            schema.setAttribute("sort", "false");
-            schema.setAttribute("identifier", "info:srw/schema/1/dc-v1.1");
-            schema.setAttribute("location", "http://www.loc.gov/standards/sru/resources/dc-schema.xsd");
-            schema.setAttribute("name", "dc");
-
-            Element schemaTitle = new Element("title", EXPLAIN_NAMESPACE);
-            schemaTitle.setAttribute("primary", "true");
-            schemaTitle.setText("Dublin Core");
-            schema.addContent(schemaTitle);
-            schemaInfo.addContent(schema);
-
-        }
-
-        {
-            // marcxml
-            Element schemaInfo = new Element("schemaInfo", EXPLAIN_NAMESPACE);
-            explain.addContent(schemaInfo);
-
-            Element schema = new Element("schema", EXPLAIN_NAMESPACE);
-            schema.setAttribute("retrieve", "true");
-            schema.setAttribute("sort", "false");
-            schema.setAttribute("identifier", "info:srw/schema/1/marcxml-v1.1");
-            schema.setAttribute("location", "http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd");
-            schema.setAttribute("name", "marcxml");
-
-            Element schemaTitle = new Element("title", EXPLAIN_NAMESPACE);
-            schemaTitle.setAttribute("primary", "true");
-            schemaTitle.setText("MARC21-XML");
-            schema.addContent(schemaTitle);
-            schemaInfo.addContent(schema);
-
-        }
-
-        {
-            // solr
-            Element schemaInfo = new Element("schemaInfo", EXPLAIN_NAMESPACE);
-            explain.addContent(schemaInfo);
-
-            Element schema = new Element("schema", EXPLAIN_NAMESPACE);
-            schema.setAttribute("retrieve", "true");
-            schema.setAttribute("sort", "false");
-            // TODO schema location?
-            schema.setAttribute("identifier", "info:srw/schema/1/solr-v1.1");
-            schema.setAttribute("location", "");
-            schema.setAttribute("name", "solr");
-
-            Element schemaTitle = new Element("title", EXPLAIN_NAMESPACE);
-            schemaTitle.setAttribute("primary", "true");
-            schemaTitle.setText("SOLR");
-            schema.addContent(schemaTitle);
-            schemaInfo.addContent(schema);
-        }
-
-        {
-            // mets
-            Element schemaInfo = new Element("schemaInfo", EXPLAIN_NAMESPACE);
-            explain.addContent(schemaInfo);
-
-            Element schema = new Element("schema", EXPLAIN_NAMESPACE);
-            schema.setAttribute("retrieve", "true");
-            schema.setAttribute("sort", "false");
-            schema.setAttribute("identifier", "http://www.loc.gov/METS/");
-            schema.setAttribute("location", "http://www.loc.gov/standards/mets/version18/mets.xsd");
-            schema.setAttribute("name", "mets");
-
-            Element schemaTitle = new Element("title", EXPLAIN_NAMESPACE);
-            schemaTitle.setAttribute("primary", "true");
-            schemaTitle.setText("METS/MODS");
-            schema.addContent(schemaTitle);
-            schemaInfo.addContent(schema);
-
-        }
-        {
-            // lido
-            Element schemaInfo = new Element("schemaInfo", EXPLAIN_NAMESPACE);
-            explain.addContent(schemaInfo);
-
-            Element schema = new Element("schema", EXPLAIN_NAMESPACE);
-            schema.setAttribute("retrieve", "true");
-            schema.setAttribute("sort", "false");
-            schema.setAttribute("identifier", "http://www.lido-schema.org");
-            schema.setAttribute("location", "http://www.lido-schema.org/schema/v1.0/lido-v1.0.xsd");
-            schema.setAttribute("name", "lido");
-
-            Element schemaTitle = new Element("title", EXPLAIN_NAMESPACE);
-            schemaTitle.setAttribute("primary", "true");
-            schemaTitle.setText("LIDO");
-            schema.addContent(schemaTitle);
-            schemaInfo.addContent(schema);
-
-        }
+        explain.addContent(
+                createSchemaInfoElement("MODS", "mods", "info:srw/schema/1/mods-v3.3", "http://www.loc.gov/standards/mods/v3/mods-3-3.xsd"));
+        explain.addContent(
+                createSchemaInfoElement("Dublin Core", "dc", "info:srw/schema/1/dc-v1.1",
+                        "http://www.loc.gov/standards/sru/resources/dc-schema.xsd"));
+        explain.addContent(
+                createSchemaInfoElement("MARC21-XML", "marcxml", "info:srw/schema/1/marcxml-v1.1",
+                        "http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd"));
+        explain.addContent(
+                createSchemaInfoElement("SOLR", "solr", "info:srw/schema/1/solr-v1.1", ""));
+        explain.addContent(
+                createSchemaInfoElement("METS/MODS", "mets", "http://www.loc.gov/METS/", "http://www.loc.gov/standards/mets/version18/mets.xsd"));
+        explain.addContent(
+                createSchemaInfoElement("LIDO", "lido", "http://www.lido-schema.org", "http://www.lido-schema.org/schema/v1.0/lido-v1.0.xsd"));
 
         Element configInfo = new Element("configInfo", EXPLAIN_NAMESPACE);
         explain.addContent(configInfo);
@@ -1125,63 +1058,59 @@ public class SruServlet extends HttpServlet {
         operator.setText("and");
         configInfo.addContent(operator);
 
-        {
-            Element supports = new Element("supports", EXPLAIN_NAMESPACE);
-            supports.setAttribute("type", "booleanOperator");
-            supports.setText("and");
-            configInfo.addContent(supports);
-        }
-        {
-            Element supports = new Element("supports", EXPLAIN_NAMESPACE);
-            supports.setAttribute("type", "booleanOperator");
-            supports.setText("or");
-            configInfo.addContent(supports);
-        }
-        {
-            Element supports = new Element("supports", EXPLAIN_NAMESPACE);
-            supports.setAttribute("type", "booleanOperator");
-            supports.setText("not");
-            configInfo.addContent(supports);
-        }
-        {
-            Element supports = new Element("supports", EXPLAIN_NAMESPACE);
-            supports.setAttribute("type", "maskingCharacter");
-            supports.setText("*");
-            configInfo.addContent(supports);
-        }
-
-        {
-            Element supports = new Element("supports", EXPLAIN_NAMESPACE);
-            supports.setAttribute("type", "relation");
-            supports.setText("=");
-            configInfo.addContent(supports);
-        }
-        {
-            Element supports = new Element("supports", EXPLAIN_NAMESPACE);
-            supports.setAttribute("type", "relation");
-            supports.setText("&lt;");
-            configInfo.addContent(supports);
-        }
-        {
-            Element supports = new Element("supports", EXPLAIN_NAMESPACE);
-            supports.setAttribute("type", "relation");
-            supports.setText("&gt;");
-            configInfo.addContent(supports);
-        }
-        {
-            Element supports = new Element("supports", EXPLAIN_NAMESPACE);
-            supports.setAttribute("type", "relation");
-            supports.setText("exact");
-            configInfo.addContent(supports);
-        }
-        {
-            Element supports = new Element("supports", EXPLAIN_NAMESPACE);
-            supports.setAttribute("type", "relation");
-            supports.setText("within");
-            configInfo.addContent(supports);
-        }
+        configInfo.addContent(createSupportsElement("and"));
+        configInfo.addContent(createSupportsElement("or"));
+        configInfo.addContent(createSupportsElement("not"));
+        configInfo.addContent(createSupportsElement("*"));
+        configInfo.addContent(createSupportsElement("="));
+        configInfo.addContent(createSupportsElement("&lt;"));
+        configInfo.addContent(createSupportsElement("&gt;"));
+        configInfo.addContent(createSupportsElement("exact"));
+        configInfo.addContent(createSupportsElement("within"));
 
         return root;
+    }
+
+    /**
+     * 
+     * @param displayTitle
+     * @param name
+     * @param identifier
+     * @param location
+     * @return
+     * @should create element correctly
+     */
+    static Element createSchemaInfoElement(String displayTitle, String name, String identifier, String location) {
+        Element ret = new Element("schemaInfo", EXPLAIN_NAMESPACE);
+
+        Element schema = new Element("schema", EXPLAIN_NAMESPACE);
+        schema.setAttribute("retrieve", "true");
+        schema.setAttribute("sort", "false");
+        schema.setAttribute("identifier", identifier);
+        schema.setAttribute("location", location);
+        schema.setAttribute("name", name);
+
+        Element schemaTitle = new Element("title", EXPLAIN_NAMESPACE);
+        schemaTitle.setAttribute("primary", "true");
+        schemaTitle.setText(displayTitle);
+        schema.addContent(schemaTitle);
+        ret.addContent(schema);
+
+        return ret;
+    }
+
+    /**
+     * 
+     * @param eleConfigInfo
+     * @param value
+     * @should create element correctly
+     */
+    static Element createSupportsElement(String value) {
+        Element ret = new Element("supports", EXPLAIN_NAMESPACE);
+        ret.setAttribute("type", "relation");
+        ret.setText(value);
+
+        return ret;
     }
 
     private static Element createIndex(SearchField field) {

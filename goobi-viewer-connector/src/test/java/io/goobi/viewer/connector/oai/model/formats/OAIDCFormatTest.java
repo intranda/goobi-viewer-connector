@@ -11,7 +11,7 @@ import org.junit.Test;
 import io.goobi.viewer.connector.AbstractSolrEnabledTest;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
-import io.goobi.viewer.connector.utils.SolrConstants;
+import io.goobi.viewer.solr.SolrConstants;
 
 public class OAIDCFormatTest extends AbstractSolrEnabledTest {
 
@@ -41,4 +41,38 @@ public class OAIDCFormatTest extends AbstractSolrEnabledTest {
         Element eleOaiDc = eleMetadata.getChild("dc", nsOaiDoc);
         Assert.assertNotNull(eleOaiDc);
     }
+
+    /**
+     * @see OAIDCFormat#generateDcSource(SolrDocument,SolrDocument,SolrDocument,Namespace)
+     * @verifies throw IllegalArgumentException if topstructDoc null
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void generateDcSource_shouldThrowIllegalArgumentExceptionIfTopstructDocNull() throws Exception {
+        OAIDCFormat.generateDcSource(null, null, null,
+                Namespace.getNamespace(Metadata.DC.getMetadataNamespacePrefix(), Metadata.DC.getMetadataNamespaceUri()));
+    }
+
+    /**
+     * @see OAIDCFormat#generateDcSource(SolrDocument,SolrDocument,SolrDocument,Namespace)
+     * @verifies create element correctly
+     */
+    @Test
+    public void generateDcSource_shouldCreateElementCorrectly() throws Exception {
+        SolrDocument doc = new SolrDocument();
+        doc.addField("MD_CREATOR", "Doe, John");
+        doc.addField(SolrConstants.TITLE, "Foo Bar");
+        doc.addField("MD_PLACEPUBLISH", "Somewhere");
+        doc.addField("MD_PUBLISHER", "Indie");
+        doc.addField("MD_YEARPUBLISH", "2023");
+        
+        Element ele = OAIDCFormat.generateDcSource(doc, doc, null,
+                Namespace.getNamespace(Metadata.DC.getMetadataNamespacePrefix(), Metadata.DC.getMetadataNamespaceUri()));
+        Assert.assertNotNull(ele);
+        Assert.assertTrue(ele.getText().contains("Doe, John"));
+        Assert.assertTrue(ele.getText().contains("Foo Bar"));
+        Assert.assertTrue(ele.getText().contains("Somewhere"));
+        Assert.assertTrue(ele.getText().contains("Indie"));
+        Assert.assertTrue(ele.getText().contains("2023"));
+    }
+
 }

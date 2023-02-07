@@ -34,10 +34,10 @@ import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
-import io.goobi.viewer.connector.utils.SolrConstants;
 import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
 import io.goobi.viewer.connector.utils.XmlConstants;
+import io.goobi.viewer.solr.SolrConstants;
 
 /**
  * ESE
@@ -45,6 +45,10 @@ import io.goobi.viewer.connector.utils.XmlConstants;
 public class EuropeanaFormat extends OAIDCFormat {
 
     private static final Logger logger = LogManager.getLogger(EuropeanaFormat.class);
+    
+    public static final String MD_DATECREATED = "MD_DATECREATED";
+    public static final String MD_PUBLISHER = "MD_PUBLISHER";
+    public static final String MD_YEARPUBLISH = "MD_YEARPUBLISH";
 
     private List<String> setSpecFields =
             DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.ESE.name().toLowerCase());
@@ -205,8 +209,8 @@ public class EuropeanaFormat extends OAIDCFormat {
             if (doc.getFieldValues("MD_INFORMATION") != null) {
                 desc = (String) doc.getFieldValues("MD_INFORMATION").iterator().next();
 
-            } else if (doc.getFieldValues("MD_DATECREATED") != null) {
-                desc = (String) doc.getFieldValues("MD_DATECREATED").iterator().next();
+            } else if (doc.getFieldValues(MD_DATECREATED) != null) {
+                desc = (String) doc.getFieldValues(MD_DATECREATED).iterator().next();
             }
             if (desc != null) {
                 Element eleDcDescription = new Element("description", nsDc);
@@ -216,14 +220,14 @@ public class EuropeanaFormat extends OAIDCFormat {
 
             // <dc:date>
             String date = null;
-            if (doc.getFieldValues("MD_YEARPUBLISH") != null) {
-                date = (String) doc.getFieldValues("MD_YEARPUBLISH").iterator().next();
-            } else if (doc.getFieldValues("MD_DATECREATED") != null) {
-                date = (String) doc.getFieldValues("MD_DATECREATED").iterator().next();
-            } else if (topstructDoc != null && topstructDoc.getFieldValues("MD_YEARPUBLISH") != null) {
-                date = (String) topstructDoc.getFieldValues("MD_YEARPUBLISH").iterator().next();
-            } else if (topstructDoc != null && topstructDoc.getFieldValues("MD_DATECREATED") != null) {
-                date = (String) topstructDoc.getFieldValues("MD_DATECREATED").iterator().next();
+            if (doc.getFieldValues(MD_YEARPUBLISH) != null) {
+                date = (String) doc.getFieldValues(MD_YEARPUBLISH).iterator().next();
+            } else if (doc.getFieldValues(MD_DATECREATED) != null) {
+                date = (String) doc.getFieldValues(MD_DATECREATED).iterator().next();
+            } else if (topstructDoc != null && topstructDoc.getFieldValues(MD_YEARPUBLISH) != null) {
+                date = (String) topstructDoc.getFieldValues(MD_YEARPUBLISH).iterator().next();
+            } else if (topstructDoc != null && topstructDoc.getFieldValues(MD_DATECREATED) != null) {
+                date = (String) topstructDoc.getFieldValues(MD_DATECREATED).iterator().next();
             }
 
             if (date != null) {
@@ -244,8 +248,8 @@ public class EuropeanaFormat extends OAIDCFormat {
                 }
             }
             // <dc:created>
-            if (doc.getFieldValues("MD_DATECREATED") != null) {
-                String created = (String) doc.getFieldValues("MD_DATECREATED").iterator().next();
+            if (doc.getFieldValues(MD_DATECREATED) != null) {
+                String created = (String) doc.getFieldValues(MD_DATECREATED).iterator().next();
                 Element eleDcCreated = new Element("created", nsDc);
                 eleDcCreated.setText(created);
                 eleEuropeanaRecord.addContent(eleDcCreated);
@@ -270,10 +274,10 @@ public class EuropeanaFormat extends OAIDCFormat {
 
             // <dc:publisher>
             String publisher = null;
-            if (doc.getFieldValues("MD_PUBLISHER") != null) {
-                publisher = (String) doc.getFieldValues("MD_PUBLISHER").iterator().next();
-            } else if (topstructDoc != null && topstructDoc.getFieldValues("MD_PUBLISHER") != null) {
-                publisher = (String) topstructDoc.getFieldValues("MD_PUBLISHER").iterator().next();
+            if (doc.getFieldValues(MD_PUBLISHER) != null) {
+                publisher = (String) doc.getFieldValues(MD_PUBLISHER).iterator().next();
+            } else if (topstructDoc != null && topstructDoc.getFieldValues(MD_PUBLISHER) != null) {
+                publisher = (String) topstructDoc.getFieldValues(MD_PUBLISHER).iterator().next();
             }
             if (publisher != null) {
                 Element eleDcPublisher = new Element("publisher", nsDc);

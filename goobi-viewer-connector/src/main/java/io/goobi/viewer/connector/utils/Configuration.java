@@ -34,9 +34,10 @@ import org.apache.commons.configuration2.event.EventListener;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.configuration2.ex.ConversionException;
 import org.apache.commons.configuration2.tree.ImmutableNode;
-import org.jdom2.Namespace;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jdom2.Namespace;
 
 import io.goobi.viewer.connector.oai.model.FieldConfiguration;
 import io.goobi.viewer.connector.oai.model.Set;
@@ -305,11 +306,14 @@ public final class Configuration {
      * </p>
      *
      * @return Configured viewerConfigFolder in the default config file; /opt/digiverso/viewer/config/ if no value configured
-     * @should return correct value
+     * @should add trailing slash
+     * @should return environment variable value if available
      */
     public String getViewerConfigFolder() {
-
-        String configLocalPath = getConfig().getString("viewerConfigFolder", "/opt/digiverso/viewer/config/");
+        String configLocalPath = System.getProperty("configFolder");
+        if (StringUtils.isEmpty(configLocalPath)) {
+            configLocalPath = getConfig().getString("viewerConfigFolder", "/opt/digiverso/viewer/config/");
+        }
         if (!configLocalPath.endsWith("/")) {
             configLocalPath += "/";
         }
