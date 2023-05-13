@@ -58,6 +58,8 @@ public class OaiServlet extends HttpServlet {
     /** {@inheritDoc} */
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("text/xml;charset=UTF-8");
+        
         String queryString = (request.getQueryString() != null ? "?" + request.getQueryString() : "");
         logger.debug("REQUEST URL: {}{}", request.getRequestURL().toString(), queryString);
 
