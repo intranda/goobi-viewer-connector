@@ -364,10 +364,15 @@ public class EuropeanaFormat extends OAIDCFormat {
 
             // MANDATORY: <europeana:isShownBy> (if <europeana:isShownAt> is not present)
             String thumbnail = (String) doc.getFieldValue(SolrConstants.THUMBNAIL);
-            if (StringUtils.isNotEmpty(thumbnail)) {
+            String useIdentifier = identifier;
+            if (StringUtils.isEmpty(useIdentifier)) {
+                useIdentifier = (String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT);
+            }
+            if (StringUtils.isNotEmpty(useIdentifier) && StringUtils.isNotEmpty(thumbnail)) {
                 Element eleEuropeanaIsShownBy = new Element("isShownBy", nsEuropeana);
-                String isShownBy = io.goobi.viewer.controller.DataManager.getInstance().getConfiguration().getIIIFApiUrl() + "records/" + identifier
-                        + "/files/images/" + thumbnail + "/full/max/0/default.jpg";
+                String isShownBy =
+                        io.goobi.viewer.controller.DataManager.getInstance().getConfiguration().getIIIFApiUrl() + "records/" + useIdentifier
+                                + "/files/images/" + thumbnail + "/full/max/0/default.jpg";
                 eleEuropeanaIsShownBy.setText(isShownBy);
                 eleEuropeanaRecord.addContent(eleEuropeanaIsShownBy);
             }
