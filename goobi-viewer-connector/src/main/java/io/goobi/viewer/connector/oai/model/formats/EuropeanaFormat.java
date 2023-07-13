@@ -45,7 +45,7 @@ import io.goobi.viewer.solr.SolrConstants;
 public class EuropeanaFormat extends OAIDCFormat {
 
     private static final Logger logger = LogManager.getLogger(EuropeanaFormat.class);
-    
+
     public static final String MD_DATECREATED = "MD_DATECREATED";
     public static final String MD_PUBLISHER = "MD_PUBLISHER";
     public static final String MD_YEARPUBLISH = "MD_YEARPUBLISH";
@@ -351,7 +351,7 @@ public class EuropeanaFormat extends OAIDCFormat {
             eleEuropeanaDataProvider.setText(dataProvider);
             eleEuropeanaRecord.addContent(eleEuropeanaDataProvider);
 
-            // MANDATORY: <europeana:isShownBy> or <europeana:isShownAt>
+            // MANDATORY: <europeana:isShownAt> (if <europeana:isShownBy> is not present)
             Element eleEuropeanaIsShownAt = new Element("isShownAt", nsEuropeana);
             String isShownAt = "";
             if (urn != null) {
@@ -361,6 +361,21 @@ public class EuropeanaFormat extends OAIDCFormat {
             }
             eleEuropeanaIsShownAt.setText(isShownAt);
             eleEuropeanaRecord.addContent(eleEuropeanaIsShownAt);
+
+            // MANDATORY: <europeana:isShownBy> (if <europeana:isShownAt> is not present)
+            String thumbnail = (String) doc.getFieldValue(SolrConstants.THUMBNAIL);
+            String useIdentifier = identifier;
+            if (StringUtils.isEmpty(useIdentifier)) {
+                useIdentifier = (String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT);
+            }
+            if (StringUtils.isNotEmpty(useIdentifier) && StringUtils.isNotEmpty(thumbnail)) {
+                Element eleEuropeanaIsShownBy = new Element("isShownBy", nsEuropeana);
+                String isShownBy =
+                        io.goobi.viewer.controller.DataManager.getInstance().getConfiguration().getIIIFApiUrl() + "records/" + useIdentifier
+                                + "/files/images/" + thumbnail + "/full/max/0/default.jpg";
+                eleEuropeanaIsShownBy.setText(isShownBy);
+                eleEuropeanaRecord.addContent(eleEuropeanaIsShownBy);
+            }
 
             eleMetadata.addContent(eleEuropeanaRecord);
             eleRecord.addContent(eleMetadata);
