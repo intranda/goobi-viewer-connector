@@ -32,6 +32,7 @@ import org.jdom2.transform.XSLTransformer;
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
+import io.goobi.viewer.connector.utils.FileFormat;
 import io.goobi.viewer.connector.utils.XmlConstants;
 import io.goobi.viewer.controller.XmlTools;
 
@@ -72,8 +73,21 @@ public class MARCXMLFormat extends METSFormat {
         if (mets.getName().equals(XmlConstants.ELE_NAME_ERROR)) {
             return mets;
         }
+        
+        try {
+            switch(FileFormat.determineFileFormat(mets))  {
+                case METS:
+                   return generateMarc(mets, handler.getIdentifier(), "GetRecord");
+                case METS_MARC:
+                default:
+                    break;
+                    
+            }
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
 
-        return generateMarc(mets, handler.getIdentifier(), "GetRecord");
+        return null;
     }
 
     /**
