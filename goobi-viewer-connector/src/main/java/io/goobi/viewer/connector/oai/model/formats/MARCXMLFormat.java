@@ -32,7 +32,6 @@ import org.jdom2.transform.XSLTransformer;
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
-import io.goobi.viewer.connector.utils.FileFormat;
 import io.goobi.viewer.connector.utils.XmlConstants;
 import io.goobi.viewer.controller.XmlTools;
 
@@ -44,7 +43,7 @@ public class MARCXMLFormat extends METSFormat {
     private static final Logger logger = LogManager.getLogger(MARCXMLFormat.class);
 
     static final Namespace xmlns = Namespace.getNamespace("http://www.openarchives.org/OAI/2.0/");
-    static final Namespace nsMets = Namespace.getNamespace("mets", "http://www.loc.gov/METS/");
+    public static final Namespace nsMets = Namespace.getNamespace("mets", "http://www.loc.gov/METS/");
     static final Namespace nsMarc = Namespace.getNamespace("marc", "http://www.loc.gov/MARC21/slim");
     static final Namespace nsMods = Namespace.getNamespace("mods", "http://www.loc.gov/mods/v3");
 
@@ -73,21 +72,8 @@ public class MARCXMLFormat extends METSFormat {
         if (mets.getName().equals(XmlConstants.ELE_NAME_ERROR)) {
             return mets;
         }
-        
-        try {
-            switch(FileFormat.determineFileFormat(mets))  {
-                case METS:
-                   return generateMarc(mets, handler.getIdentifier(), "GetRecord");
-                case METS_MARC:
-                default:
-                    break;
-                    
-            }
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-        }
 
-        return null;
+        return generateMarc(mets, handler.getIdentifier(), "GetRecord");
     }
 
     /**
@@ -127,9 +113,15 @@ public class MARCXMLFormat extends METSFormat {
                 // Look up native MARC for the main record
                 List<Element> eleListMarc = XmlTools.evaluateToElements("mets:dmdSec/mets:mdWrap[@MDTYPE='MARC']/mets:xmlData/marc:marc", rootMets,
                         Arrays.asList(nsMets, nsMarc));
+                // Alternative MARCXML embedding
+                if (eleListMarc == null || eleListMarc.isEmpty()) {
+                    eleListMarc = XmlTools.evaluateToElements("mets:dmdSec/mets:mdWrap[@MDTYPE='MARC']/mets:xmlData/bib/record", rootMets,
+                            Arrays.asList(nsMets, nsMarc));
+                }
                 if (eleListMarc != null && !eleListMarc.isEmpty()) {
                     rootMarc = eleListMarc.get(0);
                 } else {
+                    // MODS for conversion
                     List<Element> eleListMods = XmlTools.evaluateToElements("mets:dmdSec/mets:mdWrap[@MDTYPE='MODS']/mets:xmlData/mods:mods",
                             rootMets, Arrays.asList(nsMets, nsMods));
                     if (eleListMods != null && !eleListMods.isEmpty()) {
