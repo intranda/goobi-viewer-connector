@@ -15,6 +15,10 @@
  */
 package io.goobi.viewer.connector.oai.model.formats;
 
+import static io.goobi.viewer.api.rest.v1.ApiUrls.RECORDS_FILES;
+import static io.goobi.viewer.api.rest.v1.ApiUrls.RECORDS_FILES_ALTO;
+import static io.goobi.viewer.api.rest.v1.ApiUrls.RECORDS_FILES_PLAINTEXT;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,6 +49,7 @@ import io.goobi.viewer.connector.oai.model.metadata.MetadataParameter;
 import io.goobi.viewer.connector.oai.model.metadata.MetadataParameter.MetadataParameterType;
 import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
+import io.goobi.viewer.controller.FileTools;
 import io.goobi.viewer.controller.NetTools;
 import io.goobi.viewer.exceptions.HTTPException;
 import io.goobi.viewer.messages.ViewerResourceBundle;
@@ -587,18 +593,45 @@ public class OAIDCFormat extends Format {
         List<Integer> orderedPageList = new ArrayList<>(fulltextFilePaths.keySet());
         Collections.sort(orderedPageList);
 
-        String urlTemplate = DataManager.getInstance().getConfiguration().getFulltextUrl().replace("{pi}", pi);
         List<Element> ret = new ArrayList<>(orderedPageList.size());
         for (int i : orderedPageList) {
             String filePath = fulltextFilePaths.get(i); // file path relative to the data repository (Goobi viewer 3.2 and later)
-            if (filePath == null) {
+            if (StringUtils.isEmpty(filePath)) {
                 continue;
             }
-            String fileName = filePath.substring(filePath.lastIndexOf('/') + 1); // pure file name
-            String url = urlTemplate.replace("{page}", String.valueOf(i)).replace("{fileName}", fileName);
-            Element eleDcFulltext = new Element("source", namespace);
-            eleDcFulltext.setText(url);
-            ret.add(eleDcFulltext);
+            String fileName = FileTools.getFilenameFromPathString(filePath); // pure file name
+            String url = null;
+            switch (FilenameUtils.getExtension(fileName).toLowerCase()) {
+                case "xml":
+                    url = io.goobi.viewer.controller.DataManager.getInstance()
+                            .getRestApiManager()
+                            .getContentApiManager()
+                            .map(urls -> urls.path(RECORDS_FILES, RECORDS_FILES_ALTO)
+                                    .params(pi, fileName)
+                                    .build())
+                            .orElse("");
+                    break;
+                case "txt":
+                    url = io.goobi.viewer.controller.DataManager.getInstance()
+                            .getRestApiManager()
+                            .getContentApiManager()
+                            .map(urls -> urls.path(RECORDS_FILES, RECORDS_FILES_PLAINTEXT)
+                                    .params(pi, fileName)
+                                    .build())
+                            .orElse("");
+                    break;
+                default:
+                    break;
+
+            }
+            
+            logger.trace(url);
+
+            if (url != null) {
+                Element eleDcFulltext = new Element("source", namespace);
+                eleDcFulltext.setText(url);
+                ret.add(eleDcFulltext);
+            }
         }
 
         return ret;
