@@ -386,16 +386,6 @@ public class ConfigurationTest extends AbstractTest {
     }
 
     /**
-     * @see Configuration#getFulltextUrl()
-     * @verifies return correct value
-     */
-    @Test
-    public void getFulltextUrl_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals("http://localhost/viewer/rest/content/fulltext/{pi}/{page}/",
-                DataManager.getInstance().getConfiguration().getFulltextUrl());
-    }
-
-    /**
      * @see Configuration#getAccessConditionMappingForMetadataFormat(String,String)
      * @verifies return correct value
      */

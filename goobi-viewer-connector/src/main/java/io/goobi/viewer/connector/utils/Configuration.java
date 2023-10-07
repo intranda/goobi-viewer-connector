@@ -529,18 +529,6 @@ public final class Configuration {
     }
 
     /**
-     * <p>
-     * getFulltextUrl.
-     * </p>
-     *
-     * @return Full-text file URL with placeholders for PI and page.
-     * @should return correct value
-     */
-    public String getFulltextUrl() {
-        return getLocalString("fulltextUrl", "http://localhost:8080/viewer/rest/fulltext/{pi}/{page}/");
-    }
-
-    /**
      * Returns mappings for the ESE "type" element.
      *
      * @should return all values

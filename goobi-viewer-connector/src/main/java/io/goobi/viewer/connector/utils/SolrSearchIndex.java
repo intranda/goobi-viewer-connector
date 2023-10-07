@@ -28,7 +28,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,6 +49,7 @@ import io.goobi.viewer.controller.StringTools;
 import io.goobi.viewer.exceptions.IndexUnreachableException;
 import io.goobi.viewer.model.search.SearchHelper;
 import io.goobi.viewer.solr.SolrConstants;
+import io.goobi.viewer.solr.SolrConstants.DocType;
 
 /**
  * <p>
@@ -263,7 +263,7 @@ public class SolrSearchIndex {
             sbQuery.append(" +(").append(SolrConstants.URN).append(":* ").append(SolrConstants.IMAGEURN_OAI).append(":*)");
         }
         sbQuery.append(filterQuerySuffix);
-         logger.debug("OAI query: {}", StringTools.stripPatternBreakingChars(sbQuery.toString()));
+        logger.debug("OAI query: {}", StringTools.stripPatternBreakingChars(sbQuery.toString()));
         logger.trace("start: {}, rows: {}", firstRow, numRows);
         SolrQuery solrQuery = new SolrQuery(sbQuery.toString());
         solrQuery.setStart(firstRow);
@@ -349,7 +349,7 @@ public class SolrSearchIndex {
      * @return {@link org.apache.solr.common.SolrDocument}
      * @throws java.io.IOException
      * @throws org.apache.solr.client.solrj.SolrServerException
-     * @throws IndexUnreachableException 
+     * @throws IndexUnreachableException
      */
     public SolrDocument getListRecord(final String identifier, List<String> fieldList, String filterQuerySuffix)
             throws IOException, SolrServerException {
@@ -372,9 +372,10 @@ public class SolrSearchIndex {
      * @throws org.apache.solr.client.solrj.SolrServerException
      * @return a boolean.
      * @throws IOException
-     * @throws IndexUnreachableException 
+     * @throws IndexUnreachableException
      */
-    public boolean isRecordExists(final String identifier, String filterQuerySuffix) throws SolrServerException, IOException, IndexUnreachableException {
+    public boolean isRecordExists(final String identifier, String filterQuerySuffix)
+            throws SolrServerException, IOException, IndexUnreachableException {
         return !queryForIdentifier(identifier, 0, null, filterQuerySuffix).isEmpty();
     }
 
@@ -387,7 +388,7 @@ public class SolrSearchIndex {
      * @return
      * @throws SolrServerException
      * @throws IOException
-     * @throws IndexUnreachableException 
+     * @throws IndexUnreachableException
      */
     private SolrDocumentList queryForIdentifier(final String identifier, int rows, List<String> fieldList, String filterQuerySuffix)
             throws SolrServerException, IOException {
@@ -600,40 +601,43 @@ public class SolrSearchIndex {
      * </p>
      *
      * @param pi a {@link java.lang.String} object.
-     * @throws org.apache.solr.client.solrj.SolrServerException
      * @return a {@link java.util.Map} object.
+     * @throws org.apache.solr.client.solrj.SolrServerException
      * @throws IOException
+     * @should return file names correctly
      */
     public Map<Integer, String> getFulltextFileNames(String pi) throws SolrServerException, IOException {
         if (pi == null) {
             throw new IllegalArgumentException("pi may not be null");
         }
 
-        StringBuilder sbQuery = new StringBuilder();
-        sbQuery.append(SolrConstants.PI_TOPSTRUCT)
+        String query = new StringBuilder()
+                .append('+')
+                .append(SolrConstants.PI_TOPSTRUCT)
                 .append(':')
                 .append(pi)
-                .append(" AND ")
+                .append(" +")
                 .append(SolrConstants.DOCTYPE)
-                .append(":PAGE")
-                .append(" AND ")
+                .append(':')
+                .append(DocType.PAGE.name())
+                .append(" +")
                 .append(SolrConstants.FULLTEXTAVAILABLE)
                 .append(":true")
-                .append(" AND ")
+                .append(" +")
                 .append(SolrConstants.ACCESSCONDITION)
                 .append(':')
-                .append(SolrConstants.OPEN_ACCESS_VALUE);
+                .append(SolrConstants.OPEN_ACCESS_VALUE)
+                .toString();
 
-        String[] fields = new String[] { SolrConstants.ORDER, SolrConstants.FILENAME_FULLTEXT, SolrConstants.FILENAME };
-        QueryResponse qr = search(sbQuery.toString(), 0, MAX_HITS, Collections.singletonList(SolrConstants.ORDER), Arrays.asList(fields), null);
+        QueryResponse qr = search(query, 0, MAX_HITS, Collections.singletonList(SolrConstants.ORDER),
+                Arrays.asList(SolrConstants.ORDER, SolrConstants.FILENAME_ALTO, SolrConstants.FILENAME_FULLTEXT), null);
         if (!qr.getResults().isEmpty()) {
             Map<Integer, String> ret = new HashMap<>(qr.getResults().size());
             for (SolrDocument doc : qr.getResults()) {
-                if (doc.containsKey(SolrConstants.FILENAME_FULLTEXT)) {
+                if (doc.containsKey(SolrConstants.FILENAME_ALTO)) {
+                    ret.put((int) doc.getFieldValue(SolrConstants.ORDER), (String) doc.getFieldValue(SolrConstants.FILENAME_ALTO));
+                } else if (doc.containsKey(SolrConstants.FILENAME_FULLTEXT)) {
                     ret.put((int) doc.getFieldValue(SolrConstants.ORDER), (String) doc.getFieldValue(SolrConstants.FILENAME_FULLTEXT));
-                } else if (doc.containsKey(SolrConstants.FILENAME)) {
-                    String baseName = FilenameUtils.getBaseName((String) doc.getFieldValue(SolrConstants.FILENAME));
-                    ret.put((int) doc.getFieldValue(SolrConstants.ORDER), baseName + ".txt");
                 }
             }
             return ret;
