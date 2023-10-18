@@ -65,7 +65,7 @@
 		<httpcore.version>4.4.16</httpcore.version>
 		<jaxen.version>2.0.0</jaxen.version>
 		<jdom2.version>2.0.6.1</jdom2.version>
-		<json.version>20230618</json.version>
+		<json.version>20231013</json.version>
 		<junit.version>4.13.2</junit.version>
 		<log4j.version>2.20.0</log4j.version>
 		<solr.version>8.11.2</solr.version>
