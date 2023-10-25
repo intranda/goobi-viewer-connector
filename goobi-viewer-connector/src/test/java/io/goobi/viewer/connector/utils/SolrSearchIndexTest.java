@@ -93,4 +93,17 @@ public class SolrSearchIndexTest extends AbstractSolrEnabledTest {
             previous = dateCreated;
         }
     }
+
+    /**
+     * @see SolrSearchIndex#getFulltextFileNames(String)
+     * @verifies return file names correctly
+     */
+    @Test
+    public void getFulltextFileNames_shouldReturnFileNamesCorrectly() throws Exception {
+        Map<Integer, String> result = DataManager.getInstance()
+                .getSearchIndex()
+                .getFulltextFileNames("PPN517154005");
+        Assert.assertEquals(14, result.size());
+        Assert.assertEquals("alto/PPN517154005/00000001.xml", result.get(1));
+    }
 }

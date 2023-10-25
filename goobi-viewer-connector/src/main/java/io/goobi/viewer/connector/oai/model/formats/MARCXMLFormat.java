@@ -43,7 +43,7 @@ public class MARCXMLFormat extends METSFormat {
     private static final Logger logger = LogManager.getLogger(MARCXMLFormat.class);
 
     static final Namespace xmlns = Namespace.getNamespace("http://www.openarchives.org/OAI/2.0/");
-    static final Namespace nsMets = Namespace.getNamespace("mets", "http://www.loc.gov/METS/");
+    public static final Namespace nsMets = Namespace.getNamespace("mets", "http://www.loc.gov/METS/");
     static final Namespace nsMarc = Namespace.getNamespace("marc", "http://www.loc.gov/MARC21/slim");
     static final Namespace nsMods = Namespace.getNamespace("mods", "http://www.loc.gov/mods/v3");
 
@@ -113,9 +113,15 @@ public class MARCXMLFormat extends METSFormat {
                 // Look up native MARC for the main record
                 List<Element> eleListMarc = XmlTools.evaluateToElements("mets:dmdSec/mets:mdWrap[@MDTYPE='MARC']/mets:xmlData/marc:marc", rootMets,
                         Arrays.asList(nsMets, nsMarc));
+                // Alternative MARCXML embedding
+                if (eleListMarc == null || eleListMarc.isEmpty()) {
+                    eleListMarc = XmlTools.evaluateToElements("mets:dmdSec/mets:mdWrap[@MDTYPE='MARC']/mets:xmlData/bib/record", rootMets,
+                            Arrays.asList(nsMets, nsMarc));
+                }
                 if (eleListMarc != null && !eleListMarc.isEmpty()) {
                     rootMarc = eleListMarc.get(0);
                 } else {
+                    // MODS for conversion
                     List<Element> eleListMods = XmlTools.evaluateToElements("mets:dmdSec/mets:mdWrap[@MDTYPE='MODS']/mets:xmlData/mods:mods",
                             rootMets, Arrays.asList(nsMets, nsMods));
                     if (eleListMods != null && !eleListMods.isEmpty()) {
