@@ -15,21 +15,21 @@
  */
 package io.goobi.viewer.connector.oai;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import io.goobi.viewer.connector.AbstractTest;
 import io.goobi.viewer.connector.oai.servlets.OaiServlet;
 
-public class OaiServletTest extends AbstractTest {
+class OaiServletTest extends AbstractTest {
     /**
      * @see OaiServlet#checkDatestamps(String,String)
      * @verifies return false if from is not well formed
      */
     @Test
-    public void checkDatestamps_shouldReturnFalseIfFromIsNotWellFormed() throws Exception {
-        Assert.assertFalse(OaiServlet.checkDatestamps("2015-09-30T15:00:00X", "2015-09-30T15:00:01"));
-        Assert.assertFalse(OaiServlet.checkDatestamps("2015-09-2X", "2015-09-30"));
+    void checkDatestamps_shouldReturnFalseIfFromIsNotWellFormed() throws Exception {
+        Assertions.assertFalse(OaiServlet.checkDatestamps("2015-09-30T15:00:00X", "2015-09-30T15:00:01"));
+        Assertions.assertFalse(OaiServlet.checkDatestamps("2015-09-2X", "2015-09-30"));
     }
 
     /**
@@ -37,9 +37,9 @@ public class OaiServletTest extends AbstractTest {
      * @verifies return false if until is not well formed
      */
     @Test
-    public void checkDatestamps_shouldReturnFalseIfUntilIsNotWellFormed() throws Exception {
-        Assert.assertFalse(OaiServlet.checkDatestamps("2015-09-30T15:00:00", "2015-09-30T15:00:01Z"));
-        Assert.assertFalse(OaiServlet.checkDatestamps("2015-09-30", "2015-09-31"));
+    void checkDatestamps_shouldReturnFalseIfUntilIsNotWellFormed() throws Exception {
+        Assertions.assertFalse(OaiServlet.checkDatestamps("2015-09-30T15:00:00", "2015-09-30T15:00:01Z"));
+        Assertions.assertFalse(OaiServlet.checkDatestamps("2015-09-30", "2015-09-31"));
     }
 
     /**
@@ -47,9 +47,9 @@ public class OaiServletTest extends AbstractTest {
      * @verifies return false if from after until
      */
     @Test
-    public void checkDatestamps_shouldReturnFalseIfFromAfterUntil() throws Exception {
-        Assert.assertFalse(OaiServlet.checkDatestamps("2015-09-30T15:00:01", "2015-09-30T15:00:00"));
-        Assert.assertFalse(OaiServlet.checkDatestamps("2015-09-30", "2015-09-29"));
+    void checkDatestamps_shouldReturnFalseIfFromAfterUntil() throws Exception {
+        Assertions.assertFalse(OaiServlet.checkDatestamps("2015-09-30T15:00:01", "2015-09-30T15:00:00"));
+        Assertions.assertFalse(OaiServlet.checkDatestamps("2015-09-30", "2015-09-29"));
     }
 
     /**
@@ -57,8 +57,8 @@ public class OaiServletTest extends AbstractTest {
      * @verifies return true if from and until correct
      */
     @Test
-    public void checkDatestamps_shouldReturnTrueIfFromAndUntilCorrect() throws Exception {
-        Assert.assertTrue(OaiServlet.checkDatestamps("2015-09-30T15:00:00Z", "2015-09-30T15:00:01Z"));
-        Assert.assertTrue(OaiServlet.checkDatestamps("2015-09-29", "2015-09-30"));
+    void checkDatestamps_shouldReturnTrueIfFromAndUntilCorrect() throws Exception {
+        Assertions.assertTrue(OaiServlet.checkDatestamps("2015-09-30T15:00:00Z", "2015-09-30T15:00:01Z"));
+        Assertions.assertTrue(OaiServlet.checkDatestamps("2015-09-29", "2015-09-30"));
     }
 }

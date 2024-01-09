@@ -21,24 +21,24 @@ import java.util.List;
 import org.apache.solr.common.SolrDocument;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import io.goobi.viewer.connector.AbstractTest;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.controller.XmlTools;
 import io.goobi.viewer.solr.SolrConstants;
 
-public class METSFormatTest extends AbstractTest {
+class METSFormatTest extends AbstractTest {
 
     /**
      * @see METSFormat#generateMetsRecord(String,SolrDocument,RequestHandler,List,String)
      * @verifies generate element correctly
      */
     @Test
-    public void generateMetsRecord_shouldGenerateElementCorrectly() throws Exception {
+    void generateMetsRecord_shouldGenerateElementCorrectly() throws Exception {
         Document metsDoc = XmlTools.readXmlFile("src/test/resources/viewer/indexed_mets/PPN517154005.xml");
-        Assert.assertNotNull(metsDoc);
+        Assertions.assertNotNull(metsDoc);
 
         SolrDocument doc = new SolrDocument();
         doc.setField(SolrConstants.PI_TOPSTRUCT, "PPN517154005");
@@ -46,13 +46,13 @@ public class METSFormatTest extends AbstractTest {
         Element eleRecord =
                 METSFormat.generateMetsRecord(XmlTools.getStringFromElement(metsDoc, StandardCharsets.UTF_8.name()), doc, new RequestHandler(),
                         null, null);
-        Assert.assertNotNull(eleRecord);
-        Assert.assertEquals("record", eleRecord.getName());
-        Assert.assertNotNull(eleRecord.getChild("header", Format.OAI_NS));
+        Assertions.assertNotNull(eleRecord);
+        Assertions.assertEquals("record", eleRecord.getName());
+        Assertions.assertNotNull(eleRecord.getChild("header", Format.OAI_NS));
         Element eleMetadata = eleRecord.getChild("metadata", Format.OAI_NS);
-        Assert.assertNotNull(eleMetadata);
+        Assertions.assertNotNull(eleMetadata);
         Element eleMets = eleMetadata.getChild("mets", METSFormat.METS_NS);
-        Assert.assertNotNull(eleMets);
+        Assertions.assertNotNull(eleMets);
     }
 
     /**
@@ -60,10 +60,10 @@ public class METSFormatTest extends AbstractTest {
      * @verifies return null if xml empty
      */
     @Test
-    public void generateMetsRecord_shouldReturnNullIfXmlEmpty() throws Exception {
+    void generateMetsRecord_shouldReturnNullIfXmlEmpty() throws Exception {
         SolrDocument doc = new SolrDocument();
         doc.setField(SolrConstants.PI_TOPSTRUCT, "PPN517154005");
-        Assert.assertNull(METSFormat.generateMetsRecord(XmlTools.getStringFromElement("", StandardCharsets.UTF_8.name()), doc, new RequestHandler(),
+        Assertions.assertNull(METSFormat.generateMetsRecord(XmlTools.getStringFromElement("", StandardCharsets.UTF_8.name()), doc, new RequestHandler(),
                 null, null));
     }
 }

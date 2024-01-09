@@ -18,33 +18,33 @@ package io.goobi.viewer.connector.utils;
 import java.time.LocalDateTime;
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import io.goobi.viewer.connector.AbstractTest;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.enums.Verb;
 
-public class UtilsTest extends AbstractTest {
+class UtilsTest extends AbstractTest {
 
     /**
      * @see Utils#splitIdentifierAndLanguageCode(String,int)
      * @verifies split identifier correctly
      */
     @Test
-    public void splitIdentifierAndLanguageCode_shouldSplitIdentifierCorrectly() throws Exception {
+    void splitIdentifierAndLanguageCode_shouldSplitIdentifierCorrectly() throws Exception {
         {
             String[] result = Utils.splitIdentifierAndLanguageCode("id_eng", 3);
-            Assert.assertEquals(2, result.length);
-            Assert.assertEquals("id", result[0]);
-            Assert.assertEquals("eng", result[1]);
+            Assertions.assertEquals(2, result.length);
+            Assertions.assertEquals("id", result[0]);
+            Assertions.assertEquals("eng", result[1]);
         }
         {
             String[] result = Utils.splitIdentifierAndLanguageCode("id", 3);
-            Assert.assertEquals(2, result.length);
-            Assert.assertEquals("id", result[0]);
-            Assert.assertNull(result[1]);
+            Assertions.assertEquals(2, result.length);
+            Assertions.assertEquals("id", result[0]);
+            Assertions.assertNull(result[1]);
         }
 
     }
@@ -54,8 +54,8 @@ public class UtilsTest extends AbstractTest {
      * @verifies convert time correctly
      */
     @Test
-    public void convertDate_shouldConvertTimeCorrectly() throws Exception {
-        Assert.assertEquals("2016-05-23T10:40:00Z", Utils.convertDate(1464000000000L));
+    void convertDate_shouldConvertTimeCorrectly() throws Exception {
+        Assertions.assertEquals("2016-05-23T10:40:00Z", Utils.convertDate(1464000000000L));
     }
     
     /**
@@ -63,8 +63,8 @@ public class UtilsTest extends AbstractTest {
      * @verifies parse dates correctly
      */
     @Test
-    public void parseDate_shouldParseDatesCorrectly() throws Exception {
-        Assert.assertEquals("2016-05-23T10:40:00Z", Utils.parseDate(1464000000000L));
+    void parseDate_shouldParseDatesCorrectly() throws Exception {
+        Assertions.assertEquals("2016-05-23T10:40:00Z", Utils.parseDate(1464000000000L));
     }
 
     /**
@@ -72,8 +72,8 @@ public class UtilsTest extends AbstractTest {
      * @verifies format time correctly
      */
     @Test
-    public void getCurrentUTCTime_shouldFormatTimeCorrectly() throws Exception {
-        Assert.assertEquals("2020-09-07T14:30:00Z", Utils.getCurrentUTCTime(LocalDateTime.of(2020, 9, 7, 14, 30, 00)));
+    void getCurrentUTCTime_shouldFormatTimeCorrectly() throws Exception {
+        Assertions.assertEquals("2020-09-07T14:30:00Z", Utils.getCurrentUTCTime(LocalDateTime.of(2020, 9, 7, 14, 30, 00)));
     }
     
 
@@ -82,8 +82,8 @@ public class UtilsTest extends AbstractTest {
      * @verifies truncate to seconds
      */
     @Test
-    public void getCurrentUTCTime_shouldTruncateToSeconds() throws Exception {
-        Assert.assertEquals("2020-09-07T14:30:00Z", Utils.getCurrentUTCTime(LocalDateTime.of(2020, 9, 7, 14, 30, 00, 1000000)));
+    void getCurrentUTCTime_shouldTruncateToSeconds() throws Exception {
+        Assertions.assertEquals("2020-09-07T14:30:00Z", Utils.getCurrentUTCTime(LocalDateTime.of(2020, 9, 7, 14, 30, 00, 1000000)));
     }
 
     /**
@@ -91,9 +91,9 @@ public class UtilsTest extends AbstractTest {
      * @verifies clean up timestamp correctly
      */
     @Test
-    public void cleanUpTimestamp_shouldCleanUpTimestampCorrectly() throws Exception {
-        Assert.assertEquals("20201028133500", Utils.cleanUpTimestamp("2020-10-28T13:35:00"));
-        Assert.assertEquals("20201028133500", Utils.cleanUpTimestamp("2020-10-28T13:35:00.000"));
+    void cleanUpTimestamp_shouldCleanUpTimestampCorrectly() throws Exception {
+        Assertions.assertEquals("20201028133500", Utils.cleanUpTimestamp("2020-10-28T13:35:00"));
+        Assertions.assertEquals("20201028133500", Utils.cleanUpTimestamp("2020-10-28T13:35:00.000"));
     }
 
     /**
@@ -101,11 +101,11 @@ public class UtilsTest extends AbstractTest {
      * @verifies contain from timestamp
      */
     @Test
-    public void filterDatestampFromRequest_shouldContainFromTimestamp() throws Exception {
+    void filterDatestampFromRequest_shouldContainFromTimestamp() throws Exception {
         RequestHandler rh = new RequestHandler();
         rh.setFrom("2022-11-04T16:00:00Z");
         Map<String, String> datestamp = Utils.filterDatestampFromRequest(rh);
-        Assert.assertEquals("20221104160000", datestamp.get("from"));
+        Assertions.assertEquals("20221104160000", datestamp.get("from"));
     }
 
     /**
@@ -113,11 +113,11 @@ public class UtilsTest extends AbstractTest {
      * @verifies contain until timestamp
      */
     @Test
-    public void filterDatestampFromRequest_shouldContainUntilTimestamp() throws Exception {
+    void filterDatestampFromRequest_shouldContainUntilTimestamp() throws Exception {
         RequestHandler rh = new RequestHandler();
         rh.setUntil("2022-11-04T16:59:59Z");
         Map<String, String> datestamp = Utils.filterDatestampFromRequest(rh);
-        Assert.assertEquals("20221104165959", datestamp.get("until"));
+        Assertions.assertEquals("20221104165959", datestamp.get("until"));
     }
 
     /**
@@ -125,11 +125,11 @@ public class UtilsTest extends AbstractTest {
      * @verifies contain set
      */
     @Test
-    public void filterDatestampFromRequest_shouldContainSet() throws Exception {
+    void filterDatestampFromRequest_shouldContainSet() throws Exception {
         RequestHandler rh = new RequestHandler();
         rh.setSet("varia");
         Map<String, String> datestamp = Utils.filterDatestampFromRequest(rh);
-        Assert.assertEquals("varia", datestamp.get("set"));
+        Assertions.assertEquals("varia", datestamp.get("set"));
     }
 
     /**
@@ -137,11 +137,11 @@ public class UtilsTest extends AbstractTest {
      * @verifies contain metadataPrefix
      */
     @Test
-    public void filterDatestampFromRequest_shouldContainMetadataPrefix() throws Exception {
+    void filterDatestampFromRequest_shouldContainMetadataPrefix() throws Exception {
         RequestHandler rh = new RequestHandler();
         rh.setMetadataPrefix(Metadata.OAI_DC);
         Map<String, String> datestamp = Utils.filterDatestampFromRequest(rh);
-        Assert.assertEquals(Metadata.OAI_DC.getMetadataPrefix(), datestamp.get("metadataPrefix"));
+        Assertions.assertEquals(Metadata.OAI_DC.getMetadataPrefix(), datestamp.get("metadataPrefix"));
     }
 
     /**
@@ -149,11 +149,11 @@ public class UtilsTest extends AbstractTest {
      * @verifies contain verb
      */
     @Test
-    public void filterDatestampFromRequest_shouldContainVerb() throws Exception {
+    void filterDatestampFromRequest_shouldContainVerb() throws Exception {
         RequestHandler rh = new RequestHandler();
         rh.setVerb(Verb.GETRECORD);
         Map<String, String> datestamp = Utils.filterDatestampFromRequest(rh);
-        Assert.assertEquals(Verb.GETRECORD.getTitle(), datestamp.get("verb"));
+        Assertions.assertEquals(Verb.GETRECORD.getTitle(), datestamp.get("verb"));
     }
 
     /**
@@ -162,7 +162,7 @@ public class UtilsTest extends AbstractTest {
      */
     //@Test
     //TODO
-    public void formatVersionString_shouldFormatStringCorrectly() throws Exception {
-        Assert.assertTrue(Utils.formatVersionString(Utils.getVersion()).startsWith("Goobi viewer Connector"));
+    void formatVersionString_shouldFormatStringCorrectly() throws Exception {
+        Assertions.assertTrue(Utils.formatVersionString(Utils.getVersion()).startsWith("Goobi viewer Connector"));
     }
 }

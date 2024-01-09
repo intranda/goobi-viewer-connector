@@ -17,7 +17,7 @@ package io.goobi.viewer.connector;
 
 import java.io.File;
 
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeAll;
 
 import io.goobi.viewer.connector.utils.Configuration;
 
@@ -29,7 +29,7 @@ public abstract class AbstractTest {
     public static final String TEST_CONFIG_PATH = new File("src/test/resources/config_oai.test.xml").getAbsolutePath();
     public static final String TEST_CONFIG_PATH_CORE = new File("src/test/resources/config_viewer.test.xml").getAbsolutePath();
 
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass() throws Exception {
         System.setProperty("log4j.configurationFile", "src/test/resources/log4j2.test.xml");
 

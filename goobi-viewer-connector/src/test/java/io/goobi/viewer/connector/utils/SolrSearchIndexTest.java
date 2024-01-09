@@ -23,15 +23,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import io.goobi.viewer.connector.AbstractSolrEnabledTest;
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.solr.SolrConstants;
 
-public class SolrSearchIndexTest extends AbstractSolrEnabledTest {
+class SolrSearchIndexTest extends AbstractSolrEnabledTest {
 
     /** Logger for this class. */
     private static final Logger logger = LogManager.getLogger(SolrSearchIndexTest.class);
@@ -41,8 +41,8 @@ public class SolrSearchIndexTest extends AbstractSolrEnabledTest {
      * @verifies return all values
      */
     @Test
-    public void getSets_shouldReturnAllValues() throws Exception {
-        Assert.assertEquals(43, DataManager.getInstance()
+    void getSets_shouldReturnAllValues() throws Exception {
+        Assertions.assertEquals(43, DataManager.getInstance()
                 .getSearchIndex()
                 .getSets(SolrConstants.DC)
                 .size());
@@ -53,12 +53,12 @@ public class SolrSearchIndexTest extends AbstractSolrEnabledTest {
      * @verifies return correct doc
      */
     @Test
-    public void getFirstDoc_shouldReturnCorrectDoc() throws Exception {
+    void getFirstDoc_shouldReturnCorrectDoc() throws Exception {
         SolrDocument doc = DataManager.getInstance()
                 .getSearchIndex()
                 .getFirstDoc(SolrConstants.PI + ":PPN517154005", Collections.singletonList(SolrConstants.PI));
-        Assert.assertNotNull(doc);
-        Assert.assertEquals("PPN517154005", doc.getFieldValue(SolrConstants.PI));
+        Assertions.assertNotNull(doc);
+        Assertions.assertEquals("PPN517154005", doc.getFieldValue(SolrConstants.PI));
     }
 
     /**
@@ -66,11 +66,11 @@ public class SolrSearchIndexTest extends AbstractSolrEnabledTest {
      * @verifies return correct number of rows
      */
     @Test
-    public void search_shouldReturnCorrectNumberOfRows() throws Exception {
+    void search_shouldReturnCorrectNumberOfRows() throws Exception {
         QueryResponse qr = DataManager.getInstance()
                 .getSearchIndex()
                 .search(null, null, null, Metadata.OAI_DC.getMetadataPrefix(), 0, 55, false, null, "", null, null);
-        Assert.assertEquals(55, qr.getResults()
+        Assertions.assertEquals(55, qr.getResults()
                 .size());
     }
 
@@ -79,17 +79,17 @@ public class SolrSearchIndexTest extends AbstractSolrEnabledTest {
      * @verifies sort results correctly
      */
     @Test
-    public void search_shouldSortResultsCorrectly() throws Exception {
+    void search_shouldSortResultsCorrectly() throws Exception {
         QueryResponse qr = DataManager.getInstance()
                 .getSearchIndex()
                 .search(null, null, null, Metadata.OAI_DC.getMetadataPrefix(), 0, 10, false, null, "", null, null);
-        Assert.assertFalse(qr.getResults()
+        Assertions.assertFalse(qr.getResults()
                 .isEmpty());
         long previous = 0;
         for (SolrDocument doc : qr.getResults()) {
             Long dateCreated = (long) doc.getFieldValue(SolrConstants.DATECREATED);
-            Assert.assertNotNull(dateCreated);
-            Assert.assertTrue(dateCreated > previous);
+            Assertions.assertNotNull(dateCreated);
+            Assertions.assertTrue(dateCreated > previous);
             previous = dateCreated;
         }
     }
@@ -99,11 +99,11 @@ public class SolrSearchIndexTest extends AbstractSolrEnabledTest {
      * @verifies return file names correctly
      */
     @Test
-    public void getFulltextFileNames_shouldReturnFileNamesCorrectly() throws Exception {
+    void getFulltextFileNames_shouldReturnFileNamesCorrectly() throws Exception {
         Map<Integer, String> result = DataManager.getInstance()
                 .getSearchIndex()
                 .getFulltextFileNames("PPN517154005");
-        Assert.assertEquals(14, result.size());
-        Assert.assertEquals("alto/PPN517154005/00000001.xml", result.get(1));
+        Assertions.assertEquals(14, result.size());
+        Assertions.assertEquals("alto/PPN517154005/00000001.xml", result.get(1));
     }
 }

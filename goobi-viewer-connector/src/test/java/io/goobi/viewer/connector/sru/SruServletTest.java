@@ -2,31 +2,31 @@ package io.goobi.viewer.connector.sru;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import io.goobi.viewer.connector.AbstractSolrEnabledTest;
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 
-public class SruServletTest extends AbstractSolrEnabledTest {
+class SruServletTest extends AbstractSolrEnabledTest {
 
     /**
      * @see SruServlet#createSchemaInfoElement(String,String,String,String)
      * @verifies create element correctly
      */
     @Test
-    public void createSchemaInfoElement_shouldCreateElementCorrectly() throws Exception {
+    void createSchemaInfoElement_shouldCreateElementCorrectly() throws Exception {
         Element ele = SruServlet.createSchemaInfoElement("Schema F", "sf", "info:srw/schema/1/f-1.0", "http://example.com/schemaf.xsd");
-        Assert.assertNotNull(ele);
+        Assertions.assertNotNull(ele);
         Element eleSchema = ele.getChild("schema", SruServlet.EXPLAIN_NAMESPACE);
-        Assert.assertNotNull(eleSchema);
-        Assert.assertEquals("true", eleSchema.getAttributeValue("retrieve"));
-        Assert.assertEquals("false", eleSchema.getAttributeValue("sort"));
-        Assert.assertEquals("info:srw/schema/1/f-1.0", eleSchema.getAttributeValue("identifier"));
-        Assert.assertEquals("http://example.com/schemaf.xsd", eleSchema.getAttributeValue("location"));
-        Assert.assertEquals("sf", eleSchema.getAttributeValue("name"));
-        Assert.assertEquals("Schema F", eleSchema.getChildText("title", SruServlet.EXPLAIN_NAMESPACE));
+        Assertions.assertNotNull(eleSchema);
+        Assertions.assertEquals("true", eleSchema.getAttributeValue("retrieve"));
+        Assertions.assertEquals("false", eleSchema.getAttributeValue("sort"));
+        Assertions.assertEquals("info:srw/schema/1/f-1.0", eleSchema.getAttributeValue("identifier"));
+        Assertions.assertEquals("http://example.com/schemaf.xsd", eleSchema.getAttributeValue("location"));
+        Assertions.assertEquals("sf", eleSchema.getAttributeValue("name"));
+        Assertions.assertEquals("Schema F", eleSchema.getChildText("title", SruServlet.EXPLAIN_NAMESPACE));
 
     }
 
@@ -35,10 +35,10 @@ public class SruServletTest extends AbstractSolrEnabledTest {
      * @verifies create element correctly
      */
     @Test
-    public void createSupportsElement_shouldCreateElementCorrectly() throws Exception {
+    void createSupportsElement_shouldCreateElementCorrectly() throws Exception {
         Element ele = SruServlet.createSupportsElement("your mom");
-        Assert.assertNotNull(ele);
-        Assert.assertEquals("your mom", ele.getText());
+        Assertions.assertNotNull(ele);
+        Assertions.assertEquals("your mom", ele.getText());
     }
 
     /**
@@ -46,22 +46,22 @@ public class SruServletTest extends AbstractSolrEnabledTest {
      * @verifies create element correctly
      */
     @Test
-    public void generateSearchRetrieve_shouldCreateElementCorrectly() throws Exception {
+    void generateSearchRetrieve_shouldCreateElementCorrectly() throws Exception {
         SruRequestParameter parameter =
                 new SruRequestParameter(SruOperation.SEARCHRETRIEVE, "1.2", "identifier=PPN517154005", 1, 10, "recordPacking_value",
                         Metadata.OAI_DC, "recordXPath_value", "resultSetTTL_value", "sortKeys_value", "stylesheet_value", "extraRequestData_value",
                         "scanClause_value", 5, 10);
 
         Element eleSearchRetrieve = SruServlet.generateSearchRetrieve(parameter, DataManager.getInstance().getSearchIndex(), "-DC:foo");
-        Assert.assertNotNull(eleSearchRetrieve);
-        Assert.assertEquals("1.2", eleSearchRetrieve.getChildText("version", SruServlet.SRU_NAMESPACE));
-        Assert.assertEquals("1", eleSearchRetrieve.getChildText("numberOfRecords", SruServlet.SRU_NAMESPACE));
+        Assertions.assertNotNull(eleSearchRetrieve);
+        Assertions.assertEquals("1.2", eleSearchRetrieve.getChildText("version", SruServlet.SRU_NAMESPACE));
+        Assertions.assertEquals("1", eleSearchRetrieve.getChildText("numberOfRecords", SruServlet.SRU_NAMESPACE));
 
         Element eleRecords = eleSearchRetrieve.getChild("records", SruServlet.SRU_NAMESPACE);
-        Assert.assertNotNull(eleRecords);
+        Assertions.assertNotNull(eleRecords);
 
-        Assert.assertNotNull(eleRecords.getChild("record", SruServlet.SRU_NAMESPACE));
-        Assert.assertNotNull(eleSearchRetrieve.getChild("echoedSearchRetrieveRequest", SruServlet.SRU_NAMESPACE));
+        Assertions.assertNotNull(eleRecords.getChild("record", SruServlet.SRU_NAMESPACE));
+        Assertions.assertNotNull(eleSearchRetrieve.getChild("echoedSearchRetrieveRequest", SruServlet.SRU_NAMESPACE));
 
     }
 
@@ -70,19 +70,19 @@ public class SruServletTest extends AbstractSolrEnabledTest {
      * @verifies create document correctly
      */
     @Test
-    public void createWrongSchemaDocument_shouldCreateDocumentCorrectly() throws Exception {
+    void createWrongSchemaDocument_shouldCreateDocumentCorrectly() throws Exception {
         Document doc = SruServlet.createWrongSchemaDocument("1.2", "sf");
-        Assert.assertNotNull(doc);
+        Assertions.assertNotNull(doc);
         Element eleRoot = doc.getRootElement();
-        Assert.assertNotNull(eleRoot);
-        Assert.assertEquals("1.2", eleRoot.getChildText("version", SruServlet.SRU_NAMESPACE));
+        Assertions.assertNotNull(eleRoot);
+        Assertions.assertEquals("1.2", eleRoot.getChildText("version", SruServlet.SRU_NAMESPACE));
 
         Element eleDiagnostic = eleRoot.getChild("diagnostic", SruServlet.SRU_NAMESPACE);
-        Assert.assertNotNull(eleDiagnostic);
+        Assertions.assertNotNull(eleDiagnostic);
         Element eleUri = eleDiagnostic.getChild("uri", SruServlet.DIAG_NAMESPACE);
-        Assert.assertNotNull(eleUri);
-        Assert.assertEquals("info:srw/diagnostic/1/66", eleUri.getText());
-        Assert.assertEquals("Unknown schema for retrieval / sf", eleDiagnostic.getChildText("message", SruServlet.DIAG_NAMESPACE));
+        Assertions.assertNotNull(eleUri);
+        Assertions.assertEquals("info:srw/diagnostic/1/66", eleUri.getText());
+        Assertions.assertEquals("Unknown schema for retrieval / sf", eleDiagnostic.getChildText("message", SruServlet.DIAG_NAMESPACE));
     }
 
     /**
@@ -90,19 +90,19 @@ public class SruServletTest extends AbstractSolrEnabledTest {
      * @verifies create document correctly
      */
     @Test
-    public void createMissingArgumentDocument_shouldCreateDocumentCorrectly() throws Exception {
+    void createMissingArgumentDocument_shouldCreateDocumentCorrectly() throws Exception {
         Document doc = SruServlet.createMissingArgumentDocument("1.1", "scanClause");
-        Assert.assertNotNull(doc);
+        Assertions.assertNotNull(doc);
         Element eleRoot = doc.getRootElement();
-        Assert.assertNotNull(eleRoot);
-        Assert.assertEquals("1.1", eleRoot.getChildText("version", SruServlet.SRU_NAMESPACE));
+        Assertions.assertNotNull(eleRoot);
+        Assertions.assertEquals("1.1", eleRoot.getChildText("version", SruServlet.SRU_NAMESPACE));
 
         Element eleDiagnostic = eleRoot.getChild("diagnostic", SruServlet.SRU_NAMESPACE);
-        Assert.assertNotNull(eleDiagnostic);
+        Assertions.assertNotNull(eleDiagnostic);
         Element eleUri = eleDiagnostic.getChild("uri", SruServlet.DIAG_NAMESPACE);
-        Assert.assertNotNull(eleUri);
-        Assert.assertEquals("info:srw/diagnostic/1/7", eleUri.getText());
-        Assert.assertEquals("Mandatory parameter not supplied / scanClause", eleDiagnostic.getChildText("message", SruServlet.DIAG_NAMESPACE));
+        Assertions.assertNotNull(eleUri);
+        Assertions.assertEquals("info:srw/diagnostic/1/7", eleUri.getText());
+        Assertions.assertEquals("Mandatory parameter not supplied / scanClause", eleDiagnostic.getChildText("message", SruServlet.DIAG_NAMESPACE));
     }
 
     /**
@@ -110,28 +110,28 @@ public class SruServletTest extends AbstractSolrEnabledTest {
      * @verifies create document correctly
      */
     @Test
-    public void createUnsupportedOperationDocument_shouldCreateDocumentCorrectly() throws Exception {
+    void createUnsupportedOperationDocument_shouldCreateDocumentCorrectly() throws Exception {
         Document doc = SruServlet.createUnsupportedOperationDocument("1.2", "foobar");
-        Assert.assertNotNull(doc);
+        Assertions.assertNotNull(doc);
         Element eleRoot = doc.getRootElement();
-        Assert.assertNotNull(eleRoot);
-        Assert.assertEquals("1.2", eleRoot.getChildText("version", SruServlet.SRU_NAMESPACE));
+        Assertions.assertNotNull(eleRoot);
+        Assertions.assertEquals("1.2", eleRoot.getChildText("version", SruServlet.SRU_NAMESPACE));
 
         Element eleDiagnostic = eleRoot.getChild("diagnostic", SruServlet.SRU_NAMESPACE);
-        Assert.assertNotNull(eleDiagnostic);
+        Assertions.assertNotNull(eleDiagnostic);
         Element eleUri = eleDiagnostic.getChild("uri", SruServlet.DIAG_NAMESPACE);
-        Assert.assertNotNull(eleUri);
-        Assert.assertEquals("info:srw/diagnostic/1/4", eleUri.getText());
-        Assert.assertEquals("Unsupported operation / foobar", eleDiagnostic.getChildText("message", SruServlet.DIAG_NAMESPACE));
+        Assertions.assertNotNull(eleUri);
+        Assertions.assertEquals("info:srw/diagnostic/1/4", eleUri.getText());
+        Assertions.assertEquals("Unsupported operation / foobar", eleDiagnostic.getChildText("message", SruServlet.DIAG_NAMESPACE));
     }
 
     /**
      * @see SruServlet#generateSearchQuery(String,Metadata,String)
      * @verifies throw {@link IllegalArgumentException} if sruQuery null
      */
-    @Test(expected = IllegalArgumentException.class)
-    public void generateSearchQuery_shouldThrowLinkIllegalArgumentExceptionIfSruQueryNull() throws Exception {
-        SruServlet.generateSearchQuery(null, Metadata.LIDO, null);
+    @Test
+    void generateSearchQuery_shouldThrowLinkIllegalArgumentExceptionIfSruQueryNull() throws Exception {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> SruServlet.generateSearchQuery(null, Metadata.LIDO, null));
     }
 
     /**
@@ -139,11 +139,11 @@ public class SruServletTest extends AbstractSolrEnabledTest {
      * @verifies create query correctly
      */
     @Test
-    public void generateSearchQuery_shouldCreateQueryCorrectly() throws Exception {
+    void generateSearchQuery_shouldCreateQueryCorrectly() throws Exception {
         String result = SruServlet.generateSearchQuery("dc.identifier=urn:nbn:foo;bar:123", Metadata.LIDO, " -DC:a.*");
-        Assert.assertEquals("URN:urn:nbn:foo;bar:123 AND SOURCEDOCFORMAT:LIDO AND (ISWORK:true OR ISANCHOR:true) -DC:a.*", result);
+        Assertions.assertEquals("URN:urn:nbn:foo;bar:123 AND SOURCEDOCFORMAT:LIDO AND (ISWORK:true OR ISANCHOR:true) -DC:a.*", result);
 
         result = SruServlet.generateSearchQuery("anywhere=foo", Metadata.MARCXML, null);
-        Assert.assertEquals("*:foo AND SOURCEDOCFORMAT:METS AND (ISWORK:true OR ISANCHOR:true)", result);
+        Assertions.assertEquals("*:foo AND SOURCEDOCFORMAT:METS AND (ISWORK:true OR ISANCHOR:true)", result);
     }
 }
