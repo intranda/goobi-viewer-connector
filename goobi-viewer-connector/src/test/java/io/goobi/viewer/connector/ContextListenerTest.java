@@ -17,19 +17,19 @@ package io.goobi.viewer.connector;
 
 import javax.servlet.ServletContextEvent;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class ContextListenerTest {
-    
+class ContextListenerTest {
+
     /**
      * @see ContextListener#contextInitialized(ServletContextEvent)
      * @verifies set version correctly
      */
     @Test
-    public void contextInitialized_shouldSetVersionCorrectly() throws Exception {
+    void contextInitialized_shouldSetVersionCorrectly() throws Exception {
         ContextListener listener = new ContextListener();
         listener.contextInitialized(null);
-        Assert.assertNotNull(io.goobi.viewer.controller.DataManager.getInstance().getConnectorVersion());
+        Assertions.assertNotNull(io.goobi.viewer.controller.DataManager.getInstance().getConnectorVersion());
     }
 }

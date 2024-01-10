@@ -15,21 +15,21 @@
  */
 package io.goobi.viewer.connector.oai;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import io.goobi.viewer.connector.AbstractTest;
 
-public class RequestHandlerTest extends AbstractTest {
+class RequestHandlerTest extends AbstractTest {
 
     /**
      * @see RequestHandler#getFromTimestamp(String)
      * @verifies convert date to timestamp correctly
      */
     @Test
-    public void getFromTimestamp_shouldConvertDateToTimestampCorrectly() throws Exception {
+    void getFromTimestamp_shouldConvertDateToTimestampCorrectly() throws Exception {
         String from = "2015-01-01T00:00:00Z";
-        Assert.assertEquals(1420070400000L, RequestHandler.getFromTimestamp(from));
+        Assertions.assertEquals(1420070400000L, RequestHandler.getFromTimestamp(from));
     }
 
     /**
@@ -37,9 +37,9 @@ public class RequestHandlerTest extends AbstractTest {
      * @verifies set time to 000000 if none given
      */
     @Test
-    public void getFromTimestamp_shouldSetTimeTo000000IfNoneGiven() throws Exception {
+    void getFromTimestamp_shouldSetTimeTo000000IfNoneGiven() throws Exception {
         String from = "2015-01-01";
-        Assert.assertEquals(1420070400000L, RequestHandler.getFromTimestamp(from));
+        Assertions.assertEquals(1420070400000L, RequestHandler.getFromTimestamp(from));
     }
 
     /**
@@ -47,9 +47,9 @@ public class RequestHandlerTest extends AbstractTest {
      * @verifies convert date to timestamp correctly
      */
     @Test
-    public void getUntilTimestamp_shouldConvertDateToTimestampCorrectly() throws Exception {
+    void getUntilTimestamp_shouldConvertDateToTimestampCorrectly() throws Exception {
         String until = "2015-01-01T00:00:00Z";
-        Assert.assertEquals(1420070400999L, RequestHandler.getUntilTimestamp(until));
+        Assertions.assertEquals(1420070400999L, RequestHandler.getUntilTimestamp(until));
     }
 
     /**
@@ -57,8 +57,8 @@ public class RequestHandlerTest extends AbstractTest {
      * @verifies set time to 235959 if none given
      */
     @Test
-    public void getUntilTimestamp_shouldSetTimeTo235959IfNoneGiven() throws Exception {
+    void getUntilTimestamp_shouldSetTimeTo235959IfNoneGiven() throws Exception {
         String until = "2015-01-01";
-        Assert.assertEquals(1420156799999L, RequestHandler.getUntilTimestamp(until));
+        Assertions.assertEquals(1420156799999L, RequestHandler.getUntilTimestamp(until));
     }
 }
