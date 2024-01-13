@@ -66,10 +66,10 @@
 		<jaxen.version>2.0.0</jaxen.version>
 		<jdom2.version>2.0.6.1</jdom2.version>
 		<json.version>20231013</json.version>
-		<junit.version>5.9.1</junit.version>
-		<log4j.version>2.22.0</log4j.version>
+		<junit.version>5.10.1</junit.version>
+		<log4j.version>2.22.1</log4j.version>
 		<solr.version>8.11.2</solr.version>
-		<tomcat.version>9.0.84</tomcat.version>
+		<tomcat.version>9.0.85</tomcat.version>
 		<xstream.version>1.4.20</xstream.version>
 	</properties>
 
@@ -144,6 +144,12 @@
             <artifactId>junit-jupiter-api</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
         </dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
@@ -233,6 +239,9 @@
 
                                 <!-- jaxb-runtime needs to be available to remove the warning "JAXBContext implementation could not be found. WADL feature is disabled" during tomcat startup -->
                                 <ignoredUnusedDeclaredDependency>org.glassfish.jaxb:jaxb-runtime</ignoredUnusedDeclaredDependency>
+
+                                <!-- junit-jupiter is used to run the tests, otherwise it will fail in maven -->
+                                <ignoredUnusedDeclaredDependency>org.junit.jupiter:junit-jupiter</ignoredUnusedDeclaredDependency>
                             </ignoredUnusedDeclaredDependencies>
                         </configuration>
                     </execution>
