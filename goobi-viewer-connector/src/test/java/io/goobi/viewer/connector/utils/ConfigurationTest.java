@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import io.goobi.viewer.connector.AbstractTest;
 import io.goobi.viewer.connector.DataManager;
@@ -30,19 +30,19 @@ import io.goobi.viewer.connector.oai.model.Set;
 import io.goobi.viewer.connector.oai.model.formats.Format;
 import io.goobi.viewer.solr.SolrConstants;
 
-public class ConfigurationTest extends AbstractTest {
+class ConfigurationTest extends AbstractTest {
 
     /**
      * @see Configuration#getAdditionalDocstructTypes()
      * @verifies return all values
      */
     @Test
-    public void getAdditionalDocstructTypes_shouldReturnAllValues() throws Exception {
+    void getAdditionalDocstructTypes_shouldReturnAllValues() throws Exception {
         List<String> values = DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes();
-        Assert.assertNotNull(values);
-        Assert.assertEquals(2, values.size());
-        Assert.assertEquals("Article", values.get(0));
-        Assert.assertEquals("Photograph", values.get(1));
+        Assertions.assertNotNull(values);
+        Assertions.assertEquals(2, values.size());
+        Assertions.assertEquals("Article", values.get(0));
+        Assertions.assertEquals("Photograph", values.get(1));
     }
 
     /**
@@ -50,14 +50,14 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return all values
      */
     @Test
-    public void getAdditionalSets_shouldReturnAllValues() throws Exception {
+    void getAdditionalSets_shouldReturnAllValues() throws Exception {
         List<Set> values = DataManager.getInstance().getConfiguration().getAdditionalSets();
-        Assert.assertNotNull(values);
-        Assert.assertEquals(1, values.size());
+        Assertions.assertNotNull(values);
+        Assertions.assertEquals(1, values.size());
         Set set = values.get(0);
-        Assert.assertEquals("test", set.getSetName());
-        Assert.assertEquals("testspec", set.getSetSpec());
-        Assert.assertEquals("DC:a.b.c.d", set.getSetQuery());
+        Assertions.assertEquals("test", set.getSetName());
+        Assertions.assertEquals("testspec", set.getSetSpec());
+        Assertions.assertEquals("DC:a.b.c.d", set.getSetQuery());
     }
 
     /**
@@ -65,8 +65,8 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return correct value
      */
     @Test
-    public void getDocumentResolverUrl_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals("http://localhost/viewer/metsresolver?id=", DataManager.getInstance().getConfiguration().getDocumentResolverUrl());
+    void getDocumentResolverUrl_shouldReturnCorrectValue() throws Exception {
+        Assertions.assertEquals("http://localhost/viewer/metsresolver?id=", DataManager.getInstance().getConfiguration().getDocumentResolverUrl());
     }
 
     /**
@@ -74,8 +74,8 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return correct value
      */
     @Test
-    public void getEseDataProviderField_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals("MD_DEFAULTPROVIDER", DataManager.getInstance().getConfiguration().getEseDataProviderField());
+    void getEseDataProviderField_shouldReturnCorrectValue() throws Exception {
+        Assertions.assertEquals("MD_DEFAULTPROVIDER", DataManager.getInstance().getConfiguration().getEseDataProviderField());
     }
 
     /**
@@ -83,8 +83,8 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return correct value
      */
     @Test
-    public void getEseDefaultProvider_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals("Institution XYZ", DataManager.getInstance().getConfiguration().getEseDefaultProvider());
+    void getEseDefaultProvider_shouldReturnCorrectValue() throws Exception {
+        Assertions.assertEquals("Institution XYZ", DataManager.getInstance().getConfiguration().getEseDefaultProvider());
     }
 
     /**
@@ -92,8 +92,8 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return correct value
      */
     @Test
-    public void getEseDefaultRightsUrl_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals("http://www.example.com/rights", DataManager.getInstance().getConfiguration().getEseDefaultRightsUrl());
+    void getEseDefaultRightsUrl_shouldReturnCorrectValue() throws Exception {
+        Assertions.assertEquals("http://www.example.com/rights", DataManager.getInstance().getConfiguration().getEseDefaultRightsUrl());
     }
 
     /**
@@ -101,8 +101,8 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return correct value
      */
     @Test
-    public void getEseProviderField_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals("MD_ACCESSCONDITIONCOPYRIGHT", DataManager.getInstance().getConfiguration().getEseProviderField());
+    void getEseProviderField_shouldReturnCorrectValue() throws Exception {
+        Assertions.assertEquals("MD_ACCESSCONDITIONCOPYRIGHT", DataManager.getInstance().getConfiguration().getEseProviderField());
     }
 
     /**
@@ -110,8 +110,8 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return correct value
      */
     @Test
-    public void getEseRightsField_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals("TODO", DataManager.getInstance().getConfiguration().getEseRightsField());
+    void getEseRightsField_shouldReturnCorrectValue() throws Exception {
+        Assertions.assertEquals("TODO", DataManager.getInstance().getConfiguration().getEseRightsField());
     }
 
     /**
@@ -119,11 +119,11 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return all values
      */
     @Test
-    public void getEseTypes_shouldReturnAllValues() throws Exception {
+    void getEseTypes_shouldReturnAllValues() throws Exception {
         Map<String, String> values = DataManager.getInstance().getConfiguration().getEseTypes();
-        Assert.assertNotNull(values);
-        Assert.assertEquals(6, values.size());
-        Assert.assertEquals("VIDEO", values.get("video"));
+        Assertions.assertNotNull(values);
+        Assertions.assertEquals(6, values.size());
+        Assertions.assertEquals("VIDEO", values.get("video"));
     }
 
     /**
@@ -131,8 +131,8 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return correct value
      */
     @Test
-    public void getIndexUrl_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals("http://localhost:8080/solr", DataManager.getInstance().getConfiguration().getIndexUrl());
+    void getIndexUrl_shouldReturnCorrectValue() throws Exception {
+        Assertions.assertEquals("http://localhost:8080/solr", DataManager.getInstance().getConfiguration().getIndexUrl());
     }
 
     /**
@@ -140,8 +140,8 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return correct value
      */
     @Test
-    public void getMods2MarcXsl_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals("src/test/resources/MODS2MARC21slim.xsl", DataManager.getInstance().getConfiguration().getMods2MarcXsl());
+    void getMods2MarcXsl_shouldReturnCorrectValue() throws Exception {
+        Assertions.assertEquals("src/test/resources/MODS2MARC21slim.xsl", DataManager.getInstance().getConfiguration().getMods2MarcXsl());
     }
 
     /**
@@ -149,8 +149,8 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return correct value
      */
     @Test
-    public void getPiResolverUrl_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals("http://localhost/viewer/piresolver?id=", DataManager.getInstance().getConfiguration().getPiResolverUrl());
+    void getPiResolverUrl_shouldReturnCorrectValue() throws Exception {
+        Assertions.assertEquals("http://localhost/viewer/piresolver?id=", DataManager.getInstance().getConfiguration().getPiResolverUrl());
     }
 
     /**
@@ -158,8 +158,8 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return correct value
      */
     @Test
-    public void getOaiFolder_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals("src/test/resources/oai/", DataManager.getInstance().getConfiguration().getOaiFolder());
+    void getOaiFolder_shouldReturnCorrectValue() throws Exception {
+        Assertions.assertEquals("src/test/resources/oai/", DataManager.getInstance().getConfiguration().getOaiFolder());
     }
 
     /**
@@ -167,8 +167,8 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return correct value
      */
     @Test
-    public void getResumptionTokenFolder_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals("src/test/resources/oai/token/", DataManager.getInstance().getConfiguration().getResumptionTokenFolder());
+    void getResumptionTokenFolder_shouldReturnCorrectValue() throws Exception {
+        Assertions.assertEquals("src/test/resources/oai/token/", DataManager.getInstance().getConfiguration().getResumptionTokenFolder());
     }
 
     /**
@@ -176,8 +176,8 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return correct value
      */
     @Test
-    public void getUrnResolverUrl_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals("http://localhost/viewer/resolver?urn=", DataManager.getInstance().getConfiguration().getUrnResolverUrl());
+    void getUrnResolverUrl_shouldReturnCorrectValue() throws Exception {
+        Assertions.assertEquals("http://localhost/viewer/resolver?urn=", DataManager.getInstance().getConfiguration().getUrnResolverUrl());
     }
 
     /**
@@ -185,8 +185,8 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies add trailing slash
      */
     @Test
-    public void getViewerConfigFolder_shouldAddTrailingSlash() throws Exception {
-        Assert.assertEquals("src/test/resources/", DataManager.getInstance().getConfiguration().getViewerConfigFolder());
+    void getViewerConfigFolder_shouldAddTrailingSlash() throws Exception {
+        Assertions.assertEquals("src/test/resources/", DataManager.getInstance().getConfiguration().getViewerConfigFolder());
     }
 
     /**
@@ -194,10 +194,10 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return environment variable value if available
      */
     @Test
-    public void getViewerConfigFolder_shouldReturnEnvironmentVariableValueIfAvailable() throws Exception {
+    void getViewerConfigFolder_shouldReturnEnvironmentVariableValueIfAvailable() throws Exception {
         try {
             System.setProperty("configFolder", "/opt/digiverso/viewer/config_other/");
-            Assert.assertTrue(DataManager.getInstance().getConfiguration().getViewerConfigFolder().endsWith("/opt/digiverso/viewer/config_other/"));
+            Assertions.assertTrue(DataManager.getInstance().getConfiguration().getViewerConfigFolder().endsWith("/opt/digiverso/viewer/config_other/"));
         } finally {
             System.clearProperty("configFolder");
         }
@@ -208,12 +208,12 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return all values
      */
     @Test
-    public void getUrnPrefixBlacklist_shouldReturnAllValues() throws Exception {
+    void getUrnPrefixBlacklist_shouldReturnAllValues() throws Exception {
         List<String> values = DataManager.getInstance().getConfiguration().getUrnPrefixBlacklist();
-        Assert.assertNotNull(values);
-        Assert.assertEquals(2, values.size());
-        Assert.assertEquals("urn:nbn:de:test_", values.get(0));
-        Assert.assertEquals("urn:nbn:de:hidden_", values.get(1));
+        Assertions.assertNotNull(values);
+        Assertions.assertEquals(2, values.size());
+        Assertions.assertEquals("urn:nbn:de:test_", values.get(0));
+        Assertions.assertEquals("urn:nbn:de:hidden_", values.get(1));
     }
 
     /**
@@ -221,8 +221,8 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return correct value
      */
     @Test
-    public void getHitsPerToken_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals(23, DataManager.getInstance().getConfiguration().getHitsPerToken());
+    void getHitsPerToken_shouldReturnCorrectValue() throws Exception {
+        Assertions.assertEquals(23, DataManager.getInstance().getConfiguration().getHitsPerToken());
     }
 
     /**
@@ -230,16 +230,16 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return correct value
      */
     @Test
-    public void getHitsPerTokenForMetadataFormat_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals(11, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.OAI_DC.getMetadataPrefix()));
-        Assert.assertEquals(12, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.ESE.name().toLowerCase()));
-        Assert.assertEquals(13, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.METS.getMetadataPrefix()));
-        Assert.assertEquals(14, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.LIDO.getMetadataPrefix()));
-        Assert.assertEquals(15, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.MARCXML.getMetadataPrefix()));
-        Assert.assertEquals(16, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.EPICUR.getMetadataPrefix()));
-        Assert.assertEquals(17,
+    void getHitsPerTokenForMetadataFormat_shouldReturnCorrectValue() throws Exception {
+        Assertions.assertEquals(11, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.OAI_DC.getMetadataPrefix()));
+        Assertions.assertEquals(12, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.ESE.name().toLowerCase()));
+        Assertions.assertEquals(13, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.METS.getMetadataPrefix()));
+        Assertions.assertEquals(14, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.LIDO.getMetadataPrefix()));
+        Assertions.assertEquals(15, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.MARCXML.getMetadataPrefix()));
+        Assertions.assertEquals(16, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.EPICUR.getMetadataPrefix()));
+        Assertions.assertEquals(17,
                 DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.IV_OVERVIEWPAGE.getMetadataPrefix()));
-        Assert.assertEquals(18,
+        Assertions.assertEquals(18,
                 DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat(Metadata.IV_CROWDSOURCING.getMetadataPrefix()));
     }
 
@@ -248,8 +248,8 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return default value for unknown formats
      */
     @Test
-    public void getHitsPerTokenForMetadataFormat_shouldReturnDefaultValueForUnknownFormats() throws Exception {
-        Assert.assertEquals(23, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat("notfound"));
+    void getHitsPerTokenForMetadataFormat_shouldReturnDefaultValueForUnknownFormats() throws Exception {
+        Assertions.assertEquals(23, DataManager.getInstance().getConfiguration().getHitsPerTokenForMetadataFormat("notfound"));
     }
 
     /**
@@ -257,8 +257,8 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return correct value
      */
     @Test
-    public void getVersionDisriminatorFieldForMetadataFormat_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals(SolrConstants.LANGUAGE, DataManager.getInstance().getConfiguration().getVersionDisriminatorFieldForMetadataFormat("tei"));
+    void getVersionDisriminatorFieldForMetadataFormat_shouldReturnCorrectValue() throws Exception {
+        Assertions.assertEquals(SolrConstants.LANGUAGE, DataManager.getInstance().getConfiguration().getVersionDisriminatorFieldForMetadataFormat("tei"));
     }
 
     /**
@@ -266,17 +266,17 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return correct value
      */
     @Test
-    public void isMetadataFormatEnabled_shouldReturnCorrectValue() throws Exception {
-        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.OAI_DC.getMetadataPrefix()));
-        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.ESE.name().toLowerCase()));
-        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.METS.getMetadataPrefix()));
-        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.LIDO.getMetadataPrefix()));
-        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.MARCXML.getMetadataPrefix()));
-        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.EPICUR.getMetadataPrefix()));
-        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.IV_OVERVIEWPAGE.getMetadataPrefix()));
-        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.IV_CROWDSOURCING.getMetadataPrefix()));
-        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.TEI.getMetadataPrefix()));
-        Assert.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.CMDI.getMetadataPrefix()));
+    void isMetadataFormatEnabled_shouldReturnCorrectValue() throws Exception {
+        Assertions.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.OAI_DC.getMetadataPrefix()));
+        Assertions.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.ESE.name().toLowerCase()));
+        Assertions.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.METS.getMetadataPrefix()));
+        Assertions.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.LIDO.getMetadataPrefix()));
+        Assertions.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.MARCXML.getMetadataPrefix()));
+        Assertions.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.EPICUR.getMetadataPrefix()));
+        Assertions.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.IV_OVERVIEWPAGE.getMetadataPrefix()));
+        Assertions.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.IV_CROWDSOURCING.getMetadataPrefix()));
+        Assertions.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.TEI.getMetadataPrefix()));
+        Assertions.assertTrue(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(Metadata.CMDI.getMetadataPrefix()));
     }
 
     /**
@@ -284,8 +284,8 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return false for unknown formats
      */
     @Test
-    public void isMetadataFormatEnabled_shouldReturnFalseForUnknownFormats() throws Exception {
-        Assert.assertFalse(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled("notfound"));
+    void isMetadataFormatEnabled_shouldReturnFalseForUnknownFormats() throws Exception {
+        Assertions.assertFalse(DataManager.getInstance().getConfiguration().isMetadataFormatEnabled("notfound"));
     }
 
     /**
@@ -293,14 +293,14 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return all values
      */
     @Test
-    public void getAllValuesSets_shouldReturnAllValues() throws Exception {
+    void getAllValuesSets_shouldReturnAllValues() throws Exception {
         List<Set> values = DataManager.getInstance().getConfiguration().getAllValuesSets();
-        Assert.assertNotNull(values);
-        Assert.assertEquals(2, values.size());
-        Assert.assertEquals("DC", values.get(0).getSetName());
-        Assert.assertFalse(values.get(0).isTranslate());
-        Assert.assertEquals("MD_WISSENSGEBIET", values.get(1).getSetName());
-        Assert.assertFalse(values.get(1).isTranslate());
+        Assertions.assertNotNull(values);
+        Assertions.assertEquals(2, values.size());
+        Assertions.assertEquals("DC", values.get(0).getSetName());
+        Assertions.assertFalse(values.get(0).isTranslate());
+        Assertions.assertEquals("MD_WISSENSGEBIET", values.get(1).getSetName());
+        Assertions.assertFalse(values.get(1).isTranslate());
     }
 
     /**
@@ -308,23 +308,23 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return all values
      */
     @Test
-    public void getFieldForMetadataFormat_shouldReturnAllValues() throws Exception {
+    void getFieldForMetadataFormat_shouldReturnAllValues() throws Exception {
         List<FieldConfiguration> values = DataManager.getInstance().getConfiguration().getFieldForMetadataFormat(Metadata.OAI_DC.getMetadataPrefix());
-        Assert.assertNotNull(values);
-        Assert.assertEquals(2, values.size());
+        Assertions.assertNotNull(values);
+        Assertions.assertEquals(2, values.size());
 
-        Assert.assertEquals("title", values.get(0).getFieldName());
-        Assert.assertEquals("MD_TITLE", values.get(0).getValueSource());
-        Assert.assertTrue(values.get(0).isTranslate());
-        Assert.assertTrue(values.get(0).isMultivalued());
-        Assert.assertTrue(values.get(0).isUseTopstructValueIfNoneFound());
-        Assert.assertEquals("", values.get(0).getDefaultValue());
+        Assertions.assertEquals("title", values.get(0).getFieldName());
+        Assertions.assertEquals("MD_TITLE", values.get(0).getValueSource());
+        Assertions.assertTrue(values.get(0).isTranslate());
+        Assertions.assertTrue(values.get(0).isMultivalued());
+        Assertions.assertTrue(values.get(0).isUseTopstructValueIfNoneFound());
+        Assertions.assertEquals("", values.get(0).getDefaultValue());
 
-        Assert.assertEquals("format", values.get(1).getFieldName());
-        Assert.assertNull(values.get(1).getValueSource());
-        Assert.assertEquals("image/jpeg", values.get(1).getDefaultValue());
-        Assert.assertEquals("pre ", values.get(1).getPrefix());
-        Assert.assertEquals(" suf", values.get(1).getSuffix());
+        Assertions.assertEquals("format", values.get(1).getFieldName());
+        Assertions.assertNull(values.get(1).getValueSource());
+        Assertions.assertEquals("image/jpeg", values.get(1).getDefaultValue());
+        Assertions.assertEquals("pre ", values.get(1).getPrefix());
+        Assertions.assertEquals(" suf", values.get(1).getSuffix());
     }
 
     /**
@@ -332,8 +332,8 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return correct value
      */
     @Test
-    public void getBaseURL_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals("http://localhost:8080/viewer/oai", DataManager.getInstance().getConfiguration().getBaseURL());
+    void getBaseURL_shouldReturnCorrectValue() throws Exception {
+        Assertions.assertEquals("http://localhost:8080/viewer/oai", DataManager.getInstance().getConfiguration().getBaseURL());
     }
 
     /**
@@ -341,8 +341,8 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return correct value
      */
     @Test
-    public void isBaseUrlUseInRequestElement_shouldReturnCorrectValue() throws Exception {
-        Assert.assertTrue(DataManager.getInstance().getConfiguration().isBaseUrlUseInRequestElement());
+    void isBaseUrlUseInRequestElement_shouldReturnCorrectValue() throws Exception {
+        Assertions.assertTrue(DataManager.getInstance().getConfiguration().isBaseUrlUseInRequestElement());
     }
 
     /**
@@ -350,8 +350,8 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return correct value
      */
     @Test
-    public void getDefaultLocale_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals(Locale.GERMAN, DataManager.getInstance().getConfiguration().getDefaultLocale());
+    void getDefaultLocale_shouldReturnCorrectValue() throws Exception {
+        Assertions.assertEquals(Locale.GERMAN, DataManager.getInstance().getConfiguration().getDefaultLocale());
     }
 
     /**
@@ -359,12 +359,12 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return all values
      */
     @Test
-    public void getSetSpecFieldsForMetadataFormat_shouldReturnAllValues() throws Exception {
+    void getSetSpecFieldsForMetadataFormat_shouldReturnAllValues() throws Exception {
         List<String> values = DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.OAI_DC.getMetadataPrefix());
-        Assert.assertNotNull(values);
-        Assert.assertEquals(2, values.size());
-        Assert.assertEquals(SolrConstants.DC, values.get(0));
-        Assert.assertEquals(SolrConstants.DOCSTRCT, values.get(1));
+        Assertions.assertNotNull(values);
+        Assertions.assertEquals(2, values.size());
+        Assertions.assertEquals(SolrConstants.DC, values.get(0));
+        Assertions.assertEquals(SolrConstants.DOCSTRCT, values.get(1));
     }
 
     /**
@@ -372,8 +372,8 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return correct value
      */
     @Test
-    public void getRestApiUrl_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals("http://localhost/viewer/rest/", DataManager.getInstance().getConfiguration().getRestApiUrl());
+    void getRestApiUrl_shouldReturnCorrectValue() throws Exception {
+        Assertions.assertEquals("http://localhost/viewer/rest/", DataManager.getInstance().getConfiguration().getRestApiUrl());
     }
 
     /**
@@ -381,8 +381,8 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return correct value
      */
     @Test
-    public void getHarvestUrl_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals("http://localhost/viewer/harvest", DataManager.getInstance().getConfiguration().getHarvestUrl());
+    void getHarvestUrl_shouldReturnCorrectValue() throws Exception {
+        Assertions.assertEquals("http://localhost/viewer/harvest", DataManager.getInstance().getConfiguration().getHarvestUrl());
     }
 
     /**
@@ -390,12 +390,12 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies return correct value
      */
     @Test
-    public void getAccessConditionMappingForMetadataFormat_shouldReturnCorrectValue() throws Exception {
-        Assert.assertEquals(Format.ACCESSCONDITION_OPENACCESS,
+    void getAccessConditionMappingForMetadataFormat_shouldReturnCorrectValue() throws Exception {
+        Assertions.assertEquals(Format.ACCESSCONDITION_OPENACCESS,
                 DataManager.getInstance()
                         .getConfiguration()
                         .getAccessConditionMappingForMetadataFormat(Metadata.OAI_DC.getMetadataPrefix(), "Public Domain Mark 1.0"));
-        Assert.assertEquals(Format.ACCESSCONDITION_OPENACCESS,
+        Assertions.assertEquals(Format.ACCESSCONDITION_OPENACCESS,
                 DataManager.getInstance()
                         .getConfiguration()
                         .getAccessConditionMappingForMetadataFormat(Metadata.OAI_DC.getMetadataPrefix(), "Rechte vorbehalten - Freier Zugang"));
@@ -406,9 +406,9 @@ public class ConfigurationTest extends AbstractTest {
      * @verifies read config values correctly
      */
     @Test
-    public void getOaiIdentifier_shouldReadConfigValuesCorrectly() throws Exception {
+    void getOaiIdentifier_shouldReadConfigValuesCorrectly() throws Exception {
         Map<String, String> map = DataManager.getInstance().getConfiguration().getOaiIdentifier();
-        Assert.assertEquals("http://www.openarchives.org/OAI/2.0/", map.get("xmlns"));
-        Assert.assertEquals("repo", map.get("repositoryIdentifier"));
+        Assertions.assertEquals("http://www.openarchives.org/OAI/2.0/", map.get("xmlns"));
+        Assertions.assertEquals("repo", map.get("repositoryIdentifier"));
     }
 }

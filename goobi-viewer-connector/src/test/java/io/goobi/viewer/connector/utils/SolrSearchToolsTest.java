@@ -20,20 +20,20 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.solr.common.SolrDocument;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import io.goobi.viewer.solr.SolrConstants;
 
-public class SolrSearchToolsTest {
+class SolrSearchToolsTest {
 
     /**
      * @see SolrSearchTools#getAdditionalDocstructsQuerySuffix(List)
      * @verifies build query suffix correctly
      */
     @Test
-    public void getAdditionalDocstructsQuerySuffix_shouldBuildQuerySuffixCorrectly() throws Exception {
-        Assert.assertEquals(" OR (" + SolrConstants.DOCTYPE + ":DOCSTRCT AND (" + SolrConstants.DOCSTRCT + ":Article))",
+    void getAdditionalDocstructsQuerySuffix_shouldBuildQuerySuffixCorrectly() throws Exception {
+        Assertions.assertEquals(" OR (" + SolrConstants.DOCTYPE + ":DOCSTRCT AND (" + SolrConstants.DOCSTRCT + ":Article))",
                 SolrSearchTools.getAdditionalDocstructsQuerySuffix(Collections.singletonList("Article")));
     }
 
@@ -42,9 +42,9 @@ public class SolrSearchToolsTest {
      * @verifies return 0 if no valid value is found
      */
     @Test
-    public void getLatestValidDateUpdated_shouldReturn0IfNoValidValueIsFound() throws Exception {
+    void getLatestValidDateUpdated_shouldReturn0IfNoValidValueIsFound() throws Exception {
         SolrDocument doc = new SolrDocument();
-        Assert.assertEquals(Long.valueOf(0), SolrSearchTools.getLatestValidDateUpdated(doc, System.currentTimeMillis()));
+        Assertions.assertEquals(Long.valueOf(0), SolrSearchTools.getLatestValidDateUpdated(doc, System.currentTimeMillis()));
     }
 
     /**
@@ -52,13 +52,13 @@ public class SolrSearchToolsTest {
      * @verifies return correct value
      */
     @Test
-    public void getLatestValidDateUpdated_shouldReturnCorrectValue() throws Exception {
+    void getLatestValidDateUpdated_shouldReturnCorrectValue() throws Exception {
         SolrDocument doc = new SolrDocument();
         doc.addField(SolrConstants.DATEUPDATED, 1L);
         doc.addField(SolrConstants.DATEUPDATED, 2L);
         doc.addField(SolrConstants.DATEUPDATED, 3L);
         doc.addField(SolrConstants.DATEUPDATED, 4L);
-        Assert.assertEquals(Long.valueOf(3), SolrSearchTools.getLatestValidDateUpdated(doc, 3));
+        Assertions.assertEquals(Long.valueOf(3), SolrSearchTools.getLatestValidDateUpdated(doc, 3));
     }
 
     /**
@@ -66,13 +66,13 @@ public class SolrSearchToolsTest {
      * @verifies ignore untilTimestamp if zero
      */
     @Test
-    public void getLatestValidDateUpdated_shouldIgnoreUntilTimestampIfZero() throws Exception {
+    void getLatestValidDateUpdated_shouldIgnoreUntilTimestampIfZero() throws Exception {
         SolrDocument doc = new SolrDocument();
         doc.addField(SolrConstants.DATEUPDATED, 1L);
         doc.addField(SolrConstants.DATEUPDATED, 2L);
         doc.addField(SolrConstants.DATEUPDATED, 3L);
         doc.addField(SolrConstants.DATEUPDATED, 4L);
-        Assert.assertEquals(Long.valueOf(4), SolrSearchTools.getLatestValidDateUpdated(doc, 0));
+        Assertions.assertEquals(Long.valueOf(4), SolrSearchTools.getLatestValidDateUpdated(doc, 0));
     }
 
     /**
@@ -80,13 +80,13 @@ public class SolrSearchToolsTest {
      * @verifies return all values for the given field
      */
     @Test
-    public void getMetadataValues_shouldReturnAllValuesForTheGivenField() throws Exception {
+    void getMetadataValues_shouldReturnAllValuesForTheGivenField() throws Exception {
         SolrDocument doc = new SolrDocument();
         for (int i = 1; i <= 5; ++i) {
             doc.addField("MDNUM_FOO", i);
         }
         List<String> result = SolrSearchTools.getMetadataValues(doc, "MDNUM_FOO");
-        Assert.assertEquals(5, result.size());
+        Assertions.assertEquals(5, result.size());
     }
 
     /**
@@ -94,11 +94,11 @@ public class SolrSearchToolsTest {
      * @verifies build query suffix correctly
      */
     @Test
-    public void getUrnPrefixBlacklistSuffix_shouldBuildQuerySuffixCorrectly() throws Exception {
+    void getUrnPrefixBlacklistSuffix_shouldBuildQuerySuffixCorrectly() throws Exception {
         List<String> prefixes = new ArrayList<>();
         prefixes.add("urn:nbn:de:test-1");
         prefixes.add("urn:nbn:de:hidden-1");
-        Assert.assertEquals(
+        Assertions.assertEquals(
                 " -URN_UNTOKENIZED:urn\\:nbn\\:de\\:test\\-1* -IMAGEURN_UNTOKENIZED:urn\\:nbn\\:de\\:test\\-1* -IMAGEURN_OAI_UNTOKENIZED:urn\\:nbn\\:de\\:test\\-1* -URN_UNTOKENIZED:urn\\:nbn\\:de\\:hidden\\-1* -IMAGEURN_UNTOKENIZED:urn\\:nbn\\:de\\:hidden\\-1* -IMAGEURN_OAI_UNTOKENIZED:urn\\:nbn\\:de\\:hidden\\-1*",
                 SolrSearchTools.getUrnPrefixBlacklistSuffix(prefixes));
     }
@@ -108,8 +108,8 @@ public class SolrSearchToolsTest {
      * @verifies add from until to setSpec queries
      */
     @Test
-    public void buildQueryString_shouldAddFromUntilToSetSpecQueries() throws Exception {
+    void buildQueryString_shouldAddFromUntilToSetSpecQueries() throws Exception {
         String query = SolrSearchTools.buildQueryString("2022-10-27T16:00:00Z", "2022-10-27T16:15:00Z", "goobi", "oai_dc", false, null);
-        Assert.assertTrue(query.contains(" +DATEUPDATED:[1666886400000 TO 1666887300999]"));
+        Assertions.assertTrue(query.contains(" +DATEUPDATED:[1666886400000 TO 1666887300999]"));
     }
 }

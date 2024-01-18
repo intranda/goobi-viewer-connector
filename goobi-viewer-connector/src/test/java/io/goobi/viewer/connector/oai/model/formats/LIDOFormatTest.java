@@ -21,23 +21,23 @@ import java.util.List;
 import org.apache.solr.common.SolrDocument;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.controller.XmlTools;
 import io.goobi.viewer.solr.SolrConstants;
 
-public class LIDOFormatTest {
+class LIDOFormatTest {
 
     /**
      * @see LIDOFormat#generateLidoRecord(String,SolrDocument,RequestHandler,List,String)
      * @verifies generate element correctly
      */
     @Test
-    public void generateLidoRecord_shouldGenerateElementCorrectly() throws Exception {
+    void generateLidoRecord_shouldGenerateElementCorrectly() throws Exception {
         Document lidoDoc = XmlTools.readXmlFile("src/test/resources/viewer/indexed_lido/455820.xml");
-        Assert.assertNotNull(lidoDoc);
+        Assertions.assertNotNull(lidoDoc);
 
         SolrDocument doc = new SolrDocument();
         doc.setField(SolrConstants.PI_TOPSTRUCT, "record_naniweb_455820");
@@ -45,13 +45,13 @@ public class LIDOFormatTest {
         Element eleRecord =
                 LIDOFormat.generateLidoRecord(XmlTools.getStringFromElement(lidoDoc, StandardCharsets.UTF_8.name()), doc, new RequestHandler(),
                         null, null);
-        Assert.assertNotNull(eleRecord);
-        Assert.assertEquals("record", eleRecord.getName());
-        Assert.assertNotNull(eleRecord.getChild("header", Format.OAI_NS));
+        Assertions.assertNotNull(eleRecord);
+        Assertions.assertEquals("record", eleRecord.getName());
+        Assertions.assertNotNull(eleRecord.getChild("header", Format.OAI_NS));
         Element eleMetadata = eleRecord.getChild("metadata", Format.OAI_NS);
-        Assert.assertNotNull(eleMetadata);
+        Assertions.assertNotNull(eleMetadata);
         Element eleLido = eleMetadata.getChild("lido", LIDOFormat.LIDO_NS);
-        Assert.assertNotNull(eleLido);
+        Assertions.assertNotNull(eleLido);
     }
 
     /**
@@ -59,10 +59,10 @@ public class LIDOFormatTest {
      * @verifies return null if xml empty
      */
     @Test
-    public void generateLidoRecord_shouldReturnNullIfXmlEmpty() throws Exception {
+    void generateLidoRecord_shouldReturnNullIfXmlEmpty() throws Exception {
         SolrDocument doc = new SolrDocument();
         doc.setField(SolrConstants.PI_TOPSTRUCT, "LIDO123");
-        Assert.assertNull(METSFormat.generateMetsRecord(XmlTools.getStringFromElement("", StandardCharsets.UTF_8.name()), doc, new RequestHandler(),
+        Assertions.assertNull(METSFormat.generateMetsRecord(XmlTools.getStringFromElement("", StandardCharsets.UTF_8.name()), doc, new RequestHandler(),
                 null, null));
     }
 }

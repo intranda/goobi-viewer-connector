@@ -1,4 +1,5 @@
 /build/
 /doc/
-rebel.xml
 /target/
+/.settings/
+/.classpath

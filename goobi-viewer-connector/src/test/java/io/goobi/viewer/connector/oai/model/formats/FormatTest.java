@@ -22,32 +22,32 @@ import java.util.Locale;
 import org.apache.commons.io.FileUtils;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import io.goobi.viewer.connector.AbstractSolrEnabledTest;
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.model.ResumptionToken;
 
-public class FormatTest extends AbstractSolrEnabledTest {
+class FormatTest extends AbstractSolrEnabledTest {
 
     /**
      * @see Format#getIdentifyXML(String)
      * @verifies construct element correctly
      */
     @Test
-    public void getIdentifyXML_shouldConstructElementCorrectly() throws Exception {
+    void getIdentifyXML_shouldConstructElementCorrectly() throws Exception {
         Element eleIdentify = Format.getIdentifyXML(null);
-        Assert.assertNotNull(eleIdentify);
-        Assert.assertEquals("Identify", eleIdentify.getName());
-        Assert.assertEquals("OAI Frontend", eleIdentify.getChildText("repositoryName", null));
-        Assert.assertEquals("http://localhost:8080/viewer/oai", eleIdentify.getChildText("baseURL", null));
-        Assert.assertEquals("2.0", eleIdentify.getChildText("protocolVersion", null));
-        Assert.assertEquals("admin@example.com", eleIdentify.getChildText("adminEmail", null));
-        Assert.assertEquals("2012-10-10T12:07:32Z", eleIdentify.getChildText("earliestDatestamp", null));
-        Assert.assertEquals("transient", eleIdentify.getChildText("deletedRecord", null));
-        Assert.assertEquals("YYYY-MM-DDThh:mm:ssZ", eleIdentify.getChildText("granularity", null));
+        Assertions.assertNotNull(eleIdentify);
+        Assertions.assertEquals("Identify", eleIdentify.getName());
+        Assertions.assertEquals("OAI Frontend", eleIdentify.getChildText("repositoryName", null));
+        Assertions.assertEquals("http://localhost:8080/viewer/oai", eleIdentify.getChildText("baseURL", null));
+        Assertions.assertEquals("2.0", eleIdentify.getChildText("protocolVersion", null));
+        Assertions.assertEquals("admin@example.com", eleIdentify.getChildText("adminEmail", null));
+        Assertions.assertEquals("2012-10-10T12:07:32Z", eleIdentify.getChildText("earliestDatestamp", null));
+        Assertions.assertEquals("transient", eleIdentify.getChildText("deletedRecord", null));
+        Assertions.assertEquals("YYYY-MM-DDThh:mm:ssZ", eleIdentify.getChildText("granularity", null));
     }
 
     /**
@@ -55,17 +55,17 @@ public class FormatTest extends AbstractSolrEnabledTest {
      * @verifies construct element correctly
      */
     @Test
-    public void createMetadataFormats_shouldConstructElementCorrectly() throws Exception {
+    void createMetadataFormats_shouldConstructElementCorrectly() throws Exception {
         Element ele = Format.createMetadataFormats();
-        Assert.assertNotNull(ele);
-        Assert.assertEquals("ListMetadataFormats", ele.getName());
+        Assertions.assertNotNull(ele);
+        Assertions.assertEquals("ListMetadataFormats", ele.getName());
         List<Element> eleListMetadataFormat = ele.getChildren("metadataFormat", null);
-        Assert.assertNotNull(eleListMetadataFormat);
-        Assert.assertEquals(9, eleListMetadataFormat.size());
+        Assertions.assertNotNull(eleListMetadataFormat);
+        Assertions.assertEquals(9, eleListMetadataFormat.size());
         for (Element eleMetadataFormat : eleListMetadataFormat) {
-            Assert.assertNotNull(eleMetadataFormat.getChildText("metadataPrefix", null));
-            Assert.assertNotNull(eleMetadataFormat.getChildText("metadataNamespace", null));
-            Assert.assertNotNull(eleMetadataFormat.getChildText("schema", null));
+            Assertions.assertNotNull(eleMetadataFormat.getChildText("metadataPrefix", null));
+            Assertions.assertNotNull(eleMetadataFormat.getChildText("metadataNamespace", null));
+            Assertions.assertNotNull(eleMetadataFormat.getChildText("schema", null));
         }
     }
 
@@ -74,13 +74,13 @@ public class FormatTest extends AbstractSolrEnabledTest {
      * @verifies construct element correctly
      */
     @Test
-    public void createListSets_shouldConstructElementCorrectly() throws Exception {
+    void createListSets_shouldConstructElementCorrectly() throws Exception {
         Element eleListSets = Format.createListSets(Locale.ENGLISH);
-        Assert.assertNotNull(eleListSets);
-        Assert.assertEquals("ListSets", eleListSets.getName());
+        Assertions.assertNotNull(eleListSets);
+        Assertions.assertEquals("ListSets", eleListSets.getName());
         List<Element> eleListSet = eleListSets.getChildren("set", null);
-        Assert.assertNotNull(eleListSet);
-        Assert.assertEquals(44, eleListSet.size());
+        Assertions.assertNotNull(eleListSet);
+        Assertions.assertEquals(44, eleListSet.size());
     }
 
     /**
@@ -88,11 +88,11 @@ public class FormatTest extends AbstractSolrEnabledTest {
      * @verifies construct element correctly
      */
     @Test
-    public void getOaiPmhElement_shouldConstructElementCorrectly() throws Exception {
+    void getOaiPmhElement_shouldConstructElementCorrectly() throws Exception {
         Element ele = Format.getOaiPmhElement("oai");
-        Assert.assertNotNull(ele);
-        Assert.assertEquals("oai", ele.getName());
-        Assert.assertEquals("http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd",
+        Assertions.assertNotNull(ele);
+        Assertions.assertEquals("oai", ele.getName());
+        Assertions.assertEquals("http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd",
                 ele.getAttributeValue("schemaLocation", Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance")));
     }
 
@@ -101,7 +101,7 @@ public class FormatTest extends AbstractSolrEnabledTest {
      * @verifies construct element correctly
      */
     @Test
-    public void createResumptionTokenAndElement_shouldConstructElementCorrectly() throws Exception {
+    void createResumptionTokenAndElement_shouldConstructElementCorrectly() throws Exception {
         File tokenFolder = new File(DataManager.getInstance().getConfiguration().getResumptionTokenFolder());
         try {
             if (!tokenFolder.exists()) {
@@ -109,11 +109,11 @@ public class FormatTest extends AbstractSolrEnabledTest {
             }
 
             Element ele = Format.createResumptionTokenAndElement(100, 100, 10, 10, null, new RequestHandler());
-            Assert.assertNotNull(ele);
-            Assert.assertEquals("resumptionToken", ele.getName());
-            Assert.assertNotNull(ele.getAttributeValue("expirationDate"));
-            Assert.assertEquals("100", ele.getAttributeValue("completeListSize"));
-            Assert.assertEquals("10", ele.getAttributeValue("cursor"));
+            Assertions.assertNotNull(ele);
+            Assertions.assertEquals("resumptionToken", ele.getName());
+            Assertions.assertNotNull(ele.getAttributeValue("expirationDate"));
+            Assertions.assertEquals("100", ele.getAttributeValue("completeListSize"));
+            Assertions.assertEquals("10", ele.getAttributeValue("cursor"));
             
         } finally {
             if (tokenFolder.isDirectory()) {
@@ -127,10 +127,10 @@ public class FormatTest extends AbstractSolrEnabledTest {
      * @verifies return error if resumption token name illegal
      */
     @Test
-    public void handleToken_shouldReturnErrorIfResumptionTokenNameIllegal() throws Exception {
+    void handleToken_shouldReturnErrorIfResumptionTokenNameIllegal() throws Exception {
         Element result = Format.handleToken("foo", "");
-        Assert.assertEquals("error", result.getName());
-        Assert.assertEquals("badResumptionToken", result.getAttributeValue("code"));
+        Assertions.assertEquals("error", result.getName());
+        Assertions.assertEquals("badResumptionToken", result.getAttributeValue("code"));
     }
 
     /**
@@ -138,11 +138,11 @@ public class FormatTest extends AbstractSolrEnabledTest {
      * @verifies deserialize token correctly
      */
     @Test
-    public void deserializeResumptionToken_shouldDeserializeTokenCorrectly() throws Exception {
+    void deserializeResumptionToken_shouldDeserializeTokenCorrectly() throws Exception {
         File f = new File("src/test/resources/token/oai_1634822246437");
-        Assert.assertTrue(f.isFile());
+        Assertions.assertTrue(f.isFile());
 
         ResumptionToken token = Format.deserializeResumptionToken(f);
-        Assert.assertNotNull(token);
+        Assertions.assertNotNull(token);
     }
 }
