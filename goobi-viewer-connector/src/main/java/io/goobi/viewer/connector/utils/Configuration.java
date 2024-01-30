@@ -359,6 +359,11 @@ public final class Configuration {
     public String getIndexUrl() {
         return getLocalString("solr.solrUrl", "http://localhost:8080/solr");
     }
+    
+    public boolean isSolrUseHttp2() {
+        return false;
+    }
+
 
     /**
      * <p>

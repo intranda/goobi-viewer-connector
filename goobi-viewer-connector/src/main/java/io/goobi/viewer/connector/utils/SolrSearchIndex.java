@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -36,6 +37,7 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.BinaryRequestWriter;
+import org.apache.solr.client.solrj.impl.Http2SolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.FacetField.Count;
@@ -60,7 +62,7 @@ import io.goobi.viewer.solr.SolrConstants.DocType;
 public class SolrSearchIndex {
 
     /** Logger for this class. */
-    final static Logger logger = LogManager.getLogger(SolrSearchIndex.class);
+    static final Logger logger = LogManager.getLogger(SolrSearchIndex.class);
 
     /** Constant <code>MAX_HITS=Integer.MAX_VALUE</code> */
     public static final int MAX_HITS = Integer.MAX_VALUE;
@@ -111,20 +113,32 @@ public class SolrSearchIndex {
     }
 
     /**
+     * 
+     * @return New {@link SolrClient}
+     */
+    public static SolrClient getNewSolrClient(String solrUrl) {
+        if (DataManager.getInstance().getConfiguration().isSolrUseHttp2()) {
+            return getNewHttp2SolrClient(solrUrl);
+        }
+
+        return getNewHttpSolrClient(solrUrl);
+    }
+
+    /**
      * <p>
      * getNewHttpSolrServer.
      * </p>
      *
-     * @param indexUrl a {@link java.lang.String} object.
+     * @param solrUrl a {@link java.lang.String} object.
      * @return a {@link org.apache.solr.client.solrj.impl.HttpSolrServer} object.
      */
-    public static HttpSolrClient getNewHttpSolrClient(String indexUrl) {
-        if (indexUrl == null) {
-            throw new IllegalArgumentException("indexUrl may not be null");
+    static HttpSolrClient getNewHttpSolrClient(String solrUrl) {
+        if (solrUrl == null) {
+            throw new IllegalArgumentException("solrUrl may not be null");
         }
-        logger.info("Initializing server with URL '{}'", indexUrl);
+        logger.info("Initializing server with URL '{}'", solrUrl);
         HttpSolrClient server = new HttpSolrClient.Builder()
-                .withBaseSolrUrl(indexUrl)
+                .withBaseSolrUrl(solrUrl)
                 .withSocketTimeout(TIMEOUT_SO)
                 .withConnectionTimeout(TIMEOUT_CONNECTION)
                 .allowCompression(true)
@@ -143,13 +157,30 @@ public class SolrSearchIndex {
     }
 
     /**
+     * <p>
+     * getNewHttp2SolrClient.
+     * </p>
+     *
+     * @return a {@link org.apache.solr.client.solrj.impl.HttpSolrServer} object.
+     */
+    static Http2SolrClient getNewHttp2SolrClient(String solrUrl) {
+        return new Http2SolrClient.Builder(solrUrl)
+                .withIdleTimeout(TIMEOUT_SO, TimeUnit.MILLISECONDS)
+                .withConnectionTimeout(TIMEOUT_CONNECTION, TimeUnit.MILLISECONDS)
+                .withFollowRedirects(false)
+                .withRequestWriter(new BinaryRequestWriter())
+                // .allowCompression(DataManager.getInstance().getConfiguration().isSolrCompressionEnabled())
+                .build();
+    }
+
+    /**
      * Attempts multiple times to query the Solr client with the given query.
      * 
      * @param solrQuery Readily built SolrQuery object
      * @param tries Number of attempts to query Solr before giving up
      * @return
      * @throws SolrServerException
-     * @throws IOException
+     * @throws IOException 
      */
     QueryResponse querySolr(SolrQuery solrQuery, int tries) throws SolrServerException, IOException {
         if (solrQuery == null) {

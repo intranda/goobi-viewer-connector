@@ -15,7 +15,7 @@
  */
 package io.goobi.viewer.connector;
 
-import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.SolrClient;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -35,7 +35,7 @@ public abstract class AbstractSolrEnabledTest extends AbstractTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        HttpSolrClient client = SolrSearchIndex.getNewHttpSolrClient(SOLR_TEST_URL);
+        SolrClient client = SolrSearchIndex.getNewSolrClient(SOLR_TEST_URL);
         DataManager.getInstance().injectSearchIndex(new SolrSearchIndex(client, true));
     }
 }
