@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.goobi.viewer</groupId>
 	<artifactId>viewer-connector</artifactId>
-	<version>23.12</version>
+	<version>24.01-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 
@@ -39,24 +39,22 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.release>11</maven.compiler.release>
+		<maven.compiler.release>17</maven.compiler.release>
         <skipTests>true</skipTests>
         <skipDependencyCheck>true</skipDependencyCheck>
 
         <!-- Sonar -->
-        <sonar.scanner.force-deprecated-java-version>true</sonar.scanner.force-deprecated-java-version>
-
         <sonar.projectKey>intranda_goobi-viewer-connector</sonar.projectKey>
         <sonar.organization>intranda</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <sonar.java.source>11</sonar.java.source>
-        <sonar.java.target>11</sonar.java.target>
+        <sonar.java.source>17</sonar.java.source>
+        <sonar.java.target>17</sonar.java.target>
 
 		<!-- Manifest information -->
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 		<buildDate>${maven.build.timestamp}</buildDate>
         
-        <viewer-core.version>23.12.1</viewer-core.version>
+        <viewer-core.version>24.01-SNAPSHOT</viewer-core.version>
 
 		<commons-collections.version>3.2.2</commons-collections.version>
 		<commons-configuration2.version>2.9.0</commons-configuration2.version>
