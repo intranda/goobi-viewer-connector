@@ -80,13 +80,6 @@
             <groupId>io.goobi.viewer</groupId>
             <artifactId>viewer-core</artifactId>
             <version>${viewer-core.version}</version>
-            <!-- Exclude javax.xml packages to avoid module problems with Java 9+ -->
-            <exclusions>
-                <exclusion>
-                    <groupId>xml-apis</groupId>
-                    <artifactId>xml-apis</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
     
 		<dependency>
@@ -253,7 +246,7 @@
                 <version>3.12.1</version>
                 <configuration>
                     <compilerArgument>-Xlint:deprecation</compilerArgument>
-                    <!--compilerArgument>-Xlint:unchecked</compilerArgument -->
+                    <compilerArgument>-Xlint:unchecked</compilerArgument>
                 </configuration>
             </plugin>
             <plugin>
