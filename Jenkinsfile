@@ -30,9 +30,7 @@ pipeline {
         }
       }
       steps {
-              sh 'mvn -f goobi-viewer-connector/pom.xml -DskipTests=false -DskipDependencyCheck=true clean verify -U'
-              recordIssues enabledForFailure: true, aggregatingResults: true, tools: [java(), javaDoc()]
-              dependencyCheckPublisher pattern: '**/target/dependency-check-report.xml'
+        sh 'mvn -f goobi-viewer-connector/pom.xml -DskipTests=false -DskipDependencyCheck=true clean verify -U'
       }
     }
     stage('build release') {
@@ -43,9 +41,7 @@ pipeline {
         }
       }
       steps {
-              sh 'mvn -f goobi-viewer-connector/pom.xml -DskipTests=false -DskipDependencyCheck=false -DfailOnSnapshot=true clean verify -U'
-              recordIssues enabledForFailure: true, aggregatingResults: true, tools: [java(), javaDoc()]
-              dependencyCheckPublisher pattern: '**/target/dependency-check-report.xml'
+        sh 'mvn -f goobi-viewer-connector/pom.xml -DskipTests=false -DskipDependencyCheck=false -DfailOnSnapshot=true clean verify -U'
       }
     }
 
@@ -85,6 +81,11 @@ pipeline {
         sourcePattern    : 'goobi-viewer-connector/src/main/java',
         exclusionPattern : '**/*Test.class'
       ])
+      recordIssues (
+        enabledForFailure: true, aggregatingResults: false,
+        tools: [checkStyle(pattern: '**/target/checkstyle-result.xml', reportEncoding: 'UTF-8')]
+      )
+      //dependencyCheckPublisher pattern: '**/target/dependency-check-report.xml'
     }
     success {
       archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
