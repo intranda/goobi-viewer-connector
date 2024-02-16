@@ -20,13 +20,36 @@ pipeline {
         sh 'git clean -fdx'
       }
     }
-    stage('build') {
+    stage('build develop') {
+      when {
+        not {
+          anyOf {
+            branch 'master';
+            tag "v*"
+          }
+        }
+      }
       steps {
-              sh 'mvn -f goobi-viewer-connector/pom.xml -DskipTests=false -DskipDependencyCheck=false clean verify -U'
+              sh 'mvn -f goobi-viewer-connector/pom.xml -DskipTests=false -DskipDependencyCheck=true clean verify -U'
               recordIssues enabledForFailure: true, aggregatingResults: true, tools: [java(), javaDoc()]
               dependencyCheckPublisher pattern: '**/target/dependency-check-report.xml'
       }
     }
+    stage('build release') {
+      when {
+        anyOf {
+          branch 'master';
+          tag "v*"
+        }
+      }
+      steps {
+              sh 'mvn -f goobi-viewer-connector/pom.xml -DskipTests=false -DskipDependencyCheck=false -DfailOnSnapshot=true clean verify -U'
+              recordIssues enabledForFailure: true, aggregatingResults: true, tools: [java(), javaDoc()]
+              dependencyCheckPublisher pattern: '**/target/dependency-check-report.xml'
+      }
+    }
+
+
     stage('sonarcloud') {
       when {
         anyOf {
