@@ -189,9 +189,6 @@
                                 </requireMavenVersion>
                                 <requireReleaseDeps>
                                     <message>No Snapshots Allowed!</message>
-                                    <excludes>
-                                         <exclude>io.goobi.viewer:viewer-core</exclude>
-                                     </excludes>
                                 </requireReleaseDeps>
                             </rules>
                             <fail>${failOnSnapshot}</fail>
