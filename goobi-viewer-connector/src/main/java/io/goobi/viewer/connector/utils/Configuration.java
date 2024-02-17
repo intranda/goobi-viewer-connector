@@ -361,7 +361,7 @@ public final class Configuration {
     }
     
     public boolean isSolrUseHttp2() {
-        return false;
+        return true;
     }
 
 
