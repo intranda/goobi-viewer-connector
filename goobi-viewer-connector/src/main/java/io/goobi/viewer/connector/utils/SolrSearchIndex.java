@@ -117,7 +117,7 @@ public class SolrSearchIndex {
      * @return New {@link SolrClient}
      */
     public static SolrClient getNewSolrClient(String solrUrl) {
-        if (DataManager.getInstance().getConfiguration().isSolrUseHttp2()) {
+        if (io.goobi.viewer.controller.DataManager.getInstance().getConfiguration().isSolrUseHttp2()) {
             return getNewHttp2SolrClient(solrUrl);
         }
 
@@ -180,7 +180,7 @@ public class SolrSearchIndex {
      * @param tries Number of attempts to query Solr before giving up
      * @return
      * @throws SolrServerException
-     * @throws IOException 
+     * @throws IOException
      */
     QueryResponse querySolr(SolrQuery solrQuery, int tries) throws SolrServerException, IOException {
         if (solrQuery == null) {
