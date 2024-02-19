@@ -223,11 +223,7 @@ public class SolrSearchTools {
 
         List<String> ret = new ArrayList<>(values.size());
         for (Object value : values) {
-            if (value instanceof String) {
-                ret.add((String) value);
-            } else {
-                ret.add(String.valueOf(value));
-            }
+            ret.add(String.valueOf(value));
         }
 
         return ret;
@@ -256,8 +252,8 @@ public class SolrSearchTools {
             Object count = info.getCount();
             if (count instanceof Long || count instanceof Integer) {
                 ret = (long) count;
-            } else if (count instanceof Double) {
-                ret = ((Double) count).longValue();
+            } else if (count instanceof Double d) {
+                ret = d.longValue();
             }
             logger.trace("Total hits via {} value count: {}", field, ret);
         }

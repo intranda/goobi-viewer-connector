@@ -170,8 +170,8 @@ public class Utils {
      * @should parse dates correctly
      */
     public static String parseDate(Object datestring) {
-        if (datestring instanceof Long) {
-            return convertDate((Long) datestring);
+        if (datestring instanceof Long l) {
+            return convertDate(l);
         }
         return "";
     }

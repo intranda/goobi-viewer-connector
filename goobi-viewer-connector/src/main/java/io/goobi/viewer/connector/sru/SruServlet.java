@@ -87,7 +87,7 @@ public class SruServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("text/xml;charset=UTF-8");
-        
+
         SruRequestParameter parameter = null;
         try {
             parameter = new SruRequestParameter(request);
@@ -688,27 +688,25 @@ public class SruServlet extends HttpServlet {
             dc.addContent(eleDcIdentifier);
         }
         // create <dc:source />
-        {
-            Element eleDcSource = new Element("source", DC_NAMEPSACE);
-            if (creators == null) {
-                creators = "-";
-            }
-            if (title == null) {
-                title = "-";
-            }
-            if (yearpublish == null) {
-                yearpublish = "-";
-            }
-            if (placepublish == null) {
-                placepublish = "-";
-            }
-            if (publisher == null) {
-                publisher = "-";
-            }
-            String sourceString = creators + ": " + title + ", " + placepublish + ": " + publisher + " " + yearpublish + ".";
-            eleDcSource.setText(sourceString);
-            dc.addContent(eleDcSource);
+        Element eleDcSource = new Element("source", DC_NAMEPSACE);
+        if (creators == null) {
+            creators = "-";
         }
+        if (title == null) {
+            title = "-";
+        }
+        if (yearpublish == null) {
+            yearpublish = "-";
+        }
+        if (placepublish == null) {
+            placepublish = "-";
+        }
+        if (publisher == null) {
+            publisher = "-";
+        }
+        String sourceString = creators + ": " + title + ", " + placepublish + ": " + publisher + " " + yearpublish + ".";
+        eleDcSource.setText(sourceString);
+        dc.addContent(eleDcSource);
 
         // create <dc:rights />
         Element eleDcRights = new Element("rights", DC_NAMEPSACE);
@@ -882,50 +880,50 @@ public class SruServlet extends HttpServlet {
 
         for (String fieldname : document.getFieldNames()) {
             Object fieldvalue = document.getFieldValue(fieldname);
-            if (fieldvalue instanceof String) {
+            if (fieldvalue instanceof String s) {
                 Element str = new Element("str");
                 str.setAttribute("name", fieldname);
-                str.setText((String) fieldvalue);
+                str.setText(s);
                 doc.addContent(str);
-            } else if (fieldvalue instanceof Long) {
+            } else if (fieldvalue instanceof Long l) {
                 Element longElement = new Element("long");
                 longElement.setAttribute("name", fieldname);
-                longElement.setText(((Long) fieldvalue).toString());
+                longElement.setText(l.toString());
                 doc.addContent(longElement);
 
-            } else if (fieldvalue instanceof Integer) {
+            } else if (fieldvalue instanceof Integer i) {
                 Element intElement = new Element("int");
                 intElement.setAttribute("name", fieldname);
-                intElement.setText(((Integer) fieldvalue).toString());
+                intElement.setText(i.toString());
                 doc.addContent(intElement);
 
-            } else if (fieldvalue instanceof Boolean) {
+            } else if (fieldvalue instanceof Boolean b) {
                 Element intElement = new Element("bool");
                 intElement.setAttribute("name", fieldname);
-                intElement.setText(((Boolean) fieldvalue).toString());
+                intElement.setText(b.toString());
                 doc.addContent(intElement);
 
-            } else if (fieldvalue instanceof Collection) {
+            } else if (fieldvalue instanceof Collection collection) {
                 Element arr = new Element("arr");
                 arr.setAttribute("name", fieldname);
                 doc.addContent(arr);
 
-                for (Object o : (Collection) fieldvalue) {
-                    if (o instanceof String) {
+                for (Object o : collection) {
+                    if (o instanceof String s) {
                         Element str = new Element("str");
-                        str.setText((String) o);
+                        str.setText(s);
                         arr.addContent(str);
-                    } else if (o instanceof Long) {
+                    } else if (o instanceof Long l) {
                         Element longElement = new Element("long");
-                        longElement.setText(((Long) o).toString());
+                        longElement.setText(l.toString());
                         arr.addContent(longElement);
-                    } else if (fieldvalue instanceof Integer) {
+                    } else if (fieldvalue instanceof Integer i) {
                         Element intElement = new Element("int");
-                        intElement.setText(((Integer) fieldvalue).toString());
+                        intElement.setText(i.toString());
                         doc.addContent(intElement);
-                    } else if (fieldvalue instanceof Boolean) {
+                    } else if (fieldvalue instanceof Boolean b) {
                         Element intElement = new Element("bool");
-                        intElement.setText(((Boolean) fieldvalue).toString());
+                        intElement.setText(b.toString());
                         doc.addContent(intElement);
                     }
                 }
