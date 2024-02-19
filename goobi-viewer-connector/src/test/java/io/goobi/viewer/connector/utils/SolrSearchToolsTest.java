@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,22 @@ class SolrSearchToolsTest {
     void getLatestValidDateUpdated_shouldReturn0IfNoValidValueIsFound() throws Exception {
         SolrDocument doc = new SolrDocument();
         Assertions.assertEquals(Long.valueOf(0), SolrSearchTools.getLatestValidDateUpdated(doc, System.currentTimeMillis()));
+    }
+
+    /**
+     * @see SolrSearchTools#normalizeDate(String)
+     * @verifies normalize correctly
+     */
+    @Test
+    void normalizeDate_shouldNormalizeCorrectly() throws Exception {
+        Assertions.assertNull(SolrSearchTools.normalizeDate(null));
+        Assertions.assertEquals("-12345678", SolrSearchTools.normalizeDate("-12345678"));
+        Assertions.assertEquals("1122334455667788", SolrSearchTools.normalizeDate("1122334455667788"));
+        Assertions.assertEquals("0000012345678", SolrSearchTools.normalizeDate("12345678"));
+        Assertions.assertEquals("0000123456789", SolrSearchTools.normalizeDate("123456789"));
+        Assertions.assertEquals("0001234567890", SolrSearchTools.normalizeDate("1234567890"));
+        Assertions.assertEquals("0012345678901", SolrSearchTools.normalizeDate("12345678901"));
+        Assertions.assertEquals("0123456789012", SolrSearchTools.normalizeDate("123456789012"));
     }
 
     /**
@@ -77,6 +94,27 @@ class SolrSearchToolsTest {
 
     /**
      * @see SolrSearchTools#getMetadataValues(SolrDocument,String)
+     * @verifies return empty list if doc null
+     */
+    @Test
+    void getMetadataValues_shouldReturnEmptyListIfDocNull() throws Exception {
+        List<String> result = SolrSearchTools.getMetadataValues(null, "MDNUM_FOO");
+        Assertions.assertTrue(result.isEmpty());
+    }
+
+    /**
+     * @see SolrSearchTools#getMetadataValues(SolrDocument,String)
+     * @verifies return empty list if no values for fieldName found
+     */
+    @Test
+    void getMetadataValues_shouldReturnEmptyListIfNoValuesForFieldNameFound() throws Exception {
+        SolrDocument doc = new SolrDocument();
+        List<String> result = SolrSearchTools.getMetadataValues(doc, "MDNUM_FOO");
+        Assertions.assertTrue(result.isEmpty());
+    }
+
+    /**
+     * @see SolrSearchTools#getMetadataValues(SolrDocument,String)
      * @verifies return all values for the given field
      */
     @Test
@@ -87,6 +125,27 @@ class SolrSearchToolsTest {
         }
         List<String> result = SolrSearchTools.getMetadataValues(doc, "MDNUM_FOO");
         Assertions.assertEquals(5, result.size());
+    }
+
+    /**
+     * @see SolrSearchTools#getFieldCount(QueryResponse,String)
+     * @verifies throw IllegalArgumentException if queryResponse null
+     */
+    @Test
+    void getFieldCount_shouldThrowIllegalArgumentExceptionIfQueryResponseNull() throws Exception {
+        Exception e = Assertions.assertThrows(IllegalArgumentException.class, () -> SolrSearchTools.getFieldCount(null, "MD_FOO"));
+        Assertions.assertEquals("queryResponse may not be null", e.getMessage());
+    }
+
+    /**
+     * @see SolrSearchTools#getFieldCount(QueryResponse,String)
+     * @verifies throw IllegalArgumentException if field null
+     */
+    @Test
+    void getFieldCount_shouldThrowIllegalArgumentExceptionIfFieldNull() throws Exception {
+        QueryResponse qr = new QueryResponse();
+        Exception e = Assertions.assertThrows(IllegalArgumentException.class, () -> SolrSearchTools.getFieldCount(qr, null));
+        Assertions.assertEquals("field may not be null", e.getMessage());
     }
 
     /**

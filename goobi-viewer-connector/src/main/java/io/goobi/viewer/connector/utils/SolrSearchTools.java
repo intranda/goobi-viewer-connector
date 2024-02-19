@@ -151,6 +151,7 @@ public class SolrSearchTools {
      * 
      * @param date
      * @return
+     * @should normalize correctly
      */
     static String normalizeDate(String date) {
         if (date != null) {
@@ -208,8 +209,10 @@ public class SolrSearchTools {
      *
      * @param doc a {@link org.apache.solr.common.SolrDocument} object.
      * @param fieldName a {@link java.lang.String} object.
-     * @should return all values for the given field
      * @return a {@link java.util.List} object.
+     * @should return empty list if doc null
+     * @should return empty list if no values for fieldName found
+     * @should return all values for the given field
      */
     public static List<String> getMetadataValues(SolrDocument doc, String fieldName) {
         if (doc == null) {
@@ -237,6 +240,8 @@ public class SolrSearchTools {
      * @param queryResponse a {@link org.apache.solr.client.solrj.response.QueryResponse} object.
      * @param field a {@link java.lang.String} object.
      * @return a long.
+     * @should throw IllegalArgumentException if queryResponse null
+     * @should throw IllegalArgumentException if field null
      */
     public static long getFieldCount(QueryResponse queryResponse, String field) {
         if (queryResponse == null) {
