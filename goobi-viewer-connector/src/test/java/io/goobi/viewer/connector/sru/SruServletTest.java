@@ -1,5 +1,9 @@
 package io.goobi.viewer.connector.sru;
 
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.solr.common.SolrDocument;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.junit.jupiter.api.Assertions;
@@ -8,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import io.goobi.viewer.connector.AbstractSolrEnabledTest;
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.enums.Metadata;
+import io.goobi.viewer.connector.utils.SolrSearchIndex;
+import io.goobi.viewer.solr.SolrConstants;
 
 class SruServletTest extends AbstractSolrEnabledTest {
 
@@ -145,5 +151,55 @@ class SruServletTest extends AbstractSolrEnabledTest {
 
         result = SruServlet.generateSearchQuery("anywhere=foo", Metadata.MARCXML, null);
         Assertions.assertEquals("*:foo AND SOURCEDOCFORMAT:METS AND (ISWORK:true OR ISANCHOR:true)", result);
+    }
+    
+    /**
+     * @see SruServlet#generateSolrRecord(SolrDocument,Element)
+     * @verifies add correct element types
+     */
+    @Test
+    void generateSolrRecord_shouldAddCorrectElementTypes() throws Exception {
+        SolrDocument doc = new SolrDocument();
+        doc.addField(SolrConstants.DOCSTRCT, "monograph");
+        doc.addField(SolrConstants.DATECREATED, 123L);
+        doc.addField(SolrConstants.NUMPAGES, 10);
+        doc.addField(SolrConstants.ISWORK, true);
+        doc.addField("MD_FOO", Arrays.asList("one", "two"));
+        
+        Element ele = new Element("foo");
+        
+        SruServlet.generateSolrRecord(doc, ele);
+        
+        Element eleDoc = ele.getChild("doc");
+        Assertions.assertNotNull(doc);
+        
+        Element eleStr = eleDoc.getChild("str");
+        Assertions.assertNotNull(eleStr);
+        Assertions.assertEquals(SolrConstants.DOCSTRCT, eleStr.getAttributeValue("name"));
+        Assertions.assertEquals("monograph", eleStr.getText());
+        
+        Element eleLong = eleDoc.getChild("long");
+        Assertions.assertNotNull(eleLong);
+        Assertions.assertEquals(SolrConstants.DATECREATED, eleLong.getAttributeValue("name"));
+        Assertions.assertEquals("123", eleLong.getText());
+        
+        Element eleInt = eleDoc.getChild("int");
+        Assertions.assertNotNull(eleInt);
+        Assertions.assertEquals(SolrConstants.NUMPAGES, eleInt.getAttributeValue("name"));
+        Assertions.assertEquals("10", eleInt.getText());
+        
+        Element eleBool = eleDoc.getChild("bool");
+        Assertions.assertNotNull(eleBool);
+        Assertions.assertEquals(SolrConstants.ISWORK, eleBool.getAttributeValue("name"));
+        Assertions.assertEquals("true", eleBool.getText());
+        
+        Element eleArr = eleDoc.getChild("arr");
+        Assertions.assertNotNull(eleArr);
+        Assertions.assertEquals("MD_FOO", eleArr.getAttributeValue("name"));
+        List<Element> eleListArrStr = eleArr.getChildren("str");
+        Assertions.assertNotNull(eleListArrStr);
+        Assertions.assertEquals(2, eleListArrStr.size());
+        Assertions.assertEquals("one", eleListArrStr.get(0).getText());
+        Assertions.assertEquals("two", eleListArrStr.get(1).getText());
     }
 }
