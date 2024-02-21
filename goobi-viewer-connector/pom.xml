@@ -51,10 +51,14 @@
         <sonar.java.source>17</sonar.java.source>
         <sonar.java.target>17</sonar.java.target>
 
+        <!-- Checkstyle -->
+        <checkstyle.max.violations>150</checkstyle.max.violations>
+        <skipCheckstyle>true</skipCheckstyle>
+
 		<!-- Manifest information -->
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 		<buildDate>${maven.build.timestamp}</buildDate>
-        
+
         <viewer-core.version>24.02-SNAPSHOT</viewer-core.version>
 
 		<commons-configuration2.version>2.9.0</commons-configuration2.version>
@@ -75,13 +79,13 @@
 
 
 	<dependencies>
-    
+
         <dependency>
             <groupId>io.goobi.viewer</groupId>
             <artifactId>viewer-core</artifactId>
             <version>${viewer-core.version}</version>
         </dependency>
-    
+
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-configuration2</artifactId>
@@ -225,7 +229,7 @@
                                 <!-- org.citationstyles.* are runtime resources for citeproc -->
                                 <ignoredUnusedDeclaredDependency>org.citationstyles:locales</ignoredUnusedDeclaredDependency>
                                 <ignoredUnusedDeclaredDependency>org.citationstyles:styles</ignoredUnusedDeclaredDependency>
-                                
+
                                 <!-- jersey client is falsely declared as unused blocking maven install (windows developer system only) -->
                                 <ignoredUnusedDeclaredDependency>org.glassfish.jersey.core:jersey-client</ignoredUnusedDeclaredDependency>
 
@@ -393,7 +397,37 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.3.1</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.puppycrawl.tools</groupId>
+                        <artifactId>checkstyle</artifactId>
+                        <version>10.13.0</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>checkstyle-check</id>
+                        <phase>verify</phase>
+                        <configuration>
+                            <skip>${skipCheckstyle}</skip>
+                            <failOnViolation>true</failOnViolation>
+                            <failsOnError>false</failsOnError>
+                            <logViolationsToConsole>true</logViolationsToConsole>
+                            <maxAllowedViolations>${checkstyle.max.violations}</maxAllowedViolations>
+                            <violationSeverity>warning</violationSeverity>
+                            <configLocation>checkstyle.xml</configLocation>
+                        </configuration>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
-    
+
 </project>
