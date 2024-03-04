@@ -63,16 +63,14 @@ public class EpicurFormat extends Format {
     private List<String> setSpecFields =
             DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.EPICUR.getMetadataPrefix());
 
-    /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String)
-     */
     /**
      * {@inheritDoc}
      * 
      * @throws IOException
      */
     @Override
-    public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField,
+    public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, final int numRows,
+            String versionDiscriminatorField,
             String filterQuerySuffix) throws SolrServerException, IOException {
         logger.trace("createListRecords");
 
@@ -82,16 +80,18 @@ public class EpicurFormat extends Format {
                 + SolrSearchTools.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes());
         List<String> fieldList = new ArrayList<>(Arrays.asList(FIELDS));
         fieldList.addAll(setSpecFields);
+
+        int useNumRows = numRows;
         QueryResponse qr =
-                solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, true, additionalQuery, filterQuerySuffix,
+                solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, useNumRows, true, additionalQuery, filterQuerySuffix,
                         fieldList, null);
         SolrDocumentList records = qr.getResults();
         if (records.isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
         Element xmlListRecords = new Element("ListRecords", OAI_NS);
-        if (records.size() < numRows) {
-            numRows = records.size();
+        if (records.size() < useNumRows) {
+            useNumRows = records.size();
         }
         int pagecount = 0;
         for (SolrDocument doc : records) {
@@ -159,17 +159,14 @@ public class EpicurFormat extends Format {
         logger.debug("Found {} page records total", pagecount);
 
         // Create resumption token
-        if (records.getNumFound() > firstRawRow + numRows) {
-            Element resumption = createResumptionTokenAndElement(records.getNumFound(), firstRawRow + numRows, OAI_NS, handler);
+        if (records.getNumFound() > firstRawRow + useNumRows) {
+            Element resumption = createResumptionTokenAndElement(records.getNumFound(), firstRawRow + useNumRows, OAI_NS, handler);
             xmlListRecords.addContent(resumption);
         }
 
         return xmlListRecords;
     }
 
-    /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler, java.util.String)
-     */
     /** {@inheritDoc} */
     @Override
     public Element createGetRecord(RequestHandler handler, String filterQuerySuffix) {
@@ -211,7 +208,7 @@ public class EpicurFormat extends Format {
      * @param doc
      * @param dateUpdated
      * @param setSpecFields
-     * @return
+     * @return {@link Element}
      */
     private static Element generateEpicurHeader(SolrDocument doc, long dateUpdated, List<String> setSpecFields) {
         Element header = new Element("header", OAI_NS);
@@ -252,7 +249,7 @@ public class EpicurFormat extends Format {
      * @param dateUpdated
      * @param dateDeleted
      * @param topstruct
-     * @return
+     * @return {@link Element}
      */
     private static Element generateEpicurElement(String urn, Long dateCreated, Long dateUpdated, Long dateDeleted, boolean topstruct) {
         Namespace xmlns = Namespace.getNamespace("urn:nbn:de:1111-2004033116");
@@ -323,7 +320,7 @@ public class EpicurFormat extends Format {
      * @param urn
      * @param dateUpdated
      * @param setSpecFields
-     * @return
+     * @return {@link Element}
      */
     private static Element generateEpicurPageHeader(SolrDocument doc, String urn, long dateUpdated, List<String> setSpecFields) {
         Element header = new Element("header", OAI_NS);
@@ -362,7 +359,7 @@ public class EpicurFormat extends Format {
      * @param dateCreated
      * @param dateUpdated
      * @param dateDeleted
-     * @return
+     * @return {@link Element}
      */
     private static Element generateEpicurPageElement(String urn, Long dateCreated, Long dateUpdated, Long dateDeleted) {
         Namespace xmlns = Namespace.getNamespace("urn:nbn:de:1111-2004033116");
@@ -428,7 +425,7 @@ public class EpicurFormat extends Format {
      * 
      * @param status
      * @param xmlns
-     * @return
+     * @return {@link Element}
      */
     private static Element generateAdministrativeData(String status, Namespace xmlns) {
         Element delivery = new Element("delivery", xmlns);
@@ -446,9 +443,6 @@ public class EpicurFormat extends Format {
         return eleAdministrativeData;
     }
 
-    /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map, java.lang.String, java.lang.String)
-     */
     /** {@inheritDoc} */
     @Override
     public long getTotalHits(Map<String, String> params, String versionDiscriminatorField, String filterQuerySuffix)

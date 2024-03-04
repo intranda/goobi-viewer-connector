@@ -18,12 +18,12 @@ package io.goobi.viewer.connector.utils;
 /**
  * 
  */
-public class XmlConstants {
+public final class XmlConstants {
 
     private XmlConstants() {
     }
 
-    public static final String ATT_NAME_OBJID ="OBJID";
+    public static final String ATT_NAME_OBJID = "OBJID";
     public static final String ATT_NAME_SCHEME = "scheme";
 
     public static final String ELE_NAME_ERROR = "error";

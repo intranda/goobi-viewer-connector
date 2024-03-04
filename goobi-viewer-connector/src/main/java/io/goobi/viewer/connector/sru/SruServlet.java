@@ -87,7 +87,7 @@ public class SruServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("text/xml;charset=UTF-8");
-        
+
         SruRequestParameter parameter = null;
         try {
             parameter = new SruRequestParameter(request);
@@ -115,7 +115,7 @@ public class SruServlet extends HttpServlet {
         if (parameter.getStylesheet() != null && !parameter.getStylesheet().isEmpty()) {
             ProcessingInstruction pi = new ProcessingInstruction("xml-stylesheet", "type='text/xsl' href='" + parameter.getStylesheet() + "'");
             doc.addContent(pi);
-            // logger.trace("Added stylesheet '{}' to SRU output.", parameter.getStylesheet());
+            // logger.trace("Added stylesheet '{}' to SRU output.", parameter.getStylesheet()); //NOSONAR Debug
         }
 
         switch (parameter.getOperation()) {
@@ -232,7 +232,7 @@ public class SruServlet extends HttpServlet {
      * @param parameter
      * @param solr
      * @param filterQuerySuffix Filter query suffix for the client's session
-     * @return
+     * @return {@link Element}
      * @throws SolrServerException
      * @throws IOException
      * @should create element correctly
@@ -292,7 +292,7 @@ public class SruServlet extends HttpServlet {
      * 
      * @param version
      * @param schema
-     * @return
+     * @return {@link Document}
      * @should create document correctly
      */
     static Document createWrongSchemaDocument(String version, String schema) {
@@ -319,7 +319,7 @@ public class SruServlet extends HttpServlet {
      * 
      * @param version
      * @param missing
-     * @return
+     * @return {@link Document}
      * @should create document correctly
      */
     static Document createMissingArgumentDocument(String version, String missing) {
@@ -345,7 +345,7 @@ public class SruServlet extends HttpServlet {
      * 
      * @param version
      * @param operation
-     * @return
+     * @return {@link Document}
      * @should create document correctly
      */
     static Document createUnsupportedOperationDocument(String version, String operation) {
@@ -359,7 +359,7 @@ public class SruServlet extends HttpServlet {
      * @param uriText Text for the uri element
      * @param detailsText Text for the details element
      * @param arg Problematic argument
-     * @return
+     * @return {@link Document}
      */
     static Document createErrorResponseDocument(String version, String uriText, String detailsText, String arg) {
         Element searchRetrieveResponse = new Element("searchRetrieveResponse", SRU_NAMESPACE);
@@ -391,7 +391,7 @@ public class SruServlet extends HttpServlet {
      * @param sruQuery
      * @param recordSchema
      * @param filterQuerySuffix Filter query suffix for the client's session
-     * @return
+     * @return Generated query
      * @should throw {@link IllegalArgumentException} if sruQuery null
      * @should create query correctly
      */
@@ -687,28 +687,27 @@ public class SruServlet extends HttpServlet {
             eleDcIdentifier.setText(DataManager.getInstance().getConfiguration().getUrnResolverUrl() + (String) doc.getFieldValue(SolrConstants.URN));
             dc.addContent(eleDcIdentifier);
         }
+
         // create <dc:source />
-        {
-            Element eleDcSource = new Element("source", DC_NAMEPSACE);
-            if (creators == null) {
-                creators = "-";
-            }
-            if (title == null) {
-                title = "-";
-            }
-            if (yearpublish == null) {
-                yearpublish = "-";
-            }
-            if (placepublish == null) {
-                placepublish = "-";
-            }
-            if (publisher == null) {
-                publisher = "-";
-            }
-            String sourceString = creators + ": " + title + ", " + placepublish + ": " + publisher + " " + yearpublish + ".";
-            eleDcSource.setText(sourceString);
-            dc.addContent(eleDcSource);
+        Element eleDcSource = new Element("source", DC_NAMEPSACE);
+        if (creators == null) {
+            creators = "-";
         }
+        if (title == null) {
+            title = "-";
+        }
+        if (yearpublish == null) {
+            yearpublish = "-";
+        }
+        if (placepublish == null) {
+            placepublish = "-";
+        }
+        if (publisher == null) {
+            publisher = "-";
+        }
+        String sourceString = creators + ": " + title + ", " + placepublish + ": " + publisher + " " + yearpublish + ".";
+        eleDcSource.setText(sourceString);
+        dc.addContent(eleDcSource);
 
         // create <dc:rights />
         Element eleDcRights = new Element("rights", DC_NAMEPSACE);
@@ -722,7 +721,7 @@ public class SruServlet extends HttpServlet {
      * @param doc
      * @param solr
      * @param filterQuerySuffix
-     * @return
+     * @return {@link String}
      * @throws SolrServerException
      * @throws IOException
      */
@@ -875,57 +874,61 @@ public class SruServlet extends HttpServlet {
         }
     }
 
-    @SuppressWarnings("rawtypes")
+    /**
+     * 
+     * @param document
+     * @param recordData
+     */
     private static void generateSolrRecord(SolrDocument document, Element recordData) {
         Element doc = new Element("doc");
         recordData.addContent(doc);
 
         for (String fieldname : document.getFieldNames()) {
             Object fieldvalue = document.getFieldValue(fieldname);
-            if (fieldvalue instanceof String) {
+            if (fieldvalue instanceof String s) {
                 Element str = new Element("str");
                 str.setAttribute("name", fieldname);
-                str.setText((String) fieldvalue);
+                str.setText(s);
                 doc.addContent(str);
-            } else if (fieldvalue instanceof Long) {
+            } else if (fieldvalue instanceof Long l) {
                 Element longElement = new Element("long");
                 longElement.setAttribute("name", fieldname);
-                longElement.setText(((Long) fieldvalue).toString());
+                longElement.setText(l.toString());
                 doc.addContent(longElement);
 
-            } else if (fieldvalue instanceof Integer) {
+            } else if (fieldvalue instanceof Integer i) {
                 Element intElement = new Element("int");
                 intElement.setAttribute("name", fieldname);
-                intElement.setText(((Integer) fieldvalue).toString());
+                intElement.setText(i.toString());
                 doc.addContent(intElement);
 
-            } else if (fieldvalue instanceof Boolean) {
+            } else if (fieldvalue instanceof Boolean bool) {
                 Element intElement = new Element("bool");
                 intElement.setAttribute("name", fieldname);
-                intElement.setText(((Boolean) fieldvalue).toString());
+                intElement.setText(bool.toString());
                 doc.addContent(intElement);
 
-            } else if (fieldvalue instanceof Collection) {
+            } else if (fieldvalue instanceof Collection col) {
                 Element arr = new Element("arr");
                 arr.setAttribute("name", fieldname);
                 doc.addContent(arr);
 
-                for (Object o : (Collection) fieldvalue) {
-                    if (o instanceof String) {
+                for (Object o : col) {
+                    if (o instanceof String s) {
                         Element str = new Element("str");
-                        str.setText((String) o);
+                        str.setText(s);
                         arr.addContent(str);
-                    } else if (o instanceof Long) {
+                    } else if (o instanceof Long l) {
                         Element longElement = new Element("long");
-                        longElement.setText(((Long) o).toString());
+                        longElement.setText(l.toString());
                         arr.addContent(longElement);
-                    } else if (fieldvalue instanceof Integer) {
+                    } else if (fieldvalue instanceof Integer i) {
                         Element intElement = new Element("int");
-                        intElement.setText(((Integer) fieldvalue).toString());
+                        intElement.setText(i.toString());
                         doc.addContent(intElement);
-                    } else if (fieldvalue instanceof Boolean) {
+                    } else if (fieldvalue instanceof Boolean bool) {
                         Element intElement = new Element("bool");
-                        intElement.setText(((Boolean) fieldvalue).toString());
+                        intElement.setText(bool.toString());
                         doc.addContent(intElement);
                     }
                 }
@@ -933,6 +936,12 @@ public class SruServlet extends HttpServlet {
         }
     }
 
+    /**
+     * 
+     * @param request
+     * @param parameter
+     * @return {@link Element}
+     */
     private static Element getExplain(HttpServletRequest request, SruRequestParameter parameter) {
         Element root = new Element("explainResponse", SRU_NAMESPACE);
 
@@ -1079,7 +1088,7 @@ public class SruServlet extends HttpServlet {
      * @param name
      * @param identifier
      * @param location
-     * @return
+     * @return {@link Element}
      * @should create element correctly
      */
     static Element createSchemaInfoElement(String displayTitle, String name, String identifier, String location) {
@@ -1103,8 +1112,8 @@ public class SruServlet extends HttpServlet {
 
     /**
      * 
-     * @param eleConfigInfo
      * @param value
+     * @return {@link Element}
      * @should create element correctly
      */
     static Element createSupportsElement(String value) {
@@ -1115,8 +1124,12 @@ public class SruServlet extends HttpServlet {
         return ret;
     }
 
+    /**
+     * 
+     * @param field
+     * @return {@link Element}
+     */
     private static Element createIndex(SearchField field) {
-
         Element index = new Element("index", EXPLAIN_NAMESPACE);
         if (field.isSeachable()) {
             index.setAttribute("search", "true");

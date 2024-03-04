@@ -4,7 +4,6 @@ package io.goobi.viewer.connector;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -43,9 +42,13 @@ public class Version {
         } else {
             APPLICATION = "goobi-viewer-connector";
             VERSION = "unknown";
-            BUILDDATE = LocalDateTime.now().format(Utils.formatterISO8601DateTimeNoSeconds);
+            BUILDDATE = LocalDateTime.now().format(Utils.FORMATTER_ISO8601_DATETIME_NO_SECONDS);
             BUILDVERSION = "unknown";
         }
+    }
+
+    /** Private constructor */
+    private Version() {
     }
 
     private static String getManifestStringFromJar() {
@@ -64,11 +67,10 @@ public class Version {
             IOUtils.copy(inputStream, writer, StandardCharsets.UTF_8);
             String manifestString = writer.toString();
             value = manifestString;
-        } catch (MalformedURLException e) {
-            return null;
         } catch (IOException e) {
             return null;
         }
+
         return value;
     }
 

@@ -33,6 +33,8 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 
+import com.ctc.wstx.shaded.msv_core.verifier.ErrorInfo.ElementErrorInfo;
+
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
@@ -54,9 +56,6 @@ public class TEIFormat extends Format {
     static final Namespace CMDI = Namespace.getNamespace("cmd", "http://www.clarin.eu/cmd/1");
     static final Namespace COMPONENTS = Namespace.getNamespace("cmdp", "http://www.clarin.eu/cmd/1/profiles/clarin.eu:cr1:p_1380106710826");
 
-    /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String, java.lang.String)
-     */
     /** {@inheritDoc} */
     @Override
     public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField,
@@ -79,7 +78,8 @@ public class TEIFormat extends Format {
             // One OAI record for each record proper
             qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false, null, filterQuerySuffix, fieldList,
                     null);
-            totalVirtualHits = totalRawHits = qr.getResults().getNumFound();
+            totalRawHits = qr.getResults().getNumFound();
+            totalVirtualHits = totalRawHits;
         }
         if (qr.getResults().isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
@@ -97,18 +97,12 @@ public class TEIFormat extends Format {
         }
     }
 
-    /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler, java.lang.String)
-     */
     /** {@inheritDoc} */
     @Override
     public Element createGetRecord(RequestHandler handler, String filterQuerySuffix) {
         if (handler.getIdentifier() == null) {
             return new ErrorCode().getBadArgument();
         }
-
-        //        List<String> setSpecFields =
-        //                DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix().getMetadataPrefix());
 
         String versionDiscriminatorField =
                 DataManager.getInstance()
@@ -143,14 +137,10 @@ public class TEIFormat extends Format {
                             .getConfiguration()
                             .getVersionDisriminatorFieldForMetadataFormat(handler.getMetadataPrefix().getMetadataPrefix()),
                     null, filterQuerySuffix);
-        } catch (IOException e) {
+        } catch (HTTPException | IOException | SolrServerException e) {
             return new ErrorCode().getIdDoesNotExist();
         } catch (JDOMException e) {
             return new ErrorCode().getCannotDisseminateFormat();
-        } catch (SolrServerException e) {
-            return new ErrorCode().getIdDoesNotExist();
-        } catch (HTTPException e) {
-            return new ErrorCode().getIdDoesNotExist();
         }
     }
 
@@ -168,16 +158,15 @@ public class TEIFormat extends Format {
      * @param versionDiscriminatorField If not null, each value of this field will be created as an individual record
      * @param requestedVersion If not null, only the record with the exact value will be added
      * @param filterQuerySuffix Filter query suffix for the client's session
-     * @return
+     * @return {@link ElementErrorInfo}
      * @throws IOException
      * @throws JDOMException
      * @throws SolrServerException
      * @throws HTTPException
      */
     private static Element generateTeiCmdi(List<SolrDocument> records, long totalVirtualHits, long totalRawHits, int firstVirtualRow, int firstRawRow,
-            int numRows, RequestHandler handler, String recordType, String versionDiscriminatorField, String requestedVersion,
-            String filterQuerySuffix)
-            throws JDOMException, IOException, SolrServerException, HTTPException {
+            final int numRows, RequestHandler handler, String recordType, String versionDiscriminatorField, String requestedVersion,
+            String filterQuerySuffix) throws JDOMException, IOException, SolrServerException, HTTPException {
         Element xmlListRecords = new Element(recordType, OAI_NS);
 
         Namespace namespace = Namespace.getNamespace(handler.getMetadataPrefix().getMetadataNamespacePrefix(),
@@ -186,8 +175,9 @@ public class TEIFormat extends Format {
         List<String> setSpecFields =
                 DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix().getMetadataPrefix());
 
-        if (records.size() < numRows) {
-            numRows = records.size();
+        int useNumRows = numRows;
+        if (records.size() < useNumRows) {
+            useNumRows = records.size();
         }
         int virtualHitCount = 0;
         if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
@@ -276,9 +266,9 @@ public class TEIFormat extends Format {
         }
 
         // Create resumption token
-        if (totalRawHits > firstRawRow + numRows) {
+        if (totalRawHits > firstRawRow + useNumRows) {
             Element resumption = createResumptionTokenAndElement(totalVirtualHits, totalRawHits, firstVirtualRow + virtualHitCount,
-                    firstRawRow + numRows, OAI_NS, handler);
+                    firstRawRow + useNumRows, OAI_NS, handler);
             xmlListRecords.addContent(resumption);
         }
 
@@ -286,8 +276,6 @@ public class TEIFormat extends Format {
     }
 
     /**
-     * {@inheritDoc}
-     *
      * Modified header generation where identifiers also contain the language code.
      */
     protected static Element getHeader(SolrDocument doc, SolrDocument topstructDoc, RequestHandler handler, String requestedVersion,
@@ -332,9 +320,6 @@ public class TEIFormat extends Format {
         return header;
     }
 
-    /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map, java.lang.String, java.lang.String)
-     */
     /** {@inheritDoc} */
     @Override
     public long getTotalHits(Map<String, String> params, String versionDiscriminatorField, String filterQuerySuffix)

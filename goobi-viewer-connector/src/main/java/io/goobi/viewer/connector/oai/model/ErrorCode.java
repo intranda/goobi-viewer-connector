@@ -27,7 +27,8 @@ import io.goobi.viewer.connector.utils.XmlConstants;
 public class ErrorCode {
 
     static final String BODY_BAD_ARGUMENT =
-            "The request includes illegal arguments, is missing required arguments, includes a repeated argument, or values for arguments have an illegal syntax.";
+            "The request includes illegal arguments, is missing required arguments, includes a repeated argument,"
+                    + " or values for arguments have an illegal syntax.";
     static final String BODY_BAD_RESUMPTION_TOKEN = "The value of the resumptionToken argument is invalid or expired.";
     static final String BODY_BAD_VERB =
             "Value of the verb argument is not a legal OAI-PMH verb, the verb argument is missing, or the verb argument is repeated.";

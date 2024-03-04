@@ -20,12 +20,14 @@ import io.goobi.viewer.connector.utils.Configuration;
 import io.goobi.viewer.connector.utils.SolrSearchIndex;
 
 /**
- * <p>DataManager class.</p>
+ * <p>
+ * DataManager class.
+ * </p>
  *
  */
 public final class DataManager {
 
-    private static final Object lock = new Object();
+    private static final Object LOCK = new Object();
 
     private static DataManager instance = null;
 
@@ -36,14 +38,16 @@ public final class DataManager {
     private LanguageHelper languageHelper;
 
     /**
-     * <p>Getter for the field <code>instance</code>.</p>
+     * <p>
+     * Getter for the field <code>instance</code>.
+     * </p>
      *
      * @return a {@link io.goobi.viewer.connector.DataManager} object.
      */
     public static DataManager getInstance() {
         DataManager dm = instance;
         if (dm == null) {
-            synchronized (lock) {
+            synchronized (LOCK) {
                 // Another thread might have initialized instance by now
                 dm = instance;
                 if (dm == null) {
@@ -60,13 +64,15 @@ public final class DataManager {
     }
 
     /**
-     * <p>Getter for the field <code>configuration</code>.</p>
+     * <p>
+     * Getter for the field <code>configuration</code>.
+     * </p>
      *
      * @return the configuration
      */
     public Configuration getConfiguration() {
         if (configuration == null) {
-            synchronized (lock) {
+            synchronized (LOCK) {
                 configuration = new Configuration(Configuration.DEFAULT_CONFIG_FILE);
             }
         }
@@ -75,13 +81,15 @@ public final class DataManager {
     }
 
     /**
-     * <p>Getter for the field <code>searchIndex</code>.</p>
+     * <p>
+     * Getter for the field <code>searchIndex</code>.
+     * </p>
      *
      * @return the searchIndex
      */
     public SolrSearchIndex getSearchIndex() {
         if (searchIndex == null) {
-            synchronized (lock) {
+            synchronized (LOCK) {
                 searchIndex = new SolrSearchIndex(null, false);
             }
         }
@@ -91,13 +99,15 @@ public final class DataManager {
     }
 
     /**
-     * <p>Getter for the field <code>languageHelper</code>.</p>
+     * <p>
+     * Getter for the field <code>languageHelper</code>.
+     * </p>
      *
      * @return the languageHelper
      */
     public LanguageHelper getLanguageHelper() {
         if (languageHelper == null) {
-            synchronized (lock) {
+            synchronized (LOCK) {
                 String configFolder = getConfiguration().getViewerConfigFolder();
                 if (!configFolder.endsWith("/")) {
                     configFolder += '/';

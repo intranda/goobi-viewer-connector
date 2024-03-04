@@ -205,7 +205,7 @@ public class RequestHandler {
             }
         }
         try {
-            return LocalDateTime.parse(from, Utils.formatterISO8601BasicDateTime)
+            return LocalDateTime.parse(from, Utils.FORMATTER_ISO8601_BASIC_DATETIME)
                     .toInstant(ZoneOffset.UTC)
                     .toEpochMilli();
         } catch (IllegalArgumentException e) {
@@ -236,7 +236,7 @@ public class RequestHandler {
             }
         }
         try {
-            return LocalDateTime.parse(until, Utils.formatterISO8601BasicDateTime)
+            return LocalDateTime.parse(until, Utils.FORMATTER_ISO8601_BASIC_DATETIME)
                     .plus(999, ChronoUnit.MILLIS)
                     .toInstant(ZoneOffset.UTC)
                     .toEpochMilli();

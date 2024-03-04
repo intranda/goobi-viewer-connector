@@ -36,28 +36,39 @@ public class SruRequestParameter {
     // mandatory   The string: 'searchRetrieve'.
     private SruOperation operation;
 
-    // mandatory    The version of the request, and a statement by the client that it wants the response to be less than, or preferably equal to, that version. See http://www.loc.gov/standards/sru/specs/common.html#version.
+    // mandatory    The version of the request, and a statement by the client that it wants the response to be less than, or preferably equal to,
+    // that version. See http://www.loc.gov/standards/sru/specs/common.html#version.
     private String version = "1.2";
 
     // mandatory in 'query' Contains a query expressed in CQL to be processed by the server. See http://www.loc.gov/standards/sru/specs/cql.html.
     private String query;
 
-    // optional    The position within the sequence of matched records of the first record to be returned. The first position in the sequence is 1. The value supplied MUST be greater than 0. The default value if not supplied is 1.
+    // optional    The position within the sequence of matched records of the first record to be returned. The first position in the sequence is 1.
+    // The value supplied MUST be greater than 0. The default value if not supplied is 1.
     private int startRecord = 1;
 
-    // optional     The number of records requested to be returned. The value must be 0 or greater. Default value if not supplied is determined by the server. The server MAY return less than this number of records, for example if there are fewer matching records than requested, but MUST NOT return more than this number of records. 
+    // optional     The number of records requested to be returned. The value must be 0 or greater. Default value if not supplied is determined
+    // by the server. The server MAY return less than this number of records, for example if there are fewer matching records than requested,
+    // but MUST NOT return more than this number of records. 
     private int maximumRecords = 100;
 
-    // optional    A string to determine how the record should be escaped in the response. Defined values are 'string' and 'xml'. The default is 'xml'. See http://www.loc.gov/standards/sru/specs/search-retrieve.html#records. 
+    // optional    A string to determine how the record should be escaped in the response. Defined values are 'string' and 'xml'.
+    // The default is 'xml'. See http://www.loc.gov/standards/sru/specs/search-retrieve.html#records. 
     private String recordPacking = "xml";
 
-    // optional     The schema in which the records MUST be returned. The value is the URI identifier for the schema or the short name for it published by the server. The default value if not supplied is determined by the server. See http://www.loc.gov/standards/sru/resources/schemas.html.
+    // optional     The schema in which the records MUST be returned. The value is the URI identifier for the schema or the short name for it
+    // published by the server. The default value if not supplied is determined by the server.
+    // See http://www.loc.gov/standards/sru/resources/schemas.html.
     private Metadata recordSchema = Metadata.METS;
 
-    // (version 1.1 only)  optional  An XPath expression, to be applied to the records before returning them. It is to be applied relative to the schema supplied in the recordSchema parameter, and response records should assume the SRU XPath schema. 
+    // (version 1.1 only)  optional  An XPath expression, to be applied to the records before returning them.
+    // It is to be applied relative to the schema supplied in the recordSchema parameter, and response records should assume the SRU XPath schema.
     private String recordXPath = "";
 
-    //    optional    The number of seconds for which the client requests that the result set created should be maintained. The server MAY choose not to fulfil this request, and may respond with a different number of seconds. If resultSetTTL is not supplied then the server will determine the value. See http://www.loc.gov/standards/sru/specs/search-retrieve.html#resultsets.
+    //    optional    The number of seconds for which the client requests that the result set created should be maintained.
+    // The server MAY choose not to fulfil this request, and may respond with a different number of seconds.
+    // If resultSetTTL is not supplied then the server will determine the value.
+    // See http://www.loc.gov/standards/sru/specs/search-retrieve.html#resultsets.
     private String resultSetTTL = "";
 
     // (version 1.1 only)  optional    Contains a sequence of sort keys to be applied to the results.
@@ -72,10 +83,16 @@ public class SruRequestParameter {
     //  mandatory in 'scan'  The index to be browsed and the start point within it, expressed as a complete index, relation, term clause in CQL.
     private String scanClause = "";
 
-    // optional  The position within the list of terms returned where the client would like the start term to occur. If the position given is 0, then the term should be immediately before the first term in the response. If the position given is 1, then the term should be first in the list, and so forth up to the number of terms requested plus 1, meaning that the term should be immediately after the last term in the response, even if the number of terms returned is less than the number requested. The range of values is 0 to the number of terms requested plus 1. The default value is 1. 
+    // optional  The position within the list of terms returned where the client would like the start term to occur.
+    // If the position given is 0, then the term should be immediately before the first term in the response. If the position given is 1,
+    // then the term should be first in the list, and so forth up to the number of terms requested plus 1, meaning that the term should be
+    // immediately after the last term in the response, even if the number of terms returned is less than the number requested.
+    // The range of values is 0 to the number of terms requested plus 1. The default value is 1. 
     private int responsePosition = 1;
 
-    // optional  The number of terms which the client requests be returned. The actual number returned may be less than this, for example if the end of the term list is reached, but may not be more. The explain record for the database may indicate the maximum number of terms which the server will return at once. All positive integers are valid for this parameter. If not specified, the default is server determined.
+    // optional  The number of terms which the client requests be returned. The actual number returned may be less than this,for example if the end
+    // of the term list is reached, but may not be more. The explain record for the database may indicate the maximum number of terms which the
+    // server will return at once. All positive integers are valid for this parameter. If not specified, the default is server determined.
     private int maximumTerms = 0;
 
     /**
@@ -87,14 +104,14 @@ public class SruRequestParameter {
      * @param request a {@link javax.servlet.http.HttpServletRequest} object.
      */
     public SruRequestParameter(HttpServletRequest request) throws MissingArgumentException {
-        if (request.getParameter("operation") != null) {
-            operation = SruOperation.getByTitle(request.getParameter("operation"));
+        if (request.getParameter(PARAM_OPERATION) != null) {
+            operation = SruOperation.getByTitle(request.getParameter(PARAM_OPERATION));
         } else {
             throw new MissingArgumentException("Parameter 'operation' is mandatory.");
         }
 
-        if (request.getParameter("version") != null) {
-            version = request.getParameter("version");
+        if (request.getParameter(PARAM_VERSION) != null) {
+            version = request.getParameter(PARAM_VERSION);
         } else {
             throw new MissingArgumentException("Parameter 'version' is mandatory.");
         }
@@ -207,7 +224,6 @@ public class SruRequestParameter {
         this.scanClause = scanClause;
         this.responsePosition = responsePosition;
         this.maximumTerms = maximumTerms;
-
     }
 
     /**

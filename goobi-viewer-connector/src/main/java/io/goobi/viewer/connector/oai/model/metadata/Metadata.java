@@ -40,7 +40,9 @@ public class Metadata implements Serializable {
     private final boolean multivalued;
 
     /**
-     * <p>Constructor for Metadata.</p>
+     * <p>
+     * Constructor for Metadata.
+     * </p>
      *
      * @param label a {@link java.lang.String} object.
      * @param masterValue a {@link java.lang.String} object.
@@ -107,14 +109,14 @@ public class Metadata implements Serializable {
         } else if (!masterValue.equals(other.masterValue)) {
             return false;
         }
-        if (type != other.type) {
-            return false;
-        }
-        return true;
+
+        return type == other.type;
     }
 
     /**
-     * <p>isHasLabel.</p>
+     * <p>
+     * isHasLabel.
+     * </p>
      *
      * @return a boolean.
      */
@@ -123,7 +125,9 @@ public class Metadata implements Serializable {
     }
 
     /**
-     * <p>Getter for the field <code>label</code>.</p>
+     * <p>
+     * Getter for the field <code>label</code>.
+     * </p>
      *
      * @return the label
      */
@@ -132,7 +136,9 @@ public class Metadata implements Serializable {
     }
 
     /**
-     * <p>Getter for the field <code>masterValue</code>.</p>
+     * <p>
+     * Getter for the field <code>masterValue</code>.
+     * </p>
      *
      * @return a {@link java.lang.String} object.
      */
@@ -145,7 +151,9 @@ public class Metadata implements Serializable {
     }
 
     /**
-     * <p>Getter for the field <code>type</code>.</p>
+     * <p>
+     * Getter for the field <code>type</code>.
+     * </p>
      *
      * @return the type
      */
@@ -154,7 +162,9 @@ public class Metadata implements Serializable {
     }
 
     /**
-     * <p>Getter for the field <code>values</code>.</p>
+     * <p>
+     * Getter for the field <code>values</code>.
+     * </p>
      *
      * @return the values
      */
@@ -163,7 +173,9 @@ public class Metadata implements Serializable {
     }
 
     /**
-     * <p>Getter for the field <code>params</code>.</p>
+     * <p>
+     * Getter for the field <code>params</code>.
+     * </p>
      *
      * @return the params
      */
@@ -172,17 +184,17 @@ public class Metadata implements Serializable {
     }
 
     /**
-     * <p>hasParam.</p>
+     * <p>
+     * hasParam.
+     * </p>
      *
      * @param paramName a {@link java.lang.String} object.
      * @return a boolean.
      */
     public boolean hasParam(String paramName) {
-        if (params != null) {
-            for (MetadataParameter param : params) {
-                if (param.getKey().equals(paramName)) {
-                    return true;
-                }
+        for (MetadataParameter param : params) {
+            if (param.getKey().equals(paramName)) {
+                return true;
             }
         }
 
@@ -197,17 +209,16 @@ public class Metadata implements Serializable {
      * @should return false if at least one paramValue is not empty
      */
     public boolean isBlank() {
-        if (values != null) {
-            for (MetadataValue value : values) {
-                if (value.getParamValues().isEmpty()) {
-                    return true;
-                }
-                for (List<String> paramValues : value.getParamValues())
-                    for (String paramValue : paramValues) {
-                        if (StringUtils.isNotBlank(paramValue)) {
-                            return false;
-                        }
+        for (MetadataValue value : values) {
+            if (value.getParamValues().isEmpty()) {
+                return true;
+            }
+            for (List<String> paramValues : value.getParamValues()) {
+                for (String paramValue : paramValues) {
+                    if (StringUtils.isNotBlank(paramValue)) {
+                        return false;
                     }
+                }
             }
         }
 
@@ -215,7 +226,9 @@ public class Metadata implements Serializable {
     }
 
     /**
-     * <p>Getter for the field <code>number</code>.</p>
+     * <p>
+     * Getter for the field <code>number</code>.
+     * </p>
      *
      * @return a int.
      */
@@ -224,7 +237,9 @@ public class Metadata implements Serializable {
     }
 
     /**
-     * <p>isGroup.</p>
+     * <p>
+     * isGroup.
+     * </p>
      *
      * @return the group
      */
@@ -233,7 +248,9 @@ public class Metadata implements Serializable {
     }
 
     /**
-     * <p>isMultivalued.</p>
+     * <p>
+     * isMultivalued.
+     * </p>
      *
      * @return the multivalued
      */
@@ -244,10 +261,6 @@ public class Metadata implements Serializable {
     /** {@inheritDoc} */
     @Override
     public String toString() {
-        if (values != null) {
-            return "Label: " + label + " MasterValue: " + masterValue + " paramValues: " + values.get(0).getParamValues() + " ### ";
-
-        }
-        return "Label: " + label + " MasterValue: " + masterValue + " ### ";
+        return "Label: " + label + " MasterValue: " + masterValue + " paramValues: " + values.get(0).getParamValues() + " ### ";
     }
 }
