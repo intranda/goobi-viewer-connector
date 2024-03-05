@@ -878,8 +878,9 @@ public class SruServlet extends HttpServlet {
      * 
      * @param document
      * @param recordData
+     * @should add correct element types
      */
-    private static void generateSolrRecord(SolrDocument document, Element recordData) {
+    static void generateSolrRecord(SolrDocument document, Element recordData) {
         Element doc = new Element("doc");
         recordData.addContent(doc);
 
@@ -895,19 +896,16 @@ public class SruServlet extends HttpServlet {
                 longElement.setAttribute("name", fieldname);
                 longElement.setText(l.toString());
                 doc.addContent(longElement);
-
             } else if (fieldvalue instanceof Integer i) {
                 Element intElement = new Element("int");
                 intElement.setAttribute("name", fieldname);
                 intElement.setText(i.toString());
                 doc.addContent(intElement);
-
             } else if (fieldvalue instanceof Boolean bool) {
                 Element intElement = new Element("bool");
                 intElement.setAttribute("name", fieldname);
                 intElement.setText(bool.toString());
                 doc.addContent(intElement);
-
             } else if (fieldvalue instanceof Collection col) {
                 Element arr = new Element("arr");
                 arr.setAttribute("name", fieldname);

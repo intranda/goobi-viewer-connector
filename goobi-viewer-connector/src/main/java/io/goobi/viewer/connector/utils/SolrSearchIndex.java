@@ -98,17 +98,15 @@ public class SolrSearchIndex {
      * Checks whether the server's configured URL matches that in the config file. If not, a new server instance is created.
      */
     public void checkReloadNeeded() {
-        if (!testMode && client != null && client instanceof HttpSolrClient) {
-            HttpSolrClient httpSolrServer = (HttpSolrClient) client;
-            if (!DataManager.getInstance().getConfiguration().getIndexUrl().equals(httpSolrServer.getBaseURL())) {
-                logger.info("Solr URL has changed, re-initializing SolrHelper...");
-                try {
-                    httpSolrServer.close();
-                } catch (IOException e) {
-                    logger.error(e.getMessage(), e);
-                }
-                client = getNewHttpSolrClient(DataManager.getInstance().getConfiguration().getIndexUrl());
+        if (!testMode && client != null && client instanceof HttpSolrClient httpSolrClient
+                && !DataManager.getInstance().getConfiguration().getIndexUrl().equals(httpSolrClient.getBaseURL())) {
+            logger.info("Solr URL has changed, re-initializing SolrHelper...");
+            try {
+                httpSolrClient.close();
+            } catch (IOException e) {
+                logger.error(e.getMessage(), e);
             }
+            client = getNewHttpSolrClient(DataManager.getInstance().getConfiguration().getIndexUrl());
         }
     }
 
