@@ -33,8 +33,6 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 
-import com.ctc.wstx.shaded.msv_core.verifier.ErrorInfo.ElementErrorInfo;
-
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
