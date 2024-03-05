@@ -115,14 +115,10 @@ public class TEIFormat extends Format {
                 }
                 return generateTeiCmdi(Collections.singletonList(doc), 1L, 1L, 0, 0, 1, handler, "GetRecord", versionDiscriminatorField,
                         identifierSplit[1], filterQuerySuffix);
-            } catch (IOException e) {
+            } catch (HTTPException | IOException | SolrServerException e) {
                 return new ErrorCode().getIdDoesNotExist();
             } catch (JDOMException e) {
                 return new ErrorCode().getCannotDisseminateFormat();
-            } catch (SolrServerException e) {
-                return new ErrorCode().getIdDoesNotExist();
-            } catch (HTTPException e) {
-                return new ErrorCode().getIdDoesNotExist();
             }
         }
         try {
@@ -172,11 +168,6 @@ public class TEIFormat extends Format {
 
         List<String> setSpecFields =
                 DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(handler.getMetadataPrefix().getMetadataPrefix());
-
-        int useNumRows = numRows;
-        if (records.size() < useNumRows) {
-            useNumRows = records.size();
-        }
         int virtualHitCount = 0;
         if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
             List<String> versions = Collections.singletonList(requestedVersion);
@@ -264,6 +255,10 @@ public class TEIFormat extends Format {
         }
 
         // Create resumption token
+        int useNumRows = numRows;
+        if (records.size() < useNumRows) {
+            useNumRows = records.size();
+        }
         if (totalRawHits > firstRawRow + useNumRows) {
             Element resumption = createResumptionTokenAndElement(totalVirtualHits, totalRawHits, firstVirtualRow + virtualHitCount,
                     firstRawRow + useNumRows, OAI_NS, handler);
@@ -275,6 +270,14 @@ public class TEIFormat extends Format {
 
     /**
      * Modified header generation where identifiers also contain the language code.
+     * 
+     * @param doc
+     * @param topstructDoc
+     * @param handler
+     * @param requestedVersion
+     * @param setSpecFields
+     * @param filterQuerySuffix
+     * @return {@link Element}
      */
     protected static Element getHeader(SolrDocument doc, SolrDocument topstructDoc, RequestHandler handler, String requestedVersion,
             List<String> setSpecFields, String filterQuerySuffix)

@@ -26,9 +26,7 @@ public enum SruOperation {
     SCAN("scan"),
     EXPLAIN("explain"),
     SEARCHRETRIEVE("searchRetrieve"),
-    UNSUPPORTETPARAMETER("unsupported")
-
-    ;
+    UNSUPPORTETPARAMETER("unsupported");
 
     private String title;
 

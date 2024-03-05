@@ -22,7 +22,7 @@ import io.goobi.viewer.connector.utils.Utils;
  * </p>
  *
  */
-public class Version {
+public final class Version {
     /** Constant <code>APPLICATION</code> */
     public static final String APPLICATION;
     /** Constant <code>VERSION</code> */

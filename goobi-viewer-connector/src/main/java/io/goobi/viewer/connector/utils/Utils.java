@@ -51,7 +51,8 @@ public final class Utils {
     private static final int HTTP_TIMEOUT = 10000;
 
     /** Constant <code>formatterISO8601DateTimeWithOffset</code> */
-    public static final DateTimeFormatter FORMATTER_ISO8601_DATETIME_WITH_OFFSET = DateTimeFormatter.ISO_OFFSET_DATE_TIME; // yyyy-MM-dd'T'HH:mm:ss+01:00
+    public static final DateTimeFormatter FORMATTER_ISO8601_DATETIME_WITH_OFFSET =
+            DateTimeFormatter.ISO_OFFSET_DATE_TIME; // yyyy-MM-dd'T'HH:mm:ss+01:00
     /** Constant <code>formatterISO8601Date</code> */
     public static final DateTimeFormatter FORMATTER_ISO8601_DATE = DateTimeFormatter.ISO_LOCAL_DATE; // yyyy-MM-dd
     /** Constant <code>formatterISO8601Date</code> */

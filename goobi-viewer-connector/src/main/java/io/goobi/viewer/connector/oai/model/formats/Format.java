@@ -82,6 +82,11 @@ public abstract class Format {
     public static final String ACCESSCONDITION_OPENACCESS = "info:eu-repo/semantics/openAccess";
     public static final String ACCESSCONDITION_CLOSEDACCESS = "info:eu-repo/semantics/closedAccess";
 
+    public static final String MD_CREATOR = "MD_CREATOR";
+    public static final String MD_DATECREATED = "MD_DATECREATED";
+    public static final String MD_PUBLISHER = "MD_PUBLISHER";
+    public static final String MD_YEARPUBLISH = "MD_YEARPUBLISH";
+
     protected static final String[] DATE_FIELDS = { SolrConstants.DATECREATED, SolrConstants.DATEUPDATED };
     protected static final String[] IDENTIFIER_FIELDS = { SolrConstants.PI, SolrConstants.PI_TOPSTRUCT };
 
@@ -193,7 +198,8 @@ public abstract class Format {
         }
         Element listMetadataFormats = new Element("ListMetadataFormats", OAI_NS);
         for (Metadata m : Metadata.values()) {
-            // logger.trace("{}: {}", m.getMetadataPrefix(), DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(m.getMetadataPrefix()));
+            // logger.trace("{}: {}", m.getMetadataPrefix(), 
+            // DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(m.getMetadataPrefix()));
             if (m.isOaiSet() && DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(m.getMetadataPrefix())) {
                 Element metadataPrefix = new Element("metadataPrefix", OAI_NS);
                 metadataPrefix.setText(m.getMetadataPrefix());
@@ -258,7 +264,6 @@ public abstract class Format {
         if (additionalSets != null && !additionalSets.isEmpty()) {
             for (Set additionalSet : additionalSets) {
                 Element set = new Element("set", OAI_NS);
-                // TODO
                 Element setSpec = new Element(XmlConstants.ELE_NAME_SETSPEC, OAI_NS);
                 setSpec.setText(additionalSet.getSetSpec());
                 set.addContent(setSpec);
@@ -335,7 +340,8 @@ public abstract class Format {
             if (qr.getResults().isEmpty()) {
                 return new ErrorCode().getNoRecordsMatch();
             }
-            totalVirtualHits = totalRawHits = qr.getResults().getNumFound();
+            totalRawHits = qr.getResults().getNumFound();
+            totalVirtualHits = totalRawHits;
             for (SolrDocument doc : qr.getResults()) {
                 Element header = getHeader(doc, null, handler, null, setSpecFields, filterQuerySuffix);
                 xmlListIdentifiers.addContent(header);
@@ -386,7 +392,7 @@ public abstract class Format {
      */
     protected static Element getHeader(SolrDocument doc, SolrDocument topstructDoc, RequestHandler handler, String requestedVersion,
             List<String> setSpecFields, String filterQuerySuffix) throws SolrServerException, IOException {
-        // logger.trace("getHeader: {}", doc.getFieldValue(SolrConstants.PI));
+        // logger.trace("getHeader: {}", doc.getFieldValue(SolrConstants.PI)); //NOSONAR Debug
         Element header = new Element("header", OAI_NS);
         // identifier
         if (doc.getFieldValue(SolrConstants.URN) != null && ((String) doc.getFieldValue(SolrConstants.URN)).length() > 0) {
@@ -444,7 +450,6 @@ public abstract class Format {
             datestamp.setText(Utils.parseDate(doc.getFieldValue(SolrConstants.DATEDELETED)));
         }
 
-        // logger.trace("getHeader END");
         return header;
     }
 
@@ -543,7 +548,6 @@ public abstract class Format {
             ResumptionToken token = deserializeResumptionToken(f);
             Map<String, String> params = Utils.filterDatestampFromRequest(token.getHandler());
 
-            //            boolean urnOnly = false;
             long totalHits = 0;
             String versionDiscriminatorField = DataManager.getInstance()
                     .getConfiguration()
@@ -568,7 +572,6 @@ public abstract class Format {
                 return format.createListIdentifiers(token.getHandler(), token.getVirtualCursor(), token.getRawCursor(), hitsPerToken,
                         versionDiscriminatorField, filterQuerySuffix);
             } else if (token.getHandler().getVerb().equals(Verb.LISTRECORDS)) {
-                //                Metadata md = token.getHandler().getMetadataPrefix();
                 return format.createListRecords(token.getHandler(), token.getVirtualCursor(), token.getRawCursor(), hitsPerToken,
                         versionDiscriminatorField, filterQuerySuffix);
             }
@@ -576,8 +579,8 @@ public abstract class Format {
             // File cannot be de-serialized, so just delete it
             logger.warn("Token '{}' could not be read, deleting...", f.getName());
             FileUtils.deleteQuietly(f);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+        } catch (IOException | SolrServerException e) {
+            logger.error(e.getMessage());
         }
 
         return new ErrorCode().getBadResumptionToken();
@@ -586,7 +589,7 @@ public abstract class Format {
     /**
      * 
      * @param tokenFile
-     * @return
+     * @return {@link ResumptionToken}
      * @throws FileNotFoundException
      * @throws IOException
      * @should deserialize token correctly

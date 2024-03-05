@@ -578,8 +578,9 @@ public class SruServlet extends HttpServlet {
     }
 
     /**
-     * @param document
+     * @param doc
      * @param recordData
+     * @param solr
      * @param filterQuerySuffix Filter query suffix for the client's session
      * @throws SolrServerException
      * @throws IOException
@@ -612,9 +613,9 @@ public class SruServlet extends HttpServlet {
         dc.addContent(eleDcTitle);
 
         // creating Element <dc:creator />
-        if (doc.getFieldValues("MD_CREATOR") != null) {
+        if (doc.getFieldValues(io.goobi.viewer.connector.oai.model.formats.Format.MD_CREATOR) != null) {
             StringBuilder sb = new StringBuilder();
-            for (Object fieldValue : doc.getFieldValues("MD_CREATOR")) {
+            for (Object fieldValue : doc.getFieldValues(io.goobi.viewer.connector.oai.model.formats.Format.MD_CREATOR)) {
                 String value = (String) fieldValue;
                 if (sb.length() > 0) {
                     sb.append(", ");

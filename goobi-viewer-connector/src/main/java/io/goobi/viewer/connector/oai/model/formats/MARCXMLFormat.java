@@ -42,14 +42,11 @@ public class MARCXMLFormat extends METSFormat {
 
     private static final Logger logger = LogManager.getLogger(MARCXMLFormat.class);
 
-    static final Namespace xmlns = Namespace.getNamespace("http://www.openarchives.org/OAI/2.0/");
-    public static final Namespace nsMets = Namespace.getNamespace("mets", "http://www.loc.gov/METS/");
-    static final Namespace nsMarc = Namespace.getNamespace("marc", "http://www.loc.gov/MARC21/slim");
-    static final Namespace nsMods = Namespace.getNamespace("mods", "http://www.loc.gov/mods/v3");
+    static final Namespace NAMESPACE_XML = Namespace.getNamespace("http://www.openarchives.org/OAI/2.0/");
+    public static final Namespace NAMESPACE_METS = Namespace.getNamespace("mets", "http://www.loc.gov/METS/");
+    static final Namespace NAMESPACE_MARC = Namespace.getNamespace("marc", "http://www.loc.gov/MARC21/slim");
+    static final Namespace NAMESPACE_MODS = Namespace.getNamespace("mods", "http://www.loc.gov/mods/v3");
 
-    /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String, java.lang.String)
-     */
     /** {@inheritDoc} */
     @Override
     public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField,
@@ -61,9 +58,6 @@ public class MARCXMLFormat extends METSFormat {
         return generateMarc(mets, null, "ListRecords");
     }
 
-    /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler, java.lang.String)
-     */
     /** {@inheritDoc} */
     @Override
     public Element createGetRecord(RequestHandler handler, String filterQuerySuffix) {
@@ -81,29 +75,30 @@ public class MARCXMLFormat extends METSFormat {
      * @param mets
      * @param identifier
      * @param recordType
-     * @return
+     * @return {@link Element}
      */
     private static Element generateMarc(Element mets, String identifier, String recordType) {
         logger.trace("generateMarc");
-        Element xmlListRecords = new Element(recordType, xmlns);
-        Element token = mets.getChild("resumptionToken", xmlns);
-        List<Element> records = mets.getChildren(XmlConstants.ELE_NAME_RECORD, xmlns);
+        Element xmlListRecords = new Element(recordType, NAMESPACE_XML);
+        Element token = mets.getChild("resumptionToken", NAMESPACE_XML);
+        List<Element> records = mets.getChildren(XmlConstants.ELE_NAME_RECORD, NAMESPACE_XML);
 
         for (Element rec : records) {
-            Element header = rec.getChild(XmlConstants.ELE_NAME_HEADER, xmlns);
-            Element rootMets = rec.getChild(XmlConstants.ELE_NAME_METADATA, null).getChild("mets", nsMets);
+            Element header = rec.getChild(XmlConstants.ELE_NAME_HEADER, NAMESPACE_XML);
+            Element rootMets = rec.getChild(XmlConstants.ELE_NAME_METADATA, null).getChild("mets", NAMESPACE_METS);
             Element rootMarc = null;
             Element rootMods = null;
             Element subMods = null;
             if (identifier != null) {
                 // Look up DMDID via CONTENTIDS, then look up MODS element
                 List<Element> eleListDmdid = XmlTools.evaluateToElements(
-                        "mets:structMap[@TYPE='LOGICAL']/mets:div/mets:div[@CONTENTIDS='" + identifier + "']", rootMets, Arrays.asList(nsMets));
+                        "mets:structMap[@TYPE='LOGICAL']/mets:div/mets:div[@CONTENTIDS='" + identifier + "']", rootMets,
+                        Arrays.asList(NAMESPACE_METS));
                 if (!eleListDmdid.isEmpty()) {
                     String dmdid = eleListDmdid.get(0).getAttributeValue("DMDID");
                     List<Element> eleListMods =
                             XmlTools.evaluateToElements("mets:dmdSec[@ID='" + dmdid + "']/mets:mdWrap[@MDTYPE='MODS']/mets:xmlData/mods:mods",
-                                    rootMets, Arrays.asList(nsMets, nsMods));
+                                    rootMets, Arrays.asList(NAMESPACE_METS, NAMESPACE_MODS));
                     if (eleListMods != null && !eleListMods.isEmpty()) {
                         subMods = eleListMods.get(0);
                     }
@@ -112,18 +107,18 @@ public class MARCXMLFormat extends METSFormat {
             if (subMods == null) {
                 // Look up native MARC for the main record
                 List<Element> eleListMarc = XmlTools.evaluateToElements("mets:dmdSec/mets:mdWrap[@MDTYPE='MARC']/mets:xmlData/marc:marc", rootMets,
-                        Arrays.asList(nsMets, nsMarc));
+                        Arrays.asList(NAMESPACE_METS, NAMESPACE_MARC));
                 // Alternative MARCXML embedding
                 if (eleListMarc == null || eleListMarc.isEmpty()) {
                     eleListMarc = XmlTools.evaluateToElements("mets:dmdSec/mets:mdWrap[@MDTYPE='MARC']/mets:xmlData/bib/record", rootMets,
-                            Arrays.asList(nsMets, nsMarc));
+                            Arrays.asList(NAMESPACE_METS, NAMESPACE_MARC));
                 }
                 if (eleListMarc != null && !eleListMarc.isEmpty()) {
                     rootMarc = eleListMarc.get(0);
                 } else {
                     // MODS for conversion
                     List<Element> eleListMods = XmlTools.evaluateToElements("mets:dmdSec/mets:mdWrap[@MDTYPE='MODS']/mets:xmlData/mods:mods",
-                            rootMets, Arrays.asList(nsMets, nsMods));
+                            rootMets, Arrays.asList(NAMESPACE_METS, NAMESPACE_MODS));
                     if (eleListMods != null && !eleListMods.isEmpty()) {
                         rootMods = eleListMods.get(0);
                     }
@@ -137,13 +132,13 @@ public class MARCXMLFormat extends METSFormat {
             } else if (rootMarc != null) {
                 // Native root MARC
                 logger.trace("root MARC");
-                Element eleRecord = new Element(XmlConstants.ELE_NAME_RECORD, xmlns);
-                Element newheader = new Element(XmlConstants.ELE_NAME_HEADER, xmlns);
+                Element eleRecord = new Element(XmlConstants.ELE_NAME_RECORD, NAMESPACE_XML);
+                Element newheader = new Element(XmlConstants.ELE_NAME_HEADER, NAMESPACE_XML);
                 newheader.addContent(header.cloneContent());
                 eleRecord.addContent(newheader);
 
-                Element metadata = new Element(XmlConstants.ELE_NAME_METADATA, xmlns);
-                Element answer = new Element(XmlConstants.ELE_NAME_RECORD, nsMarc);
+                Element metadata = new Element(XmlConstants.ELE_NAME_METADATA, NAMESPACE_XML);
+                Element answer = new Element(XmlConstants.ELE_NAME_RECORD, NAMESPACE_MARC);
                 answer.addNamespaceDeclaration(XSI_NS);
                 answer.setAttribute("schemaLocation", "http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd",
                         XSI_NS);
@@ -158,7 +153,7 @@ public class MARCXMLFormat extends METSFormat {
             }
         }
         if (token != null) {
-            Element resumption = new Element("resumptionToken", xmlns);
+            Element resumption = new Element("resumptionToken", NAMESPACE_XML);
             resumption.setAttribute("expirationDate", token.getAttribute("expirationDate").getValue());
             resumption.setAttribute("completeListSize", token.getAttribute("completeListSize").getValue());
             resumption.setAttribute("cursor", token.getAttribute("cursor").getValue());
@@ -173,12 +168,12 @@ public class MARCXMLFormat extends METSFormat {
      * 
      * @param mods
      * @param header
-     * @return
+     * @return {@link Element}
      */
     static Element convertModsToMarc(Element mods, Element header) {
-        Element newmods = new Element("mods", nsMods);
+        Element newmods = new Element("mods", NAMESPACE_MODS);
         newmods.addContent(mods.cloneContent());
-        newmods.addNamespaceDeclaration(nsMarc);
+        newmods.addNamespaceDeclaration(NAMESPACE_MARC);
         org.jdom2.Document marcDoc = new org.jdom2.Document();
         marcDoc.setRootElement(newmods);
 
@@ -188,13 +183,13 @@ public class MARCXMLFormat extends METSFormat {
             org.jdom2.Document docTrans = transformer.transform(marcDoc);
             Element root = docTrans.getRootElement();
 
-            Element eleRecord = new Element(XmlConstants.ELE_NAME_RECORD, xmlns);
-            Element newheader = new Element(XmlConstants.ELE_NAME_HEADER, xmlns);
+            Element eleRecord = new Element(XmlConstants.ELE_NAME_RECORD, NAMESPACE_XML);
+            Element newheader = new Element(XmlConstants.ELE_NAME_HEADER, NAMESPACE_XML);
             newheader.addContent(header.cloneContent());
             eleRecord.addContent(newheader);
 
-            Element metadata = new Element(XmlConstants.ELE_NAME_METADATA, xmlns);
-            Element answer = new Element(XmlConstants.ELE_NAME_RECORD, nsMarc);
+            Element metadata = new Element(XmlConstants.ELE_NAME_METADATA, NAMESPACE_XML);
+            Element answer = new Element(XmlConstants.ELE_NAME_RECORD, NAMESPACE_MARC);
             answer.addNamespaceDeclaration(XSI_NS);
             answer.setAttribute("schemaLocation", "http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd",
                     XSI_NS);

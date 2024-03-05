@@ -165,11 +165,6 @@ public class METSFormat extends Format {
         logger.trace("generateMetsRecords");
 
         Element xmlListRecords = new Element(recordType, OAI_NS);
-
-        int useNumRows = numRows;
-        if (records.size() < useNumRows) {
-            useNumRows = records.size();
-        }
         for (SolrDocument doc : records) {
             String pi = (String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT);
             if (pi == null) {
@@ -204,6 +199,10 @@ public class METSFormat extends Format {
         }
 
         // Create resumption token
+        int useNumRows = numRows;
+        if (records.size() < useNumRows) {
+            useNumRows = records.size();
+        }
         if (totalHits > firstRow + useNumRows) {
             Element resumption = createResumptionTokenAndElement(totalHits, firstRow + useNumRows, OAI_NS, handler);
             xmlListRecords.addContent(resumption);
