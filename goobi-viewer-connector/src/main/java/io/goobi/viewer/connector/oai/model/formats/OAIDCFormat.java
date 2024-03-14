@@ -364,7 +364,7 @@ public class OAIDCFormat extends Format {
                             finishedValues.add(val);
                         }
                     } catch (IOException e) {
-                        logger.error("Could not retrieve TOC for '{}': {}", doc.getFieldValue(SolrConstants.PI), e.getMessage(), e);
+                        logger.error("Could not retrieve TOC for '{}': {}", doc.getFieldValue(SolrConstants.PI), e.getMessage());
                     } catch (HTTPException e) {
                         logger.error("Could not retrieve TOC for '{}' (code {}) {}", doc.getFieldValue(SolrConstants.PI), e.getCode(), url);
                     }
