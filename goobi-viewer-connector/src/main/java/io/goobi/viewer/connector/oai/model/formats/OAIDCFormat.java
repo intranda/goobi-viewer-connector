@@ -364,9 +364,9 @@ public class OAIDCFormat extends Format {
                             finishedValues.add(val);
                         }
                     } catch (IOException e) {
-                        logger.error(e.getMessage(), e);
+                        logger.error(" {}", doc.getFieldValue(SolrConstants.PI), e.getMessage(), e);
                     } catch (HTTPException e) {
-                        logger.error("{}: {}", e.getCode(), url);
+                        logger.error("Could not retrieve TOC for '{}' (code {}) {}", doc.getFieldValue(SolrConstants.PI), e.getCode(), url);
                     }
                 } else if (!md.getParams().isEmpty()) {
                     // Parameter configuration
