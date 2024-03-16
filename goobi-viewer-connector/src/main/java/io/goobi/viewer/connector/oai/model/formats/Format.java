@@ -140,7 +140,7 @@ public abstract class Format {
             throws IOException, SolrServerException;
 
     /**
-     * for the server request ?verb=Identify this method build the xml section in the Identify element
+     * For the server request ?verb=Identify this method build the xml section in the Identify element.
      *
      * @param filterQuerySuffix Filter query suffix for the client's session
      * @return the identify Element for the xml tree
@@ -187,7 +187,7 @@ public abstract class Format {
     }
 
     /**
-     * for the server request ?verb=ListMetadataFormats this method build the xml section
+     * For the server request ?verb=ListMetadataFormats this method build the xml section.
      *
      * @return a {@link org.jdom2.Element} object.
      * @should construct element correctly
@@ -221,7 +221,7 @@ public abstract class Format {
     }
 
     /**
-     * for the server request ?verb=ListSets this method build the xml section
+     * For the server request ?verb=ListSets this method build the xml section.
      *
      * @param locale a {@link java.util.Locale} object.
      * @return a {@link org.jdom2.Element} object.
@@ -282,7 +282,7 @@ public abstract class Format {
     }
 
     /**
-     * for the server request ?verb=ListIdentifiers this method build the xml section
+     * For the server request ?verb=ListIdentifiers this method build the XML section.
      *
      * @param handler a {@link io.goobi.viewer.connector.oai.RequestHandler} object.
      * @param firstVirtualRow a int.
@@ -360,7 +360,7 @@ public abstract class Format {
     }
 
     /**
-     * creates root element for oai protocol
+     * Vreates root element for OAI protocol.
      *
      * @param elementName a {@link java.lang.String} object.
      * @return a {@link org.jdom2.Element} object.
@@ -377,7 +377,7 @@ public abstract class Format {
     }
 
     /**
-     * create the header for listIdentifiers and ListRecords, because there are both the same
+     * Create the header for listIdentifiers and ListRecords, because there are both the same.
      *
      * @param doc Document from which to extract values.
      * @param topstructDoc If not null, the datestamp value will be determined from this instead.
@@ -520,7 +520,7 @@ public abstract class Format {
     }
 
     /**
-     * handle token
+     * handle token.
      *
      * @param resumptionToken a {@link java.lang.String} object.
      * @param filterQuerySuffix Filter query suffix for the client's session

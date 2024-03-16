@@ -159,7 +159,7 @@ public final class Configuration {
     }
 
     /**
-     * ns is needed as parameter for every xml element, otherwise the standard-ns is printed out in every element the standard return String =
+     * ns is needed as parameter for every XML element, otherwise the standard-ns is printed out in every element the standard return String.
      * http://www.openarchives.org/OAI/2.0/
      *
      * @return the Standard Namespace for the xml response
@@ -268,7 +268,7 @@ public final class Configuration {
     }
 
     /**
-     * this method returns a HashMap with information for the oai header and identify verb
+     * This method returns a HashMap with information for the OAI header and identify verb.
      *
      * @return {@link java.util.HashMap}
      */
@@ -286,7 +286,7 @@ public final class Configuration {
     }
 
     /**
-     * This method generates a HashMap with information for oai header
+     * This method generates a HashMap with information for OAI header.
      *
      * @return {@link java.util.HashMap}
      * @should read config values correctly

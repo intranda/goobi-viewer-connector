@@ -54,7 +54,7 @@ public class RequestHandler {
     private String set = null;
 
     /**
-     * handles the request in servlet
+     * Handles the request in servlet.
      *
      * @param request a {@link javax.servlet.http.HttpServletRequest} object.
      */

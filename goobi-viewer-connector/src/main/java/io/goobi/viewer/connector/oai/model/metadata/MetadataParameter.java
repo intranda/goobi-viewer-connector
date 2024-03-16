@@ -41,7 +41,7 @@ public class MetadataParameter implements Serializable {
         URLESCAPEDFIELD("urlescapedfield"),
         HIERARCHICALFIELD("hierarchicalfield"),
         /**
-         * Same as field but needs to be queried for all indexed languages
+         * Same as field but needs to be queried for all indexed languages.
          */
         MULTILANGUAGEFIELD("multilanguagefield");
 

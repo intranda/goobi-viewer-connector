@@ -266,7 +266,7 @@ public class SolrSearchIndex {
     }
 
     /**
-     * searches and returns a list of {@link org.apache.solr.common.SolrDocument}
+     * Searches and returns a list of {@link org.apache.solr.common.SolrDocument}.
      *
      * @param from startdate
      * @param until enddate
@@ -318,7 +318,7 @@ public class SolrSearchIndex {
     }
 
     /**
-     * there is no difference between oai_dc or mets
+     * There is no difference between oai_dc or mets.
      *
      * @param params a {@link java.util.Map} object.
      * @param firstRawRow a int.
@@ -343,7 +343,7 @@ public class SolrSearchIndex {
     }
 
     /**
-     * listRecords display the whole meta-data of an element
+     * listRecords display the whole meta-data of an element.
      *
      * @param params a {@link java.util.Map} object.
      * @param firstRow a int.
@@ -369,7 +369,7 @@ public class SolrSearchIndex {
     }
 
     /**
-     * Searches for identifier and return {@link org.apache.solr.common.SolrDocument} identifier can be PPN or URN (doc or page)
+     * Searches for identifier and return {@link org.apache.solr.common.SolrDocument} identifier can be PPN or URN (doc or page).
      *
      * @param identifier Identifier to search
      * @param fieldList Optional list of fields to return.

@@ -52,7 +52,7 @@ public class ErrorCode {
     }
 
     /**
-     * required argument is missing, argument has wrong syntax or argument has invalid value
+     * Required argument is missing, argument has wrong syntax or argument has invalid value.
      *
      * @return a {@link org.jdom2.Element} object.
      * @should construct element correctly
@@ -65,7 +65,7 @@ public class ErrorCode {
     }
 
     /**
-     * resumptionToken is expired, invalid, not found
+     * resumptionToken is expired, invalid or not found.
      *
      * @return a {@link org.jdom2.Element} object.
      * @should construct element correctly
@@ -78,7 +78,7 @@ public class ErrorCode {
     }
 
     /**
-     * the verb argument is missing or has invalid value
+     * The verb argument is missing or has invalid value.
      *
      * @return a {@link org.jdom2.Element} object.
      * @should construct element correctly
@@ -91,7 +91,7 @@ public class ErrorCode {
     }
 
     /**
-     * The metadataPrefix argument has invalid value
+     * The metadataPrefix argument has invalid value.
      *
      * @return a {@link org.jdom2.Element} object.
      * @should construct element correctly
@@ -105,7 +105,7 @@ public class ErrorCode {
     }
 
     /**
-     * identifier does not exist
+     * The identifier does not exist.
      *
      * @return a {@link org.jdom2.Element} object.
      * @should construct element correctly
@@ -118,7 +118,7 @@ public class ErrorCode {
     }
 
     /**
-     * for given identifier the metadata format used in metadataPrefix is not provided
+     * For the given identifier the metadata format used in metadataPrefix is not provided.
      *
      * @return a {@link org.jdom2.Element} object.
      * @should construct element correctly
@@ -131,7 +131,7 @@ public class ErrorCode {
     }
 
     /**
-     * query returns no hits
+     * The query returns no hits.
      *
      * @return a {@link org.jdom2.Element} object.
      * @should construct element correctly
@@ -144,7 +144,7 @@ public class ErrorCode {
     }
 
     /**
-     * there are no sets in repository
+     * There are no sets in repository.
      *
      * @return a {@link org.jdom2.Element} object.
      * @should construct element correctly

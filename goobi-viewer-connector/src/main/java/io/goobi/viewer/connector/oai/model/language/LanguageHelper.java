@@ -74,7 +74,7 @@ public class LanguageHelper {
     }
 
     /**
-     * Gets the language data for the given iso-code 639-1 or 639-2B
+     * Gets the language data for the given iso-code 639-1 or 639-2B.
      *
      * @param isoCode a {@link java.lang.String} object.
      * @return a {@link io.goobi.viewer.connector.oai.model.language.Language} object.

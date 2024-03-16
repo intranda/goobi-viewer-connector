@@ -66,7 +66,7 @@ public final class Utils {
     }
 
     /**
-     * insert some chars in the time string
+     * Insert some chars in the time string.
      *
      * @param ldt LocalDateTime to use
      * @return the time in the format YYYY-MM-DDThh:mm:ssZ
@@ -178,7 +178,7 @@ public final class Utils {
     }
 
     /**
-     * Returns a parameter map built from {@link RequestHandler} values
+     * Returns a parameter map built from {@link RequestHandler} values.
      *
      * @param requestHandler The request that was send to the server(servlet)
      * @return a HashMap with the values from, until and set as string
