@@ -45,7 +45,7 @@ import io.goobi.viewer.solr.SolrConstants;
  * </p>
  *
  */
-public class SolrSearchTools {
+public final class SolrSearchTools {
 
     /** Logger for this class. */
     private static final Logger logger = LogManager.getLogger(SolrSearchTools.class);
@@ -65,7 +65,7 @@ public class SolrSearchTools {
      * @param metadataPrefix
      * @param excludeAnchor
      * @param additionalQuery
-     * @return
+     * @return Generated query
      * @should add from until to setSpec queries
      */
     static String buildQueryString(String from, String until, String setSpec, String metadataPrefix, boolean excludeAnchor, String additionalQuery) {
@@ -140,6 +140,7 @@ public class SolrSearchTools {
      * Returns the blacklist filter suffix (if enabled), followed by the user-agnostic access condition suffix. For the purposes of OAI, the privilege
      * to download metadata is checked rather than the privilege to list a record.
      *
+     * @param request
      * @return a {@link java.lang.String} object.
      * @throws IndexUnreachableException
      */
@@ -150,7 +151,7 @@ public class SolrSearchTools {
     /**
      * 
      * @param date
-     * @return
+     * @return date normalized to 13 digits
      */
     static String normalizeDate(String date) {
         if (date != null) {
@@ -208,8 +209,10 @@ public class SolrSearchTools {
      *
      * @param doc a {@link org.apache.solr.common.SolrDocument} object.
      * @param fieldName a {@link java.lang.String} object.
-     * @should return all values for the given field
      * @return a {@link java.util.List} object.
+     * @should return empty list if doc null
+     * @should return empty list if no values for fieldName found
+     * @should return all values for the given field
      */
     public static List<String> getMetadataValues(SolrDocument doc, String fieldName) {
         if (doc == null) {
@@ -223,8 +226,8 @@ public class SolrSearchTools {
 
         List<String> ret = new ArrayList<>(values.size());
         for (Object value : values) {
-            if (value instanceof String) {
-                ret.add((String) value);
+            if (value instanceof String s) {
+                ret.add(s);
             } else {
                 ret.add(String.valueOf(value));
             }
@@ -241,6 +244,8 @@ public class SolrSearchTools {
      * @param queryResponse a {@link org.apache.solr.client.solrj.response.QueryResponse} object.
      * @param field a {@link java.lang.String} object.
      * @return a long.
+     * @should throw IllegalArgumentException if queryResponse null
+     * @should throw IllegalArgumentException if field null
      */
     public static long getFieldCount(QueryResponse queryResponse, String field) {
         if (queryResponse == null) {
@@ -256,8 +261,8 @@ public class SolrSearchTools {
             Object count = info.getCount();
             if (count instanceof Long || count instanceof Integer) {
                 ret = (long) count;
-            } else if (count instanceof Double) {
-                ret = ((Double) count).longValue();
+            } else if (count instanceof Double d) {
+                ret = d.longValue();
             }
             logger.trace("Total hits via {} value count: {}", field, ret);
         }
@@ -307,17 +312,17 @@ public class SolrSearchTools {
      * getUrnPrefixBlacklistSuffix.
      * </p>
      *
-     * @should build query suffix correctly
      * @param urnPrefixBlacklist a {@link java.util.List} object.
      * @return a {@link java.lang.String} object.
+     * @should build query suffix correctly
      */
     public static String getUrnPrefixBlacklistSuffix(List<String> urnPrefixBlacklist) {
         StringBuilder sbQuerySuffix = new StringBuilder();
         if (urnPrefixBlacklist != null && !urnPrefixBlacklist.isEmpty()) {
             int count = 0;
-            for (String urnPrefix : urnPrefixBlacklist) {
-                if (StringUtils.isNotBlank(urnPrefix)) {
-                    urnPrefix = ClientUtils.escapeQueryChars(urnPrefix);
+            for (final String p : urnPrefixBlacklist) {
+                if (StringUtils.isNotBlank(p)) {
+                    String urnPrefix = ClientUtils.escapeQueryChars(p);
                     urnPrefix += '*';
                     sbQuerySuffix.append(" -")
                             .append("URN_UNTOKENIZED:")

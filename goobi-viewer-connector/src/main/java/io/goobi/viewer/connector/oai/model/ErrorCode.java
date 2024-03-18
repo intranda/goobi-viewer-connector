@@ -27,7 +27,8 @@ import io.goobi.viewer.connector.utils.XmlConstants;
 public class ErrorCode {
 
     static final String BODY_BAD_ARGUMENT =
-            "The request includes illegal arguments, is missing required arguments, includes a repeated argument, or values for arguments have an illegal syntax.";
+            "The request includes illegal arguments, is missing required arguments, includes a repeated argument,"
+                    + " or values for arguments have an illegal syntax.";
     static final String BODY_BAD_RESUMPTION_TOKEN = "The value of the resumptionToken argument is invalid or expired.";
     static final String BODY_BAD_VERB =
             "Value of the verb argument is not a legal OAI-PMH verb, the verb argument is missing, or the verb argument is repeated.";
@@ -51,7 +52,7 @@ public class ErrorCode {
     }
 
     /**
-     * required argument is missing, argument has wrong syntax or argument has invalid value
+     * Required argument is missing, argument has wrong syntax or argument has invalid value.
      *
      * @return a {@link org.jdom2.Element} object.
      * @should construct element correctly
@@ -64,7 +65,7 @@ public class ErrorCode {
     }
 
     /**
-     * resumptionToken is expired, invalid, not found
+     * resumptionToken is expired, invalid or not found.
      *
      * @return a {@link org.jdom2.Element} object.
      * @should construct element correctly
@@ -77,7 +78,7 @@ public class ErrorCode {
     }
 
     /**
-     * the verb argument is missing or has invalid value
+     * The verb argument is missing or has invalid value.
      *
      * @return a {@link org.jdom2.Element} object.
      * @should construct element correctly
@@ -90,7 +91,7 @@ public class ErrorCode {
     }
 
     /**
-     * The metadataPrefix argument has invalid value
+     * The metadataPrefix argument has invalid value.
      *
      * @return a {@link org.jdom2.Element} object.
      * @should construct element correctly
@@ -104,7 +105,7 @@ public class ErrorCode {
     }
 
     /**
-     * identifier does not exist
+     * The identifier does not exist.
      *
      * @return a {@link org.jdom2.Element} object.
      * @should construct element correctly
@@ -117,7 +118,7 @@ public class ErrorCode {
     }
 
     /**
-     * for given identifier the metadata format used in metadataPrefix is not provided
+     * For the given identifier the metadata format used in metadataPrefix is not provided.
      *
      * @return a {@link org.jdom2.Element} object.
      * @should construct element correctly
@@ -130,7 +131,7 @@ public class ErrorCode {
     }
 
     /**
-     * query returns no hits
+     * The query returns no hits.
      *
      * @return a {@link org.jdom2.Element} object.
      * @should construct element correctly
@@ -143,7 +144,7 @@ public class ErrorCode {
     }
 
     /**
-     * there are no sets in repository
+     * There are no sets in repository.
      *
      * @return a {@link org.jdom2.Element} object.
      * @should construct element correctly

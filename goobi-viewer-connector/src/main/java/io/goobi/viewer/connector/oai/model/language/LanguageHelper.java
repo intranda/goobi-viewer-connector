@@ -25,10 +25,8 @@ import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.configuration2.reloading.PeriodicReloadingTrigger;
 import org.apache.commons.configuration2.tree.xpath.XPathExpressionEngine;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-
-import io.goobi.viewer.connector.utils.Configuration;
+import org.apache.logging.log4j.Logger;
 
 /**
  * <p>
@@ -40,7 +38,7 @@ public class LanguageHelper {
 
     private static final Logger logger = LogManager.getLogger(LanguageHelper.class);
 
-    ReloadingFileBasedConfigurationBuilder<XMLConfiguration> builder;
+    private ReloadingFileBasedConfigurationBuilder<XMLConfiguration> builder;
 
     /**
      * <p>
@@ -65,7 +63,6 @@ public class LanguageHelper {
             logger.error(e.getMessage());
         }
     }
-    
 
     private XMLConfiguration getConfig() {
         try {
@@ -77,7 +74,7 @@ public class LanguageHelper {
     }
 
     /**
-     * Gets the language data for the given iso-code 639-1 or 639-2B
+     * Gets the language data for the given iso-code 639-1 or 639-2B.
      *
      * @param isoCode a {@link java.lang.String} object.
      * @return a {@link io.goobi.viewer.connector.oai.model.language.Language} object.
@@ -94,7 +91,7 @@ public class LanguageHelper {
             }
         } catch (IndexOutOfBoundsException e) {
             throw new IllegalArgumentException("No matching language found for " + isoCode);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             throw new IllegalArgumentException(e);
         }
         if (languageConfig == null) {

@@ -44,28 +44,29 @@ import io.goobi.viewer.connector.oai.RequestHandler;
  * </p>
  *
  */
-public class Utils {
+public final class Utils {
 
     private static final Logger logger = LogManager.getLogger(Utils.class);
 
     private static final int HTTP_TIMEOUT = 10000;
 
     /** Constant <code>formatterISO8601DateTimeWithOffset</code> */
-    public static final DateTimeFormatter formatterISO8601DateTimeWithOffset = DateTimeFormatter.ISO_OFFSET_DATE_TIME; // yyyy-MM-dd'T'HH:mm:ss+01:00
+    public static final DateTimeFormatter FORMATTER_ISO8601_DATETIME_WITH_OFFSET =
+            DateTimeFormatter.ISO_OFFSET_DATE_TIME; // yyyy-MM-dd'T'HH:mm:ss+01:00
     /** Constant <code>formatterISO8601Date</code> */
-    public static final DateTimeFormatter formatterISO8601Date = DateTimeFormatter.ISO_LOCAL_DATE; // yyyy-MM-dd
+    public static final DateTimeFormatter FORMATTER_ISO8601_DATE = DateTimeFormatter.ISO_LOCAL_DATE; // yyyy-MM-dd
     /** Constant <code>formatterISO8601Date</code> */
-    public static final DateTimeFormatter formatterISO8601Time = DateTimeFormatter.ISO_LOCAL_TIME; // HH:mm:ss
+    public static final DateTimeFormatter FORMATTER_ISO8601_TIME = DateTimeFormatter.ISO_LOCAL_TIME; // HH:mm:ss
     /** Constant <code>formatterBasicDateTime</code> */
-    public static final DateTimeFormatter formatterISO8601BasicDateTime = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+    public static final DateTimeFormatter FORMATTER_ISO8601_BASIC_DATETIME = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
     /** Constant <code>formatterISO8601DateTimeNoSeconds</code> */
-    public static final DateTimeFormatter formatterISO8601DateTimeNoSeconds = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    public static final DateTimeFormatter FORMATTER_ISO8601_DATETIME_NO_SECONDS = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     private Utils() {
     }
 
     /**
-     * insert some chars in the time string
+     * Insert some chars in the time string.
      *
      * @param ldt LocalDateTime to use
      * @return the time in the format YYYY-MM-DDThh:mm:ssZ
@@ -78,7 +79,7 @@ public class Utils {
         }
         return ldt.atOffset(ZoneOffset.UTC)
                 .truncatedTo(ChronoUnit.SECONDS)
-                .format(formatterISO8601DateTimeWithOffset);
+                .format(FORMATTER_ISO8601_DATETIME_WITH_OFFSET);
     }
 
     /**
@@ -93,7 +94,7 @@ public class Utils {
     public static String convertDate(long milliSeconds) {
         return Instant.ofEpochMilli(milliSeconds)
                 .atOffset(ZoneOffset.UTC)
-                .format(formatterISO8601DateTimeWithOffset);
+                .format(FORMATTER_ISO8601_DATETIME_WITH_OFFSET);
     }
 
     /**
@@ -170,14 +171,14 @@ public class Utils {
      * @should parse dates correctly
      */
     public static String parseDate(Object datestring) {
-        if (datestring instanceof Long) {
-            return convertDate((Long) datestring);
+        if (datestring instanceof Long l) {
+            return convertDate(l);
         }
         return "";
     }
 
     /**
-     * Returns a parameter map built from {@link RequestHandler} values
+     * Returns a parameter map built from {@link RequestHandler} values.
      *
      * @param requestHandler The request that was send to the server(servlet)
      * @return a HashMap with the values from, until and set as string
@@ -223,20 +224,21 @@ public class Utils {
     /**
      * 
      * @param timestamp
-     * @return
+     * @return {@link String}
      * @should clean up timestamp correctly
      */
-    public static String cleanUpTimestamp(String timestamp) {
+    public static String cleanUpTimestamp(final String timestamp) {
         if (StringUtils.isEmpty(timestamp)) {
             return timestamp;
         }
 
         // Remove milliseconds
-        if (timestamp.contains(".")) {
-            timestamp = timestamp.substring(0, timestamp.indexOf("."));
+        String useTimeStamp = timestamp;
+        if (useTimeStamp.contains(".")) {
+            useTimeStamp = useTimeStamp.substring(0, useTimeStamp.indexOf("."));
         }
 
-        return timestamp.replace("-", "").replace("T", "").replace(":", "").replace("Z", "");
+        return useTimeStamp.replace("-", "").replace("T", "").replace(":", "").replace("Z", "");
     }
 
     /**

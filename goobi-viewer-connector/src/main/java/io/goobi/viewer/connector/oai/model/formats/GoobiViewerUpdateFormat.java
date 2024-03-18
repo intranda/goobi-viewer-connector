@@ -30,6 +30,8 @@ import org.jdom2.Namespace;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.ctc.wstx.shaded.msv_core.verifier.ErrorInfo.ElementErrorInfo;
+
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
@@ -46,9 +48,6 @@ public class GoobiViewerUpdateFormat extends Format {
 
     private static final Logger logger = LogManager.getLogger(GoobiViewerUpdateFormat.class);
 
-    /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String, java.lang.String)
-     */
     /** {@inheritDoc} */
     @Override
     public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField,
@@ -95,9 +94,6 @@ public class GoobiViewerUpdateFormat extends Format {
         }
     }
 
-    /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler, java.lang.String)
-     */
     /** {@inheritDoc} */
     @Override
     public Element createGetRecord(RequestHandler handler, String filterQuerySuffix) {
@@ -116,21 +112,17 @@ public class GoobiViewerUpdateFormat extends Format {
             sbUrlRoot.append("&identifier=").append(handler.getIdentifier()).append("&action=");
             String urlRoot = sbUrlRoot.toString();
             switch (handler.getMetadataPrefix()) {
-                case IV_OVERVIEWPAGE: {
-                    int status = Utils.getHttpResponseStatus(urlRoot + "snoop_overviewpage");
-                    if (status != 200) {
+                case IV_OVERVIEWPAGE:
+                    if (Utils.getHttpResponseStatus(urlRoot + "snoop_overviewpage") != 200) {
                         logger.trace("Overview page not found for {}", handler.getIdentifier());
                         return new ErrorCode().getCannotDisseminateFormat();
                     }
-                }
                     break;
-                case IV_CROWDSOURCING: {
-                    int status = Utils.getHttpResponseStatus(urlRoot + "snoop_cs");
-                    if (status != 200) {
+                case IV_CROWDSOURCING:
+                    if (Utils.getHttpResponseStatus(urlRoot + "snoop_cs") != 200) {
                         logger.trace("Crowdsourcing not found for {}", handler.getIdentifier());
                         return new ErrorCode().getCannotDisseminateFormat();
                     }
-                }
                     break;
                 default:
                     logger.trace("Unknown metadata format: {}", handler.getMetadataPrefix().getMetadataPrefix());
@@ -151,13 +143,13 @@ public class GoobiViewerUpdateFormat extends Format {
     /**
      * Creates a list of overview page documents for the given Solr document list.
      * 
-     * @param records
+     * @param jsonArray
      * @param totalHits
      * @param firstRow
      * @param numRows
      * @param handler
      * @param recordType "GetRecord" or "ListRecords"
-     * @return
+     * @return {@link ElementErrorInfo}
      * @throws IOException
      * @throws JDOMException
      * @throws SolrServerException
@@ -178,10 +170,6 @@ public class GoobiViewerUpdateFormat extends Format {
                 Namespace.getNamespace(Metadata.IV_CROWDSOURCING.getMetadataNamespacePrefix(), Metadata.IV_CROWDSOURCING.getMetadataNamespaceUri());
         Element xmlListRecords = new Element(recordType, OAI_NS);
 
-        int useNumRows = numRows;
-        if (jsonArray.length() < useNumRows) {
-            useNumRows = jsonArray.length();
-        }
         StringBuilder sbUrlRoot = new StringBuilder(DataManager.getInstance().getConfiguration().getHarvestUrl()).append('?');
         if (handler.getFrom() != null) {
             sbUrlRoot.append("&from=").append(handler.getFrom());
@@ -245,17 +233,15 @@ public class GoobiViewerUpdateFormat extends Format {
                 // Add dataset URL
                 String url = urlRoot + identifier + "&action=";
                 switch (handler.getMetadataPrefix()) {
-                    case IV_OVERVIEWPAGE: {
+                    case IV_OVERVIEWPAGE:
                         Element eleUrl = new Element("url", nsOverviewPage);
                         eleUrl.setText(url + "get_overviewpage");
                         metadata.addContent(eleUrl);
-                    }
                         break;
-                    case IV_CROWDSOURCING: {
-                        Element eleUrl = new Element("url", nsCrowdsourcingUpdates);
+                    case IV_CROWDSOURCING:
+                        eleUrl = new Element("url", nsCrowdsourcingUpdates);
                         eleUrl.setText(url + "get_cs");
                         metadata.addContent(eleUrl);
-                    }
                         break;
                     default:
                         break;
@@ -268,6 +254,10 @@ public class GoobiViewerUpdateFormat extends Format {
         }
 
         // Create resumption token
+        int useNumRows = numRows;
+        if (jsonArray.length() < useNumRows) {
+            useNumRows = jsonArray.length();
+        }
         if (totalHits > firstRow + useNumRows) {
             Element resumption = createResumptionTokenAndElement(totalHits, firstRow + useNumRows, OAI_NS, handler);
             xmlListRecords.addContent(resumption);

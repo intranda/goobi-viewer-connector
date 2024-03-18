@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -36,6 +37,7 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.BinaryRequestWriter;
+import org.apache.solr.client.solrj.impl.Http2SolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.FacetField.Count;
@@ -60,7 +62,7 @@ import io.goobi.viewer.solr.SolrConstants.DocType;
 public class SolrSearchIndex {
 
     /** Logger for this class. */
-    final static Logger logger = LogManager.getLogger(SolrSearchIndex.class);
+    static final Logger logger = LogManager.getLogger(SolrSearchIndex.class);
 
     /** Constant <code>MAX_HITS=Integer.MAX_VALUE</code> */
     public static final int MAX_HITS = Integer.MAX_VALUE;
@@ -96,18 +98,29 @@ public class SolrSearchIndex {
      * Checks whether the server's configured URL matches that in the config file. If not, a new server instance is created.
      */
     public void checkReloadNeeded() {
-        if (!testMode && client != null && client instanceof HttpSolrClient) {
-            HttpSolrClient httpSolrServer = (HttpSolrClient) client;
-            if (!DataManager.getInstance().getConfiguration().getIndexUrl().equals(httpSolrServer.getBaseURL())) {
-                logger.info("Solr URL has changed, re-initializing SolrHelper...");
-                try {
-                    httpSolrServer.close();
-                } catch (IOException e) {
-                    logger.error(e.getMessage(), e);
-                }
-                client = getNewHttpSolrClient(DataManager.getInstance().getConfiguration().getIndexUrl());
+        if (!testMode && client != null && client instanceof HttpSolrClient httpSolrClient
+                && !DataManager.getInstance().getConfiguration().getIndexUrl().equals(httpSolrClient.getBaseURL())) {
+            logger.info("Solr URL has changed, re-initializing SolrHelper...");
+            try {
+                httpSolrClient.close();
+            } catch (IOException e) {
+                logger.error(e.getMessage(), e);
             }
+            client = getNewHttpSolrClient(DataManager.getInstance().getConfiguration().getIndexUrl());
         }
+    }
+
+    /**
+     * 
+     * @param solrUrl
+     * @return New {@link SolrClient}
+     */
+    public static SolrClient getNewSolrClient(String solrUrl) {
+        if (io.goobi.viewer.controller.DataManager.getInstance().getConfiguration().isSolrUseHttp2()) {
+            return getNewHttp2SolrClient(solrUrl);
+        }
+
+        return getNewHttpSolrClient(solrUrl);
     }
 
     /**
@@ -115,16 +128,16 @@ public class SolrSearchIndex {
      * getNewHttpSolrServer.
      * </p>
      *
-     * @param indexUrl a {@link java.lang.String} object.
+     * @param solrUrl a {@link java.lang.String} object.
      * @return a {@link org.apache.solr.client.solrj.impl.HttpSolrServer} object.
      */
-    public static HttpSolrClient getNewHttpSolrClient(String indexUrl) {
-        if (indexUrl == null) {
-            throw new IllegalArgumentException("indexUrl may not be null");
+    static HttpSolrClient getNewHttpSolrClient(String solrUrl) {
+        if (solrUrl == null) {
+            throw new IllegalArgumentException("solrUrl may not be null");
         }
-        logger.info("Initializing server with URL '{}'", indexUrl);
+        logger.info("Initializing server with URL '{}'", solrUrl);
         HttpSolrClient server = new HttpSolrClient.Builder()
-                .withBaseSolrUrl(indexUrl)
+                .withBaseSolrUrl(solrUrl)
                 .withSocketTimeout(TIMEOUT_SO)
                 .withConnectionTimeout(TIMEOUT_CONNECTION)
                 .allowCompression(true)
@@ -134,28 +147,43 @@ public class SolrSearchIndex {
         server.setFollowRedirects(false); // defaults to false
         //        server.setMaxRetries(1); // defaults to 0. > 1 not recommended.
         server.setRequestWriter(new BinaryRequestWriter());
-        // Backwards compatibility mode for Solr 4 servers
-        //        if (DataManager.getInstance().getConfiguration().isSolrBackwardsCompatible()) {
-        //            server.setParser(new XMLResponseParser());
-        //        }
 
         return server;
+    }
+
+    /**
+     * <p>
+     * getNewHttp2SolrClient.
+     * </p>
+     *
+     * @param solrUrl
+     * @return a {@link org.apache.solr.client.solrj.impl.HttpSolrServer} object.
+     */
+    static Http2SolrClient getNewHttp2SolrClient(String solrUrl) {
+        return new Http2SolrClient.Builder(solrUrl)
+                .withIdleTimeout(TIMEOUT_SO, TimeUnit.MILLISECONDS)
+                .withConnectionTimeout(TIMEOUT_CONNECTION, TimeUnit.MILLISECONDS)
+                .withFollowRedirects(false)
+                .withRequestWriter(new BinaryRequestWriter())
+                // .allowCompression(DataManager.getInstance().getConfiguration().isSolrCompressionEnabled())
+                .build();
     }
 
     /**
      * Attempts multiple times to query the Solr client with the given query.
      * 
      * @param solrQuery Readily built SolrQuery object
-     * @param tries Number of attempts to query Solr before giving up
-     * @return
+     * @param maxTries Number of attempts to query Solr before giving up
+     * @return {@link QueryResponse}
      * @throws SolrServerException
      * @throws IOException
      */
-    QueryResponse querySolr(SolrQuery solrQuery, int tries) throws SolrServerException, IOException {
+    QueryResponse querySolr(SolrQuery solrQuery, final int maxTries) throws SolrServerException, IOException {
         if (solrQuery == null) {
             throw new IllegalArgumentException("solrQuery may not be null");
         }
 
+        int tries = maxTries;
         while (tries > 0) {
             tries--;
             try {
@@ -188,7 +216,7 @@ public class SolrSearchIndex {
             finalQuery = "+" + finalQuery;
         }
         SolrQuery solrQuery = new SolrQuery(finalQuery);
-        // logger.trace("search: {}", finalQuery);
+        // logger.trace("search: {}", finalQuery); //NOSONAR Debug
         solrQuery.setRows(MAX_HITS);
 
         return querySolr(solrQuery, RETRY_ATTEMPTS).getResults();
@@ -238,7 +266,7 @@ public class SolrSearchIndex {
     }
 
     /**
-     * searches and returns a list of {@link org.apache.solr.common.SolrDocument}
+     * Searches and returns a list of {@link org.apache.solr.common.SolrDocument}.
      *
      * @param from startdate
      * @param until enddate
@@ -290,7 +318,7 @@ public class SolrSearchIndex {
     }
 
     /**
-     * there is no difference between oai_dc or mets
+     * There is no difference between oai_dc or mets.
      *
      * @param params a {@link java.util.Map} object.
      * @param firstRawRow a int.
@@ -315,7 +343,7 @@ public class SolrSearchIndex {
     }
 
     /**
-     * listRecords display the whole meta-data of an element
+     * listRecords display the whole meta-data of an element.
      *
      * @param params a {@link java.util.Map} object.
      * @param firstRow a int.
@@ -341,14 +369,14 @@ public class SolrSearchIndex {
     }
 
     /**
-     * Searches for identifier and return {@link org.apache.solr.common.SolrDocument} identifier can be PPN or URN (doc or page)
+     * Searches for identifier and return {@link org.apache.solr.common.SolrDocument} identifier can be PPN or URN (doc or page).
      *
      * @param identifier Identifier to search
      * @param fieldList Optional list of fields to return.
      * @param filterQuerySuffix Filter query suffix for the client's session
      * @return {@link org.apache.solr.common.SolrDocument}
-     * @throws java.io.IOException
-     * @throws org.apache.solr.client.solrj.SolrServerException
+     * @throws IOException
+     * @throws SolrServerException
      * @throws IndexUnreachableException
      */
     public SolrDocument getListRecord(final String identifier, List<String> fieldList, String filterQuerySuffix)
@@ -369,13 +397,11 @@ public class SolrSearchIndex {
      *
      * @param identifier a {@link java.lang.String} object.
      * @param filterQuerySuffix Filter query suffix for the client's session
-     * @throws org.apache.solr.client.solrj.SolrServerException
      * @return a boolean.
      * @throws IOException
-     * @throws IndexUnreachableException
+     * @throws SolrServerException
      */
-    public boolean isRecordExists(final String identifier, String filterQuerySuffix)
-            throws SolrServerException, IOException, IndexUnreachableException {
+    public boolean isRecordExists(final String identifier, String filterQuerySuffix) throws SolrServerException, IOException {
         return !queryForIdentifier(identifier, 0, null, filterQuerySuffix).isEmpty();
     }
 
@@ -385,7 +411,7 @@ public class SolrSearchIndex {
      * @param rows Number of hits to return.
      * @param fieldList Optional list of fields to return.
      * @param filterQuerySuffix Filter query suffix for the client's session
-     * @return
+     * @return {@link SolrDocumentList}
      * @throws SolrServerException
      * @throws IOException
      * @throws IndexUnreachableException
@@ -426,11 +452,11 @@ public class SolrSearchIndex {
     /**
      * Creates a list with all available values for the given field (minus any blacklisted values).
      *
-     * @throws org.apache.solr.client.solrj.SolrServerException
-     * @should return all values
      * @param field a {@link java.lang.String} object.
      * @return a {@link java.util.List} object.
      * @throws IOException
+     * @throws SolrServerException
+     * @should return all values
      */
     public List<String> getSets(String field) throws SolrServerException, IOException {
         List<String> ret = new ArrayList<>();
@@ -469,8 +495,8 @@ public class SolrSearchIndex {
      * @param fieldStatistics a {@link java.util.List} object.
      * @param filterQuerySuffix Filter query suffix for the client's session
      * @return size of search
-     * @throws java.io.IOException
-     * @throws org.apache.solr.client.solrj.SolrServerException
+     * @throws IOException
+     * @throws SolrServerException
      */
     public long getTotalHitNumber(Map<String, String> params, boolean urnOnly, String additionalQuery, List<String> fieldStatistics,
             String filterQuerySuffix) throws IOException, SolrServerException {
@@ -480,7 +506,7 @@ public class SolrSearchIndex {
             sbQuery.append(" AND (").append(SolrConstants.URN).append(":* OR ").append(SolrConstants.IMAGEURN_OAI).append(":*)");
         }
         sbQuery.append(filterQuerySuffix);
-        logger.debug("OAI query: {}", sbQuery.toString());
+        logger.debug("OAI query: {}", sbQuery);
         SolrQuery solrQuery = new SolrQuery(sbQuery.toString());
         solrQuery.setStart(0);
         solrQuery.setRows(0);
@@ -503,7 +529,7 @@ public class SolrSearchIndex {
      *
      * @param filterQuerySuffix Filter query suffix for the client's session
      * @return a {@link java.lang.String} object.
-     * @throws org.apache.solr.client.solrj.SolrServerException if any.
+     * @throws SolrServerException
      * @throws IOException
      */
     public String getEarliestRecordDatestamp(String filterQuerySuffix) throws SolrServerException, IOException {
@@ -515,14 +541,14 @@ public class SolrSearchIndex {
             solrQuery.addField(SolrConstants.DATECREATED);
             solrQuery.addSort(SolrConstants.DATECREATED, ORDER.asc);
             QueryResponse resp = querySolr(solrQuery, RETRY_ATTEMPTS);
-            if (resp.getResults().size() > 0) {
+            if (!resp.getResults().isEmpty()) {
                 SolrDocument doc = resp.getResults().get(0);
                 if (doc.getFieldValue(SolrConstants.DATECREATED) != null) {
                     LocalDateTime ldt = Instant.ofEpochMilli((Long) doc.getFieldValue(SolrConstants.DATECREATED))
                             .atZone(ZoneOffset.UTC)
                             .toLocalDateTime();
-                    String yearMonthDay = ldt.format(Utils.formatterISO8601Date);
-                    String hourMinuteSeconde = ldt.format(Utils.formatterISO8601Time);
+                    String yearMonthDay = ldt.format(Utils.FORMATTER_ISO8601_DATE);
+                    String hourMinuteSeconde = ldt.format(Utils.FORMATTER_ISO8601_TIME);
 
                     return yearMonthDay + "T" + hourMinuteSeconde + "Z";
                 }
@@ -530,6 +556,7 @@ public class SolrSearchIndex {
         } catch (NullPointerException e) {
             logger.error(e.getMessage(), e);
         }
+
         return "";
     }
 
@@ -538,15 +565,14 @@ public class SolrSearchIndex {
      *
      * @param anchorDoc a {@link org.apache.solr.common.SolrDocument} object.
      * @param untilTimestamp a long.
-     * @param request {@link HttpServletRequest} for filter query suffix generation
      * @param filterQuerySuffix Filter query suffix for the client's session
-     * @throws org.apache.solr.client.solrj.SolrServerException
      * @return a long.
      * @throws IOException
+     * @throws SolrServerException
      */
     public long getLatestVolumeTimestamp(SolrDocument anchorDoc, long untilTimestamp, String filterQuerySuffix)
             throws SolrServerException, IOException {
-        if (anchorDoc.getFieldValue(SolrConstants.ISANCHOR) == null || (Boolean) anchorDoc.getFieldValue(SolrConstants.ISANCHOR) == false) {
+        if (anchorDoc.getFieldValue(SolrConstants.ISANCHOR) == null || !(Boolean) anchorDoc.getFieldValue(SolrConstants.ISANCHOR)) {
             return -1;
         }
 
@@ -580,10 +606,10 @@ public class SolrSearchIndex {
      *
      * @param query a {@link java.lang.String} object.
      * @param fieldList a {@link java.util.List} object.
-     * @throws org.apache.solr.client.solrj.SolrServerException
-     * @should return correct doc
      * @return a {@link org.apache.solr.common.SolrDocument} object.
      * @throws IOException
+     * @throws SolrServerException
+     * @should return correct doc
      */
     public SolrDocument getFirstDoc(String query, List<String> fieldList) throws SolrServerException, IOException {
         logger.trace("getFirstDoc: {}", query);

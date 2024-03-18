@@ -16,7 +16,9 @@
 package io.goobi.viewer.connector.sru;
 
 /**
- * <p>SruOperation class.</p>
+ * <p>
+ * SruOperation class.
+ * </p>
  *
  */
 public enum SruOperation {
@@ -24,29 +26,32 @@ public enum SruOperation {
     SCAN("scan"),
     EXPLAIN("explain"),
     SEARCHRETRIEVE("searchRetrieve"),
-    UNSUPPORTETPARAMETER("unsupported")
-    
-    ;
+    UNSUPPORTETPARAMETER("unsupported");
+
     private String title;
 
     /**
-     * 
+     * @param title
      */
     private SruOperation(String title) {
         this.title = title;
     }
-    
+
     /**
-     * <p>Getter for the field <code>title</code>.</p>
+     * <p>
+     * Getter for the field <code>title</code>.
+     * </p>
      *
      * @return the title
      */
     public String getTitle() {
         return title;
     }
-    
+
     /**
-     * <p>getByTitle.</p>
+     * <p>
+     * getByTitle.
+     * </p>
      *
      * @param title a {@link java.lang.String} object.
      * @return a {@link io.goobi.viewer.connector.sru.SruOperation} object.
@@ -57,7 +62,7 @@ public enum SruOperation {
                 return operation;
             }
         }
-        
+
         return UNSUPPORTETPARAMETER;
     }
 }

@@ -59,7 +59,7 @@ public class OaiServlet extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("text/xml;charset=UTF-8");
-        
+
         String queryString = (request.getQueryString() != null ? "?" + request.getQueryString() : "");
         logger.debug("REQUEST URL: {}{}", request.getRequestURL().toString(), queryString);
 
@@ -143,7 +143,9 @@ public class OaiServlet extends HttpServlet {
                     case LISTIDENTIFIERS:
                         if (handler.getMetadataPrefix() == null) {
                             root.addContent(new ErrorCode().getBadArgument());
-                        } else if (!DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(handler.getMetadataPrefix().getMetadataPrefix())) {
+                        } else if (!DataManager.getInstance()
+                                .getConfiguration()
+                                .isMetadataFormatEnabled(handler.getMetadataPrefix().getMetadataPrefix())) {
                             // Deny access to disabled formats
                             root.addContent(new ErrorCode().getCannotDisseminateFormat());
                         } else {
@@ -176,7 +178,9 @@ public class OaiServlet extends HttpServlet {
                     case LISTRECORDS:
                         if (handler.getMetadataPrefix() == null) {
                             root.addContent(new ErrorCode().getBadArgument());
-                        } else if (!DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(handler.getMetadataPrefix().getMetadataPrefix())) {
+                        } else if (!DataManager.getInstance()
+                                .getConfiguration()
+                                .isMetadataFormatEnabled(handler.getMetadataPrefix().getMetadataPrefix())) {
                             // Deny access to disabled formats
                             root.addContent(new ErrorCode().getCannotDisseminateFormat());
                         } else {
@@ -215,7 +219,9 @@ public class OaiServlet extends HttpServlet {
                     case GETRECORD:
                         if (handler.getMetadataPrefix() == null) {
                             root.addContent(new ErrorCode().getBadArgument());
-                        } else if (!DataManager.getInstance().getConfiguration().isMetadataFormatEnabled(handler.getMetadataPrefix().getMetadataPrefix())) {
+                        } else if (!DataManager.getInstance()
+                                .getConfiguration()
+                                .isMetadataFormatEnabled(handler.getMetadataPrefix().getMetadataPrefix())) {
                             // Deny access to disabled formats
                             root.addContent(new ErrorCode().getCannotDisseminateFormat());
                         } else {
@@ -292,7 +298,7 @@ public class OaiServlet extends HttpServlet {
                 // Date/time
                 dateTime = true;
                 try {
-                    LocalDateTime.parse(from, Utils.formatterISO8601DateTimeWithOffset);
+                    LocalDateTime.parse(from, Utils.FORMATTER_ISO8601_DATETIME_WITH_OFFSET);
                 } catch (DateTimeParseException e) {
                     logger.warn(e.getMessage());
                     return false;
@@ -300,7 +306,7 @@ public class OaiServlet extends HttpServlet {
             } else {
                 // Just date
                 try {
-                    LocalDate.parse(from, Utils.formatterISO8601Date);
+                    LocalDate.parse(from, Utils.FORMATTER_ISO8601_DATE);
                 } catch (DateTimeParseException e) {
                     logger.warn(e.getMessage());
                     return false;
@@ -312,7 +318,7 @@ public class OaiServlet extends HttpServlet {
                 // Date/time
                 dateTime = true;
                 try {
-                    LocalDateTime.parse(until, Utils.formatterISO8601DateTimeWithOffset);
+                    LocalDateTime.parse(until, Utils.FORMATTER_ISO8601_DATETIME_WITH_OFFSET);
                 } catch (DateTimeParseException e) {
                     logger.warn(e.getMessage());
                     return false;
@@ -320,7 +326,7 @@ public class OaiServlet extends HttpServlet {
             } else {
                 // Just date
                 try {
-                    LocalDate.parse(until, Utils.formatterISO8601Date);
+                    LocalDate.parse(until, Utils.FORMATTER_ISO8601_DATE);
                 } catch (DateTimeParseException e) {
                     logger.warn(e.getMessage());
                     return false;
@@ -330,8 +336,8 @@ public class OaiServlet extends HttpServlet {
         if (from != null && until != null) {
             // Check for different from/until formats ('from' may not be later than 'until')
             if (dateTime) {
-                LocalDateTime ldtFrom = LocalDateTime.parse(from, Utils.formatterISO8601DateTimeWithOffset);
-                LocalDateTime ldtUntil = LocalDateTime.parse(until, Utils.formatterISO8601DateTimeWithOffset);
+                LocalDateTime ldtFrom = LocalDateTime.parse(from, Utils.FORMATTER_ISO8601_DATETIME_WITH_OFFSET);
+                LocalDateTime ldtUntil = LocalDateTime.parse(until, Utils.FORMATTER_ISO8601_DATETIME_WITH_OFFSET);
                 try {
                     return !ldtFrom.isAfter(ldtUntil);
                 } catch (DateTimeParseException e) {
@@ -340,8 +346,8 @@ public class OaiServlet extends HttpServlet {
                 }
             }
 
-            LocalDate ldFrom = LocalDate.parse(from, Utils.formatterISO8601Date);
-            LocalDate ldUntil = LocalDate.parse(until, Utils.formatterISO8601Date);
+            LocalDate ldFrom = LocalDate.parse(from, Utils.FORMATTER_ISO8601_DATE);
+            LocalDate ldUntil = LocalDate.parse(until, Utils.FORMATTER_ISO8601_DATE);
             try {
                 return !ldFrom.isAfter(ldUntil);
             } catch (DateTimeParseException e) {

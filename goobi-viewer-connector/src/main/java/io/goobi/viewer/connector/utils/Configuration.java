@@ -44,6 +44,7 @@ import io.goobi.viewer.connector.oai.model.Set;
 import io.goobi.viewer.connector.oai.model.metadata.Metadata;
 import io.goobi.viewer.connector.oai.model.metadata.MetadataParameter;
 import io.goobi.viewer.connector.oai.model.metadata.MetadataParameter.MetadataParameterType;
+import io.goobi.viewer.controller.StringConstants;
 
 /**
  * <p>
@@ -57,6 +58,8 @@ public final class Configuration {
 
     /** Constant <code>DEFAULT_CONFIG_FILE="config_oai.xml"</code> */
     public static final String DEFAULT_CONFIG_FILE = "config_oai.xml";
+
+    private static final String XML_PATH_ATTRIBUTE_NAME = "[@name]";
 
     protected ReloadingFileBasedConfigurationBuilder<XMLConfiguration> builder;
     protected ReloadingFileBasedConfigurationBuilder<XMLConfiguration> builderLocal;
@@ -90,9 +93,7 @@ public final class Configuration {
 
                         @Override
                         public void onEvent(Event event) {
-                            if (builder.getReloadingController().checkForReloading(null)) {
-                                //
-                            }
+                            builder.getReloadingController().checkForReloading(null);
                         }
                     });
         } else {
@@ -121,9 +122,7 @@ public final class Configuration {
 
                         @Override
                         public void onEvent(Event event) {
-                            if (builderLocal.getReloadingController().checkForReloading(null)) {
-                                //
-                            }
+                            builderLocal.getReloadingController().checkForReloading(null);
                         }
                     });
         }
@@ -152,7 +151,7 @@ public final class Configuration {
             try {
                 return builderLocal.getConfiguration();
             } catch (ConfigurationException e) {
-                // logger.error(e.getMessage());
+                // logger.error(e.getMessage()); //NOSONAR Debug
             }
         }
 
@@ -160,7 +159,7 @@ public final class Configuration {
     }
 
     /**
-     * ns is needed as parameter for every xml element, otherwise the standard-ns is printed out in every element the standard return String =
+     * ns is needed as parameter for every XML element, otherwise the standard-ns is printed out in every element the standard return String.
      * http://www.openarchives.org/OAI/2.0/
      *
      * @return the Standard Namespace for the xml response
@@ -173,7 +172,7 @@ public final class Configuration {
     /**
      * 
      * @param inPath
-     * @return
+     * @return List<HierarchicalConfiguration<ImmutableNode>>
      */
     private List<HierarchicalConfiguration<ImmutableNode>> getLocalConfigurationsAt(String inPath) {
         List<HierarchicalConfiguration<ImmutableNode>> ret = getConfigLocal().configurationsAt(inPath);
@@ -188,7 +187,7 @@ public final class Configuration {
      * 
      * @param inPath
      * @param defaultList
-     * @return
+     * @return List<String>
      */
     private List<String> getLocalList(String inPath, List<String> defaultList) {
         return getLocalList(getConfigLocal(), getConfig(), inPath, defaultList);
@@ -198,7 +197,7 @@ public final class Configuration {
      * 
      * @param inPath
      * @param inDefault
-     * @return
+     * @return a boolean
      */
     private boolean getLocalBoolean(String inPath, boolean inDefault) {
         try {
@@ -213,7 +212,7 @@ public final class Configuration {
      * 
      * @param inPath
      * @param inDefault
-     * @return
+     * @return an int
      */
     private int getLocalInt(String inPath, int inDefault) {
         try {
@@ -231,7 +230,7 @@ public final class Configuration {
      * 
      * @param inPath
      * @param inDefault
-     * @return
+     * @return {@link String}
      */
     private String getLocalString(String inPath, String inDefault) {
         try {
@@ -248,7 +247,7 @@ public final class Configuration {
      * @param altConfig Alternative configuration
      * @param inPath XML path
      * @param defaultList List of default values to return if none found in config
-     * @return
+     * @return List<String>
      */
     private static List<String> getLocalList(HierarchicalConfiguration<ImmutableNode> config, HierarchicalConfiguration<ImmutableNode> altConfig,
             String inPath,
@@ -269,7 +268,7 @@ public final class Configuration {
     }
 
     /**
-     * this method returns a HashMap with information for the oai header and identify verb
+     * This method returns a HashMap with information for the OAI header and identify verb.
      *
      * @return {@link java.util.HashMap}
      */
@@ -287,7 +286,7 @@ public final class Configuration {
     }
 
     /**
-     * This method generates a HashMap with information for oai header
+     * This method generates a HashMap with information for OAI header.
      *
      * @return {@link java.util.HashMap}
      * @should read config values correctly
@@ -432,7 +431,7 @@ public final class Configuration {
             List<FieldConfiguration> ret = new ArrayList<>(elements.size());
             for (Iterator<HierarchicalConfiguration<ImmutableNode>> it = elements.iterator(); it.hasNext();) {
                 HierarchicalConfiguration<ImmutableNode> sub = it.next();
-                String name = sub.getString("[@name]", null);
+                String name = sub.getString(XML_PATH_ATTRIBUTE_NAME, null);
                 String valueSource = sub.getString("[@valueSource]", null);
                 boolean translate = sub.getBoolean("[@translate]", false);
                 boolean multivalued = sub.getBoolean("[@multivalued]", false);
@@ -440,11 +439,11 @@ public final class Configuration {
                 String defaultValue = sub.getString("[@defaultValue]", null);
                 String prefix = sub.getString("[@prefix]", null);
                 if (prefix != null) {
-                    prefix = prefix.replace("_SPACE_", " ");
+                    prefix = prefix.replace(StringConstants.PLACEHOLDER_SPACE, " ");
                 }
                 String suffix = sub.getString("[@suffix]", null);
                 if (suffix != null) {
-                    suffix = suffix.replace("_SPACE_", " ");
+                    suffix = suffix.replace(StringConstants.PLACEHOLDER_SPACE, " ");
                 }
                 ret.add(new FieldConfiguration(name, valueSource, translate, multivalued, useTopstructValueIfNoneFound, defaultValue, prefix,
                         suffix));
@@ -542,7 +541,7 @@ public final class Configuration {
         if (types != null) {
             for (Iterator it = types.iterator(); it.hasNext();) {
                 HierarchicalConfiguration sub = (HierarchicalConfiguration) it.next();
-                ret.put(sub.getString("[@name]"), sub.getString("[@type]"));
+                ret.put(sub.getString(XML_PATH_ATTRIBUTE_NAME), sub.getString("[@type]"));
             }
         }
 
@@ -810,10 +809,10 @@ public final class Configuration {
 
             for (Iterator it = templateList.iterator(); it.hasNext();) {
                 HierarchicalConfiguration subElement = (HierarchicalConfiguration) it.next();
-                if (subElement.getString("[@name]").equals(template)) {
+                if (subElement.getString(XML_PATH_ATTRIBUTE_NAME).equals(template)) {
                     usingTemplate = subElement;
                     break;
-                } else if ("_DEFAULT".equals(subElement.getString("[@name]"))) {
+                } else if ("_DEFAULT".equals(subElement.getString(XML_PATH_ATTRIBUTE_NAME))) {
                     defaultTemplate = subElement;
                 }
             }
@@ -831,9 +830,8 @@ public final class Configuration {
     /**
      * Reads metadata configuration for the given template configuration item. Returns empty list if template is null.
      * 
-     * @param templateList
-     * @param template
-     * @return
+     * @param usingTemplate
+     * @return List<Metadata>
      */
     @SuppressWarnings("rawtypes")
     private static List<Metadata> getMetadataForTemplate(HierarchicalConfiguration usingTemplate) {
@@ -861,8 +859,8 @@ public final class Configuration {
                             String key = sub2.getString("[@key]");
                             String overrideMasterValue = sub2.getString("[@value]");
                             String defaultValue = sub2.getString("[@defaultValue]");
-                            String prefix = sub2.getString("[@prefix]", "").replace("_SPACE_", " ");
-                            String suffix = sub2.getString("[@suffix]", "").replace("_SPACE_", " ");
+                            String prefix = sub2.getString("[@prefix]", "").replace(StringConstants.PLACEHOLDER_SPACE, " ");
+                            String suffix = sub2.getString("[@suffix]", "").replace(StringConstants.PLACEHOLDER_SPACE, " ");
                             boolean addUrl = sub2.getBoolean("[@url]", false);
                             boolean dontUseTopstructValue = sub2.getBoolean("[@dontUseTopstructValue]", false);
                             paramList.add(new MetadataParameter(MetadataParameterType.getByString(fieldType), source, key, overrideMasterValue,

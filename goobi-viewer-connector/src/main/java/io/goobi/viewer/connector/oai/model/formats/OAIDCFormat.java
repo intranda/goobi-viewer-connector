@@ -39,6 +39,8 @@ import org.apache.solr.common.SolrDocumentList;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 
+import com.ctc.wstx.shaded.msv_core.verifier.ErrorInfo.ElementErrorInfo;
+
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
@@ -67,9 +69,6 @@ public class OAIDCFormat extends Format {
     private List<String> setSpecFields =
             DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.OAI_DC.getMetadataPrefix());
 
-    /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String, java.lang.String)
-     */
     /** {@inheritDoc} */
     @Override
     public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField,
@@ -90,7 +89,8 @@ public class OAIDCFormat extends Format {
             qr = solr.getListRecords(Utils.filterDatestampFromRequest(handler), firstRawRow, numRows, false,
                     SolrSearchTools.getAdditionalDocstructsQuerySuffix(DataManager.getInstance().getConfiguration().getAdditionalDocstructTypes()),
                     filterQuerySuffix, null, null);
-            totalVirtualHits = totalRawHits = qr.getResults().getNumFound();
+            totalRawHits = qr.getResults().getNumFound();
+            totalVirtualHits = totalRawHits;
 
         }
         if (qr.getResults().isEmpty()) {
@@ -102,9 +102,6 @@ public class OAIDCFormat extends Format {
                 versionDiscriminatorField, null, filterQuerySuffix);
     }
 
-    /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler, java.lang.String)
-     */
     /** {@inheritDoc} */
     @Override
     public Element createGetRecord(RequestHandler handler, String filterQuerySuffix) {
@@ -153,19 +150,15 @@ public class OAIDCFormat extends Format {
      * @param versionDiscriminatorField
      * @param requestedVersion
      * @param filterQuerySuffix Filter query suffix for the client's session
-     * @return
+     * @return {@link Element}
      * @throws SolrServerException
      * @throws IOException
      */
     private Element generateDC(List<SolrDocument> records, long totalVirtualHits, long totalRawHits, int firstVirtualRow, int firstRawRow,
-            int numRows, RequestHandler handler, String recordType, String versionDiscriminatorField, String requestedVersion,
+            final int numRows, RequestHandler handler, String recordType, String versionDiscriminatorField, String requestedVersion,
             String filterQuerySuffix) throws SolrServerException, IOException {
         Namespace nsOaiDoc = Namespace.getNamespace(Metadata.OAI_DC.getMetadataNamespacePrefix(), Metadata.OAI_DC.getMetadataNamespaceUri());
         Element xmlListRecords = new Element(recordType, OAI_NS);
-
-        if (records.size() < numRows) {
-            numRows = records.size();
-        }
 
         int virtualHitCount = 0;
         if (StringUtils.isNotEmpty(versionDiscriminatorField)) {
@@ -195,9 +188,13 @@ public class OAIDCFormat extends Format {
         }
 
         // Create resumption token
-        if (totalRawHits > firstRawRow + numRows) {
+        int useNumRows = numRows;
+        if (records.size() < useNumRows) {
+            useNumRows = records.size();
+        }
+        if (totalRawHits > firstRawRow + useNumRows) {
             Element resumption = createResumptionTokenAndElement(totalVirtualHits, totalRawHits, firstVirtualRow + virtualHitCount,
-                    firstRawRow + numRows, OAI_NS, handler);
+                    firstRawRow + useNumRows, OAI_NS, handler);
             xmlListRecords.addContent(resumption);
         }
 
@@ -213,7 +210,7 @@ public class OAIDCFormat extends Format {
      * @param nsOaiDoc
      * @param setSpecFields
      * @param filterQuerySuffix Filter query suffix for the client's session
-     * @return
+     * @return {@link ElementErrorInfo}
      * @throws SolrServerException
      * @throws IOException
      * @should generate element correctly
@@ -332,9 +329,9 @@ public class OAIDCFormat extends Format {
                                         doc.getFieldValue(SolrConstants.IDDOC));
                                 continue;
                             }
-                            for (Element oai_fulltext : generateFulltextUrls((String) topstructDoc.getFieldValue(SolrConstants.PI_TOPSTRUCT),
+                            for (Element eleOaiFullText : generateFulltextUrls((String) topstructDoc.getFieldValue(SolrConstants.PI_TOPSTRUCT),
                                     nsDc)) {
-                                eleOaiDc.addContent(oai_fulltext);
+                                eleOaiDc.addContent(eleOaiFullText);
                             }
                             break;
                         default:
@@ -367,9 +364,9 @@ public class OAIDCFormat extends Format {
                             finishedValues.add(val);
                         }
                     } catch (IOException e) {
-                        logger.error(e.getMessage(), e);
+                        logger.error("Could not retrieve TOC for '{}': {}", doc.getFieldValue(SolrConstants.PI), e.getMessage());
                     } catch (HTTPException e) {
-                        logger.error("{}: {}", e.getCode(), url);
+                        logger.error("Could not retrieve TOC for '{}' (code {}) {}", doc.getFieldValue(SolrConstants.PI), e.getCode(), url);
                     }
                 } else if (!md.getParams().isEmpty()) {
                     // Parameter configuration
@@ -488,15 +485,15 @@ public class OAIDCFormat extends Format {
         }
 
         StringBuilder sbSourceCreators = new StringBuilder();
-        if (doc != null && doc.getFieldValues("MD_CREATOR") != null) {
-            for (Object fieldValue : doc.getFieldValues("MD_CREATOR")) {
+        if (doc != null && doc.getFieldValues(MD_CREATOR) != null) {
+            for (Object fieldValue : doc.getFieldValues(MD_CREATOR)) {
                 if (sbSourceCreators.length() > 0) {
                     sbSourceCreators.append(", ");
                 }
                 sbSourceCreators.append((String) fieldValue);
             }
-        } else if (topstructDoc.getFieldValues("MD_CREATOR") != null) {
-            for (Object fieldValue : topstructDoc.getFieldValues("MD_CREATOR")) {
+        } else if (topstructDoc.getFieldValues(MD_CREATOR) != null) {
+            for (Object fieldValue : topstructDoc.getFieldValues(MD_CREATOR)) {
                 if (sbSourceCreators.length() > 0) {
                     sbSourceCreators.append(", ");
                 }
@@ -528,7 +525,7 @@ public class OAIDCFormat extends Format {
         }
 
         // Publisher info
-        String sourceYearpublish = (String) topstructDoc.getFirstValue("MD_YEARPUBLISH");
+        String sourceYearpublish = (String) topstructDoc.getFirstValue(MD_YEARPUBLISH);
         if (sourceYearpublish == null) {
             sourceYearpublish = "-";
         }
@@ -536,7 +533,7 @@ public class OAIDCFormat extends Format {
         if (sourcePlacepublish == null) {
             sourcePlacepublish = "-";
         }
-        String sourcePublisher = (String) topstructDoc.getFirstValue("MD_PUBLISHER");
+        String sourcePublisher = (String) topstructDoc.getFirstValue(MD_PUBLISHER);
         if (sourcePublisher == null) {
             sourcePublisher = "-";
         }
@@ -624,7 +621,7 @@ public class OAIDCFormat extends Format {
                     break;
 
             }
-            
+
             logger.trace(url);
 
             if (url != null) {

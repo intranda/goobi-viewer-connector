@@ -30,6 +30,8 @@ import org.apache.solr.common.SolrDocumentList;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 
+import com.ctc.wstx.shaded.msv_core.verifier.ErrorInfo.ElementErrorInfo;
+
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
@@ -46,16 +48,9 @@ public class EuropeanaFormat extends OAIDCFormat {
 
     private static final Logger logger = LogManager.getLogger(EuropeanaFormat.class);
 
-    public static final String MD_DATECREATED = "MD_DATECREATED";
-    public static final String MD_PUBLISHER = "MD_PUBLISHER";
-    public static final String MD_YEARPUBLISH = "MD_YEARPUBLISH";
-
     private List<String> setSpecFields =
             DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.ESE.name().toLowerCase());
 
-    /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String, java.lang.String)
-     */
     /** {@inheritDoc} */
     @Override
     public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField,
@@ -69,9 +64,6 @@ public class EuropeanaFormat extends OAIDCFormat {
         return generateESE(qr.getResults(), qr.getResults().getNumFound(), firstRawRow, numRows, handler, "ListRecords", filterQuerySuffix);
     }
 
-    /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler, java.lang.String)
-     */
     /** {@inheritDoc} */
     @Override
     public Element createGetRecord(RequestHandler handler, String filterQuerySuffix) {
@@ -99,21 +91,17 @@ public class EuropeanaFormat extends OAIDCFormat {
      * @param handler
      * @param recordType
      * @param filterQuerySuffix Filter query suffix for the client's session
-     * @return
+     * @return {@link ElementErrorInfo}
      * @throws SolrServerException
      * @throws IOException
      */
-    private Element generateESE(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler, String recordType,
-            String filterQuerySuffix) throws SolrServerException, IOException {
+    private Element generateESE(List<SolrDocument> records, long totalHits, int firstRow, final int numRows, RequestHandler handler,
+            String recordType, String filterQuerySuffix) throws SolrServerException, IOException {
         Namespace nsDc = Namespace.getNamespace(Metadata.DC.getMetadataNamespacePrefix(), Metadata.DC.getMetadataNamespaceUri());
         Namespace nsDcTerms = Namespace.getNamespace("dcterms", "http://purl.org/dc/terms/");
         Namespace nsEuropeana = Namespace.getNamespace(Metadata.ESE.getMetadataNamespacePrefix(), Metadata.ESE.getMetadataNamespaceUri());
 
         Element xmlListRecords = new Element(recordType, OAI_NS);
-
-        if (records.size() < numRows) {
-            numRows = records.size();
-        }
         for (SolrDocument doc : records) {
             // logger.trace("record: {}", doc.getFieldValue(SolrConstants.PI));
             boolean isWork = doc.getFieldValue(SolrConstants.ISWORK) != null && (boolean) doc.getFieldValue(SolrConstants.ISWORK);
@@ -237,8 +225,8 @@ public class EuropeanaFormat extends OAIDCFormat {
             }
 
             // <dc:creator>
-            if (doc.getFieldValues("MD_CREATOR") != null) {
-                for (Object fieldValue : doc.getFieldValues("MD_CREATOR")) {
+            if (doc.getFieldValues(MD_CREATOR) != null) {
+                for (Object fieldValue : doc.getFieldValues(MD_CREATOR)) {
                     String creator = (String) fieldValue;
                     if (StringUtils.isNotBlank(creator)) {
                         Element eleDcCreator = new Element("creator", nsDc);
@@ -383,8 +371,12 @@ public class EuropeanaFormat extends OAIDCFormat {
         }
 
         // Create resumption token
-        if (totalHits > firstRow + numRows) {
-            Element resumption = createResumptionTokenAndElement(totalHits, firstRow + numRows, OAI_NS, handler);
+        int useNumRows = numRows;
+        if (records.size() < useNumRows) {
+            useNumRows = records.size();
+        }
+        if (totalHits > firstRow + useNumRows) {
+            Element resumption = createResumptionTokenAndElement(totalHits, firstRow + useNumRows, OAI_NS, handler);
             xmlListRecords.addContent(resumption);
         }
 

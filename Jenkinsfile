@@ -20,13 +20,32 @@ pipeline {
         sh 'git clean -fdx'
       }
     }
-    stage('build') {
+    stage('build develop') {
+      when {
+        not {
+          anyOf {
+            branch 'master';
+            tag "v*"
+          }
+        }
+      }
       steps {
-              sh 'mvn -f goobi-viewer-connector/pom.xml -DskipTests=false -DskipDependencyCheck=false clean verify -U'
-              recordIssues enabledForFailure: true, aggregatingResults: true, tools: [java(), javaDoc()]
-              dependencyCheckPublisher pattern: '**/target/dependency-check-report.xml'
+        sh 'mvn -f goobi-viewer-connector/pom.xml -DskipTests=false -DskipDependencyCheck=true -DskipCheckstyle=false clean verify -U'
       }
     }
+    stage('build release') {
+      when {
+        anyOf {
+          branch 'master';
+          tag "v*"
+        }
+      }
+      steps {
+        sh 'mvn -f goobi-viewer-connector/pom.xml -DskipTests=false -DskipDependencyCheck=false -DskipCheckstyle=false -DfailOnSnapshot=true clean verify -U'
+      }
+    }
+
+
     stage('sonarcloud') {
       when {
         anyOf {
@@ -62,6 +81,11 @@ pipeline {
         sourcePattern    : 'goobi-viewer-connector/src/main/java',
         exclusionPattern : '**/*Test.class'
       ])
+      recordIssues (
+        enabledForFailure: true, aggregatingResults: false,
+        tools: [checkStyle(pattern: '**/target/checkstyle-result.xml', reportEncoding: 'UTF-8')]
+      )
+      //dependencyCheckPublisher pattern: '**/target/dependency-check-report.xml'
     }
     success {
       archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true

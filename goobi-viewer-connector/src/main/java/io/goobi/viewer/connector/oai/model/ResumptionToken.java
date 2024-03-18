@@ -54,7 +54,7 @@ public class ResumptionToken {
     private RequestHandler handler;
 
     /**
-     * creates a unique resumption token when number of hits is greater than list size
+     * Creates a unique resumption token when number of hits is greater than list size.
      *
      * @param tokenName a {@link java.lang.String} object.
      * @param hits a long.

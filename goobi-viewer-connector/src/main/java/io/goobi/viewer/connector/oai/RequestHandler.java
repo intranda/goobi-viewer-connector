@@ -54,7 +54,7 @@ public class RequestHandler {
     private String set = null;
 
     /**
-     * handles the request in servlet
+     * Handles the request in servlet.
      *
      * @param request a {@link javax.servlet.http.HttpServletRequest} object.
      */
@@ -190,12 +190,13 @@ public class RequestHandler {
      * getFromTimestamp.
      * </p>
      *
-     * @param from a {@link java.lang.String} object.
+     * @param fromTimestamp a {@link java.lang.String} object.
+     * @return a long.
      * @should convert date to timestamp correctly
      * @should set time to 000000 if none given
-     * @return a long.
      */
-    public static long getFromTimestamp(String from) {
+    public static long getFromTimestamp(final String fromTimestamp) {
+        String from = fromTimestamp;
         if (from == null) {
             from = "19700101000000";
         } else {
@@ -205,7 +206,7 @@ public class RequestHandler {
             }
         }
         try {
-            return LocalDateTime.parse(from, Utils.formatterISO8601BasicDateTime)
+            return LocalDateTime.parse(from, Utils.FORMATTER_ISO8601_BASIC_DATETIME)
                     .toInstant(ZoneOffset.UTC)
                     .toEpochMilli();
         } catch (IllegalArgumentException e) {
@@ -220,13 +221,13 @@ public class RequestHandler {
      * getUntilTimestamp.
      * </p>
      *
-     * @param until a {@link java.lang.String} object.
+     * @param untilTimestamp a {@link java.lang.String} object.
      * @return a long.
      * @should convert date to timestamp correctly
      * @should set time to 235959 if none given
      */
-    public static long getUntilTimestamp(String until) {
-        // logger.trace("getUntilTimestamp: {}", until);
+    public static long getUntilTimestamp(final String untilTimestamp) {
+        String until = untilTimestamp;
         if (until == null) {
             until = "99991231235959";
         } else {
@@ -236,7 +237,7 @@ public class RequestHandler {
             }
         }
         try {
-            return LocalDateTime.parse(until, Utils.formatterISO8601BasicDateTime)
+            return LocalDateTime.parse(until, Utils.FORMATTER_ISO8601_BASIC_DATETIME)
                     .plus(999, ChronoUnit.MILLIS)
                     .toInstant(ZoneOffset.UTC)
                     .toEpochMilli();

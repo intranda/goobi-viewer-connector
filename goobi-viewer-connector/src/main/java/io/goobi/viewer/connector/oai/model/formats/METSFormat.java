@@ -32,6 +32,8 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 
+import com.ctc.wstx.shaded.msv_core.verifier.ErrorInfo.ElementErrorInfo;
+
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
@@ -60,9 +62,6 @@ public class METSFormat extends Format {
     private List<String> setSpecFields =
             DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.METS.getMetadataPrefix());
 
-    /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListIdentifiers(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String, java.lang.String)
-     */
     /** {@inheritDoc} */
     @Override
     public Element createListIdentifiers(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField,
@@ -87,7 +86,8 @@ public class METSFormat extends Format {
         if (qr.getResults().isEmpty()) {
             return new ErrorCode().getNoRecordsMatch();
         }
-        totalVirtualHits = totalRawHits = qr.getResults().getNumFound();
+        totalRawHits = qr.getResults().getNumFound();
+        totalVirtualHits = totalRawHits;
         for (SolrDocument doc : qr.getResults()) {
             Element header = getHeader(doc, null, handler, null, setSpecFields, filterQuerySuffix);
             xmlListIdentifiers.addContent(header);
@@ -104,9 +104,6 @@ public class METSFormat extends Format {
         return xmlListIdentifiers;
     }
 
-    /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createListRecords(io.goobi.viewer.connector.oai.RequestHandler, int, int, int, java.lang.String, java.lang.String)
-     */
     /** {@inheritDoc} */
     @Override
     public Element createListRecords(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField,
@@ -125,9 +122,6 @@ public class METSFormat extends Format {
                 filterQuerySuffix);
     }
 
-    /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#createGetRecord(io.goobi.viewer.connector.oai.RequestHandler, java.lang.String)
-     */
     /** {@inheritDoc} */
     @Override
     public Element createGetRecord(RequestHandler handler, String filterQuerySuffix) {
@@ -160,20 +154,17 @@ public class METSFormat extends Format {
      * @param numRows
      * @param handler
      * @param recordType "GetRecord" or "ListRecords"
+     * @param setSpecFields
      * @param filterQuerySuffix Filter query suffix for the client's session
-     * @return
+     * @return {@link ElementErrorInfo}
      * @throws JDOMException
      * @throws SolrServerException
      */
-    private static Element generateMetsRecords(List<SolrDocument> records, long totalHits, int firstRow, int numRows, RequestHandler handler,
+    private static Element generateMetsRecords(List<SolrDocument> records, long totalHits, int firstRow, final int numRows, RequestHandler handler,
             String recordType, List<String> setSpecFields, String filterQuerySuffix) throws SolrServerException {
         logger.trace("generateMetsRecords");
-        
-        Element xmlListRecords = new Element(recordType, OAI_NS);
 
-        if (records.size() < numRows) {
-            numRows = records.size();
-        }
+        Element xmlListRecords = new Element(recordType, OAI_NS);
         for (SolrDocument doc : records) {
             String pi = (String) doc.getFieldValue(SolrConstants.PI_TOPSTRUCT);
             if (pi == null) {
@@ -208,8 +199,12 @@ public class METSFormat extends Format {
         }
 
         // Create resumption token
-        if (totalHits > firstRow + numRows) {
-            Element resumption = createResumptionTokenAndElement(totalHits, firstRow + numRows, OAI_NS, handler);
+        int useNumRows = numRows;
+        if (records.size() < useNumRows) {
+            useNumRows = records.size();
+        }
+        if (totalHits > firstRow + useNumRows) {
+            Element resumption = createResumptionTokenAndElement(totalHits, firstRow + useNumRows, OAI_NS, handler);
             xmlListRecords.addContent(resumption);
         }
 
@@ -223,7 +218,7 @@ public class METSFormat extends Format {
      * @param handler
      * @param setSpecFields
      * @param filterQuerySuffix
-     * @return
+     * @return {@link ElementErrorInfo}
      * @throws SolrServerException
      * @should generate element correctly
      * @should return null if xml empty

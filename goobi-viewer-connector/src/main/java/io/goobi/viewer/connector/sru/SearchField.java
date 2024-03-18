@@ -38,10 +38,20 @@ public enum SearchField {
     private String dcName;
     private String cqlName;
     private String solrName;
-    boolean seachable;
-    boolean scanable;
-    boolean sortable;
+    private boolean seachable;
+    private boolean scanable;
+    private boolean sortable;
 
+    /**
+     * 
+     * @param internalName
+     * @param dcName
+     * @param cqlName
+     * @param solrName
+     * @param seachable
+     * @param scanable
+     * @param sortable
+     */
     private SearchField(String internalName, String dcName, String cqlName, String solrName, boolean seachable, boolean scanable, boolean sortable) {
         this.internalName = internalName;
         this.dcName = dcName;
