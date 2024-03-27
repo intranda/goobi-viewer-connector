@@ -352,7 +352,7 @@ public abstract class Format {
         // Create resumption token
         if (totalRawHits > firstRawRow + numRows) {
             Element resumption = createResumptionTokenAndElement(totalVirtualHits, totalRawHits, firstVirtualRow + virtualHitCount,
-                    firstRawRow + numRows, OAI_NS, handler);
+                    firstRawRow + numRows, firstVirtualRow, handler);
             xmlListIdentifiers.addContent(resumption);
         }
 
@@ -459,13 +459,13 @@ public abstract class Format {
      * </p>
      *
      * @param hits a long.
-     * @param cursor a int.
-     * @param xmlns a {@link org.jdom2.Namespace} object.
+     * @param cursor Internal cursor (first value of the next batch)
+     * @param outputCursor Cursor value to output in the OAI dataset (first value of the current batch)
      * @param handler a {@link io.goobi.viewer.connector.oai.RequestHandler} object.
      * @return a {@link org.jdom2.Element} object.
      */
-    protected static Element createResumptionTokenAndElement(long hits, int cursor, Namespace xmlns, RequestHandler handler) {
-        return createResumptionTokenAndElement(hits, hits, cursor, cursor, xmlns, handler);
+    protected static Element createResumptionTokenAndElement(long hits, int cursor, int outputCursor, RequestHandler handler) {
+        return createResumptionTokenAndElement(hits, hits, cursor, cursor, outputCursor, handler);
     }
 
     /**
@@ -475,14 +475,14 @@ public abstract class Format {
      *
      * @param virtualHits a long.
      * @param rawHits a long.
-     * @param virtualCursor a int.
-     * @param rawCursor a int.
-     * @param xmlns a {@link org.jdom2.Namespace} object.
+     * @param virtualCursor Internal virtual count cursor (first value of the next batch)
+     * @param rawCursor Internal raw count cursor (first value of the next batch)
+     * @param outputCursor Cursor value to output in the OAI dataset (first value of the current batch)
      * @param handler a {@link io.goobi.viewer.connector.oai.RequestHandler} object.
      * @return a {@link org.jdom2.Element} object.
      * @should construct element correctly
      */
-    protected static Element createResumptionTokenAndElement(long virtualHits, long rawHits, int virtualCursor, int rawCursor, Namespace xmlns,
+    protected static Element createResumptionTokenAndElement(long virtualHits, long rawHits, int virtualCursor, int rawCursor, int outputCursor,
             RequestHandler handler) {
         long now = System.currentTimeMillis();
         long time = now + expiration;
@@ -491,10 +491,10 @@ public abstract class Format {
         try {
             saveToken(token);
 
-            Element eleResumptionToken = new Element("resumptionToken", xmlns);
+            Element eleResumptionToken = new Element("resumptionToken", OAI_NS);
             eleResumptionToken.setAttribute("expirationDate", Utils.convertDate(time));
             eleResumptionToken.setAttribute("completeListSize", String.valueOf(virtualHits));
-            eleResumptionToken.setAttribute("cursor", String.valueOf(virtualCursor));
+            eleResumptionToken.setAttribute("cursor", String.valueOf(outputCursor));
             eleResumptionToken.setText(token.getTokenName());
 
             return eleResumptionToken;

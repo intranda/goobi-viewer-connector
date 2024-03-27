@@ -194,7 +194,7 @@ public class OAIDCFormat extends Format {
         }
         if (totalRawHits > firstRawRow + useNumRows) {
             Element resumption = createResumptionTokenAndElement(totalVirtualHits, totalRawHits, firstVirtualRow + virtualHitCount,
-                    firstRawRow + useNumRows, OAI_NS, handler);
+                    firstRawRow + useNumRows, firstVirtualRow, handler);
             xmlListRecords.addContent(resumption);
         }
 
