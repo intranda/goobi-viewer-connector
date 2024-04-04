@@ -141,7 +141,7 @@ class ConfigurationTest extends AbstractTest {
      */
     @Test
     void getMods2MarcXsl_shouldReturnCorrectValue() throws Exception {
-        Assertions.assertEquals("src/test/resources/MODS2MARC21slim.xsl", DataManager.getInstance().getConfiguration().getMods2MarcXsl());
+        Assertions.assertEquals("src/main/resources/MODS2MARC21slim.xsl", DataManager.getInstance().getConfiguration().getMods2MarcXsl());
     }
 
     /**
