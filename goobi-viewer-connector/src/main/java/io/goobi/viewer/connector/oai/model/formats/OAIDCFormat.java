@@ -46,7 +46,6 @@ import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.enums.Verb;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
-import io.goobi.viewer.connector.oai.model.language.Language;
 import io.goobi.viewer.connector.oai.model.metadata.MetadataParameter;
 import io.goobi.viewer.connector.oai.model.metadata.MetadataParameter.MetadataParameterType;
 import io.goobi.viewer.connector.utils.SolrSearchTools;
@@ -55,6 +54,7 @@ import io.goobi.viewer.controller.FileTools;
 import io.goobi.viewer.controller.NetTools;
 import io.goobi.viewer.exceptions.HTTPException;
 import io.goobi.viewer.messages.ViewerResourceBundle;
+import io.goobi.viewer.model.translations.language.Language;
 import io.goobi.viewer.solr.SolrConstants;
 
 /**
