@@ -154,7 +154,7 @@ public class OAIDCFormat extends Format {
      * @throws SolrServerException
      * @throws IOException
      */
-    private Element generateDC(List<SolrDocument> records, long totalVirtualHits, long totalRawHits, int firstVirtualRow, int firstRawRow,
+    Element generateDC(List<SolrDocument> records, long totalVirtualHits, long totalRawHits, int firstVirtualRow, int firstRawRow,
             final int numRows, RequestHandler handler, String recordType, String versionDiscriminatorField, String requestedVersion,
             String filterQuerySuffix) throws SolrServerException, IOException {
         Namespace nsOaiDoc = Namespace.getNamespace(Metadata.OAI_DC.getMetadataNamespacePrefix(), Metadata.OAI_DC.getMetadataNamespaceUri());

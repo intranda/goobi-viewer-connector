@@ -72,8 +72,40 @@
         <enabled>true</enabled>
         <hitsPerToken>11</hitsPerToken>
         <fields>
-            <field name="title" valueSource="MD_TITLE" translate="true" multivalued="true" useTopstructValueIfNoneFound="true" defaultValue="" />
-            <field name="format" defaultValue="image/jpeg" prefix="pre_SPACE_" suffix="_SPACE_suf" />
+            <template name="_DEFAULT">
+                <metadata label="title" value="{0}">
+                    <param type="field" key="MD_TITLE" />
+                </metadata>
+                <metadata label="creator" value="{0}">
+                    <param type="field" key="MD_CREATOR" />
+                </metadata>
+                <metadata label="subject" value="{0}">
+                    <param type="translatedfield" key="DC" />
+                </metadata>
+                <metadata label="publisher" value="{0}">
+                    <param type="field" key="MD_PUBLISHER" dontUseTopstructValue="false" />
+                </metadata>
+                <metadata label="date" value="{0}">
+                    <param type="field" key="MD_YEARPUBLISH" dontUseTopstructValue="false" />
+                </metadata>
+                <metadata label="type" value="{0}">
+                    <param type="translatedfield" key="DOCSTRCT" />
+                </metadata>
+                <metadata label="type" value="text" />
+                <metadata label="format" value="image/jpeg" />
+                <metadata label="format" value="application/pdf" />
+                <metadata label="identifier" value="#AUTO#" />
+                <metadata label="source" value="#AUTO#" />
+                <metadata label="rights" value="#AUTO#" />
+                <!--
+                <metadata label="url" value="http://localhost:8080/viewer/image/{0}/{1}/">
+                    <param type="field" key="PI_TOPSTRUCT" />
+                    <param type="field" key="THUMBPAGENO" />
+                </metadata>
+                -->
+                <metadata label="fulltext" value="#AUTO#" />
+                <metadata label="description" value="#TOC#" />
+            </template>
         </fields>
         <setSpec>
             <field>DC</field>
