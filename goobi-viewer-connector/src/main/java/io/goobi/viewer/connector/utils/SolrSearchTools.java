@@ -145,7 +145,7 @@ public final class SolrSearchTools {
      * @throws IndexUnreachableException
      */
     public static String getAllSuffixes(HttpServletRequest request) {
-        return SearchHelper.getAllSuffixes(request, true, true, true, IPrivilegeHolder.PRIV_DOWNLOAD_METADATA);
+        return SearchHelper.getAllSuffixes(request, true, true, IPrivilegeHolder.PRIV_DOWNLOAD_METADATA);
     }
 
     /**
