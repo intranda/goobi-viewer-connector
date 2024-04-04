@@ -463,6 +463,7 @@ public abstract class Format {
      * @param outputCursor Cursor value to output in the OAI dataset (first value of the current batch)
      * @param handler a {@link io.goobi.viewer.connector.oai.RequestHandler} object.
      * @return a {@link org.jdom2.Element} object.
+     * @should construct element correctly
      */
     protected static Element createResumptionTokenAndElement(long hits, int cursor, int outputCursor, RequestHandler handler) {
         return createResumptionTokenAndElement(hits, hits, cursor, cursor, outputCursor, handler);
@@ -480,7 +481,6 @@ public abstract class Format {
      * @param outputCursor Cursor value to output in the OAI dataset (first value of the current batch)
      * @param handler a {@link io.goobi.viewer.connector.oai.RequestHandler} object.
      * @return a {@link org.jdom2.Element} object.
-     * @should construct element correctly
      */
     protected static Element createResumptionTokenAndElement(long virtualHits, long rawHits, int virtualCursor, int rawCursor, int outputCursor,
             RequestHandler handler) {
