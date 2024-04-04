@@ -76,8 +76,9 @@ public class MARCXMLFormat extends METSFormat {
      * @param identifier
      * @param recordType
      * @return {@link Element}
+     * @should generate element correctly
      */
-    private static Element generateMarc(Element mets, String identifier, String recordType) {
+    static Element generateMarc(Element mets, String identifier, String recordType) {
         logger.trace("generateMarc");
         Element xmlListRecords = new Element(recordType, NAMESPACE_XML);
         Element token = mets.getChild("resumptionToken", NAMESPACE_XML);

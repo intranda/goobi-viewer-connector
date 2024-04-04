@@ -132,7 +132,7 @@
         <enabled>true</enabled>
         <hitsPerToken>15</hitsPerToken>
         <!-- Pfad zum marc to mods xslt -->
-	<marcStylesheet>src/test/resources/MODS2MARC21slim.xsl</marcStylesheet>
+	<marcStylesheet>src/main/resources/MODS2MARC21slim.xsl</marcStylesheet>
     </marcxml>
 	
 	<epicur>

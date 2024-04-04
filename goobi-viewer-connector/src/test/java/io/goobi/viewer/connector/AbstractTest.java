@@ -36,6 +36,5 @@ public abstract class AbstractTest {
         // Initialize the instance with a custom config file
         DataManager.getInstance().injectConfiguration(new Configuration(TEST_CONFIG_PATH));
         io.goobi.viewer.controller.DataManager.getInstance().injectConfiguration(new io.goobi.viewer.controller.Configuration(TEST_CONFIG_PATH_CORE));
-        
     }
 }
