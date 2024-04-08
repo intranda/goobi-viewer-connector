@@ -414,48 +414,6 @@ public final class Configuration {
 
     /**
      * <p>
-     * getFieldForMetadataFormat.
-     * </p>
-     *
-     * @param metadataFormat a {@link java.lang.String} object.
-     * @should return all values
-     * @return a {@link java.util.List} object.
-     */
-    public List<FieldConfiguration> getFieldForMetadataFormat(String metadataFormat) {
-        if (metadataFormat == null) {
-            throw new IllegalArgumentException("metadataFormat may not be null");
-        }
-
-        List<HierarchicalConfiguration<ImmutableNode>> elements = getLocalConfigurationsAt(metadataFormat + ".fields.field");
-        if (elements != null) {
-            List<FieldConfiguration> ret = new ArrayList<>(elements.size());
-            for (Iterator<HierarchicalConfiguration<ImmutableNode>> it = elements.iterator(); it.hasNext();) {
-                HierarchicalConfiguration<ImmutableNode> sub = it.next();
-                String name = sub.getString(XML_PATH_ATTRIBUTE_NAME, null);
-                String valueSource = sub.getString("[@valueSource]", null);
-                boolean translate = sub.getBoolean("[@translate]", false);
-                boolean multivalued = sub.getBoolean("[@multivalued]", false);
-                boolean useTopstructValueIfNoneFound = sub.getBoolean("[@useTopstructValueIfNoneFound]", false);
-                String defaultValue = sub.getString("[@defaultValue]", null);
-                String prefix = sub.getString("[@prefix]", null);
-                if (prefix != null) {
-                    prefix = prefix.replace(StringConstants.PLACEHOLDER_SPACE, " ");
-                }
-                String suffix = sub.getString("[@suffix]", null);
-                if (suffix != null) {
-                    suffix = suffix.replace(StringConstants.PLACEHOLDER_SPACE, " ");
-                }
-                ret.add(new FieldConfiguration(name, valueSource, translate, multivalued, useTopstructValueIfNoneFound, defaultValue, prefix,
-                        suffix));
-            }
-            return ret;
-        }
-
-        return null;
-    }
-
-    /**
-     * <p>
      * getSetSpecFieldsForMetadataFormat.
      * </p>
      *
@@ -795,10 +753,10 @@ public final class Configuration {
      * </p>
      *
      * @param metadataFormat a {@link java.lang.String} object.
-     * @param template a {@link java.lang.String} object.
+     * @param template a {@link java.lang.String} object
+     * @return a {@link java.util.List} object.
      * @should return correct template configuration
      * @should return default template configuration if template not found
-     * @return a {@link java.util.List} object.
      */
     @SuppressWarnings({ "rawtypes" })
     public List<Metadata> getMetadataConfiguration(String metadataFormat, String template) {

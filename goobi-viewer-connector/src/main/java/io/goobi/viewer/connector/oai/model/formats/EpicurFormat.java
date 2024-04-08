@@ -160,7 +160,7 @@ public class EpicurFormat extends Format {
 
         // Create resumption token
         if (records.getNumFound() > firstRawRow + useNumRows) {
-            Element resumption = createResumptionTokenAndElement(records.getNumFound(), firstRawRow + useNumRows, OAI_NS, handler);
+            Element resumption = createResumptionTokenAndElement(records.getNumFound(), firstRawRow + useNumRows, firstRawRow, handler);
             xmlListRecords.addContent(resumption);
         }
 

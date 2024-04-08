@@ -157,7 +157,7 @@ public class LIDOFormat extends Format {
             useNumRows = records.size();
         }
         if (totalHits > firstRow + useNumRows) {
-            Element resumption = createResumptionTokenAndElement(totalHits, firstRow + useNumRows, OAI_NS, handler);
+            Element resumption = createResumptionTokenAndElement(totalHits, firstRow + useNumRows, firstRow, handler);
             xmlListRecords.addContent(resumption);
         }
 

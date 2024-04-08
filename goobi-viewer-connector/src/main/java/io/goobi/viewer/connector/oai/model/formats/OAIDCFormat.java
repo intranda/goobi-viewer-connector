@@ -46,7 +46,6 @@ import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.enums.Metadata;
 import io.goobi.viewer.connector.oai.enums.Verb;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
-import io.goobi.viewer.connector.oai.model.language.Language;
 import io.goobi.viewer.connector.oai.model.metadata.MetadataParameter;
 import io.goobi.viewer.connector.oai.model.metadata.MetadataParameter.MetadataParameterType;
 import io.goobi.viewer.connector.utils.SolrSearchTools;
@@ -55,6 +54,7 @@ import io.goobi.viewer.controller.FileTools;
 import io.goobi.viewer.controller.NetTools;
 import io.goobi.viewer.exceptions.HTTPException;
 import io.goobi.viewer.messages.ViewerResourceBundle;
+import io.goobi.viewer.model.translations.language.Language;
 import io.goobi.viewer.solr.SolrConstants;
 
 /**
@@ -154,7 +154,7 @@ public class OAIDCFormat extends Format {
      * @throws SolrServerException
      * @throws IOException
      */
-    private Element generateDC(List<SolrDocument> records, long totalVirtualHits, long totalRawHits, int firstVirtualRow, int firstRawRow,
+    Element generateDC(List<SolrDocument> records, long totalVirtualHits, long totalRawHits, int firstVirtualRow, int firstRawRow,
             final int numRows, RequestHandler handler, String recordType, String versionDiscriminatorField, String requestedVersion,
             String filterQuerySuffix) throws SolrServerException, IOException {
         Namespace nsOaiDoc = Namespace.getNamespace(Metadata.OAI_DC.getMetadataNamespacePrefix(), Metadata.OAI_DC.getMetadataNamespaceUri());
@@ -194,7 +194,7 @@ public class OAIDCFormat extends Format {
         }
         if (totalRawHits > firstRawRow + useNumRows) {
             Element resumption = createResumptionTokenAndElement(totalVirtualHits, totalRawHits, firstVirtualRow + virtualHitCount,
-                    firstRawRow + useNumRows, OAI_NS, handler);
+                    firstRawRow + useNumRows, firstVirtualRow, handler);
             xmlListRecords.addContent(resumption);
         }
 

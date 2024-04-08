@@ -23,6 +23,7 @@ class OAIDCFormatTest extends AbstractSolrEnabledTest {
     void generateSingleDCRecord_shouldGenerateElementCorrectly() throws Exception {
         SolrDocument doc = new SolrDocument();
         doc.setField(SolrConstants.PI, "PPN123456789");
+        doc.setField(SolrConstants.ACCESSCONDITION, "restricted");
 
         RequestHandler handler = new RequestHandler();
 

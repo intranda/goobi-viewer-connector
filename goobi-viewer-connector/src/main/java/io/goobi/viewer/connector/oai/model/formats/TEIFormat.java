@@ -36,12 +36,12 @@ import org.jdom2.Namespace;
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
 import io.goobi.viewer.connector.oai.model.ErrorCode;
-import io.goobi.viewer.connector.oai.model.language.Language;
 import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
 import io.goobi.viewer.controller.NetTools;
 import io.goobi.viewer.controller.XmlTools;
 import io.goobi.viewer.exceptions.HTTPException;
+import io.goobi.viewer.model.translations.language.Language;
 import io.goobi.viewer.solr.SolrConstants;
 
 /**
@@ -261,7 +261,7 @@ public class TEIFormat extends Format {
         }
         if (totalRawHits > firstRawRow + useNumRows) {
             Element resumption = createResumptionTokenAndElement(totalVirtualHits, totalRawHits, firstVirtualRow + virtualHitCount,
-                    firstRawRow + useNumRows, OAI_NS, handler);
+                    firstRawRow + useNumRows, firstVirtualRow, handler);
             xmlListRecords.addContent(resumption);
         }
 

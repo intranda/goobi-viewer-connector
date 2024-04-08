@@ -141,7 +141,7 @@ class ConfigurationTest extends AbstractTest {
      */
     @Test
     void getMods2MarcXsl_shouldReturnCorrectValue() throws Exception {
-        Assertions.assertEquals("src/test/resources/MODS2MARC21slim.xsl", DataManager.getInstance().getConfiguration().getMods2MarcXsl());
+        Assertions.assertEquals("src/main/resources/MODS2MARC21slim.xsl", DataManager.getInstance().getConfiguration().getMods2MarcXsl());
     }
 
     /**
@@ -304,27 +304,14 @@ class ConfigurationTest extends AbstractTest {
     }
 
     /**
-     * @see Configuration#getFieldForMetadataFormat(String)
-     * @verifies return all values
+     * @see Configuration#getMetadataConfiguration(String,String)
+     * @verifies return default template configuration if template not found
      */
     @Test
-    void getFieldForMetadataFormat_shouldReturnAllValues() throws Exception {
-        List<FieldConfiguration> values = DataManager.getInstance().getConfiguration().getFieldForMetadataFormat(Metadata.OAI_DC.getMetadataPrefix());
-        Assertions.assertNotNull(values);
-        Assertions.assertEquals(2, values.size());
-
-        Assertions.assertEquals("title", values.get(0).getFieldName());
-        Assertions.assertEquals("MD_TITLE", values.get(0).getValueSource());
-        Assertions.assertTrue(values.get(0).isTranslate());
-        Assertions.assertTrue(values.get(0).isMultivalued());
-        Assertions.assertTrue(values.get(0).isUseTopstructValueIfNoneFound());
-        Assertions.assertEquals("", values.get(0).getDefaultValue());
-
-        Assertions.assertEquals("format", values.get(1).getFieldName());
-        Assertions.assertNull(values.get(1).getValueSource());
-        Assertions.assertEquals("image/jpeg", values.get(1).getDefaultValue());
-        Assertions.assertEquals("pre ", values.get(1).getPrefix());
-        Assertions.assertEquals(" suf", values.get(1).getSuffix());
+    void getMetadataConfiguration_shouldReturnDefaultTemplateConfigurationOfTemplateNotFound() throws Exception {
+        List<io.goobi.viewer.connector.oai.model.metadata.Metadata> metadataList =
+                DataManager.getInstance().getConfiguration().getMetadataConfiguration(Metadata.OAI_DC.getMetadataPrefix(), "monograph");
+        Assertions.assertEquals(14, metadataList.size());
     }
 
     /**

@@ -97,7 +97,7 @@ public class METSFormat extends Format {
         // Create resumption token
         if (totalRawHits > firstRawRow + numRows) {
             Element resumption = createResumptionTokenAndElement(totalVirtualHits, totalRawHits, firstVirtualRow + virtualHitCount,
-                    firstRawRow + numRows, OAI_NS, handler);
+                    firstRawRow + numRows, firstVirtualRow, handler);
             xmlListIdentifiers.addContent(resumption);
         }
 
@@ -204,7 +204,7 @@ public class METSFormat extends Format {
             useNumRows = records.size();
         }
         if (totalHits > firstRow + useNumRows) {
-            Element resumption = createResumptionTokenAndElement(totalHits, firstRow + useNumRows, OAI_NS, handler);
+            Element resumption = createResumptionTokenAndElement(totalHits, firstRow + useNumRows, firstRow, handler);
             xmlListRecords.addContent(resumption);
         }
 
@@ -246,10 +246,10 @@ public class METSFormat extends Format {
             }
             newMetsRoot.addContent(metsRoot.cloneContent());
 
-            Element eleRecord = new Element("record", OAI_NS);
+            Element eleRecord = new Element(XmlConstants.ELE_NAME_RECORD, OAI_NS);
             Element header = getHeader(doc, null, handler, null, setSpecFields, filterQuerySuffix);
             eleRecord.addContent(header);
-            Element metadata = new Element("metadata", OAI_NS);
+            Element metadata = new Element(XmlConstants.ELE_NAME_METADATA, OAI_NS);
             metadata.addContent(newMetsRoot);
             eleRecord.addContent(metadata);
 

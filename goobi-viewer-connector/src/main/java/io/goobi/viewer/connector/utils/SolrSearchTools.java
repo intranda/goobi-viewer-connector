@@ -182,7 +182,7 @@ public final class SolrSearchTools {
      *
      * @param doc a {@link org.apache.solr.common.SolrDocument} object.
      * @param untilTimestamp a long.
-     * @return Latest DATEUPDATED value is less than or equals untilTimestamp on doc; 0 if none found.
+     * @return Latest DATEUPDATED value that is less than or equals untilTimestamp on doc; 0 if none found.
      * @should return correct value
      * @should return 0 if no valid value is found
      * @should ignore untilTimestamp if zero

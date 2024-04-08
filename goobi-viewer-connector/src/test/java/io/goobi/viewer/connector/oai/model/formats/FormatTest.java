@@ -97,7 +97,7 @@ class FormatTest extends AbstractSolrEnabledTest {
     }
 
     /**
-     * @see Format#createResumptionTokenAndElement(long,long,int,int,Namespace,RequestHandler)
+     * @see Format#createResumptionTokenAndElement(long,int,Namespace,RequestHandler)
      * @verifies construct element correctly
      */
     @Test
@@ -107,14 +107,12 @@ class FormatTest extends AbstractSolrEnabledTest {
             if (!tokenFolder.exists()) {
                 tokenFolder.mkdirs();
             }
-
-            Element ele = Format.createResumptionTokenAndElement(100, 100, 10, 10, null, new RequestHandler());
+            Element ele = Format.createResumptionTokenAndElement(100, 10, 0, new RequestHandler());
             Assertions.assertNotNull(ele);
             Assertions.assertEquals("resumptionToken", ele.getName());
             Assertions.assertNotNull(ele.getAttributeValue("expirationDate"));
             Assertions.assertEquals("100", ele.getAttributeValue("completeListSize"));
-            Assertions.assertEquals("10", ele.getAttributeValue("cursor"));
-            
+            Assertions.assertEquals("0", ele.getAttributeValue("cursor"));
         } finally {
             if (tokenFolder.isDirectory()) {
                 FileUtils.deleteDirectory(tokenFolder);

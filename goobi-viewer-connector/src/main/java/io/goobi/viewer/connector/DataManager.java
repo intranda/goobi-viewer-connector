@@ -15,9 +15,9 @@
  */
 package io.goobi.viewer.connector;
 
-import io.goobi.viewer.connector.oai.model.language.LanguageHelper;
 import io.goobi.viewer.connector.utils.Configuration;
 import io.goobi.viewer.connector.utils.SolrSearchIndex;
+import io.goobi.viewer.model.translations.language.LanguageHelper;
 
 /**
  * <p>
@@ -35,7 +35,7 @@ public final class DataManager {
 
     private SolrSearchIndex searchIndex;
 
-    private LanguageHelper languageHelper;
+    private LanguageHelper languageHelper = io.goobi.viewer.controller.DataManager.getInstance().getLanguageHelper();
 
     /**
      * <p>
