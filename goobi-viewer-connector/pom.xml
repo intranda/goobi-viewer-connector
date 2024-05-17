@@ -382,12 +382,13 @@
                     <!--failBuildOnCVSS>5.0</failBuildOnCVSS-->
                     <skipProvidedScope>true</skipProvidedScope>
                     <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
+                    <knownExploitedEnabled>false</knownExploitedEnabled>
+                    <format>ALL</format>
                     <skipTestScope>true</skipTestScope>
                     <skip>${skipDependencyCheck}</skip>
                     <suppressionFiles>
                         <suppressionFile>file://${basedir}/dependency-suppression.xml</suppressionFile>
                     </suppressionFiles>
-                    <format>ALL</format>
                 </configuration>
                 <executions>
                     <execution>
