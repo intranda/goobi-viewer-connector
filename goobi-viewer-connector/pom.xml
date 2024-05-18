@@ -67,7 +67,6 @@
 		<commons-lang3.version>3.14.0</commons-lang3.version>
 		<httpclient.version>4.5.14</httpclient.version>
 		<httpcore.version>4.4.16</httpcore.version>
-		<jaxen.version>2.0.0</jaxen.version>
 		<jdom2.version>2.0.6.1</jdom2.version>
 		<json.version>20240303</json.version>
 		<junit.version>5.10.2</junit.version>
@@ -115,11 +114,6 @@
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpcore</artifactId>
 			<version>${httpcore.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>jaxen</groupId>
-			<artifactId>jaxen</artifactId>
-			<version>${jaxen.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jdom</groupId>
