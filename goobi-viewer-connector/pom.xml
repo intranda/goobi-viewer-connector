@@ -26,40 +26,40 @@
 		</repository>
 	</repositories>
 
-    <distributionManagement>
-        <repository>
-            <id>intranda-releases</id>
-            <url>https://nexus.intranda.com/repository/maven-releases</url>
-        </repository>
-        <snapshotRepository>
-            <id>intranda-snapshots</id>
-            <url>https://nexus.intranda.com/repository/maven-snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
+	<distributionManagement>
+		<repository>
+			<id>intranda-releases</id>
+			<url>https://nexus.intranda.com/repository/maven-releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>intranda-snapshots</id>
+			<url>https://nexus.intranda.com/repository/maven-snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <skipTests>true</skipTests>
-        <skipDependencyCheck>true</skipDependencyCheck>
-        <failOnSnapshot>false</failOnSnapshot>
+		<skipTests>true</skipTests>
+		<skipDependencyCheck>true</skipDependencyCheck>
+		<failOnSnapshot>false</failOnSnapshot>
 		<maven.compiler.release>17</maven.compiler.release>
 
-        <!-- Sonar -->
-        <sonar.projectKey>intranda_goobi-viewer-connector</sonar.projectKey>
-        <sonar.organization>intranda</sonar.organization>
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <sonar.java.source>17</sonar.java.source>
-        <sonar.java.target>17</sonar.java.target>
+		<!-- Sonar -->
+		<sonar.projectKey>intranda_goobi-viewer-connector</sonar.projectKey>
+		<sonar.organization>intranda</sonar.organization>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+		<sonar.java.source>17</sonar.java.source>
+		<sonar.java.target>17</sonar.java.target>
 
-        <!-- Checkstyle -->
-        <checkstyle.max.violations>4</checkstyle.max.violations>
-        <skipCheckstyle>true</skipCheckstyle>
+		<!-- Checkstyle -->
+		<checkstyle.max.violations>4</checkstyle.max.violations>
+		<skipCheckstyle>true</skipCheckstyle>
 
 		<!-- Manifest information -->
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 		<buildDate>${maven.build.timestamp}</buildDate>
 
-        <viewer-core.version>24.05-SNAPSHOT</viewer-core.version>
+		<viewer-core.version>24.05-SNAPSHOT</viewer-core.version>
 
 		<commons-configuration2.version>2.10.1</commons-configuration2.version>
 		<commons-io.version>2.16.1</commons-io.version>
@@ -79,17 +79,17 @@
 
 	<dependencies>
 
-        <dependency>
-            <groupId>io.goobi.viewer</groupId>
-            <artifactId>viewer-core</artifactId>
-            <version>${viewer-core.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>io.goobi.viewer</groupId>
+			<artifactId>viewer-core</artifactId>
+			<version>${viewer-core.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-configuration2</artifactId>
-            <version>${commons-configuration2.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-configuration2</artifactId>
+			<version>${commons-configuration2.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
@@ -120,23 +120,23 @@
 			<artifactId>jdom2</artifactId>
 			<version>${jdom2.version}</version>
 		</dependency>
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>${json.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>${json.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter</artifactId>
 			<version>${junit.version}</version>
 			<scope>test</scope>
-        </dependency>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
@@ -161,243 +161,243 @@
 	</dependencies>
 
 
-    <build>
-        <plugins>
-            <!-- used for mvn versions:display-plugin-updates -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.4.1</version>
-                <executions>
-                    <execution>
-                        <id>enforce-maven</id>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <requireMavenVersion>
-                                    <version>3.8.8</version>
-                                </requireMavenVersion>
-                                <requireReleaseDeps>
-                                    <message>No Snapshots Allowed!</message>
-                                </requireReleaseDeps>
-                            </rules>
-                            <fail>${failOnSnapshot}</fail>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <!-- used for mvn verify -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.6.1</version>
-                <executions>
-                    <execution>
-                        <id>analyze</id>
-                        <goals>
-                            <goal>analyze-only</goal>
-                        </goals>
-                        <configuration>
-                            <failOnWarning>false</failOnWarning>
-                            <ignoredUnusedDeclaredDependencies>
-                                <!-- JXPath is used at XPathExpressionEngine from org.apache.commons.configuration2, i.e. LanguageHelper -->
-                                <ignoredUnusedDeclaredDependency>commons-jxpath:commons-jxpath</ignoredUnusedDeclaredDependency>
+	<build>
+		<plugins>
+			<!-- used for mvn versions:display-plugin-updates -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>3.4.1</version>
+				<executions>
+					<execution>
+						<id>enforce-maven</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireMavenVersion>
+									<version>3.8.8</version>
+								</requireMavenVersion>
+								<requireReleaseDeps>
+									<message>No Snapshots Allowed!</message>
+								</requireReleaseDeps>
+							</rules>
+							<fail>${failOnSnapshot}</fail>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- used for mvn verify -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.6.1</version>
+				<executions>
+					<execution>
+						<id>analyze</id>
+						<goals>
+							<goal>analyze-only</goal>
+						</goals>
+						<configuration>
+							<failOnWarning>false</failOnWarning>
+							<ignoredUnusedDeclaredDependencies>
+								<!-- JXPath is used at XPathExpressionEngine from org.apache.commons.configuration2, i.e. LanguageHelper -->
+								<ignoredUnusedDeclaredDependency>commons-jxpath:commons-jxpath</ignoredUnusedDeclaredDependency>
 
-                                <!-- junit-jupiter is used to run the tests, otherwise it will fail in maven -->
-                                <ignoredUnusedDeclaredDependency>org.junit.jupiter:junit-jupiter</ignoredUnusedDeclaredDependency>
-                            </ignoredUnusedDeclaredDependencies>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>
-                <configuration>
-                    <compilerArgument>-Xlint:deprecation</compilerArgument>
-                    <compilerArgument>-Xlint:unchecked</compilerArgument>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.5</version>
-                <configuration>
-                    <skipTests>${skipTests}</skipTests>
-                    <excludes>
-                        <exclude>**/Abstract*.java</exclude>
-                    </excludes>
-                    <systemPropertyVariables>
-                        <java.util.logging.config.file>src/test/resources/log4j2.test.xml</java.util.logging.config.file>
-                    </systemPropertyVariables>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.4.0</version>
-                <configuration>
-                    <archive>
-                        <addMavenDescriptor>false</addMavenDescriptor>
-                        <manifestEntries>
-                            <ApplicationName>Goobi viewer Connector</ApplicationName>
-                            <version>${project.version}</version>
-                            <Implementation-Version>${buildNumber}</Implementation-Version>
-                            <Implementation-Build-Date>${buildDate}</Implementation-Build-Date>
-                        </manifestEntries>
-                    </archive>
-                    <excludes>
-                        <exclude>**/log4j2.xml</exclude>
-                        <exclude>**/*.properties</exclude>
-                    </excludes>
+								<!-- junit-jupiter is used to run the tests, otherwise it will fail in maven -->
+								<ignoredUnusedDeclaredDependency>org.junit.jupiter:junit-jupiter</ignoredUnusedDeclaredDependency>
+							</ignoredUnusedDeclaredDependencies>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.13.0</version>
+				<configuration>
+					<compilerArgument>-Xlint:deprecation</compilerArgument>
+					<compilerArgument>-Xlint:unchecked</compilerArgument>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.2.5</version>
+				<configuration>
+					<skipTests>${skipTests}</skipTests>
+					<excludes>
+						<exclude>**/Abstract*.java</exclude>
+					</excludes>
+					<systemPropertyVariables>
+						<java.util.logging.config.file>src/test/resources/log4j2.test.xml</java.util.logging.config.file>
+					</systemPropertyVariables>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.4.0</version>
+				<configuration>
+					<archive>
+						<addMavenDescriptor>false</addMavenDescriptor>
+						<manifestEntries>
+							<ApplicationName>Goobi viewer Connector</ApplicationName>
+							<version>${project.version}</version>
+							<Implementation-Version>${buildNumber}</Implementation-Version>
+							<Implementation-Build-Date>${buildDate}</Implementation-Build-Date>
+						</manifestEntries>
+					</archive>
+					<excludes>
+						<exclude>**/log4j2.xml</exclude>
+						<exclude>**/*.properties</exclude>
+					</excludes>
 
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <!-- get git version number -->
-            <plugin>
-                <groupId>pl.project13.maven</groupId>
-                <artifactId>git-commit-id-plugin</artifactId>
-                <version>4.9.10</version>
-                <configuration>
-                    <commitIdGenerationMode>flat</commitIdGenerationMode>
-                    <gitDescribe>
-                        <skip>true</skip>
-                    </gitDescribe>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>revision</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>buildnumber-maven-plugin</artifactId>
-                <version>3.2.0</version>
-                <configuration>
-                    <shortRevisionLength>7</shortRevisionLength>
-                    <doCheck>false</doCheck>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>create</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.6.3</version>
-                <configuration>
-                    <doclint>none</doclint>
-                    <fixTags>link,throws,return,param</fixTags>
-                    <tags>
-                        <tag>
-                            <name>should</name>
-                            <placement>X</placement>
-                        </tag>
-                    </tags>
-                </configuration>
-            </plugin>
-            <!-- used for test coverage report in Jenkins -->
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.12</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>report</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <!-- used for mvn versions:display-dependency-updates -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>versions-maven-plugin</artifactId>
-                <version>2.16.2</version>
-                <configuration>
-                    <rulesUri>file://${basedir}/version-number-rules.xml</rulesUri>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.owasp</groupId>
-                <artifactId>dependency-check-maven</artifactId>
-                <version>9.2.0</version>
-                <configuration>
-                    <!--failBuildOnCVSS>5.0</failBuildOnCVSS-->
-                    <skipProvidedScope>true</skipProvidedScope>
-                    <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
-                    <knownExploitedEnabled>false</knownExploitedEnabled>
-                    <format>ALL</format>
-                    <skipTestScope>true</skipTestScope>
-                    <skip>${skipDependencyCheck}</skip>
-                    <suppressionFiles>
-                        <suppressionFile>file://${basedir}/dependency-suppression.xml</suppressionFile>
-                    </suppressionFiles>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.3.1</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.puppycrawl.tools</groupId>
-                        <artifactId>checkstyle</artifactId>
-                        <version>10.16.0</version>
-                    </dependency>
-                </dependencies>
-                <executions>
-                    <execution>
-                        <id>checkstyle-check</id>
-                        <phase>verify</phase>
-                        <configuration>
-                            <skip>${skipCheckstyle}</skip>
-                            <failOnViolation>true</failOnViolation>
-                            <failsOnError>false</failsOnError>
-                            <logViolationsToConsole>true</logViolationsToConsole>
-                            <maxAllowedViolations>${checkstyle.max.violations}</maxAllowedViolations>
-                            <violationSeverity>warning</violationSeverity>
-                            <configLocation>checkstyle.xml</configLocation>
-                        </configuration>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- get git version number -->
+			<plugin>
+				<groupId>pl.project13.maven</groupId>
+				<artifactId>git-commit-id-plugin</artifactId>
+				<version>4.9.10</version>
+				<configuration>
+					<commitIdGenerationMode>flat</commitIdGenerationMode>
+					<gitDescribe>
+						<skip>true</skip>
+					</gitDescribe>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>revision</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>buildnumber-maven-plugin</artifactId>
+				<version>3.2.0</version>
+				<configuration>
+					<shortRevisionLength>7</shortRevisionLength>
+					<doCheck>false</doCheck>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.6.3</version>
+				<configuration>
+					<doclint>none</doclint>
+					<fixTags>link,throws,return,param</fixTags>
+					<tags>
+						<tag>
+							<name>should</name>
+							<placement>X</placement>
+						</tag>
+					</tags>
+				</configuration>
+			</plugin>
+			<!-- used for test coverage report in Jenkins -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.12</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- used for mvn versions:display-dependency-updates -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>versions-maven-plugin</artifactId>
+				<version>2.16.2</version>
+				<configuration>
+					<rulesUri>file://${basedir}/version-number-rules.xml</rulesUri>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.owasp</groupId>
+				<artifactId>dependency-check-maven</artifactId>
+				<version>9.2.0</version>
+				<configuration>
+					<!--failBuildOnCVSS>5.0</failBuildOnCVSS-->
+					<skipProvidedScope>true</skipProvidedScope>
+					<assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
+					<knownExploitedEnabled>false</knownExploitedEnabled>
+					<format>ALL</format>
+					<skipTestScope>true</skipTestScope>
+					<skip>${skipDependencyCheck}</skip>
+					<suppressionFiles>
+						<suppressionFile>file://${basedir}/dependency-suppression.xml</suppressionFile>
+					</suppressionFiles>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>3.3.1</version>
+				<dependencies>
+					<dependency>
+						<groupId>com.puppycrawl.tools</groupId>
+						<artifactId>checkstyle</artifactId>
+						<version>10.16.0</version>
+					</dependency>
+				</dependencies>
+				<executions>
+					<execution>
+						<id>checkstyle-check</id>
+						<phase>verify</phase>
+						<configuration>
+							<skip>${skipCheckstyle}</skip>
+							<failOnViolation>true</failOnViolation>
+							<failsOnError>false</failsOnError>
+							<logViolationsToConsole>true</logViolationsToConsole>
+							<maxAllowedViolations>${checkstyle.max.violations}</maxAllowedViolations>
+							<violationSeverity>warning</violationSeverity>
+							<configLocation>checkstyle.xml</configLocation>
+						</configuration>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>
