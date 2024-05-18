@@ -208,33 +208,8 @@
                         <configuration>
                             <failOnWarning>false</failOnWarning>
                             <ignoredUnusedDeclaredDependencies>
-                                <!-- JSTL is used within JSF for example c:forEach -->
-                                <ignoredUnusedDeclaredDependency>javax.servlet:jstl</ignoredUnusedDeclaredDependency>
-
-                                <!-- The jersey-container-servlet dependency is used for startup during runtime Unit tests run without it though -->
-                                <ignoredUnusedDeclaredDependency>org.glassfish.jersey.containers:jersey-container-servlet</ignoredUnusedDeclaredDependency>
-
                                 <!-- JXPath is used at XPathExpressionEngine from org.apache.commons.configuration2, i.e. LanguageHelper -->
                                 <ignoredUnusedDeclaredDependency>commons-jxpath:commons-jxpath</ignoredUnusedDeclaredDependency>
-
-                                <!-- The MariaDB java client is used for the database connection and configured in the Tomcat -->
-                                <ignoredUnusedDeclaredDependency>org.mariadb.jdbc:mariadb-java-client</ignoredUnusedDeclaredDependency>
-
-                                <!-- EclipseLink Java Persistence API for database management -->
-                                <ignoredUnusedDeclaredDependency>org.eclipse.persistence:org.eclipse.persistence.jpa</ignoredUnusedDeclaredDependency>
-
-                                <!-- javax.annotation is not part of jdk 11 anymore -->
-                                <ignoredUnusedDeclaredDependency>javax.annotation:javax.annotation-api</ignoredUnusedDeclaredDependency>
-
-                                <!-- org.citationstyles.* are runtime resources for citeproc -->
-                                <ignoredUnusedDeclaredDependency>org.citationstyles:locales</ignoredUnusedDeclaredDependency>
-                                <ignoredUnusedDeclaredDependency>org.citationstyles:styles</ignoredUnusedDeclaredDependency>
-
-                                <!-- jersey client is falsely declared as unused blocking maven install (windows developer system only) -->
-                                <ignoredUnusedDeclaredDependency>org.glassfish.jersey.core:jersey-client</ignoredUnusedDeclaredDependency>
-
-                                <!-- jaxb-runtime needs to be available to remove the warning "JAXBContext implementation could not be found. WADL feature is disabled" during tomcat startup -->
-                                <ignoredUnusedDeclaredDependency>org.glassfish.jaxb:jaxb-runtime</ignoredUnusedDeclaredDependency>
 
                                 <!-- junit-jupiter is used to run the tests, otherwise it will fail in maven -->
                                 <ignoredUnusedDeclaredDependency>org.junit.jupiter:junit-jupiter</ignoredUnusedDeclaredDependency>
