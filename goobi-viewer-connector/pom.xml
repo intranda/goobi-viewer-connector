@@ -83,7 +83,9 @@
 			<groupId>io.goobi.viewer</groupId>
 			<artifactId>viewer-core</artifactId>
 			<version>${viewer-core.version}</version>
-			<exclusions>
+            <exclusions>
+                <!-- Excluding weld-servlet-shaded is necessary because otherwise it will false positively show as used but undeclared dependency
+                     instead of jakarta.servlet -->
 				<exclusion>
 					<groupId>org.jboss.weld.servlet</groupId>
 					<artifactId>weld-servlet-shaded</artifactId>
