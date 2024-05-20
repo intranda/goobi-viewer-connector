@@ -83,9 +83,9 @@
 			<groupId>io.goobi.viewer</groupId>
 			<artifactId>viewer-core</artifactId>
 			<version>${viewer-core.version}</version>
-            <exclusions>
-                <!-- Excluding weld-servlet-shaded is necessary because otherwise it will false positively show as used but undeclared dependency
-                     instead of jakarta.servlet -->
+			<exclusions>
+				<!-- Excluding weld-servlet-shaded is necessary because otherwise it will false positively show as used but undeclared dependency
+					 instead of jakarta.servlet -->
 				<exclusion>
 					<groupId>org.jboss.weld.servlet</groupId>
 					<artifactId>weld-servlet-shaded</artifactId>
@@ -226,8 +226,10 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.13.0</version>
 				<configuration>
-					<compilerArgument>-Xlint:deprecation</compilerArgument>
-					<compilerArgument>-Xlint:unchecked</compilerArgument>
+					<compilerArgs>
+						<arg>-Xlint:deprecation</arg>
+						<arg>-Xlint:unchecked</arg>
+					</compilerArgs>
 				</configuration>
 			</plugin>
 			<plugin>
