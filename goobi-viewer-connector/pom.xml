@@ -72,7 +72,7 @@
 		<json.version>20240303</json.version>
 		<junit.version>5.10.2</junit.version>
 		<log4j.version>2.23.1</log4j.version>
-		<solr.version>9.6.0</solr.version>
+		<solr.version>9.6.1</solr.version>
 		<xstream.version>1.4.20</xstream.version>
 	</properties>
 
