@@ -88,7 +88,7 @@ public class SolrSearchIndex {
                 logger.error("Solr URL is not configured. Cannot instantiate the OAI-PMH interface.");
                 return;
             }
-            this.client = getNewHttpSolrClient(DataManager.getInstance().getConfiguration().getIndexUrl());
+            this.client = getNewSolrClient(DataManager.getInstance().getConfiguration().getIndexUrl());
         } else {
             this.client = client;
         }
@@ -106,7 +106,7 @@ public class SolrSearchIndex {
             } catch (IOException e) {
                 logger.error(e.getMessage(), e);
             }
-            client = getNewHttpSolrClient(DataManager.getInstance().getConfiguration().getIndexUrl());
+            client = getNewSolrClient(DataManager.getInstance().getConfiguration().getIndexUrl());
         }
     }
 
@@ -535,6 +535,7 @@ public class SolrSearchIndex {
     public String getEarliestRecordDatestamp(String filterQuerySuffix) throws SolrServerException, IOException {
         try {
             String searchStr = SolrConstants.ISWORK + ":true" + filterQuerySuffix;
+            logger.trace("getEarliestRecordDatestamp: " + searchStr);
 
             SolrQuery solrQuery = new SolrQuery(searchStr);
             solrQuery.setRows(1);
