@@ -115,7 +115,7 @@ public final class Configuration {
                 builderLocal.getConfiguration();
                 logger.info("Local Connector configuration file '{}' loaded.", fileLocal.getAbsolutePath());
             } catch (ConfigurationException e) {
-                logger.error(e.getMessage(), e);
+                logger.error("{} ({})", e.getMessage(), fileLocal.getAbsolutePath(), e);
             }
             builderLocal.addEventListener(ConfigurationBuilderEvent.CONFIGURATION_REQUEST,
                     new EventListener() {

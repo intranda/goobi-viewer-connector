@@ -116,6 +116,7 @@ public class SolrSearchIndex {
      * @return New {@link SolrClient}
      */
     public static SolrClient getNewSolrClient(String solrUrl) {
+        logger.trace("getNewSolrClient: " + solrUrl);
         if (io.goobi.viewer.controller.DataManager.getInstance().getConfiguration().isSolrUseHttp2()) {
             return getNewHttp2SolrClient(solrUrl);
         }
@@ -534,9 +535,7 @@ public class SolrSearchIndex {
      */
     public String getEarliestRecordDatestamp(String filterQuerySuffix) throws SolrServerException, IOException {
         try {
-            String searchStr = SolrConstants.ISWORK + ":true" + filterQuerySuffix;
-            logger.trace("getEarliestRecordDatestamp: " + searchStr);
-
+            String searchStr = "+" + SolrConstants.ISWORK + ":true" + filterQuerySuffix;
             SolrQuery solrQuery = new SolrQuery(searchStr);
             solrQuery.setRows(1);
             solrQuery.addField(SolrConstants.DATECREATED);
