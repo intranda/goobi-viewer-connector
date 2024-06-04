@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -116,7 +114,6 @@ public class SolrSearchIndex {
      * @return New {@link SolrClient}
      */
     public static SolrClient getNewSolrClient(String solrUrl) {
-        logger.trace("getNewSolrClient: " + solrUrl);
         if (io.goobi.viewer.controller.DataManager.getInstance().getConfiguration().isSolrUseHttp2()) {
             return getNewHttp2SolrClient(solrUrl);
         }
