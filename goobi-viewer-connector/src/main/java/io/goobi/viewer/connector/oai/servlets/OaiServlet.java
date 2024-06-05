@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.Temporal;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -285,20 +286,21 @@ public class OaiServlet extends HttpServlet {
      *
      * @param from a {@link java.lang.String} object.
      * @param until a {@link java.lang.String} object.
+     * @return false if from after until; true otherwise
      * @should return false if from is not well formed
      * @should return false if until is not well formed
      * @should return false if from after until
      * @should return true if from and until correct
-     * @return a boolean.
+     * @should compare LocalDate and LocalDateTime correctly
      */
     public static boolean checkDatestamps(String from, String until) {
-        boolean dateTime = false;
+        LocalDateTime ldtFrom = null;
+        LocalDateTime ldtUntil = null;
         if (from != null) {
             if (from.contains("T")) {
                 // Date/time
-                dateTime = true;
                 try {
-                    LocalDateTime.parse(from, Utils.FORMATTER_ISO8601_DATETIME_WITH_OFFSET);
+                    ldtFrom = LocalDateTime.parse(from, Utils.FORMATTER_ISO8601_DATETIME_WITH_OFFSET);
                 } catch (DateTimeParseException e) {
                     logger.warn(e.getMessage());
                     return false;
@@ -306,7 +308,7 @@ public class OaiServlet extends HttpServlet {
             } else {
                 // Just date
                 try {
-                    LocalDate.parse(from, Utils.FORMATTER_ISO8601_DATE);
+                    ldtFrom = LocalDate.parse(from, Utils.FORMATTER_ISO8601_DATE).atStartOfDay();
                 } catch (DateTimeParseException e) {
                     logger.warn(e.getMessage());
                     return false;
@@ -316,9 +318,8 @@ public class OaiServlet extends HttpServlet {
         if (until != null) {
             if (until.contains("T")) {
                 // Date/time
-                dateTime = true;
                 try {
-                    LocalDateTime.parse(until, Utils.FORMATTER_ISO8601_DATETIME_WITH_OFFSET);
+                    ldtUntil = LocalDateTime.parse(until, Utils.FORMATTER_ISO8601_DATETIME_WITH_OFFSET);
                 } catch (DateTimeParseException e) {
                     logger.warn(e.getMessage());
                     return false;
@@ -326,30 +327,16 @@ public class OaiServlet extends HttpServlet {
             } else {
                 // Just date
                 try {
-                    LocalDate.parse(until, Utils.FORMATTER_ISO8601_DATE);
+                    ldtUntil = LocalDate.parse(until, Utils.FORMATTER_ISO8601_DATE).atStartOfDay();
                 } catch (DateTimeParseException e) {
                     logger.warn(e.getMessage());
                     return false;
                 }
             }
         }
-        if (from != null && until != null) {
-            // Check for different from/until formats ('from' may not be later than 'until')
-            if (dateTime) {
-                LocalDateTime ldtFrom = LocalDateTime.parse(from, Utils.FORMATTER_ISO8601_DATETIME_WITH_OFFSET);
-                LocalDateTime ldtUntil = LocalDateTime.parse(until, Utils.FORMATTER_ISO8601_DATETIME_WITH_OFFSET);
-                try {
-                    return !ldtFrom.isAfter(ldtUntil);
-                } catch (DateTimeParseException e) {
-                    logger.warn(e.getMessage());
-                    return false;
-                }
-            }
-
-            LocalDate ldFrom = LocalDate.parse(from, Utils.FORMATTER_ISO8601_DATE);
-            LocalDate ldUntil = LocalDate.parse(until, Utils.FORMATTER_ISO8601_DATE);
+        if (ldtFrom != null && ldtUntil != null) {
             try {
-                return !ldFrom.isAfter(ldUntil);
+                return !ldtFrom.isAfter(ldtUntil);
             } catch (DateTimeParseException e) {
                 logger.warn(e.getMessage());
                 return false;

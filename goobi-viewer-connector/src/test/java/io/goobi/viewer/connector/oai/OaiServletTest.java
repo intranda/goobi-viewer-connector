@@ -61,4 +61,14 @@ class OaiServletTest extends AbstractTest {
         Assertions.assertTrue(OaiServlet.checkDatestamps("2015-09-30T15:00:00Z", "2015-09-30T15:00:01Z"));
         Assertions.assertTrue(OaiServlet.checkDatestamps("2015-09-29", "2015-09-30"));
     }
+    
+    /**
+     * @see OaiServlet#checkDatestamps(String,String)
+     * @verifies compare LocalDate and LocalDateTime correctly
+     */
+    @Test
+    void checkDatestamps_shouldCompareLocalDateAndLocalDateTimeCorrectly() throws Exception {
+        Assertions.assertTrue(OaiServlet.checkDatestamps("2015-09-30", "2015-09-30T15:00:00Z"));
+        Assertions.assertFalse(OaiServlet.checkDatestamps("2015-09-29T15:00:00:Z", "2015-09-30"));
+    }
 }
