@@ -438,7 +438,7 @@ public abstract class Format {
                 for (Object fieldValue : doc.getFieldValues(setSpecField)) {
                     // TODO translation
                     Element setSpec = new Element(XmlConstants.ELE_NAME_SETSPEC, OAI_NS);
-                    setSpec.setText((String) fieldValue);
+                    setSpec.setText(setSpecField + ":" + (String) fieldValue);
                     header.addContent(setSpec);
                 }
             }

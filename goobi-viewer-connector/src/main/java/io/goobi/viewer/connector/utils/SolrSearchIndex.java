@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -88,7 +86,7 @@ public class SolrSearchIndex {
                 logger.error("Solr URL is not configured. Cannot instantiate the OAI-PMH interface.");
                 return;
             }
-            this.client = getNewHttpSolrClient(DataManager.getInstance().getConfiguration().getIndexUrl());
+            this.client = getNewSolrClient(DataManager.getInstance().getConfiguration().getIndexUrl());
         } else {
             this.client = client;
         }
@@ -106,7 +104,7 @@ public class SolrSearchIndex {
             } catch (IOException e) {
                 logger.error(e.getMessage(), e);
             }
-            client = getNewHttpSolrClient(DataManager.getInstance().getConfiguration().getIndexUrl());
+            client = getNewSolrClient(DataManager.getInstance().getConfiguration().getIndexUrl());
         }
     }
 
@@ -534,8 +532,7 @@ public class SolrSearchIndex {
      */
     public String getEarliestRecordDatestamp(String filterQuerySuffix) throws SolrServerException, IOException {
         try {
-            String searchStr = SolrConstants.ISWORK + ":true" + filterQuerySuffix;
-
+            String searchStr = "+" + SolrConstants.ISWORK + ":true" + filterQuerySuffix;
             SolrQuery solrQuery = new SolrQuery(searchStr);
             solrQuery.setRows(1);
             solrQuery.addField(SolrConstants.DATECREATED);
