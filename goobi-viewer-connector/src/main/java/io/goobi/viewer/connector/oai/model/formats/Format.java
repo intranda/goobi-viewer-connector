@@ -429,20 +429,21 @@ public abstract class Format {
             Element setSpec = new Element(XmlConstants.ELE_NAME_SETSPEC, OAI_NS);
             setSpec.setText(handler.getSet());
             header.addContent(setSpec);
-        } else if (handler.getMetadataPrefix() != null && setSpecFields != null && !setSpecFields.isEmpty()) {
-            // setSpec from config
-            for (String setSpecField : setSpecFields) {
-                if (!doc.containsKey(setSpecField)) {
-                    continue;
-                }
-                for (Object fieldValue : doc.getFieldValues(setSpecField)) {
-                    // TODO translation
-                    Element setSpec = new Element(XmlConstants.ELE_NAME_SETSPEC, OAI_NS);
-                    setSpec.setText(setSpecField + ":" + (String) fieldValue);
-                    header.addContent(setSpec);
-                }
-            }
         }
+        //        else if (handler.getMetadataPrefix() != null && setSpecFields != null && !setSpecFields.isEmpty()) {
+        //            // setSpec from config
+        //            for (String setSpecField : setSpecFields) {
+        //                if (!doc.containsKey(setSpecField)) {
+        //                    continue;
+        //                }
+        //                for (Object fieldValue : doc.getFieldValues(setSpecField)) {
+        //                    // TODO translation
+        //                    Element setSpec = new Element(XmlConstants.ELE_NAME_SETSPEC, OAI_NS);
+        //                    setSpec.setText(setSpecField + ":" + (String) fieldValue);
+        //                    header.addContent(setSpec);
+        //                }
+        //            }
+        //        }
 
         // status="deleted"
         if (doc.getFieldValues(SolrConstants.DATEDELETED) != null) {
