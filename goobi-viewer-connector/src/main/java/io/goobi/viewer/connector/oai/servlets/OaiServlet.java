@@ -291,9 +291,11 @@ public class OaiServlet extends HttpServlet {
      * @should return false if until is not well formed
      * @should return false if from after until
      * @should return true if from and until correct
-     * @should compare LocalDate and LocalDateTime correctly
+     * @should return false if from and until different types
      */
     public static boolean checkDatestamps(String from, String until) {
+        boolean fromJustDate = false;
+        boolean untilJustDate = false;
         LocalDateTime ldtFrom = null;
         LocalDateTime ldtUntil = null;
         if (from != null) {
@@ -309,6 +311,7 @@ public class OaiServlet extends HttpServlet {
                 // Just date
                 try {
                     ldtFrom = LocalDate.parse(from, Utils.FORMATTER_ISO8601_DATE).atStartOfDay();
+                    fromJustDate = true;
                 } catch (DateTimeParseException e) {
                     logger.warn(e.getMessage());
                     return false;
@@ -328,11 +331,16 @@ public class OaiServlet extends HttpServlet {
                 // Just date
                 try {
                     ldtUntil = LocalDate.parse(until, Utils.FORMATTER_ISO8601_DATE).atStartOfDay();
+                    untilJustDate = true;
                 } catch (DateTimeParseException e) {
                     logger.warn(e.getMessage());
                     return false;
                 }
             }
+        }
+        // Different types not allowed
+        if (fromJustDate != untilJustDate) {
+            return false;
         }
         if (ldtFrom != null && ldtUntil != null) {
             try {
