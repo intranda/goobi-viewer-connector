@@ -154,7 +154,6 @@ public class OaiServlet extends HttpServlet {
                             root.addContent(new ErrorCode().getCannotDisseminateFormat());
                         } else {
                             try {
-                                logger.debug("foo");
                                 int hitsPerToken =
                                         DataManager.getInstance()
                                                 .getConfiguration()
