@@ -61,7 +61,9 @@ public class OaiServlet extends HttpServlet {
         response.setContentType("text/xml;charset=UTF-8");
 
         String queryString = (request.getQueryString() != null ? "?" + request.getQueryString() : "");
-        logger.debug("REQUEST URL: {}{}", request.getRequestURL().toString(), queryString);
+        if (logger.isDebugEnabled()) {
+            logger.debug("REQUEST URL: {}{}", request.getRequestURL().toString(), queryString);
+        }
 
         String filterQuerySuffix = "";
         filterQuerySuffix = SolrSearchTools.getAllSuffixes(request);
@@ -94,6 +96,7 @@ public class OaiServlet extends HttpServlet {
             root.addContent(new ErrorCode().getBadVerb());
         } else if (!checkDatestamps(handler.getFrom(), handler.getUntil())) {
             // Check for invalid from/until parameters
+            logger.trace("Invalid timestamps");
             root.addContent(new ErrorCode().getBadArgument());
         } else {
             Element requestType = new Element("request", Format.OAI_NS);
@@ -141,6 +144,7 @@ public class OaiServlet extends HttpServlet {
                         }
                         break;
                     case LISTIDENTIFIERS:
+                        logger.debug("ListIdentifiers");
                         if (handler.getMetadataPrefix() == null) {
                             root.addContent(new ErrorCode().getBadArgument());
                         } else if (!DataManager.getInstance()
@@ -291,6 +295,7 @@ public class OaiServlet extends HttpServlet {
      * @should return false if from after until
      * @should return true if from and until correct
      * @should return false if from and until different types
+     * @should return true if only one datestamp given
      */
     public static boolean checkDatestamps(String from, String until) {
         boolean fromJustDate = false;
@@ -338,7 +343,7 @@ public class OaiServlet extends HttpServlet {
             }
         }
         // Different types not allowed
-        if (fromJustDate != untilJustDate) {
+        if (from != null && until != null && fromJustDate != untilJustDate) {
             return false;
         }
         if (ldtFrom != null && ldtUntil != null) {

@@ -296,6 +296,7 @@ public abstract class Format {
      */
     public Element createListIdentifiers(RequestHandler handler, int firstVirtualRow, int firstRawRow, int numRows, String versionDiscriminatorField,
             String filterQuerySuffix) throws SolrServerException, IOException {
+        logger.debug("createListIdentifiers");
         Map<String, String> datestamp = Utils.filterDatestampFromRequest(handler);
 
         Element xmlListIdentifiers = new Element("ListIdentifiers", OAI_NS);

@@ -71,4 +71,14 @@ class OaiServletTest extends AbstractTest {
         Assertions.assertFalse(OaiServlet.checkDatestamps("2015-09-30", "2015-09-30T15:00:00Z"));
         Assertions.assertFalse(OaiServlet.checkDatestamps("2015-09-29T15:00:00:Z", "2015-09-30"));
     }
+    
+    /**
+     * @see OaiServlet#checkDatestamps(String,String)
+     * @verifies return true if only one datestamp given
+     */
+    @Test
+    void checkDatestamps_shouldReturnTrueIfOnlyOneDatestampGiven() throws Exception {
+        Assertions.assertTrue(OaiServlet.checkDatestamps("2015-09-30T15:00:00Z", null));
+        Assertions.assertTrue(OaiServlet.checkDatestamps(null, "2015-09-30"));
+    }
 }

@@ -118,6 +118,7 @@ public class SolrSearchIndex {
             return getNewHttp2SolrClient(solrUrl);
         }
 
+        logger.trace("Using HTTP1 compatiblity mode.");
         return getNewHttpSolrClient(solrUrl);
     }
 
@@ -129,6 +130,7 @@ public class SolrSearchIndex {
      * @param solrUrl a {@link java.lang.String} object.
      * @return a {@link org.apache.solr.client.solrj.impl.HttpSolrServer} object.
      */
+    @Deprecated(since = "24.01")
     static HttpSolrClient getNewHttpSolrClient(String solrUrl) {
         if (solrUrl == null) {
             throw new IllegalArgumentException("solrUrl may not be null");
