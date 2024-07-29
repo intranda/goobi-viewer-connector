@@ -76,7 +76,7 @@ public class SolrSearchIndex {
      * Constructor for SolrSearchIndex.
      * </p>
      *
-     * @param client a {@link org.apache.solr.client.solrj.SolrServer} object.
+     * @param client a {@link org.apache.solr.client.solrj.SolrClient} object.
      * @param testMode a boolean.
      */
     public SolrSearchIndex(SolrClient client, boolean testMode) {
