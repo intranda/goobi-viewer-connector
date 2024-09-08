@@ -199,12 +199,8 @@ public final class Configuration {
      * @return a boolean
      */
     private boolean getLocalBoolean(String inPath, boolean inDefault) {
-        try {
-            return getConfigLocal().getBoolean(inPath, getConfig().getBoolean(inPath, inDefault));
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return inDefault;
-        }
+        return getConfigLocal().getBoolean(inPath, getConfig().getBoolean(inPath, inDefault));
+
     }
 
     /**
@@ -219,9 +215,6 @@ public final class Configuration {
         } catch (ConversionException e) {
             logger.error("{}. Using default value {} instead.", e.getMessage(), inDefault);
             return inDefault;
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return inDefault;
         }
     }
 
@@ -232,12 +225,7 @@ public final class Configuration {
      * @return {@link String}
      */
     private String getLocalString(String inPath, String inDefault) {
-        try {
-            return getConfigLocal().getString(inPath, getConfig().getString(inPath, inDefault));
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return inDefault;
-        }
+        return getConfigLocal().getString(inPath, getConfig().getString(inPath, inDefault));
     }
 
     /**
