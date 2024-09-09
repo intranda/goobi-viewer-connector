@@ -100,8 +100,8 @@ public class SruRequestParameter {
      * Constructor for SruRequestParameter.
      * </p>
      *
-     * @throws org.apache.commons.cli.MissingArgumentException
      * @param request a {@link javax.servlet.http.HttpServletRequest} object.
+     * @throws io.goobi.viewer.connector.exceptions.MissingArgumentException
      */
     public SruRequestParameter(HttpServletRequest request) throws MissingArgumentException {
         if (request.getParameter(PARAM_OPERATION) != null) {
