@@ -73,7 +73,7 @@
 		<junit.version>5.11.3</junit.version>
 		<log4j.version>2.24.1</log4j.version>
 		<solr.version>9.7.0</solr.version>
-		<xstream.version>1.4.20</xstream.version>
+		<xstream.version>1.4.21</xstream.version>
 	</properties>
 
 
