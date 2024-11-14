@@ -469,7 +469,7 @@ public final class Configuration {
      * @should return correct value
      */
     public String getRestApiUrl() {
-        return getLocalString("restApiUrl", "http://localhost:8080/viewer/rest/");
+        return getLocalString("restApiUrl", "http://localhost:8080/viewer/api/v1/");
     }
 
     /**

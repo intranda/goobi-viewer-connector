@@ -53,20 +53,9 @@
 	<!-- documentResolverUrl: URL to the METS/LIDO resolver -->
 	<documentResolverUrl>http://localhost/viewer/metsresolver?id=</documentResolverUrl>
     <!-- harvestUrl: URL for havesting overview page and crowdsourcing updates -->
-    <harvestUrl>http://localhost/viewer/harvest
-    </harvestUrl>
+    <harvestUrl>http://localhost/viewer/harvest</harvestUrl>
     <!-- restApiUrl: Goobi viewer REST API for full-text/ALTO/TEI/CMDI and TOC retrieval -->
-    <restApiUrl>http://localhost/viewer/rest/</restApiUrl>
-    <!-- fulltextUrl: URL for a single plain full-text page; contains placeholders 
-        for PI and page number; can be used for REST or older ContentServlet URLs. 
-        Allowed placeholders:
-          {dataRepository} (e.g. '1'),
-          {pi} (e.g 'PPN123456789'),
-          {fileName} (e.g. '00000001.txt'), 
-          {filePath} (e.g 'fulltext_crowd/PPN123456789/00000001.txt'),
-          {page} (e.g. '1') -->
-    <fulltextUrl>http://localhost/viewer/rest/content/fulltext/{pi}/{page}/
-    </fulltextUrl>
+    <restApiUrl>http://localhost/viewer/api/v1/</restApiUrl>
     
     <oai_dc>
         <enabled>true</enabled>
