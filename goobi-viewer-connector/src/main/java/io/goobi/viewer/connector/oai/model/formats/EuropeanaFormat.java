@@ -39,6 +39,7 @@ import io.goobi.viewer.connector.oai.model.ErrorCode;
 import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
 import io.goobi.viewer.connector.utils.XmlConstants;
+import io.goobi.viewer.controller.StringConstants;
 import io.goobi.viewer.solr.SolrConstants;
 
 /**
@@ -167,8 +168,10 @@ public class EuropeanaFormat extends OAIDCFormat {
             String language = "";
             if (doc.getFieldValues("MD_LANGUAGE") != null) {
                 language = (String) doc.getFieldValues("MD_LANGUAGE").iterator().next();
-                eleDcLanguage.setText(language);
-                eleEuropeanaRecord.addContent(eleDcLanguage);
+                if (!StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(language)) {
+                    eleDcLanguage.setText(language);
+                    eleEuropeanaRecord.addContent(eleDcLanguage);
+                }
             }
 
             // MANDATORY: <dc:title>
@@ -188,9 +191,11 @@ public class EuropeanaFormat extends OAIDCFormat {
                     }
                 }
             }
-            Element eleDcTitle = new Element("title", nsDc);
-            eleDcTitle.setText(title);
-            eleEuropeanaRecord.addContent(eleDcTitle);
+            if (!StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(title)) {
+                Element eleDcTitle = new Element("title", nsDc);
+                eleDcTitle.setText(title);
+                eleEuropeanaRecord.addContent(eleDcTitle);
+            }
 
             // <dc:description>
             String desc = null;
@@ -200,7 +205,7 @@ public class EuropeanaFormat extends OAIDCFormat {
             } else if (doc.getFieldValues(MD_DATECREATED) != null) {
                 desc = (String) doc.getFieldValues(MD_DATECREATED).iterator().next();
             }
-            if (desc != null) {
+            if (desc != null && !StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(desc)) {
                 Element eleDcDescription = new Element("description", nsDc);
                 eleDcDescription.setText(desc);
                 eleEuropeanaRecord.addContent(eleDcDescription);
@@ -218,7 +223,7 @@ public class EuropeanaFormat extends OAIDCFormat {
                 date = (String) topstructDoc.getFieldValues(MD_DATECREATED).iterator().next();
             }
 
-            if (date != null) {
+            if (date != null && !StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(date)) {
                 Element eleDcDate = new Element("date", nsDc);
                 eleDcDate.setText(date);
                 eleEuropeanaRecord.addContent(eleDcDate);
@@ -228,7 +233,7 @@ public class EuropeanaFormat extends OAIDCFormat {
             if (doc.getFieldValues(MD_CREATOR) != null) {
                 for (Object fieldValue : doc.getFieldValues(MD_CREATOR)) {
                     String creator = (String) fieldValue;
-                    if (StringUtils.isNotBlank(creator)) {
+                    if (StringUtils.isNotBlank(creator) && !StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(creator)) {
                         Element eleDcCreator = new Element("creator", nsDc);
                         eleDcCreator.setText(creator);
                         eleEuropeanaRecord.addContent(eleDcCreator);
@@ -238,23 +243,29 @@ public class EuropeanaFormat extends OAIDCFormat {
             // <dc:created>
             if (doc.getFieldValues(MD_DATECREATED) != null) {
                 String created = (String) doc.getFieldValues(MD_DATECREATED).iterator().next();
-                Element eleDcCreated = new Element("created", nsDc);
-                eleDcCreated.setText(created);
-                eleEuropeanaRecord.addContent(eleDcCreated);
+                if (!StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(created)
+                        && !StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(created)) {
+                    Element eleDcCreated = new Element("created", nsDc);
+                    eleDcCreated.setText(created);
+                    eleEuropeanaRecord.addContent(eleDcCreated);
+                }
             }
             // <dc:issued>
             if (doc.getFieldValues("MD_DATEISSUED") != null) {
                 String created = (String) doc.getFieldValues("MD_DATEISSUED").iterator().next();
-                Element eleDcCreated = new Element("created", nsDc);
-                eleDcCreated.setText(created);
-                eleEuropeanaRecord.addContent(eleDcCreated);
+                if (!StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(created)) {
+                    Element eleDcCreated = new Element("issued", nsDc);
+                    eleDcCreated.setText(created);
+                    eleEuropeanaRecord.addContent(eleDcCreated);
+                }
             }
             // creating <dc:subject>
             if (doc.getFieldValues(SolrConstants.DC) != null) {
                 for (Object fieldValue : doc.getFieldValues(SolrConstants.DC)) {
                     Element eleDcType = new Element("subject", nsDc);
-                    if (((String) fieldValue).equals("")) {
-                        eleDcType.setText((String) fieldValue);
+                    String subject = (String) fieldValue;
+                    if (StringUtils.isNotEmpty(subject) && !StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(subject)) {
+                        eleDcType.setText(subject);
                         eleEuropeanaRecord.addContent(eleDcType);
                     }
                 }
@@ -267,7 +278,7 @@ public class EuropeanaFormat extends OAIDCFormat {
             } else if (topstructDoc != null && topstructDoc.getFieldValues(MD_PUBLISHER) != null) {
                 publisher = (String) topstructDoc.getFieldValues(MD_PUBLISHER).iterator().next();
             }
-            if (publisher != null) {
+            if (publisher != null && !StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(publisher)) {
                 Element eleDcPublisher = new Element("publisher", nsDc);
                 eleDcPublisher.setText(publisher);
                 eleEuropeanaRecord.addContent(eleDcPublisher);
@@ -277,8 +288,10 @@ public class EuropeanaFormat extends OAIDCFormat {
             Element eleDcType = new Element("type", nsDc);
             if (doc.getFieldValue(SolrConstants.DOCSTRCT) != null) {
                 type = (String) doc.getFieldValue(SolrConstants.DOCSTRCT);
-                eleDcType.setText(type);
-                eleEuropeanaRecord.addContent(eleDcType);
+                if (type != null && !StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(type)) {
+                    eleDcType.setText(type);
+                    eleEuropeanaRecord.addContent(eleDcType);
+                }
             }
 
             // <dc:format>
@@ -301,7 +314,10 @@ public class EuropeanaFormat extends OAIDCFormat {
             String provider = DataManager.getInstance().getConfiguration().getEseDefaultProvider();
             String field = DataManager.getInstance().getConfiguration().getEseProviderField();
             if (doc.getFieldValues(field) != null) {
-                provider = (String) doc.getFieldValues(field).iterator().next();
+                String val = (String) doc.getFieldValues(field).iterator().next();
+                if (!StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(val)) {
+                    provider = val;
+                }
             }
             eleEuropeanaProvider.setText(provider);
             eleEuropeanaRecord.addContent(eleEuropeanaProvider);
@@ -309,7 +325,7 @@ public class EuropeanaFormat extends OAIDCFormat {
             // MANDATORY: <europeana:type>
             Element eleEuropeanaType = new Element("type", nsEuropeana);
             String europeanaType = "TEXT";
-            if (type != null) {
+            if (type != null && !StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(type)) {
                 // Retrieve coded ESE type, if available
                 Map<String, String> eseTypes = DataManager.getInstance().getConfiguration().getEseTypes();
                 if (eseTypes.get(type) != null) {
@@ -324,7 +340,11 @@ public class EuropeanaFormat extends OAIDCFormat {
             String rights = DataManager.getInstance().getConfiguration().getEseDefaultRightsUrl();
             String rightsField = DataManager.getInstance().getConfiguration().getEseRightsField();
             if (doc.getFieldValues(rightsField) != null) {
-                rights = (String) doc.getFieldValues(rightsField).iterator().next();
+                String val = (String) doc.getFieldValues(rightsField).iterator().next();
+                if (!StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(val)) {
+                    rights = val;
+                }
+
             }
             eleEuropeanaRights.setText(rights);
             eleEuropeanaRecord.addContent(eleEuropeanaRights);
@@ -334,7 +354,10 @@ public class EuropeanaFormat extends OAIDCFormat {
             String dataProvider = DataManager.getInstance().getConfiguration().getEseDefaultProvider();
             String dataProviderField = DataManager.getInstance().getConfiguration().getEseDataProviderField();
             if (doc.getFieldValues(dataProviderField) != null) {
-                dataProvider = (String) doc.getFieldValues(dataProviderField).iterator().next();
+                String val = (String) doc.getFieldValues(dataProviderField).iterator().next();
+                if (!StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(val)) {
+                    dataProvider = val;
+                }
             }
             eleEuropeanaDataProvider.setText(dataProvider);
             eleEuropeanaRecord.addContent(eleEuropeanaDataProvider);
