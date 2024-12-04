@@ -52,6 +52,7 @@ import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
 import io.goobi.viewer.controller.FileTools;
 import io.goobi.viewer.controller.NetTools;
+import io.goobi.viewer.controller.StringConstants;
 import io.goobi.viewer.exceptions.HTTPException;
 import io.goobi.viewer.messages.ViewerResourceBundle;
 import io.goobi.viewer.model.translations.language.Language;
@@ -405,7 +406,7 @@ public class OAIDCFormat extends Format {
                             val = val.replace("{" + paramIndex + '}', paramVal);
                             paramIndex++;
                         }
-                        if (openAccess || !restrictedContent) {
+                        if ((openAccess || !restrictedContent) && !StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(val)) {
                             finishedValues.add(val);
                         }
                     }
