@@ -418,7 +418,8 @@ public class SolrSearchIndex {
      */
     private SolrDocumentList queryForIdentifier(final String identifier, int rows, List<String> fieldList, String filterQuerySuffix)
             throws SolrServerException, IOException {
-        String useIdentifier = ClientUtils.escapeQueryChars(identifier);
+        // String useIdentifier = ClientUtils.escapeQueryChars(identifier);
+        String useIdentifier = identifier;
 
         StringBuilder sb = new StringBuilder();
         sb.append("+(")
