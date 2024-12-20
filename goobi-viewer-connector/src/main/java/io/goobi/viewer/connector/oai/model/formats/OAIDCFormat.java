@@ -52,6 +52,7 @@ import io.goobi.viewer.connector.utils.SolrSearchTools;
 import io.goobi.viewer.connector.utils.Utils;
 import io.goobi.viewer.controller.FileTools;
 import io.goobi.viewer.controller.NetTools;
+import io.goobi.viewer.controller.StringConstants;
 import io.goobi.viewer.exceptions.HTTPException;
 import io.goobi.viewer.messages.ViewerResourceBundle;
 import io.goobi.viewer.model.translations.language.Language;
@@ -405,7 +406,7 @@ public class OAIDCFormat extends Format {
                             val = val.replace("{" + paramIndex + '}', paramVal);
                             paramIndex++;
                         }
-                        if (openAccess || !restrictedContent) {
+                        if ((openAccess || !restrictedContent) && !StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(val)) {
                             finishedValues.add(val);
                         }
                     }
@@ -487,17 +488,23 @@ public class OAIDCFormat extends Format {
         StringBuilder sbSourceCreators = new StringBuilder();
         if (doc != null && doc.getFieldValues(MD_CREATOR) != null) {
             for (Object fieldValue : doc.getFieldValues(MD_CREATOR)) {
-                if (sbSourceCreators.length() > 0) {
-                    sbSourceCreators.append(", ");
+                String val = (String) fieldValue;
+                if (!StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(val)) {
+                    if (sbSourceCreators.length() > 0) {
+                        sbSourceCreators.append(", ");
+                    }
+                    sbSourceCreators.append(val);
                 }
-                sbSourceCreators.append((String) fieldValue);
             }
         } else if (topstructDoc.getFieldValues(MD_CREATOR) != null) {
             for (Object fieldValue : topstructDoc.getFieldValues(MD_CREATOR)) {
-                if (sbSourceCreators.length() > 0) {
-                    sbSourceCreators.append(", ");
+                String val = (String) fieldValue;
+                if (!StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(val)) {
+                    if (sbSourceCreators.length() > 0) {
+                        sbSourceCreators.append(", ");
+                    }
+                    sbSourceCreators.append(val);
                 }
-                sbSourceCreators.append((String) fieldValue);
             }
         }
         if (sbSourceCreators.length() == 0) {
@@ -506,35 +513,44 @@ public class OAIDCFormat extends Format {
 
         StringBuilder sbSourceTitle = new StringBuilder();
         if (doc != null && doc.getFirstValue(SolrConstants.TITLE) != null) {
-            sbSourceTitle.append((String) doc.getFirstValue(SolrConstants.TITLE));
+            String val = (String) doc.getFirstValue(SolrConstants.TITLE);
+            if (!StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(val)) {
+                sbSourceTitle.append(val);
+            }
         }
         if (anchorDoc != null && anchorDoc.getFirstValue(SolrConstants.TITLE) != null) {
-            if (sbSourceTitle.length() > 0) {
-                sbSourceTitle.append("; ");
+            String val = (String) anchorDoc.getFirstValue(SolrConstants.TITLE);
+            if (!StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(val)) {
+                if (sbSourceTitle.length() > 0) {
+                    sbSourceTitle.append("; ");
+                }
+                sbSourceTitle.append(val);
             }
-            sbSourceTitle.append((String) anchorDoc.getFirstValue(SolrConstants.TITLE));
         }
         if (sbSourceTitle.length() == 0) {
             sbSourceTitle.append('-');
         }
         if (topstructDoc != doc && topstructDoc.getFirstValue(SolrConstants.TITLE) != null) {
-            if (sbSourceTitle.length() > 0) {
-                sbSourceTitle.append("; ");
+            String val = (String) topstructDoc.getFirstValue(SolrConstants.TITLE);
+            if (!StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(val)) {
+                if (sbSourceTitle.length() > 0) {
+                    sbSourceTitle.append("; ");
+                }
+                sbSourceTitle.append(val);
             }
-            sbSourceTitle.append((String) topstructDoc.getFirstValue(SolrConstants.TITLE));
         }
 
         // Publisher info
         String sourceYearpublish = (String) topstructDoc.getFirstValue(MD_YEARPUBLISH);
-        if (sourceYearpublish == null) {
+        if (sourceYearpublish == null || StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(sourceYearpublish)) {
             sourceYearpublish = "-";
         }
         String sourcePlacepublish = (String) topstructDoc.getFirstValue("MD_PLACEPUBLISH");
-        if (sourcePlacepublish == null) {
+        if (sourcePlacepublish == null || StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(sourcePlacepublish)) {
             sourcePlacepublish = "-";
         }
         String sourcePublisher = (String) topstructDoc.getFirstValue(MD_PUBLISHER);
-        if (sourcePublisher == null) {
+        if (sourcePublisher == null || StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(sourcePublisher)) {
             sourcePublisher = "-";
         }
 
