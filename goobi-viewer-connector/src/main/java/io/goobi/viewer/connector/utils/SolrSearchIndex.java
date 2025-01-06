@@ -36,7 +36,6 @@ import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.BinaryRequestWriter;
 import org.apache.solr.client.solrj.impl.Http2SolrClient;
-import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -67,6 +66,8 @@ public class SolrSearchIndex {
     private static final int TIMEOUT_CONNECTION = 300000;
     private static final int RETRY_ATTEMPTS = 20;
 
+    private long lastPing = 0;
+
     private SolrClient client;
     private final boolean testMode;
 
@@ -95,15 +96,38 @@ public class SolrSearchIndex {
      * Checks whether the server's configured URL matches that in the config file. If not, a new server instance is created.
      */
     public void checkReloadNeeded() {
-        if (!testMode && client != null && client instanceof HttpSolrClient httpSolrClient
-                && !DataManager.getInstance().getConfiguration().getIndexUrl().equals(httpSolrClient.getBaseURL())) {
-            logger.info("Solr URL has changed, re-initializing SolrHelper...");
-            try {
-                httpSolrClient.close();
-            } catch (IOException e) {
-                logger.error(e.getMessage(), e);
+        if (testMode || !(client instanceof Http2SolrClient)) {
+            return;
+        }
+
+        String baseUrl = ((Http2SolrClient) client).getBaseURL();
+        if (!DataManager.getInstance().getConfiguration().getIndexUrl().equals(baseUrl)) {
+            // Re-init Solr client if the configured Solr URL has been changed
+            logger.info("Solr URL has changed, re-initializing Solr client...");
+            synchronized (this) {
+                try {
+                    client.close();
+                } catch (IOException e) {
+                    logger.error(e.getMessage());
+                }
+                client = getNewSolrClient(DataManager.getInstance().getConfiguration().getIndexUrl());
             }
-            client = getNewSolrClient(DataManager.getInstance().getConfiguration().getIndexUrl());
+        } else if (lastPing == 0 || System.currentTimeMillis() - lastPing > 60000) {
+            // Check whether the HTTP connection pool of the Solr client has been shut down and re-init
+            try {
+                client.ping();
+            } catch (IOException | SolrServerException e) {
+                logger.warn("HTTP client was closed, re-initializing Solr client...");
+                synchronized (this) {
+                    try {
+                        client.close();
+                    } catch (IOException e1) {
+                        logger.error(e1.getMessage());
+                    }
+                    client = getNewSolrClient(DataManager.getInstance().getConfiguration().getIndexUrl());
+                }
+            }
+            lastPing = System.currentTimeMillis();
         }
     }
 
@@ -113,52 +137,6 @@ public class SolrSearchIndex {
      * @return New {@link SolrClient}
      */
     public static SolrClient getNewSolrClient(String solrUrl) {
-        if (io.goobi.viewer.controller.DataManager.getInstance().getConfiguration().isSolrUseHttp2()) {
-            return getNewHttp2SolrClient(solrUrl);
-        }
-
-        logger.trace("Using HTTP1 compatiblity mode.");
-        return getNewHttpSolrClient(solrUrl);
-    }
-
-    /**
-     * <p>
-     * getNewHttpSolrServer.
-     * </p>
-     *
-     * @param solrUrl a {@link java.lang.String} object.
-     * @return a {@link org.apache.solr.client.solrj.impl.HttpSolrServer} object.
-     */
-    @Deprecated(since = "24.01")
-    static HttpSolrClient getNewHttpSolrClient(String solrUrl) {
-        if (solrUrl == null) {
-            throw new IllegalArgumentException("solrUrl may not be null");
-        }
-        logger.info("Initializing server with URL '{}'", solrUrl);
-        HttpSolrClient server = new HttpSolrClient.Builder()
-                .withBaseSolrUrl(solrUrl)
-                .withSocketTimeout(TIMEOUT_SO)
-                .withConnectionTimeout(TIMEOUT_CONNECTION)
-                .allowCompression(true)
-                .build();
-        //        server.setDefaultMaxConnectionsPerHost(100);
-        //        server.setMaxTotalConnections(100);
-        server.setFollowRedirects(false); // defaults to false
-        //        server.setMaxRetries(1); // defaults to 0. > 1 not recommended.
-        server.setRequestWriter(new BinaryRequestWriter());
-
-        return server;
-    }
-
-    /**
-     * <p>
-     * getNewHttp2SolrClient.
-     * </p>
-     *
-     * @param solrUrl
-     * @return a {@link org.apache.solr.client.solrj.impl.HttpSolrServer} object.
-     */
-    static Http2SolrClient getNewHttp2SolrClient(String solrUrl) {
         return new Http2SolrClient.Builder(solrUrl)
                 .withIdleTimeout(TIMEOUT_SO, TimeUnit.MILLISECONDS)
                 .withConnectionTimeout(TIMEOUT_CONNECTION, TimeUnit.MILLISECONDS)
