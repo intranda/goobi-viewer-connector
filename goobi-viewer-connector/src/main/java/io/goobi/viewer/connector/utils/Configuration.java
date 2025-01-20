@@ -819,4 +819,15 @@ public final class Configuration {
 
         return ret;
     }
+    
+
+    /**
+     * Overrides values in the config file (for unit test purposes).
+     *
+     * @param property Property path (e.g. "accessConditions.fullAccessForLocalhost")
+     * @param value New value to set
+     */
+    public void overrideValue(String property, Object value) {
+        getConfig().setProperty(property, value);
+    }
 }

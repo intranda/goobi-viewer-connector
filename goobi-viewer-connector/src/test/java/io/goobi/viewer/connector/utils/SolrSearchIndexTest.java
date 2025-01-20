@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.junit.jupiter.api.Assertions;
@@ -35,6 +36,34 @@ class SolrSearchIndexTest extends AbstractSolrEnabledTest {
 
     /** Logger for this class. */
     private static final Logger logger = LogManager.getLogger(SolrSearchIndexTest.class);
+
+    /**
+     * @see SolrSearchIndex#checkReloadNeeded()
+     * @verifies create new client if solr url changed
+     */
+    @Test
+    void checkReloadNeeded_shouldCreateNewClientIfSolrUrlChanged() {
+        SolrSearchIndex index = DataManager.getInstance().getSearchIndex();
+        index.setTestMode(false);
+        SolrClient oldClient = index.getClient();
+        Assertions.assertEquals(oldClient, index.getClient());
+        DataManager.getInstance().getConfiguration().overrideValue("solr.solrUrl", "http://localhost:8080/solr");
+        index.checkReloadNeeded();
+        Assertions.assertNotEquals(oldClient, index.getClient());
+    }
+
+    /**
+     * @see SolrSearchIndex#checkReloadNeeded()
+     * @verifies ping server if last ping too old
+     */
+    @Test
+    void checkReloadNeeded_shouldPingServerIfLastPingTooOld() {
+        SolrSearchIndex index = DataManager.getInstance().getSearchIndex();
+        index.setTestMode(false);
+        Assertions.assertEquals(0, index.getLastPing());
+        index.checkReloadNeeded();
+        Assertions.assertNotEquals(0, index.getLastPing());
+    }
 
     /**
      * @see SolrSearchIndex#getSets(String)
