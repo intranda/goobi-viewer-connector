@@ -9,4 +9,12 @@
 		<ignoreVersion type="regex">.*[-_\.](alpha|Alpha|ALPHA|beta|Beta|BETA|rc|RC|M|EA|java7)[-_\.]?[0-9]?.*</ignoreVersion>
 	</ignoreVersions>
 
+    <rules>
+        <!-- This is Jakarta EE 11, Tomcat 11 ...-->
+        <rule groupId="jakarta.servlet" artifactId="jakarta.servlet-api">
+            <ignoreVersions>
+                <ignoreVersion>6.1.0</ignoreVersion>
+            </ignoreVersions>
+        </rule>
+    </rules>
 </ruleset>
