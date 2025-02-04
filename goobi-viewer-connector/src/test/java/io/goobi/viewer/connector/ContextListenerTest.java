@@ -15,10 +15,10 @@
  */
 package io.goobi.viewer.connector;
 
-import javax.servlet.ServletContextEvent;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import jakarta.servlet.ServletContextEvent;
 
 class ContextListenerTest {
 
@@ -27,7 +27,7 @@ class ContextListenerTest {
      * @verifies set version correctly
      */
     @Test
-    void contextInitialized_shouldSetVersionCorrectly() throws Exception {
+    void contextInitialized_shouldSetVersionCorrectly() {
         ContextListener listener = new ContextListener();
         listener.contextInitialized(null);
         Assertions.assertNotNull(io.goobi.viewer.controller.DataManager.getInstance().getConnectorVersion());

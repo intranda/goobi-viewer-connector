@@ -17,7 +17,7 @@ package io.goobi.viewer.connector.sru;
 
 import java.nio.charset.StandardCharsets;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import io.goobi.viewer.connector.exceptions.MissingArgumentException;
 import io.goobi.viewer.connector.oai.enums.Metadata;
@@ -100,7 +100,7 @@ public class SruRequestParameter {
      * Constructor for SruRequestParameter.
      * </p>
      *
-     * @param request a {@link javax.servlet.http.HttpServletRequest} object.
+     * @param request a {@link jakarta.servlet.http.HttpServletRequest} object.
      * @throws io.goobi.viewer.connector.exceptions.MissingArgumentException
      */
     public SruRequestParameter(HttpServletRequest request) throws MissingArgumentException {

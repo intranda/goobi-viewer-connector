@@ -13,13 +13,12 @@
  *
  * You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package io.goobi.viewer.connector.oai;
+package io.goobi.viewer.connector.oai.servlets;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import io.goobi.viewer.connector.AbstractTest;
-import io.goobi.viewer.connector.oai.servlets.OaiServlet;
 
 class OaiServletTest extends AbstractTest {
     /**

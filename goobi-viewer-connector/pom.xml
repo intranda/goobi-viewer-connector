@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.goobi.viewer</groupId>
 	<artifactId>viewer-connector</artifactId>
-	<version>24.12</version>
+	<version>25.01-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 
@@ -42,14 +42,14 @@
 		<skipTests>true</skipTests>
 		<skipDependencyCheck>true</skipDependencyCheck>
 		<failOnSnapshot>false</failOnSnapshot>
-		<maven.compiler.release>17</maven.compiler.release>
+		<maven.compiler.release>21</maven.compiler.release>
 
 		<!-- Sonar -->
 		<sonar.projectKey>intranda_goobi-viewer-connector</sonar.projectKey>
 		<sonar.organization>intranda</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
-		<sonar.java.source>17</sonar.java.source>
-		<sonar.java.target>17</sonar.java.target>
+		<sonar.java.source>21</sonar.java.source>
+		<sonar.java.target>21</sonar.java.target>
 
 		<!-- Checkstyle -->
 		<checkstyle.max.violations>0</checkstyle.max.violations>
@@ -59,7 +59,7 @@
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 		<buildDate>${maven.build.timestamp}</buildDate>
 
-		<viewer-core.version>24.12</viewer-core.version>
+		<viewer-core.version>25.01-SNAPSHOT</viewer-core.version>
 
 		<commons-configuration2.version>2.11.0</commons-configuration2.version>
 		<commons-io.version>2.18.0</commons-io.version>
@@ -67,12 +67,12 @@
 		<commons-lang3.version>3.17.0</commons-lang3.version>
 		<httpclient.version>4.5.14</httpclient.version>
 		<httpcore.version>4.4.16</httpcore.version>
-		<jakarta.servlet-api.version>4.0.4</jakarta.servlet-api.version>
+		<jakarta.servlet-api.version>6.0.0</jakarta.servlet-api.version>
 		<jdom2.version>2.0.6.1</jdom2.version>
-		<json.version>20240303</json.version>
+		<json.version>20250107</json.version>
 		<junit.version>5.11.4</junit.version>
 		<log4j.version>2.24.3</log4j.version>
-		<solr.version>9.7.0</solr.version>
+		<solr.version>9.8.0</solr.version>
 		<xstream.version>1.4.21</xstream.version>
 	</properties>
 
@@ -89,10 +89,6 @@
 				<exclusion>
 					<groupId>org.jboss.weld.servlet</groupId>
 					<artifactId>weld-servlet-shaded</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.logging.log4j</groupId>
-					<artifactId>log4j-core</artifactId>
 				</exclusion>
 			</exclusions>
 
@@ -205,7 +201,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>3.8.0</version>
+				<version>3.8.1</version>
 				<executions>
 					<execution>
 						<id>analyze</id>
@@ -230,7 +226,9 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.13.0</version>
 				<configuration>
-					<compilerArgs>
+                    <compilerArgs>
+                        <!-- Explicitly enable annotation processing -->
+						<arg>-proc:full</arg>
 						<arg>-Xlint:deprecation</arg>
 						<arg>-Xlint:unchecked</arg>
 					</compilerArgs>
@@ -239,7 +237,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.5.0</version>
+				<version>3.5.2</version>
 				<configuration>
 					<skipTests>${skipTests}</skipTests>
 					<excludes>
@@ -317,7 +315,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.10.1</version>
+				<version>3.11.2</version>
 				<configuration>
                     <doclint>none</doclint>
                     <failOnWarnings>true</failOnWarnings>
@@ -369,7 +367,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>versions-maven-plugin</artifactId>
-				<version>2.17.1</version>
+				<version>2.18.0</version>
 				<configuration>
 					<rulesUri>file://${basedir}/version-number-rules.xml</rulesUri>
 				</configuration>
@@ -377,7 +375,7 @@
 			<plugin>
 				<groupId>org.owasp</groupId>
 				<artifactId>dependency-check-maven</artifactId>
-				<version>9.2.0</version>
+				<version>12.0.2</version>
 				<configuration>
 					<!--failBuildOnCVSS>5.0</failBuildOnCVSS-->
 					<skipProvidedScope>true</skipProvidedScope>
@@ -401,12 +399,12 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.5.0</version>
+				<version>3.6.0</version>
 				<dependencies>
 					<dependency>
 						<groupId>com.puppycrawl.tools</groupId>
 						<artifactId>checkstyle</artifactId>
-						<version>10.21.0</version>
+						<version>10.21.2</version>
 					</dependency>
 				</dependencies>
 				<executions>

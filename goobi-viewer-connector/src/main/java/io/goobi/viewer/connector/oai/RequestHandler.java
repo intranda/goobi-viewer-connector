@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -56,7 +56,7 @@ public class RequestHandler {
     /**
      * Handles the request in servlet.
      *
-     * @param request a {@link javax.servlet.http.HttpServletRequest} object.
+     * @param request a {@link jakarta.servlet.http.HttpServletRequest} object.
      */
     public RequestHandler(HttpServletRequest request) {
         if (request.getParameter("verb") != null) {
