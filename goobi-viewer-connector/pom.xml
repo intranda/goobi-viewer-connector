@@ -226,8 +226,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.14.0</version>
 				<configuration>
-                    <compilerArgs>
-                        <!-- Explicitly enable annotation processing -->
+					<compilerArgs>
+						<!-- Explicitly enable annotation processing -->
 						<arg>-proc:full</arg>
 						<arg>-Xlint:deprecation</arg>
 						<arg>-Xlint:unchecked</arg>
@@ -317,31 +317,31 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>3.11.2</version>
 				<configuration>
-                    <doclint>none</doclint>
-                    <failOnWarnings>true</failOnWarnings>
-                    <!-- Specifies the tags to be fixed automatically when running the mvn javadox:fix command, see:
-                         https://maven.apache.org/plugins/maven-javadoc-plugin/fix-mojo.html#fixTags
-                    -->
+					<doclint>none</doclint>
+					<failOnWarnings>true</failOnWarnings>
+					<!-- Specifies the tags to be fixed automatically when running the mvn javadox:fix command, see:
+						 https://maven.apache.org/plugins/maven-javadoc-plugin/fix-mojo.html#fixTags
+					-->
 					<fixTags>link,throws,return,param</fixTags>
 					<tags>
-                        <tag>
-                            <!-- Disables custom @should tag in Javadoc see:
-                                 https://maven.apache.org/plugins/maven-javadoc-plugin/javadoc-mojo.html#tags
-                            -->
+						<tag>
+							<!-- Disables custom @should tag in Javadoc see:
+								 https://maven.apache.org/plugins/maven-javadoc-plugin/javadoc-mojo.html#tags
+							-->
 							<name>should</name>
 							<placement>X</placement>
 						</tag>
 					</tags>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>check-javadoc</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                 </executions>
+				</configuration>
+				<executions>
+					<execution>
+						<id>check-javadoc</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				 </executions>
 			</plugin>
 			<!-- used for test coverage report in Jenkins -->
 			<plugin>
@@ -427,33 +427,33 @@
 				</executions>
 			</plugin>
 		</plugins>
-    </build>
+	</build>
 
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.10.1</version>
-                <configuration>
-                    <doclint>none</doclint>
-                    <failOnWarnings>true</failOnWarnings>
-                    <fixTags>link,throws,return,param</fixTags>
-                    <tags>
-                        <tag>
-                            <name>should</name>
-                            <placement>X</placement>
-                        </tag>
-                    </tags>
-                </configuration>
-                <reportSets>
-                    <reportSet>
-                        <reports>
-                            <report>javadoc</report>
-                        </reports>
-                    </reportSet>
-                </reportSets>
-            </plugin>
-        </plugins>
-    </reporting>
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.10.1</version>
+				<configuration>
+					<doclint>none</doclint>
+					<failOnWarnings>true</failOnWarnings>
+					<fixTags>link,throws,return,param</fixTags>
+					<tags>
+						<tag>
+							<name>should</name>
+							<placement>X</placement>
+						</tag>
+					</tags>
+				</configuration>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>javadoc</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+		</plugins>
+	</reporting>
 </project>
