@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.goobi.viewer</groupId>
 	<artifactId>viewer-connector</artifactId>
-	<version>25.01-SNAPSHOT</version>
+	<version>25.02-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 
@@ -59,7 +59,7 @@
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 		<buildDate>${maven.build.timestamp}</buildDate>
 
-		<viewer-core.version>25.01-SNAPSHOT</viewer-core.version>
+		<viewer-core.version>25.02-SNAPSHOT</viewer-core.version>
 
 		<commons-configuration2.version>2.11.0</commons-configuration2.version>
 		<commons-io.version>2.18.0</commons-io.version>
@@ -70,15 +70,27 @@
 		<jakarta.servlet-api.version>6.0.0</jakarta.servlet-api.version>
 		<jdom2.version>2.0.6.1</jdom2.version>
 		<json.version>20250107</json.version>
-		<junit.version>5.11.4</junit.version>
+		<junit.version>5.12.0</junit.version>
 		<log4j.version>2.24.3</log4j.version>
 		<solr.version>9.8.0</solr.version>
 		<xstream.version>1.4.21</xstream.version>
 	</properties>
 
 
-	<dependencies>
+    <dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.junit</groupId>
+				<artifactId>junit-bom</artifactId>
+				<version>${junit.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
+
+	<dependencies>
 		<dependency>
 			<groupId>io.goobi.viewer</groupId>
 			<artifactId>viewer-core</artifactId>
@@ -143,13 +155,11 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
-			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter</artifactId>
-			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -224,10 +234,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.13.0</version>
+				<version>3.14.0</version>
 				<configuration>
-                    <compilerArgs>
-                        <!-- Explicitly enable annotation processing -->
+					<compilerArgs>
+						<!-- Explicitly enable annotation processing -->
 						<arg>-proc:full</arg>
 						<arg>-Xlint:deprecation</arg>
 						<arg>-Xlint:unchecked</arg>
@@ -317,31 +327,31 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>3.11.2</version>
 				<configuration>
-                    <doclint>none</doclint>
-                    <failOnWarnings>true</failOnWarnings>
-                    <!-- Specifies the tags to be fixed automatically when running the mvn javadox:fix command, see:
-                         https://maven.apache.org/plugins/maven-javadoc-plugin/fix-mojo.html#fixTags
-                    -->
+					<doclint>none</doclint>
+					<failOnWarnings>true</failOnWarnings>
+					<!-- Specifies the tags to be fixed automatically when running the mvn javadox:fix command, see:
+						 https://maven.apache.org/plugins/maven-javadoc-plugin/fix-mojo.html#fixTags
+					-->
 					<fixTags>link,throws,return,param</fixTags>
 					<tags>
-                        <tag>
-                            <!-- Disables custom @should tag in Javadoc see:
-                                 https://maven.apache.org/plugins/maven-javadoc-plugin/javadoc-mojo.html#tags
-                            -->
+						<tag>
+							<!-- Disables custom @should tag in Javadoc see:
+								 https://maven.apache.org/plugins/maven-javadoc-plugin/javadoc-mojo.html#tags
+							-->
 							<name>should</name>
 							<placement>X</placement>
 						</tag>
 					</tags>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>check-javadoc</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                 </executions>
+				</configuration>
+				<executions>
+					<execution>
+						<id>check-javadoc</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				 </executions>
 			</plugin>
 			<!-- used for test coverage report in Jenkins -->
 			<plugin>
@@ -375,7 +385,7 @@
 			<plugin>
 				<groupId>org.owasp</groupId>
 				<artifactId>dependency-check-maven</artifactId>
-				<version>12.0.2</version>
+				<version>12.1.0</version>
 				<configuration>
 					<!--failBuildOnCVSS>5.0</failBuildOnCVSS-->
 					<skipProvidedScope>true</skipProvidedScope>
@@ -427,33 +437,33 @@
 				</executions>
 			</plugin>
 		</plugins>
-    </build>
+	</build>
 
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.10.1</version>
-                <configuration>
-                    <doclint>none</doclint>
-                    <failOnWarnings>true</failOnWarnings>
-                    <fixTags>link,throws,return,param</fixTags>
-                    <tags>
-                        <tag>
-                            <name>should</name>
-                            <placement>X</placement>
-                        </tag>
-                    </tags>
-                </configuration>
-                <reportSets>
-                    <reportSet>
-                        <reports>
-                            <report>javadoc</report>
-                        </reports>
-                    </reportSet>
-                </reportSets>
-            </plugin>
-        </plugins>
-    </reporting>
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.10.1</version>
+				<configuration>
+					<doclint>none</doclint>
+					<failOnWarnings>true</failOnWarnings>
+					<fixTags>link,throws,return,param</fixTags>
+					<tags>
+						<tag>
+							<name>should</name>
+							<placement>X</placement>
+						</tag>
+					</tags>
+				</configuration>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>javadoc</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+		</plugins>
+	</reporting>
 </project>
