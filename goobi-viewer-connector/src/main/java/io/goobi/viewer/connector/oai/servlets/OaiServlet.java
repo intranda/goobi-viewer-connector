@@ -62,7 +62,7 @@ public class OaiServlet extends HttpServlet {
 
         String queryString = (request.getQueryString() != null ? "?" + request.getQueryString() : "");
         if (logger.isDebugEnabled()) {
-            logger.debug("REQUEST URL: {}{}", request.getRequestURL().toString(), queryString);
+            logger.debug("REQUEST URL: {}{}", request.getRequestURL(), queryString);
         }
 
         String filterQuerySuffix = "";

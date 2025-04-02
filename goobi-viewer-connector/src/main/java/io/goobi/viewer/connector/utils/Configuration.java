@@ -268,6 +268,7 @@ public final class Configuration {
         identifyTags.put("adminEmail", getLocalString("identifyTags.adminEmail", null));
         identifyTags.put("deletedRecord", getLocalString("identifyTags.deletedRecord", null));
         identifyTags.put("granularity", getLocalString("identifyTags.granularity", null));
+        identifyTags.put("description", getLocalString("identifyTags.description", null));
 
         return identifyTags;
     }
