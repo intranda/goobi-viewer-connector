@@ -185,9 +185,9 @@ public abstract class Format {
 
         if (StringUtils.isNoneEmpty(identifyTags.get("description"))) {
             Element eleDescription = new Element("description", OAI_NS);
-            //            Element eleDcDescription = new Element("description", DC_NS);
-            eleDescription.setText(identifyTags.get("description"));
-            //            eleDescription.addContent(eleDcDescription);
+            Element eleDcDescription = new Element("description", DC_NS);
+            eleDcDescription.setText(identifyTags.get("description"));
+            eleDescription.addContent(eleDcDescription);
             identify.addContent(eleDescription);
         }
 
