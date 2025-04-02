@@ -425,7 +425,8 @@ public class OAIDCFormat extends Format {
                             }
                             paramIndex++;
                         }
-                        if ((openAccess || !restrictedContent) && !StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(val)) {
+                        if ((openAccess || !restrictedContent) && !StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(val)
+                                && !md.getMasterValue().equals(val)) {
                             finishedValues.add(val);
                         }
                     }
