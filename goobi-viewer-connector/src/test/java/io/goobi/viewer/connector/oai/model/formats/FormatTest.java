@@ -48,6 +48,9 @@ class FormatTest extends AbstractSolrEnabledTest {
         Assertions.assertEquals("2012-10-10T12:07:32Z", eleIdentify.getChildText("earliestDatestamp", null));
         Assertions.assertEquals("transient", eleIdentify.getChildText("deletedRecord", null));
         Assertions.assertEquals("YYYY-MM-DDThh:mm:ssZ", eleIdentify.getChildText("granularity", null));
+        Element eleDescription = eleIdentify.getChild("description", null);
+        Assertions.assertNotNull(eleDescription);
+        Assertions.assertEquals("Lorem ipsum dolor sit amet", eleDescription.getChildText("description", Format.DC_NS));
     }
 
     /**
