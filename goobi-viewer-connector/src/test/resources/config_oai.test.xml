@@ -28,6 +28,8 @@
 		<!-- Definiert, wie genau mit Zeiten umgegangen wird. Erlaubt sind Datestamps 
 			und UTCdatetime -->
 		<granularity>YYYY-MM-DDThh:mm:ssZ</granularity>
+        
+        <description>Lorem ipsum dolor sit amet</description>
 	</identifyTags>
 
 	<!-- Definiert die Liste von XML Namespaces, die in der OAI Antwort verwendet 
