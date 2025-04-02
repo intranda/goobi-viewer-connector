@@ -271,8 +271,7 @@ public class OAIDCFormat extends Format {
 
         // creating Element <oai_dc:dc ....> </oai_dc:dc>
         Element eleOaiDc = new Element("dc", nsOaiDoc);
-        Namespace nsDc = Namespace.getNamespace(Metadata.DC.getMetadataNamespacePrefix(), Metadata.DC.getMetadataNamespaceUri());
-        eleOaiDc.addNamespaceDeclaration(nsDc);
+        eleOaiDc.addNamespaceDeclaration(DC_NS);
         eleOaiDc.addNamespaceDeclaration(XSI_NS);
         eleOaiDc.setAttribute("schemaLocation", "http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd", XSI_NS);
 
@@ -322,7 +321,7 @@ public class OAIDCFormat extends Format {
                                         doc.getFieldValue(SolrConstants.IDDOC));
                                 continue;
                             }
-                            eleOaiDc.addContent(generateDcSource(doc, topstructDoc, anchorDoc, nsDc));
+                            eleOaiDc.addContent(generateDcSource(doc, topstructDoc, anchorDoc, DC_NS));
                             break;
                         case "fulltext":
                             if (topstructDoc == null) {
@@ -331,7 +330,7 @@ public class OAIDCFormat extends Format {
                                 continue;
                             }
                             for (Element eleOaiFullText : generateFulltextUrls((String) topstructDoc.getFieldValue(SolrConstants.PI_TOPSTRUCT),
-                                    nsDc)) {
+                                    DC_NS)) {
                                 eleOaiDc.addContent(eleOaiFullText);
                             }
                             break;
@@ -373,37 +372,57 @@ public class OAIDCFormat extends Format {
                     // Parameter configuration
                     String firstField = md.getParams().get(0).getKey();
                     int numValues = SolrSearchTools.getMetadataValues(doc, firstField).size();
-                    // for each instance of the first field value
-                    for (int i = 0; i < numValues; ++i) {
+                    if (numValues > 0) {
+                        // for each instance of the first field value
+                        for (int i = 0; i < numValues; ++i) {
+                            String val = md.getMasterValue();
+                            int paramIndex = 0;
+                            // for each parameter
+                            for (MetadataParameter param : md.getParams()) {
+                                if (SolrConstants.THUMBNAIL.equals(param.getKey())) {
+                                    restrictedContent = true;
+                                }
+                                String paramVal = "";
+                                List<String> values = SolrSearchTools.getMetadataValues(doc, param.getKey());
+                                if (values.isEmpty() && !param.isDontUseTopstructValue()) {
+                                    values = SolrSearchTools.getMetadataValues(topstructDoc, param.getKey());
+                                }
+                                if (!values.isEmpty()) {
+                                    paramVal = values.size() > i ? values.get(i) : "";
+                                    if (StringUtils.isNotEmpty(paramVal)) {
+                                        if (MetadataParameterType.TRANSLATEDFIELD.equals(param.getType())) {
+                                            paramVal = ViewerResourceBundle.getTranslation(paramVal, null);
+                                        }
+                                        if (StringUtils.isNotEmpty(param.getPrefix())) {
+                                            String prefix = ViewerResourceBundle.getTranslation(param.getPrefix(), null);
+                                            paramVal = prefix + paramVal;
+                                        }
+                                        if (StringUtils.isNotEmpty(param.getSuffix())) {
+                                            String suffix = ViewerResourceBundle.getTranslation(param.getSuffix(), null);
+                                            paramVal += suffix;
+                                        }
+                                    }
+                                } else if (param.getDefaultValue() != null) {
+                                    paramVal = param.getDefaultValue();
+                                }
+                                val = val.replace("{" + paramIndex + "}", paramVal);
+                                paramIndex++;
+                            }
+                            if ((openAccess || !restrictedContent) && !StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(val)) {
+                                finishedValues.add(val);
+                            }
+                        }
+                    } else {
+                        // No field values found, just default value
                         String val = md.getMasterValue();
                         int paramIndex = 0;
-                        // for each parameter
                         for (MetadataParameter param : md.getParams()) {
                             if (SolrConstants.THUMBNAIL.equals(param.getKey())) {
                                 restrictedContent = true;
                             }
-                            String paramVal = "";
-                            List<String> values = SolrSearchTools.getMetadataValues(doc, param.getKey());
-                            if (values.isEmpty() && !param.isDontUseTopstructValue()) {
-                                values = SolrSearchTools.getMetadataValues(topstructDoc, param.getKey());
+                            if (param.getDefaultValue() != null) {
+                                val = val.replace("{" + paramIndex + "}", param.getDefaultValue());
                             }
-                            if (!values.isEmpty()) {
-                                paramVal = values.size() > i ? values.get(i) : "";
-                                if (StringUtils.isNotEmpty(paramVal)) {
-                                    if (MetadataParameterType.TRANSLATEDFIELD.equals(param.getType())) {
-                                        paramVal = ViewerResourceBundle.getTranslation(paramVal, null);
-                                    }
-                                    if (StringUtils.isNotEmpty(param.getPrefix())) {
-                                        String prefix = ViewerResourceBundle.getTranslation(param.getPrefix(), null);
-                                        paramVal = prefix + paramVal;
-                                    }
-                                    if (StringUtils.isNotEmpty(param.getSuffix())) {
-                                        String suffix = ViewerResourceBundle.getTranslation(param.getSuffix(), null);
-                                        paramVal += suffix;
-                                    }
-                                }
-                            }
-                            val = val.replace("{" + paramIndex + '}', paramVal);
                             paramIndex++;
                         }
                         if ((openAccess || !restrictedContent) && !StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(val)) {
@@ -411,7 +430,7 @@ public class OAIDCFormat extends Format {
                         }
                     }
                 } else if (StringUtils.isNotEmpty(md.getMasterValue())) {
-                    // Default value
+                    // Static value
                     String val = md.getMasterValue();
                     if ("title".equals(md.getLabel()) && isWork && doc.getFieldValue(SolrConstants.IDDOC_PARENT) != null) {
                         // If this is a volume, add anchor title in front
@@ -430,7 +449,7 @@ public class OAIDCFormat extends Format {
 
                 // Add all constructed values for the current field to XML
                 for (String val : finishedValues) {
-                    Element eleField = new Element(md.getLabel(), nsDc);
+                    Element eleField = new Element(md.getLabel(), DC_NS);
                     eleField.setText(val);
                     eleOaiDc.addContent(eleField);
                 }
