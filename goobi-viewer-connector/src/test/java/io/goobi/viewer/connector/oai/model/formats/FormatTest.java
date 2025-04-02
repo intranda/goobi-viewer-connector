@@ -55,7 +55,7 @@ class FormatTest extends AbstractSolrEnabledTest {
      * @verifies construct element correctly
      */
     @Test
-    void createMetadataFormats_shouldConstructElementCorrectly() throws Exception {
+    void createMetadataFormats_shouldConstructElementCorrectly() {
         Element ele = Format.createMetadataFormats();
         Assertions.assertNotNull(ele);
         Assertions.assertEquals("ListMetadataFormats", ele.getName());
@@ -80,7 +80,7 @@ class FormatTest extends AbstractSolrEnabledTest {
         Assertions.assertEquals("ListSets", eleListSets.getName());
         List<Element> eleListSet = eleListSets.getChildren("set", null);
         Assertions.assertNotNull(eleListSet);
-        Assertions.assertEquals(44, eleListSet.size());
+        Assertions.assertEquals(55, eleListSet.size());
     }
 
     /**
@@ -88,7 +88,7 @@ class FormatTest extends AbstractSolrEnabledTest {
      * @verifies construct element correctly
      */
     @Test
-    void getOaiPmhElement_shouldConstructElementCorrectly() throws Exception {
+    void getOaiPmhElement_shouldConstructElementCorrectly() {
         Element ele = Format.getOaiPmhElement("oai");
         Assertions.assertNotNull(ele);
         Assertions.assertEquals("oai", ele.getName());
@@ -125,7 +125,7 @@ class FormatTest extends AbstractSolrEnabledTest {
      * @verifies return error if resumption token name illegal
      */
     @Test
-    void handleToken_shouldReturnErrorIfResumptionTokenNameIllegal() throws Exception {
+    void handleToken_shouldReturnErrorIfResumptionTokenNameIllegal() {
         Element result = Format.handleToken("foo", "");
         Assertions.assertEquals("error", result.getName());
         Assertions.assertEquals("badResumptionToken", result.getAttributeValue("code"));
