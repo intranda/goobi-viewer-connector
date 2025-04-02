@@ -42,7 +42,8 @@ class SolrSearchIndexTest extends AbstractSolrEnabledTest {
      */
     @Test
     void getSets_shouldReturnAllValues() throws Exception {
-        Assertions.assertEquals(43, DataManager.getInstance()
+        // Update expected result if test index changes
+        Assertions.assertEquals(54, DataManager.getInstance()
                 .getSearchIndex()
                 .getSets(SolrConstants.DC)
                 .size());
@@ -83,13 +84,13 @@ class SolrSearchIndexTest extends AbstractSolrEnabledTest {
         QueryResponse qr = DataManager.getInstance()
                 .getSearchIndex()
                 .search(null, null, null, Metadata.OAI_DC.getMetadataPrefix(), 0, 10, false, null, "", null, null);
-        Assertions.assertFalse(qr.getResults()
-                .isEmpty());
+        Assertions.assertTrue(qr.getResults().size() > 1);
         long previous = 0;
         for (SolrDocument doc : qr.getResults()) {
             Long dateCreated = (long) doc.getFieldValue(SolrConstants.DATECREATED);
+            System.out.println(dateCreated);
             Assertions.assertNotNull(dateCreated);
-            Assertions.assertTrue(dateCreated > previous);
+            Assertions.assertTrue(dateCreated >= previous);
             previous = dateCreated;
         }
     }
@@ -102,8 +103,8 @@ class SolrSearchIndexTest extends AbstractSolrEnabledTest {
     void getFulltextFileNames_shouldReturnFileNamesCorrectly() throws Exception {
         Map<Integer, String> result = DataManager.getInstance()
                 .getSearchIndex()
-                .getFulltextFileNames("PPN517154005");
-        Assertions.assertEquals(14, result.size());
-        Assertions.assertEquals("alto/PPN517154005/00000001.xml", result.get(1));
+                .getFulltextFileNames("lit30844");
+        Assertions.assertEquals(4, result.size());
+        Assertions.assertEquals("alto/lit30844/p0085.xml", result.get(1));
     }
 }
