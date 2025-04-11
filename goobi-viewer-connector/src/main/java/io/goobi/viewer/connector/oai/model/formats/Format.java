@@ -78,6 +78,7 @@ public abstract class Format {
     protected static final Namespace XSI_NS = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
 
     public static final Namespace OAI_NS = DataManager.getInstance().getConfiguration().getStandardNameSpace();
+    public static final Namespace DC_NS = Namespace.getNamespace(Metadata.DC.getMetadataNamespacePrefix(), Metadata.DC.getMetadataNamespaceUri());
 
     public static final String ACCESSCONDITION_OPENACCESS = "info:eu-repo/semantics/openAccess";
     public static final String ACCESSCONDITION_CLOSEDACCESS = "info:eu-repo/semantics/closedAccess";
@@ -150,7 +151,6 @@ public abstract class Format {
      */
     public static Element getIdentifyXML(String filterQuerySuffix) throws SolrServerException, IOException {
         // TODO: optional parameter: compression is not implemented
-        // TODO: optional parameter: description is not implemented
         Map<String, String> identifyTags = DataManager.getInstance().getConfiguration().getIdentifyTags();
         Element identify = new Element("Identify", OAI_NS);
 
@@ -182,6 +182,14 @@ public abstract class Format {
         Element granularity = new Element("granularity", OAI_NS);
         granularity.setText(identifyTags.get("granularity"));
         identify.addContent(granularity);
+
+        if (StringUtils.isNoneEmpty(identifyTags.get("description"))) {
+            Element eleDescription = new Element("description", OAI_NS);
+            Element eleDcDescription = new Element("description", DC_NS);
+            eleDcDescription.setText(identifyTags.get("description"));
+            eleDescription.addContent(eleDcDescription);
+            identify.addContent(eleDescription);
+        }
 
         return identify;
     }
