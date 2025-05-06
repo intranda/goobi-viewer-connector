@@ -117,7 +117,6 @@ class SolrSearchIndexTest extends AbstractSolrEnabledTest {
         long previous = 0;
         for (SolrDocument doc : qr.getResults()) {
             Long dateCreated = (long) doc.getFieldValue(SolrConstants.DATECREATED);
-            System.out.println(dateCreated);
             Assertions.assertNotNull(dateCreated);
             Assertions.assertTrue(dateCreated >= previous);
             previous = dateCreated;
