@@ -43,7 +43,7 @@
 		<!-- Anzahl der Treffer pro Seite -->
 		<hitsPerToken>23</hitsPerToken>
 		<!-- URL zum Index -->
-		<solrUrl>http://localhost:8080/solr</solrUrl>
+		<solrUrl>https://viewer-testing-index.goobi.io/solr/collection1</solrUrl>
 	</solr>
 	<oaiFolder>src/test/resources/oai/</oaiFolder>
 	<!-- Verzeichnis in dem die resumtionToken gespeichert werden -->
