@@ -29,8 +29,6 @@ import org.apache.commons.configuration2.builder.ConfigurationBuilderEvent;
 import org.apache.commons.configuration2.builder.ReloadingFileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
-import org.apache.commons.configuration2.event.Event;
-import org.apache.commons.configuration2.event.EventListener;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.configuration2.ex.ConversionException;
 import org.apache.commons.configuration2.tree.ImmutableNode;
@@ -70,7 +68,6 @@ public final class Configuration {
      *
      * @param configPath a {@link java.lang.String} object.
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public Configuration(String configPath) {
         // Load default configuration
         builder =
@@ -88,13 +85,7 @@ public final class Configuration {
                 logger.error(e.getMessage(), e);
             }
             builder.addEventListener(ConfigurationBuilderEvent.CONFIGURATION_REQUEST,
-                    new EventListener() {
-
-                        @Override
-                        public void onEvent(Event event) {
-                            builder.getReloadingController().checkForReloading(null);
-                        }
-                    });
+                    event -> builder.getReloadingController().checkForReloading(null));
         } else {
             logger.error("Default Connector configuration file not found: {}; Base path is {}",
                     builder.getFileHandler().getFile().getAbsoluteFile(),
@@ -117,13 +108,7 @@ public final class Configuration {
                 logger.error("{} ({})", e.getMessage(), fileLocal.getAbsolutePath(), e);
             }
             builderLocal.addEventListener(ConfigurationBuilderEvent.CONFIGURATION_REQUEST,
-                    new EventListener() {
-
-                        @Override
-                        public void onEvent(Event event) {
-                            builderLocal.getReloadingController().checkForReloading(null);
-                        }
-                    });
+                    event -> builderLocal.getReloadingController().checkForReloading(null));
         }
     }
 
@@ -268,6 +253,7 @@ public final class Configuration {
         identifyTags.put("adminEmail", getLocalString("identifyTags.adminEmail", null));
         identifyTags.put("deletedRecord", getLocalString("identifyTags.deletedRecord", null));
         identifyTags.put("granularity", getLocalString("identifyTags.granularity", null));
+        identifyTags.put("description", getLocalString("identifyTags.description", null));
 
         return identifyTags;
     }
@@ -818,5 +804,15 @@ public final class Configuration {
         }
 
         return ret;
+    }
+
+    /**
+     * Overrides values in the config file (for unit test purposes).
+     *
+     * @param property Property path (e.g. "accessConditions.fullAccessForLocalhost")
+     * @param value New value to set
+     */
+    public void overrideValue(String property, Object value) {
+        getConfig().setProperty(property, value);
     }
 }

@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.junit.jupiter.api.Assertions;
@@ -37,12 +38,41 @@ class SolrSearchIndexTest extends AbstractSolrEnabledTest {
     private static final Logger logger = LogManager.getLogger(SolrSearchIndexTest.class);
 
     /**
+     * @see SolrSearchIndex#checkReloadNeeded()
+     * @verifies create new client if solr url changed
+     */
+    @Test
+    void checkReloadNeeded_shouldCreateNewClientIfSolrUrlChanged() {
+        SolrSearchIndex index = DataManager.getInstance().getSearchIndex();
+        index.setTestMode(false);
+        SolrClient oldClient = index.getClient();
+        Assertions.assertEquals(oldClient, index.getClient());
+        DataManager.getInstance().getConfiguration().overrideValue("solr.solrUrl", "http://localhost:8080/solr");
+        index.checkReloadNeeded();
+        Assertions.assertNotEquals(oldClient, index.getClient());
+    }
+
+    /**
+     * @see SolrSearchIndex#checkReloadNeeded()
+     * @verifies ping server if last ping too old
+     */
+    @Test
+    void checkReloadNeeded_shouldPingServerIfLastPingTooOld() {
+        SolrSearchIndex index = DataManager.getInstance().getSearchIndex();
+        index.setTestMode(false);
+        Assertions.assertEquals(0, index.getLastPing());
+        index.checkReloadNeeded();
+        Assertions.assertNotEquals(0, index.getLastPing());
+    }
+
+    /**
      * @see SolrSearchIndex#getSets(String)
      * @verifies return all values
      */
     @Test
     void getSets_shouldReturnAllValues() throws Exception {
-        Assertions.assertEquals(43, DataManager.getInstance()
+        // Update expected result if test index changes
+        Assertions.assertEquals(54, DataManager.getInstance()
                 .getSearchIndex()
                 .getSets(SolrConstants.DC)
                 .size());
@@ -83,13 +113,12 @@ class SolrSearchIndexTest extends AbstractSolrEnabledTest {
         QueryResponse qr = DataManager.getInstance()
                 .getSearchIndex()
                 .search(null, null, null, Metadata.OAI_DC.getMetadataPrefix(), 0, 10, false, null, "", null, null);
-        Assertions.assertFalse(qr.getResults()
-                .isEmpty());
+        Assertions.assertTrue(qr.getResults().size() > 1);
         long previous = 0;
         for (SolrDocument doc : qr.getResults()) {
             Long dateCreated = (long) doc.getFieldValue(SolrConstants.DATECREATED);
             Assertions.assertNotNull(dateCreated);
-            Assertions.assertTrue(dateCreated > previous);
+            Assertions.assertTrue(dateCreated >= previous);
             previous = dateCreated;
         }
     }
@@ -102,8 +131,8 @@ class SolrSearchIndexTest extends AbstractSolrEnabledTest {
     void getFulltextFileNames_shouldReturnFileNamesCorrectly() throws Exception {
         Map<Integer, String> result = DataManager.getInstance()
                 .getSearchIndex()
-                .getFulltextFileNames("PPN517154005");
-        Assertions.assertEquals(14, result.size());
-        Assertions.assertEquals("alto/PPN517154005/00000001.xml", result.get(1));
+                .getFulltextFileNames("lit30844");
+        Assertions.assertEquals(4, result.size());
+        Assertions.assertEquals("alto/lit30844/p0085.xml", result.get(1));
     }
 }

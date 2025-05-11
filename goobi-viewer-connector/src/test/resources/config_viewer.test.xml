@@ -6,6 +6,8 @@
 
 <config>
 
+    <configFolder>src/test/resources/</configFolder>
+
     <!-- stopwordsFile: location of the stopword.txt file used in Solr -->
     <stopwordsFile>src/test/resources/stopwords.txt</stopwordsFile>
 

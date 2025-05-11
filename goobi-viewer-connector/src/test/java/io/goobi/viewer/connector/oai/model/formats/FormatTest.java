@@ -48,6 +48,9 @@ class FormatTest extends AbstractSolrEnabledTest {
         Assertions.assertEquals("2012-10-10T12:07:32Z", eleIdentify.getChildText("earliestDatestamp", null));
         Assertions.assertEquals("transient", eleIdentify.getChildText("deletedRecord", null));
         Assertions.assertEquals("YYYY-MM-DDThh:mm:ssZ", eleIdentify.getChildText("granularity", null));
+        Element eleDescription = eleIdentify.getChild("description", null);
+        Assertions.assertNotNull(eleDescription);
+        Assertions.assertEquals("Lorem ipsum dolor sit amet", eleDescription.getChildText("description", Format.DC_NS));
     }
 
     /**
@@ -55,7 +58,7 @@ class FormatTest extends AbstractSolrEnabledTest {
      * @verifies construct element correctly
      */
     @Test
-    void createMetadataFormats_shouldConstructElementCorrectly() throws Exception {
+    void createMetadataFormats_shouldConstructElementCorrectly() {
         Element ele = Format.createMetadataFormats();
         Assertions.assertNotNull(ele);
         Assertions.assertEquals("ListMetadataFormats", ele.getName());
@@ -80,7 +83,7 @@ class FormatTest extends AbstractSolrEnabledTest {
         Assertions.assertEquals("ListSets", eleListSets.getName());
         List<Element> eleListSet = eleListSets.getChildren("set", null);
         Assertions.assertNotNull(eleListSet);
-        Assertions.assertEquals(44, eleListSet.size());
+        Assertions.assertEquals(55, eleListSet.size());
     }
 
     /**
@@ -88,7 +91,7 @@ class FormatTest extends AbstractSolrEnabledTest {
      * @verifies construct element correctly
      */
     @Test
-    void getOaiPmhElement_shouldConstructElementCorrectly() throws Exception {
+    void getOaiPmhElement_shouldConstructElementCorrectly() {
         Element ele = Format.getOaiPmhElement("oai");
         Assertions.assertNotNull(ele);
         Assertions.assertEquals("oai", ele.getName());
@@ -125,7 +128,7 @@ class FormatTest extends AbstractSolrEnabledTest {
      * @verifies return error if resumption token name illegal
      */
     @Test
-    void handleToken_shouldReturnErrorIfResumptionTokenNameIllegal() throws Exception {
+    void handleToken_shouldReturnErrorIfResumptionTokenNameIllegal() {
         Element result = Format.handleToken("foo", "");
         Assertions.assertEquals("error", result.getName());
         Assertions.assertEquals("badResumptionToken", result.getAttributeValue("code"));

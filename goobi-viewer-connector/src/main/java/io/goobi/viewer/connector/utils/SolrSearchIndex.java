@@ -69,7 +69,7 @@ public class SolrSearchIndex {
     private long lastPing = 0;
 
     private SolrClient client;
-    private final boolean testMode;
+    private boolean testMode;
 
     /**
      * <p>
@@ -94,6 +94,9 @@ public class SolrSearchIndex {
 
     /**
      * Checks whether the server's configured URL matches that in the config file. If not, a new server instance is created.
+     * 
+     * @should create new client if solr url changed
+     * @should ping server if last ping too old
      */
     public void checkReloadNeeded() {
         if (testMode || !(client instanceof Http2SolrClient)) {
@@ -647,5 +650,50 @@ public class SolrSearchIndex {
         }
 
         return Collections.emptyMap();
+    }
+
+    /**
+     * Getter for tests.
+     * 
+     * @return the lastPing
+     */
+    long getLastPing() {
+        return lastPing;
+    }
+
+    /**
+     * Setter for tests.
+     * 
+     * @param lastPing the lastPing to set
+     */
+    void setLastPing(long lastPing) {
+        this.lastPing = lastPing;
+    }
+
+    /**
+     * Getter for tests.
+     * 
+     * @return the client
+     */
+    SolrClient getClient() {
+        return client;
+    }
+
+    /**
+     * Getter for tests.
+     * 
+     * @return the testMode
+     */
+    boolean isTestMode() {
+        return testMode;
+    }
+
+    /**
+     * Setter for tests.
+     * 
+     * @param testMode the testMode to set
+     */
+    void setTestMode(boolean testMode) {
+        this.testMode = testMode;
     }
 }

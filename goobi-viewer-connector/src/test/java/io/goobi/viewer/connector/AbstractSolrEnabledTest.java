@@ -26,7 +26,7 @@ import io.goobi.viewer.connector.utils.SolrSearchIndex;
  */
 public abstract class AbstractSolrEnabledTest extends AbstractTest {
 
-    private static final String SOLR_TEST_URL = "https://viewer-testing-index.goobi.io/solr/collection1";
+    public static final String SOLR_TEST_URL = "https://viewer-testing-index.goobi.io/solr/collection1";
 
     @BeforeAll
     public static void setUpClass() throws Exception {
@@ -34,7 +34,7 @@ public abstract class AbstractSolrEnabledTest extends AbstractTest {
     }
 
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp() {
         SolrClient client = SolrSearchIndex.getNewSolrClient(SOLR_TEST_URL);
         DataManager.getInstance().injectSearchIndex(new SolrSearchIndex(client, true));
     }

@@ -22,6 +22,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import io.goobi.viewer.connector.AbstractSolrEnabledTest;
 import io.goobi.viewer.connector.AbstractTest;
 import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.enums.Metadata;
@@ -131,7 +132,7 @@ class ConfigurationTest extends AbstractTest {
      */
     @Test
     void getIndexUrl_shouldReturnCorrectValue() {
-        Assertions.assertEquals("http://localhost:8080/solr", DataManager.getInstance().getConfiguration().getIndexUrl());
+        Assertions.assertEquals(AbstractSolrEnabledTest.SOLR_TEST_URL, DataManager.getInstance().getConfiguration().getIndexUrl());
     }
 
     /**
