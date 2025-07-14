@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.goobi.viewer</groupId>
 	<artifactId>viewer-connector</artifactId>
-	<version>25.06-SNAPSHOT</version>
+	<version>25.06</version>
 	<packaging>jar</packaging>
 
 
@@ -59,7 +59,7 @@
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 		<buildDate>${maven.build.timestamp}</buildDate>
 
-		<viewer-core.version>25.06-SNAPSHOT</viewer-core.version>
+		<viewer-core.version>25.06</viewer-core.version>
 
 		<commons-configuration2.version>2.12.0</commons-configuration2.version>
 		<commons-io.version>2.19.0</commons-io.version>
