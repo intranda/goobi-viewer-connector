@@ -69,10 +69,10 @@
 		<httpcore.version>4.4.16</httpcore.version>
 		<jakarta.servlet-api.version>6.0.0</jakarta.servlet-api.version>
 		<jdom2.version>2.0.6.1</jdom2.version>
-		<json.version>20251224</json.version>
+		<json.version>2025122</json.version>
 		<junit.version>6.0.2</junit.version>
 		<log4j.version>2.25.3</log4j.version>
-		<solr.version>9.9.0</solr.version>
+		<solr.version>9.10.1</solr.version>
 		<xstream.version>1.4.21</xstream.version>
 	</properties>
 
