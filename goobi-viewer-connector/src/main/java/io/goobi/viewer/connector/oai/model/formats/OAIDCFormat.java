@@ -670,9 +670,6 @@ public class OAIDCFormat extends Format {
         return ret;
     }
 
-    /* (non-Javadoc)
-     * @see io.goobi.viewer.connector.oai.model.formats.AbstractFormat#getTotalHits(java.util.Map, java.util.String, java.util.String)
-     */
     /** {@inheritDoc} */
     @Override
     public long getTotalHits(Map<String, String> params, String versionDiscriminatorField, String filterQuerySuffix)
