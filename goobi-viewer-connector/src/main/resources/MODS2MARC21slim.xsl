@@ -8,7 +8,7 @@
 <!-- MODS v3 to MARC21Slim transformation  	ntra 2/20/04 -->
 
 	<!--xsl:include href="http://www.loc.gov/marcxml/xslt/MARC21slimUtils.xsl"/-->
-	<xsl:include href="file:///opt/digiverso/viewer/oai/MARC21slimUtils.xsl"/>
+	<xsl:include href="MARC21slimUtils.xsl"/>
 	
 	<xsl:output method="xml" indent="yes" encoding="UTF-8"/>
 
