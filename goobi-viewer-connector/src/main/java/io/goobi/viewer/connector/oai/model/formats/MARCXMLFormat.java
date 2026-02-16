@@ -291,8 +291,9 @@ public class MARCXMLFormat extends METSFormat {
                 }
                 // classpath include: resolve relative to base systemId
                 String basePathStr = baseUri.getPath();
-                if (basePathStr == null)
+                if (basePathStr == null) {
                     basePathStr = "";
+                }
                 int lastSlash = basePathStr.lastIndexOf('/');
                 String parentDir = (lastSlash >= 0) ? basePathStr.substring(0, lastSlash + 1) : "";
                 String includedPath = parentDir + href;
