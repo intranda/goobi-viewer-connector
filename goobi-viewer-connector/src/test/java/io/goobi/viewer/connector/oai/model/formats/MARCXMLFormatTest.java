@@ -15,21 +15,66 @@
  */
 package io.goobi.viewer.connector.oai.model.formats;
 
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import javax.xml.transform.Source;
+import javax.xml.transform.URIResolver;
 
 import org.apache.solr.common.SolrDocument;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import io.goobi.viewer.connector.AbstractSolrEnabledTest;
+import io.goobi.viewer.connector.DataManager;
 import io.goobi.viewer.connector.oai.RequestHandler;
+import io.goobi.viewer.connector.utils.Configuration;
 import io.goobi.viewer.connector.utils.XmlConstants;
 import io.goobi.viewer.controller.XmlTools;
 import io.goobi.viewer.solr.SolrConstants;
 
 class MARCXMLFormatTest extends AbstractSolrEnabledTest {
+
+    @AfterEach
+    void restoreConfig() {
+        DataManager.getInstance().injectConfiguration(new Configuration(AbstractSolrEnabledTest.TEST_CONFIG_PATH));
+    }
+
+    /**
+     * @see MARCXMLFormat#createXsltUriResolver()
+     * @verifies resolve absolute file href without access denied
+     */
+    @Test
+    void uriResolver_shouldResolveAbsoluteFileHrefWithoutAccessDenied(@TempDir Path tempDir) throws Exception {
+        // Saxon resolves xsl:include hrefs to absolute file: URIs before calling the URIResolver.
+        // The old code treated this absolute URI string as a relative path, causing the sandbox
+        // check to fail with "Access denied".
+        try (InputStream is = MARCXMLFormatTest.class.getClassLoader().getResourceAsStream("MARC21slimUtils.xsl")) {
+            Files.copy(is, tempDir.resolve("MARC21slimUtils.xsl"));
+        }
+
+        String configXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<config>\n"
+                + "  <oaiFolder>" + tempDir.toAbsolutePath() + "/</oaiFolder>\n"
+                + "</config>";
+        Path configFile = tempDir.resolve("config_test.xml");
+        Files.writeString(configFile, configXml);
+        DataManager.getInstance().injectConfiguration(new Configuration(configFile.toString()));
+
+        URIResolver resolver = MARCXMLFormat.createXsltUriResolver();
+
+        // Simulate what Saxon passes: already-resolved absolute file: URI as href
+        String href = tempDir.resolve("MARC21slimUtils.xsl").toUri().toString();
+        String base = tempDir.resolve("MODS2MARC21slim.xsl").toUri().toString();
+
+        Source result = resolver.resolve(href, base);
+        Assertions.assertNotNull(result);
+    }
 
     /**
      * @see MARCXMLFormat#generateMarc(Element,String,String)

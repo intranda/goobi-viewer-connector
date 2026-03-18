@@ -256,7 +256,7 @@ public class MARCXMLFormat extends METSFormat {
         }
     }
 
-    private static URIResolver createXsltUriResolver() {
+    static URIResolver createXsltUriResolver() {
         return (href, base) -> {
             // If base is null, just try classpath
             if (base == null) {
@@ -276,7 +276,17 @@ public class MARCXMLFormat extends METSFormat {
                 if ("file".equals(baseUri.getScheme())) {
                     // filesystem include
                     Path basePath = Paths.get(baseUri).getParent();
-                    Path resolved = basePath.resolve(href).normalize();
+                    Path resolved;
+                    try {
+                        URI hrefUri = new URI(href);
+                        if (hrefUri.isAbsolute() && "file".equals(hrefUri.getScheme())) {
+                            resolved = Paths.get(hrefUri).normalize();
+                        } else {
+                            resolved = basePath.resolve(href).normalize();
+                        }
+                    } catch (URISyntaxException e) {
+                        resolved = basePath.resolve(href).normalize();
+                    }
 
                     Path allowedRoot = Paths.get(DataManager.getInstance()
                             .getConfiguration()
