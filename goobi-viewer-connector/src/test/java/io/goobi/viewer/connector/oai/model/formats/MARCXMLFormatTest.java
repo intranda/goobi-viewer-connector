@@ -47,26 +47,18 @@ class MARCXMLFormatTest extends AbstractSolrEnabledTest {
     }
 
     /**
-     * @see MARCXMLFormat#createXsltUriResolver()
+     * @see MARCXMLFormat#createXsltUriResolver(Path)
      * @verifies resolve absolute file href without access denied
      */
     @Test
     void uriResolver_shouldResolveAbsoluteFileHrefWithoutAccessDenied(@TempDir Path tempDir) throws Exception {
         // Saxon resolves xsl:include hrefs to absolute file: URIs before calling the URIResolver.
-        // The old code treated this absolute URI string as a relative path, causing the sandbox
-        // check to fail with "Access denied".
+        // The allowedRoot must be derived from the XSLT file's parent directory, not from oaiFolder config.
         try (InputStream is = MARCXMLFormatTest.class.getClassLoader().getResourceAsStream("MARC21slimUtils.xsl")) {
             Files.copy(is, tempDir.resolve("MARC21slimUtils.xsl"));
         }
 
-        String configXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<config>\n"
-                + "  <oaiFolder>" + tempDir.toAbsolutePath() + "/</oaiFolder>\n"
-                + "</config>";
-        Path configFile = tempDir.resolve("config_test.xml");
-        Files.writeString(configFile, configXml);
-        DataManager.getInstance().injectConfiguration(new Configuration(configFile.toString()));
-
-        URIResolver resolver = MARCXMLFormat.createXsltUriResolver();
+        URIResolver resolver = MARCXMLFormat.createXsltUriResolver(tempDir.toAbsolutePath().normalize());
 
         // Simulate what Saxon passes: already-resolved absolute file: URI as href
         String href = tempDir.resolve("MARC21slimUtils.xsl").toUri().toString();
