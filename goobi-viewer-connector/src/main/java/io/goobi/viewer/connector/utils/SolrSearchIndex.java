@@ -15,6 +15,7 @@
  */
 package io.goobi.viewer.connector.utils;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -55,7 +56,7 @@ import io.goobi.viewer.solr.SolrConstants.DocType;
  * </p>
  *
  */
-public class SolrSearchIndex {
+public class SolrSearchIndex implements Closeable {
 
     /** Logger for this class. */
     static final Logger logger = LogManager.getLogger(SolrSearchIndex.class);
@@ -92,9 +93,16 @@ public class SolrSearchIndex {
         }
     }
 
+    @Override
+    public void close() throws IOException {
+        if (client != null) {
+            client.close();
+        }
+    }
+
     /**
      * Checks whether the server's configured URL matches that in the config file. If not, a new server instance is created.
-     * 
+     *
      * @should create new client if solr url changed
      * @should ping server if last ping too old
      */
