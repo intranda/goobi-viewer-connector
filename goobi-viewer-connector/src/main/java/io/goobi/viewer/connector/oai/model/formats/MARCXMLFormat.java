@@ -215,15 +215,22 @@ public class MARCXMLFormat extends METSFormat {
             }
         }
 
+        // Determine the allowed root for xsl:include resolution
+        final Path xsltAllowedRoot;
+        if (localXsltFile.exists()) {
+            xsltAllowedRoot = localXsltFile.toPath().getParent().toAbsolutePath().normalize();
+        } else {
+            xsltAllowedRoot = null; // classpath-only, no filesystem access needed
+        }
+
         try (InputStream input = xsltUrl.openStream()) {
             StreamSource xsltSource = new StreamSource(input);
             xsltSource.setSystemId(xsltUrl.toExternalForm());
 
             TransformerFactory factory = TransformerFactory.newInstance();
             factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-            factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
             factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
-            factory.setURIResolver(createXsltUriResolver());
+            factory.setURIResolver(createXsltUriResolver(xsltAllowedRoot));
 
             Transformer transformer = factory.newTransformer(xsltSource);
 
@@ -256,7 +263,7 @@ public class MARCXMLFormat extends METSFormat {
         }
     }
 
-    private static URIResolver createXsltUriResolver() {
+    static URIResolver createXsltUriResolver(Path allowedRoot) {
         return (href, base) -> {
             // If base is null, just try classpath
             if (base == null) {
@@ -276,15 +283,20 @@ public class MARCXMLFormat extends METSFormat {
                 if ("file".equals(baseUri.getScheme())) {
                     // filesystem include
                     Path basePath = Paths.get(baseUri).getParent();
-                    Path resolved = basePath.resolve(href).normalize();
+                    Path resolved;
+                    try {
+                        URI hrefUri = new URI(href);
+                        if (hrefUri.isAbsolute() && "file".equals(hrefUri.getScheme())) {
+                            resolved = Paths.get(hrefUri).normalize();
+                        } else {
+                            resolved = basePath.resolve(href).normalize();
+                        }
+                    } catch (URISyntaxException e) {
+                        resolved = basePath.resolve(href).normalize();
+                    }
 
-                    Path allowedRoot = Paths.get(DataManager.getInstance()
-                            .getConfiguration()
-                            .getOaiFolder())
-                            .toAbsolutePath()
-                            .normalize();
-                    if (!resolved.startsWith(allowedRoot)) {
-                        throw new TransformerException("Access denied: " + href);
+                    if (allowedRoot != null && !resolved.startsWith(allowedRoot)) {
+                        throw new TransformerException("Access denied: " + resolved);
                     }
                     return new StreamSource(resolved.toFile());
 
