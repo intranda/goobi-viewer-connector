@@ -54,7 +54,7 @@ public class EuropeanaFormat extends OAIDCFormat {
     private static Namespace nsEuropeana = Namespace.getNamespace(Metadata.ESE.getMetadataNamespacePrefix(), Metadata.ESE.getMetadataNamespaceUri());
 
     private List<String> setSpecFields =
-            DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.ESE.name().toLowerCase());
+            DataManager.getInstance().getConfiguration().getSetSpecFieldsForMetadataFormat(Metadata.ESE.getMetadataPrefix());
 
     /** {@inheritDoc} */
     @Override

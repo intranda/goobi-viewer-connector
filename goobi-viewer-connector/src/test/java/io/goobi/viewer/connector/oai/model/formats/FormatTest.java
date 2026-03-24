@@ -64,7 +64,7 @@ class FormatTest extends AbstractSolrEnabledTest {
         Assertions.assertEquals("ListMetadataFormats", ele.getName());
         List<Element> eleListMetadataFormat = ele.getChildren("metadataFormat", null);
         Assertions.assertNotNull(eleListMetadataFormat);
-        Assertions.assertEquals(9, eleListMetadataFormat.size());
+        Assertions.assertEquals(10, eleListMetadataFormat.size());
         for (Element eleMetadataFormat : eleListMetadataFormat) {
             Assertions.assertNotNull(eleMetadataFormat.getChildText("metadataPrefix", null));
             Assertions.assertNotNull(eleMetadataFormat.getChildText("metadataNamespace", null));
