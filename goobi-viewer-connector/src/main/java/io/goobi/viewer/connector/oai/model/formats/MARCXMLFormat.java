@@ -229,6 +229,9 @@ public class MARCXMLFormat extends METSFormat {
 
             TransformerFactory factory = TransformerFactory.newInstance();
             factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            // ACCESS_EXTERNAL_DTD is intentionally not set: Saxon propagates it to its internal XML reader (Xerces),
+            // which does not support this JAXP property and would log a warning on every transformation.
+            // FEATURE_SECURE_PROCESSING=true already covers external DTD access restriction for Saxon.
             factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
             factory.setURIResolver(createXsltUriResolver(xsltAllowedRoot));
 
