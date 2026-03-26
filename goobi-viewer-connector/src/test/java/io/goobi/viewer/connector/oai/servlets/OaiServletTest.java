@@ -26,7 +26,7 @@ class OaiServletTest extends AbstractTest {
      * @verifies return false if from is not well formed
      */
     @Test
-    void checkDatestamps_shouldReturnFalseIfFromIsNotWellFormed() throws Exception {
+    void checkDatestamps_shouldReturnFalseIfFromIsNotWellFormed() {
         Assertions.assertFalse(OaiServlet.checkDatestamps("2015-09-30T15:00:00X", "2015-09-30T15:00:01"));
         Assertions.assertFalse(OaiServlet.checkDatestamps("2015-09-2X", "2015-09-30"));
     }
@@ -36,7 +36,7 @@ class OaiServletTest extends AbstractTest {
      * @verifies return false if until is not well formed
      */
     @Test
-    void checkDatestamps_shouldReturnFalseIfUntilIsNotWellFormed() throws Exception {
+    void checkDatestamps_shouldReturnFalseIfUntilIsNotWellFormed() {
         Assertions.assertFalse(OaiServlet.checkDatestamps("2015-09-30T15:00:00", "2015-09-30T15:00:01Z"));
         Assertions.assertFalse(OaiServlet.checkDatestamps("2015-09-30", "2015-09-31"));
     }
@@ -46,7 +46,7 @@ class OaiServletTest extends AbstractTest {
      * @verifies return false if from after until
      */
     @Test
-    void checkDatestamps_shouldReturnFalseIfFromAfterUntil() throws Exception {
+    void checkDatestamps_shouldReturnFalseIfFromAfterUntil() {
         Assertions.assertFalse(OaiServlet.checkDatestamps("2015-09-30T15:00:01", "2015-09-30T15:00:00"));
         Assertions.assertFalse(OaiServlet.checkDatestamps("2015-09-30", "2015-09-29"));
     }
@@ -56,7 +56,7 @@ class OaiServletTest extends AbstractTest {
      * @verifies return true if from and until correct
      */
     @Test
-    void checkDatestamps_shouldReturnTrueIfFromAndUntilCorrect() throws Exception {
+    void checkDatestamps_shouldReturnTrueIfFromAndUntilCorrect() {
         Assertions.assertTrue(OaiServlet.checkDatestamps("2015-09-30T15:00:00Z", "2015-09-30T15:00:01Z"));
         Assertions.assertTrue(OaiServlet.checkDatestamps("2015-09-29", "2015-09-30"));
     }
@@ -66,7 +66,7 @@ class OaiServletTest extends AbstractTest {
      * @verifies return false if from and until different types
      */
     @Test
-    void checkDatestamps_shouldReturnFalseIfFromAndUntilDifferentTypes() throws Exception {
+    void checkDatestamps_shouldReturnFalseIfFromAndUntilDifferentTypes() {
         Assertions.assertFalse(OaiServlet.checkDatestamps("2015-09-30", "2015-09-30T15:00:00Z"));
         Assertions.assertFalse(OaiServlet.checkDatestamps("2015-09-29T15:00:00:Z", "2015-09-30"));
     }
@@ -76,7 +76,7 @@ class OaiServletTest extends AbstractTest {
      * @verifies return true if only one datestamp given
      */
     @Test
-    void checkDatestamps_shouldReturnTrueIfOnlyOneDatestampGiven() throws Exception {
+    void checkDatestamps_shouldReturnTrueIfOnlyOneDatestampGiven() {
         Assertions.assertTrue(OaiServlet.checkDatestamps("2015-09-30T15:00:00Z", null));
         Assertions.assertTrue(OaiServlet.checkDatestamps(null, "2015-09-30"));
     }
