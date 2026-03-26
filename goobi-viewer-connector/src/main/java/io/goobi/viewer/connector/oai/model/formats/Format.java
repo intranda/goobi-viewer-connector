@@ -404,7 +404,7 @@ public abstract class Format {
         // logger.trace("getHeader: {}", doc.getFieldValue(SolrConstants.PI)); //NOSONAR Debug
         Element header = new Element("header", OAI_NS);
         // identifier
-        if (doc.getFieldValue(SolrConstants.URN) != null && ((String) doc.getFieldValue(SolrConstants.URN)).length() > 0) {
+        if (doc.getFieldValue(SolrConstants.URN) != null && !((String) doc.getFieldValue(SolrConstants.URN)).isEmpty()) {
             Element urnIdentifier = new Element("identifier", OAI_NS);
             urnIdentifier.setText(DataManager.getInstance().getConfiguration().getOaiIdentifier().get("repositoryIdentifier")
                     + (String) doc.getFieldValue(SolrConstants.URN));

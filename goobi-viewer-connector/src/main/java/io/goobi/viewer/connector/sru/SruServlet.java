@@ -617,7 +617,7 @@ public class SruServlet extends HttpServlet {
             StringBuilder sb = new StringBuilder();
             for (Object fieldValue : doc.getFieldValues(io.goobi.viewer.connector.oai.model.formats.Format.MD_CREATOR)) {
                 String value = (String) fieldValue;
-                if (sb.length() > 0) {
+                if (!sb.isEmpty()) {
                     sb.append(", ");
                 }
                 sb.append(value);
@@ -683,7 +683,7 @@ public class SruServlet extends HttpServlet {
         dc.addContent(eleDcFormat);
 
         // create <dc:identifier />
-        if (doc.getFieldValue(SolrConstants.URN) != null && ((String) doc.getFieldValue(SolrConstants.URN)).length() > 0) {
+        if (doc.getFieldValue(SolrConstants.URN) != null && !((String) doc.getFieldValue(SolrConstants.URN)).isEmpty()) {
             Element eleDcIdentifier = new Element("identifier", DC_NAMEPSACE);
             eleDcIdentifier.setText(DataManager.getInstance().getConfiguration().getUrnResolverUrl() + (String) doc.getFieldValue(SolrConstants.URN));
             dc.addContent(eleDcIdentifier);

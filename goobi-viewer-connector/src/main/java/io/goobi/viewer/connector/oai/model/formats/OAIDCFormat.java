@@ -510,7 +510,7 @@ public class OAIDCFormat extends Format {
             for (Object fieldValue : doc.getFieldValues(MD_CREATOR)) {
                 String val = (String) fieldValue;
                 if (!StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(val)) {
-                    if (sbSourceCreators.length() > 0) {
+                    if (!sbSourceCreators.isEmpty()) {
                         sbSourceCreators.append(", ");
                     }
                     sbSourceCreators.append(val);
@@ -520,14 +520,14 @@ public class OAIDCFormat extends Format {
             for (Object fieldValue : topstructDoc.getFieldValues(MD_CREATOR)) {
                 String val = (String) fieldValue;
                 if (!StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(val)) {
-                    if (sbSourceCreators.length() > 0) {
+                    if (!sbSourceCreators.isEmpty()) {
                         sbSourceCreators.append(", ");
                     }
                     sbSourceCreators.append(val);
                 }
             }
         }
-        if (sbSourceCreators.length() == 0) {
+        if (sbSourceCreators.isEmpty()) {
             sbSourceCreators.append('-');
         }
 
@@ -541,19 +541,19 @@ public class OAIDCFormat extends Format {
         if (anchorDoc != null && anchorDoc.getFirstValue(SolrConstants.TITLE) != null) {
             String val = (String) anchorDoc.getFirstValue(SolrConstants.TITLE);
             if (!StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(val)) {
-                if (sbSourceTitle.length() > 0) {
+                if (!sbSourceTitle.isEmpty()) {
                     sbSourceTitle.append("; ");
                 }
                 sbSourceTitle.append(val);
             }
         }
-        if (sbSourceTitle.length() == 0) {
+        if (sbSourceTitle.isEmpty()) {
             sbSourceTitle.append('-');
         }
         if (topstructDoc != doc && topstructDoc.getFirstValue(SolrConstants.TITLE) != null) {
             String val = (String) topstructDoc.getFirstValue(SolrConstants.TITLE);
             if (!StringConstants.ACCESSCONDITION_METADATA_ACCESS_RESTRICTED.equals(val)) {
-                if (sbSourceTitle.length() > 0) {
+                if (!sbSourceTitle.isEmpty()) {
                     sbSourceTitle.append("; ");
                 }
                 sbSourceTitle.append(val);
