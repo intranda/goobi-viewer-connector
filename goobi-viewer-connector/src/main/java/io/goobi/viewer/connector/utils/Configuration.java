@@ -57,6 +57,7 @@ public final class Configuration {
     public static final String DEFAULT_CONFIG_FILE = "config_oai.xml";
 
     private static final String XML_PATH_ATTRIBUTE_NAME = "[@name]";
+    private static final String XML_PATH_ATTRIBUTE_TYPE = "[@type]";
 
     protected ReloadingFileBasedConfigurationBuilder<XMLConfiguration> builder;
     protected ReloadingFileBasedConfigurationBuilder<XMLConfiguration> builderLocal;
@@ -472,7 +473,7 @@ public final class Configuration {
         if (types != null) {
             for (Iterator it = types.iterator(); it.hasNext();) {
                 HierarchicalConfiguration sub = (HierarchicalConfiguration) it.next();
-                ret.put(sub.getString(XML_PATH_ATTRIBUTE_NAME), sub.getString("[@type]"));
+                ret.put(sub.getString(XML_PATH_ATTRIBUTE_NAME), sub.getString(XML_PATH_ATTRIBUTE_TYPE));
             }
         }
 

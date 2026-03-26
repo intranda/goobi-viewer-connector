@@ -65,6 +65,10 @@ public class OAIDCFormat extends Format {
 
     private static final Logger logger = LogManager.getLogger(OAIDCFormat.class);
 
+    private static final String MSG_NO_TOPSTRUCT_FOUND =
+            "No topstruct found for IDDOC:{} - is this a page document? Please check the base query.";
+    private static final String ELE_NAME_SOURCE = "source";
+
     protected static Map<String, String> anchorTitles = new HashMap<>();
 
     private List<String> setSpecFields =
@@ -242,7 +246,7 @@ public class OAIDCFormat extends Format {
             }
         }
         if (topstructDoc == null && !doc.containsKey(SolrConstants.DATEDELETED)) {
-            logger.warn("No topstruct found for IDDOC:{} - is this a page document? Please check the base query.",
+            logger.warn(MSG_NO_TOPSTRUCT_FOUND,
                     doc.getFieldValue(SolrConstants.IDDOC));
         }
         SolrDocument anchorDoc = null;
@@ -315,9 +319,9 @@ public class OAIDCFormat extends Format {
                             }
                             finishedValues.add(val);
                             break;
-                        case "source":
+                        case ELE_NAME_SOURCE:
                             if (topstructDoc == null) {
-                                logger.warn("No topstruct found for IDDOC:{} - is this a page document? Please check the base query.",
+                                logger.warn(MSG_NO_TOPSTRUCT_FOUND,
                                         doc.getFieldValue(SolrConstants.IDDOC));
                                 continue;
                             }
@@ -325,7 +329,7 @@ public class OAIDCFormat extends Format {
                             break;
                         case "fulltext":
                             if (topstructDoc == null) {
-                                logger.warn("No topstruct found for IDDOC:{} - is this a page document? Please check the base query.",
+                                logger.warn(MSG_NO_TOPSTRUCT_FOUND,
                                         doc.getFieldValue(SolrConstants.IDDOC));
                                 continue;
                             }
@@ -595,7 +599,7 @@ public class OAIDCFormat extends Format {
 
         sbSourceString.append('.');
 
-        Element eleDcSource = new Element("source", namespace);
+        Element eleDcSource = new Element(ELE_NAME_SOURCE, namespace);
         eleDcSource.setText(sbSourceString.toString());
 
         return eleDcSource;
@@ -661,7 +665,7 @@ public class OAIDCFormat extends Format {
             logger.trace(url);
 
             if (url != null) {
-                Element eleDcFulltext = new Element("source", namespace);
+                Element eleDcFulltext = new Element(ELE_NAME_SOURCE, namespace);
                 eleDcFulltext.setText(url);
                 ret.add(eleDcFulltext);
             }

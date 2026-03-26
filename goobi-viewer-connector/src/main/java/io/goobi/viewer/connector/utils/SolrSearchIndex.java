@@ -67,6 +67,11 @@ public class SolrSearchIndex implements Closeable {
     private static final int TIMEOUT_CONNECTION = 300000;
     private static final int RETRY_ATTEMPTS = 20;
 
+    private static final String PARAM_FROM = "from";
+    private static final String PARAM_UNTIL = "until";
+    private static final String PARAM_SET = "set";
+    private static final String PARAM_METADATA_PREFIX = "metadataPrefix";
+
     private long lastPing = 0;
 
     private SolrClient client;
@@ -321,7 +326,7 @@ public class SolrSearchIndex implements Closeable {
     public QueryResponse getListIdentifiers(Map<String, String> params, int firstRawRow, int numRows, String additionalQuery, List<String> fieldList,
             List<String> fieldStatistics, String filterQuerySuffix) throws SolrServerException {
         try {
-            return search(params.get("from"), params.get("until"), params.get("set"), params.get("metadataPrefix"), firstRawRow, numRows, false,
+            return search(params.get(PARAM_FROM), params.get(PARAM_UNTIL), params.get(PARAM_SET), params.get(PARAM_METADATA_PREFIX), firstRawRow, numRows, false,
                     additionalQuery, filterQuerySuffix, fieldList, fieldStatistics);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
@@ -347,7 +352,7 @@ public class SolrSearchIndex implements Closeable {
     public QueryResponse getListRecords(Map<String, String> params, int firstRow, int numRows, boolean urnOnly, String additionalQuery,
             String filterQuerySuffix, List<String> fieldList, List<String> fieldStatistics) throws SolrServerException {
         try {
-            return search(params.get("from"), params.get("until"), params.get("set"), params.get("metadataPrefix"), firstRow, numRows, urnOnly,
+            return search(params.get(PARAM_FROM), params.get(PARAM_UNTIL), params.get(PARAM_SET), params.get(PARAM_METADATA_PREFIX), firstRow, numRows, urnOnly,
                     additionalQuery, filterQuerySuffix, fieldList, fieldStatistics);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
@@ -489,8 +494,8 @@ public class SolrSearchIndex implements Closeable {
      */
     public long getTotalHitNumber(Map<String, String> params, boolean urnOnly, String additionalQuery, List<String> fieldStatistics,
             String filterQuerySuffix) throws IOException, SolrServerException {
-        StringBuilder sbQuery = new StringBuilder(SolrSearchTools.buildQueryString(params.get("from"), params.get("until"), params.get("set"),
-                params.get("metadataPrefix"), urnOnly, additionalQuery));
+        StringBuilder sbQuery = new StringBuilder(SolrSearchTools.buildQueryString(params.get(PARAM_FROM), params.get(PARAM_UNTIL), params.get(PARAM_SET),
+                params.get(PARAM_METADATA_PREFIX), urnOnly, additionalQuery));
         if (urnOnly) {
             sbQuery.append(" AND (").append(SolrConstants.URN).append(":* OR ").append(SolrConstants.IMAGEURN_OAI).append(":*)");
         }
