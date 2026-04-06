@@ -346,24 +346,9 @@ public class OAIDCFormat extends Format {
                 } else if ("#TOC#".equals(md.getMasterValue())) {
                     // Generated TOC as plain text
                     String url = DataManager.getInstance().getConfiguration().getRestApiUrl() + "records/"
-                            + (String) doc.getFieldValue(SolrConstants.PI) + "/toc/";
+                            + (String) doc.getFieldValue(SolrConstants.PI) + "/toc";
                     try {
-                        String val = null;
-                        try {
-                            val = NetTools.getWebContentGET(url);
-                        } catch (HTTPException e) {
-                            // If the API end point was not found, try the fallback, otherwise re-throw the exception
-                            if (e.getCode() != 404) {
-                                throw e;
-                            }
-                        }
-                        if (StringUtils.isEmpty(val)) {
-                            // Old API fallback
-                            url = DataManager.getInstance().getConfiguration().getRestApiUrl() + "records/toc/"
-                                    + (String) doc.getFieldValue(SolrConstants.PI) + "/";
-                            val = NetTools.getWebContentGET(url);
-                        }
-
+                        String val = NetTools.getWebContentGET(url);
                         if (StringUtils.isNotEmpty(val)) {
                             finishedValues.add(val);
                         }
