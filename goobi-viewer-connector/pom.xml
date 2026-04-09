@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.goobi.viewer</groupId>
 	<artifactId>viewer-connector</artifactId>
-	<version>26.02</version>
+	<version>26.03-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 
@@ -59,7 +59,7 @@
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 		<buildDate>${maven.build.timestamp}</buildDate>
 
-		<viewer-core.version>26.02</viewer-core.version>
+		<viewer-core.version>26.03-SNAPSHOT</viewer-core.version>
 
 		<commons-configuration2.version>2.13.0</commons-configuration2.version>
 		<commons-io.version>2.21.0</commons-io.version>
@@ -71,7 +71,7 @@
 		<jdom2.version>2.0.6.1</jdom2.version>
 		<json.version>20251224</json.version>
 		<junit.version>6.0.3</junit.version>
-		<log4j.version>2.25.3</log4j.version>
+		<log4j.version>2.25.4</log4j.version>
 		<solr.version>9.10.1</solr.version>
 		<xstream.version>1.4.21</xstream.version>
 	</properties>
@@ -410,7 +410,7 @@
 					<dependency>
 						<groupId>com.puppycrawl.tools</groupId>
 						<artifactId>checkstyle</artifactId>
-						<version>13.2.0</version>
+						<version>13.4.0</version>
 					</dependency>
 				</dependencies>
 				<executions>

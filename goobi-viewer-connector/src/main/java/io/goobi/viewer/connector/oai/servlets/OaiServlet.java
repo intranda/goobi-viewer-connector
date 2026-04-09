@@ -55,6 +55,8 @@ public class OaiServlet extends HttpServlet {
 
     private static final Logger logger = LogManager.getLogger(OaiServlet.class);
 
+    private static final String PARAM_RESUMPTION_TOKEN = "resumptionToken";
+
     /** {@inheritDoc} */
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -123,9 +125,9 @@ public class OaiServlet extends HttpServlet {
             }
             root.addContent(requestType);
             //  resumptionToken
-            if (request.getParameter("resumptionToken") != null) {
-                String resumptionToken = request.getParameterValues("resumptionToken")[0];
-                requestType.setAttribute("resumptionToken", resumptionToken);
+            if (request.getParameter(PARAM_RESUMPTION_TOKEN) != null) {
+                String resumptionToken = request.getParameterValues(PARAM_RESUMPTION_TOKEN)[0];
+                requestType.setAttribute(PARAM_RESUMPTION_TOKEN, resumptionToken);
                 root.addContent(Format.handleToken(resumptionToken, filterQuerySuffix));
                 Format.removeExpiredTokens();
             } else {
