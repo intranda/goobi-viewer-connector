@@ -275,13 +275,44 @@ public class OaiServlet extends HttpServlet {
                 xmlOut.output(doc, response.getOutputStream());
             }
         } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-            try {
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-            } catch (IOException e1) {
-                logger.error(e1.getMessage());
+            // Client disconnects (harvester timeouts etc.) are normal network behavior.
+            // Downgrade to DEBUG so they don't pollute the error log.
+            if (isClientAbort(e)) {
+                String clientIp = request.getHeader("X-Forwarded-For");
+                if (clientIp == null) {
+                    clientIp = request.getRemoteAddr();
+                } else {
+                    int comma = clientIp.indexOf(',');
+                    if (comma > 0) {
+                        clientIp = clientIp.substring(0, comma).trim();
+                    }
+                }
+                logger.debug("Client {} disconnected during OAI response for '{}': {}",
+                        clientIp, request.getQueryString(), e.getMessage());
+            } else {
+                logger.error(e.getMessage(), e);
+                try {
+                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                } catch (IOException e1) {
+                    logger.error(e1.getMessage());
+                }
             }
         }
+    }
+
+    /**
+     * Returns true if the given exception indicates a client disconnect (broken pipe, connection reset, ClientAbortException).
+     *
+     * @param e the exception to test
+     * @return true if the exception is caused by a client disconnect
+     */
+    private static boolean isClientAbort(Throwable e) {
+        String simpleName = e.getClass().getSimpleName().toLowerCase();
+        String message = e.toString().toLowerCase();
+        return simpleName.contains("clientabortexception")
+                || message.contains("broken pipe")
+                || message.contains("connection reset")
+                || message.contains("clientabort");
     }
 
     /**
