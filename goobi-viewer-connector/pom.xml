@@ -102,6 +102,11 @@
 					<groupId>org.jboss.weld.servlet</groupId>
 					<artifactId>weld-servlet-shaded</artifactId>
 				</exclusion>
+				<!-- xml-apis bundles javax.xml.transform, splitting the package with java.xml on Java 9+ -->
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
 			</exclusions>
 
 		</dependency>
