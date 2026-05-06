@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -35,7 +34,6 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.BinaryRequestWriter;
 import org.apache.solr.client.solrj.impl.Http2SolrClient;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.FacetField.Count;
@@ -49,6 +47,7 @@ import io.goobi.viewer.exceptions.IndexUnreachableException;
 import io.goobi.viewer.model.search.SearchHelper;
 import io.goobi.viewer.solr.SolrConstants;
 import io.goobi.viewer.solr.SolrConstants.DocType;
+import io.goobi.viewer.solr.SolrTools;
 
 /**
  * <p>
@@ -153,13 +152,7 @@ public class SolrSearchIndex implements Closeable {
      * @return New {@link SolrClient}
      */
     public static SolrClient getNewSolrClient(String solrUrl) {
-        return new Http2SolrClient.Builder(solrUrl)
-                .withIdleTimeout(TIMEOUT_SO, TimeUnit.MILLISECONDS)
-                .withConnectionTimeout(TIMEOUT_CONNECTION, TimeUnit.MILLISECONDS)
-                .withFollowRedirects(false)
-                .withRequestWriter(new BinaryRequestWriter())
-                // .allowCompression(DataManager.getInstance().getConfiguration().isSolrCompressionEnabled())
-                .build();
+        return SolrTools.newSolrClient(solrUrl, TIMEOUT_SO);
     }
 
     /**
