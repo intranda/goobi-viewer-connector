@@ -278,15 +278,9 @@ public class OaiServlet extends HttpServlet {
             // Client disconnects (harvester timeouts etc.) are normal network behavior.
             // Downgrade to DEBUG so they don't pollute the error log.
             if (isClientAbort(e)) {
-                String clientIp = request.getHeader("X-Forwarded-For");
-                if (clientIp == null) {
-                    clientIp = request.getRemoteAddr();
-                } else {
-                    int comma = clientIp.indexOf(',');
-                    if (comma > 0) {
-                        clientIp = clientIp.substring(0, comma).trim();
-                    }
-                }
+                // IP extraction was pulled into extractClientIp() so the X-Forwarded-For parsing
+                // (first-entry-wins, trim) can be unit-tested without mocking HttpServletRequest.
+                String clientIp = extractClientIp(request.getHeader("X-Forwarded-For"), request.getRemoteAddr());
                 logger.debug("Client {} disconnected during OAI response for '{}': {}",
                         clientIp, request.getQueryString(), e.getMessage());
             } else {
@@ -303,16 +297,51 @@ public class OaiServlet extends HttpServlet {
     /**
      * Returns true if the given exception indicates a client disconnect (broken pipe, connection reset, ClientAbortException).
      *
+     * Visibility relaxed from private to package-private so the heuristic can be unit-tested directly.
+     *
      * @param e the exception to test
      * @return true if the exception is caused by a client disconnect
+     * @should return true when exception class name contains ClientAbortException
+     * @should return true when message contains broken pipe
+     * @should return true when message contains connection reset
+     * @should return false for generic IOException
+     * @should be case insensitive
      */
-    private static boolean isClientAbort(Throwable e) {
+    static boolean isClientAbort(Throwable e) {
         String simpleName = e.getClass().getSimpleName().toLowerCase();
         String message = e.toString().toLowerCase();
         return simpleName.contains("clientabortexception")
                 || message.contains("broken pipe")
                 || message.contains("connection reset")
                 || message.contains("clientabort");
+    }
+
+    /**
+     * Resolves the originating client IP for logging purposes. Prefers the first entry of the
+     * X-Forwarded-For header (proxy chain order: client, proxy-1, proxy-2, ...), trimmed of
+     * surrounding whitespace, and falls back to the servlet container's remote address when the
+     * header is absent.
+     *
+     * Extracted from the doGet catch block so the parsing can be unit-tested without mocking
+     * HttpServletRequest.
+     *
+     * @param forwardedFor raw value of the X-Forwarded-For header (may be null)
+     * @param remoteAddr fallback remote address (servlet container value)
+     * @return the resolved client IP, or remoteAddr if forwardedFor is null
+     * @should return remote address when forwarded for is null
+     * @should return forwarded for when no comma present
+     * @should return first ip when forwarded for contains comma
+     * @should trim whitespace from first forwarded for entry
+     */
+    static String extractClientIp(String forwardedFor, String remoteAddr) {
+        if (forwardedFor == null) {
+            return remoteAddr;
+        }
+        int comma = forwardedFor.indexOf(',');
+        if (comma > 0) {
+            return forwardedFor.substring(0, comma).trim();
+        }
+        return forwardedFor;
     }
 
     /**
