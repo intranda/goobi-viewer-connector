@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.goobi.viewer</groupId>
 	<artifactId>viewer-connector</artifactId>
-	<version>26.03.1</version>
+	<version>26.04-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 
@@ -59,10 +59,10 @@
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 		<buildDate>${maven.build.timestamp}</buildDate>
 
-		<viewer-core.version>26.03</viewer-core.version>
+		<viewer-core.version>26.04-SNAPSHOT</viewer-core.version>
 
-		<commons-configuration2.version>2.13.0</commons-configuration2.version>
-		<commons-io.version>2.21.0</commons-io.version>
+		<commons-configuration2.version>2.14.0</commons-configuration2.version>
+		<commons-io.version>2.22.0</commons-io.version>
 		<commons-jxpath.version>1.4.0</commons-jxpath.version>
 		<commons-lang3.version>3.20.0</commons-lang3.version>
 		<httpclient.version>4.5.14</httpclient.version>
@@ -101,6 +101,11 @@
 				<exclusion>
 					<groupId>org.jboss.weld.servlet</groupId>
 					<artifactId>weld-servlet-shaded</artifactId>
+				</exclusion>
+				<!-- xml-apis bundles javax.xml.transform, splitting the package with java.xml on Java 9+ -->
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
 				</exclusion>
 			</exclusions>
 
@@ -381,7 +386,7 @@
 			<plugin>
 				<groupId>org.owasp</groupId>
 				<artifactId>dependency-check-maven</artifactId>
-				<version>12.2.0</version>
+				<version>12.2.1</version>
 				<configuration>
 					<!--failBuildOnCVSS>5.0</failBuildOnCVSS-->
 					<skipProvidedScope>true</skipProvidedScope>
@@ -410,7 +415,7 @@
 					<dependency>
 						<groupId>com.puppycrawl.tools</groupId>
 						<artifactId>checkstyle</artifactId>
-						<version>13.4.0</version>
+						<version>13.4.1</version>
 					</dependency>
 				</dependencies>
 				<executions>
