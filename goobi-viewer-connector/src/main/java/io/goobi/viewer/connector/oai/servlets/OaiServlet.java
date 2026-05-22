@@ -67,6 +67,14 @@ public class OaiServlet extends HttpServlet {
             logger.debug("REQUEST URL: {}{}", request.getRequestURL(), queryString);
         }
 
+        String connectorSolrUrl = DataManager.getInstance().getConfiguration().getIndexUrl();
+        String coreSolrUrl = io.goobi.viewer.controller.DataManager.getInstance().getConfiguration().getSolrUrl();
+        if (connectorSolrUrl != null && coreSolrUrl != null
+                && !StringUtils.stripEnd(connectorSolrUrl, "/").equals(StringUtils.stripEnd(coreSolrUrl, "/"))) {
+            logger.warn("Solr URL mismatch: connector is configured with '{}' but viewer-core is configured with '{}'.",
+                    connectorSolrUrl, coreSolrUrl);
+        }
+
         String filterQuerySuffix = "";
         filterQuerySuffix = SolrSearchTools.getAllSuffixes(request);
         // logger.trace("filterQuerySuffix: {}",filterQuerySuffix);
@@ -317,13 +325,10 @@ public class OaiServlet extends HttpServlet {
     }
 
     /**
-     * Resolves the originating client IP for logging purposes. Prefers the first entry of the
-     * X-Forwarded-For header (proxy chain order: client, proxy-1, proxy-2, ...), trimmed of
-     * surrounding whitespace, and falls back to the servlet container's remote address when the
-     * header is absent.
+     * Resolves the originating client IP for logging purposes. Prefers the first entry of the X-Forwarded-For header (proxy chain order: client,
+     * proxy-1, proxy-2, ...), trimmed of surrounding whitespace, and falls back to the servlet container's remote address when the header is absent.
      *
-     * Extracted from the doGet catch block so the parsing can be unit-tested without mocking
-     * HttpServletRequest.
+     * Extracted from the doGet catch block so the parsing can be unit-tested without mocking HttpServletRequest.
      *
      * @param forwardedFor raw value of the X-Forwarded-For header (may be null)
      * @param remoteAddr fallback remote address (servlet container value)
